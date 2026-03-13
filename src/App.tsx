@@ -43,6 +43,7 @@ const App = () => (
                 <Route path="/dashboard" element={<DashboardLayout />}>
                   <Route index element={<DashboardHome />} />
                   <Route path="documents" element={<DocumentsPage />} />
+                  <Route path="documents/cnh" element={<CnhFormPage />} />
                   <Route path="history" element={<HistoryPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

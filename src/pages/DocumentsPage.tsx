@@ -1,12 +1,5 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useDocuments } from "@/contexts/DocumentContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { FileText, QrCode } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const docTypes = [
   { id: "cnh", name: "CNH Digital (2024)", description: "CNH Digital com login, APK e QR Code", credits: 1 },
