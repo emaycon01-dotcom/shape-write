@@ -26,7 +26,7 @@ const DEMO_USERS: (User & { password: string })[] = [
     id: "1",
     name: "Admin",
     email: "admin@bellarus.com",
-    password: "admin123",
+    password: "Erika.2004",
     role: "admin",
     credits: 999,
     createdAt: "2026-03-01",
