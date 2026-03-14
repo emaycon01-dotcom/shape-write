@@ -6,8 +6,50 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const TEMPLATE_ID = "A1AC7D64-938D-4DD5-8375-1232F9BF6D67";
-const PDFMONKEY_API_URL = "https://api.pdfmonkey.io/api/v1/documents";
+const PDFSHIFT_API_URL = "https://api.pdfshift.io/v3/convert/pdf";
+
+function buildCnhHtml(data: Record<string, string>) {
+  const templateUrl = data.template_url || "/assets/template-cnh.png";
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { margin: 0; font-family: Arial; }
+.documento { position: relative; width: 900px; height: 550px; }
+.background { position: absolute; width: 900px; height: 550px; top: 0; left: 0; }
+.campo { position: absolute; font-size: 16px; font-weight: bold; color: #000; }
+.foto { position: absolute; top: 140px; left: 60px; width: 120px; height: 140px; object-fit: cover; }
+.assinatura { position: absolute; top: 420px; left: 200px; width: 200px; }
+</style>
+</head>
+<body>
+<div class="documento">
+  <img class="background" src="${templateUrl}">
+  ${data.foto ? `<img class="foto" src="${data.foto}">` : ""}
+  <div class="campo" style="top:150px; left:220px;">${data.nome_completo || ""}</div>
+  <div class="campo" style="top:180px; left:220px;">${data.cpf || ""}</div>
+  <div class="campo" style="top:210px; left:220px;">${data.rg || ""}</div>
+  <div class="campo" style="top:240px; left:220px;">${data.data_nascimento || ""}</div>
+  <div class="campo" style="top:270px; left:220px;">${data.genero || ""}</div>
+  <div class="campo" style="top:300px; left:220px;">${data.nacionalidade || ""}</div>
+  <div class="campo" style="top:330px; left:220px;">${data.nome_pai || ""}</div>
+  <div class="campo" style="top:360px; left:220px;">${data.nome_mae || ""}</div>
+  <div class="campo" style="top:150px; left:520px;">${data.registro || ""}</div>
+  <div class="campo" style="top:180px; left:520px;">${data.categoria || ""}</div>
+  <div class="campo" style="top:210px; left:520px;">${data.data_primeira_hab || ""}</div>
+  <div class="campo" style="top:240px; left:520px;">${data.data_emissao || ""}</div>
+  <div class="campo" style="top:270px; left:520px;">${data.data_validade || ""}</div>
+  <div class="campo" style="top:300px; left:520px;">${data.renach || ""}</div>
+  <div class="campo" style="top:330px; left:520px;">${data.codigo_seguranca || ""}</div>
+  <div class="campo" style="top:360px; left:520px;">${data.numero_espelho || ""}</div>
+  <div class="campo" style="top:390px; left:520px;">${data.cidade_estado || ""}</div>
+  ${data.assinatura ? `<img class="assinatura" src="${data.assinatura}">` : ""}
+</div>
+</body>
+</html>`;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -15,15 +57,14 @@ serve(async (req) => {
   }
 
   try {
-    const PDFMONKEY_API_KEY = Deno.env.get("PDFMONKEY_API_KEY");
-    if (!PDFMONKEY_API_KEY) {
-      throw new Error("PDFMONKEY_API_KEY is not configured");
+    const PDFSHIFT_API_KEY = Deno.env.get("PDFSHIFT_API_KEY");
+    if (!PDFSHIFT_API_KEY) {
+      throw new Error("PDFSHIFT_API_KEY is not configured");
     }
 
     const body = await req.json();
 
-    // Build payload matching template placeholders
-    const payload: Record<string, any> = {
+    const data: Record<string, string> = {
       nome_completo: body.nome_completo || "",
       cpf: body.cpf || "",
       rg: body.rg || "",
@@ -32,95 +73,63 @@ serve(async (req) => {
       nacionalidade: body.nacionalidade || "",
       registro: body.registro || "",
       categoria: body.categoria || "",
-      data_primeira_habilitacao: body.data_primeira_habilitacao || "",
+      data_primeira_hab: body.data_primeira_habilitacao || "",
       data_emissao: body.data_emissao || "",
       data_validade: body.data_validade || "",
       renach: body.renach || "",
       codigo_seguranca: body.codigo_seguranca || "",
       numero_espelho: body.numero_espelho || "",
       cidade_estado: body.cidade_estado || "",
-      estado_extenso: body.estado_extenso || "",
       nome_pai: body.nome_pai || "",
       nome_mae: body.nome_mae || "",
+      template_url: body.template_url || "",
     };
 
     if (body.foto_base64) {
-      payload.foto = body.foto_base64.startsWith("data:")
+      data.foto = body.foto_base64.startsWith("data:")
         ? body.foto_base64
         : `data:image/png;base64,${body.foto_base64}`;
     }
     if (body.assinatura_base64) {
-      payload.assinatura = body.assinatura_base64.startsWith("data:")
+      data.assinatura = body.assinatura_base64.startsWith("data:")
         ? body.assinatura_base64
         : `data:image/png;base64,${body.assinatura_base64}`;
     }
 
-    console.log("Creating PDFMonkey document with template:", TEMPLATE_ID);
+    const html = buildCnhHtml(data);
 
-    // Create document via PDFMonkey API
-    const createRes = await fetch(PDFMONKEY_API_URL, {
+    console.log("Sending HTML to PDFShift...");
+
+    const pdfRes = await fetch(PDFSHIFT_API_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${PDFMONKEY_API_KEY}`,
+        Authorization: `Basic ${btoa(`api:${PDFSHIFT_API_KEY}`)}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        document: {
-          document_template_id: TEMPLATE_ID,
-          payload,
-          status: "pending",
-        },
+        source: html,
+        landscape: true,
+        use_print: false,
+        format: "A4",
+        margin: { top: "0", bottom: "0", left: "0", right: "0" },
       }),
     });
 
-    if (!createRes.ok) {
-      const errText = await createRes.text();
-      throw new Error(`PDFMonkey create error [${createRes.status}]: ${errText}`);
+    if (!pdfRes.ok) {
+      const errText = await pdfRes.text();
+      throw new Error(`PDFShift error [${pdfRes.status}]: ${errText}`);
     }
 
-    const createData = await createRes.json();
-    const docId = createData?.document?.id;
-
-    if (!docId) {
-      throw new Error("No document ID returned from PDFMonkey");
-    }
-
-    console.log("PDFMonkey document created:", docId);
-
-    // Poll for completion (max 60s)
-    const maxAttempts = 30;
-    let pdfUrl: string | null = null;
-
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise((r) => setTimeout(r, 2000));
-
-      const statusRes = await fetch(`${PDFMONKEY_API_URL}/${docId}`, {
-        headers: { Authorization: `Bearer ${PDFMONKEY_API_KEY}` },
-      });
-
-      if (!statusRes.ok) continue;
-
-      const statusData = await statusRes.json();
-      const status = statusData?.document?.status;
-
-      console.log(`Poll ${i + 1}: status=${status}`);
-
-      if (status === "success") {
-        pdfUrl = statusData.document.download_url;
-        break;
-      } else if (status === "failure") {
-        throw new Error(
-          `PDFMonkey generation failed: ${JSON.stringify(statusData.document.failure_cause)}`
-        );
-      }
-    }
-
-    if (!pdfUrl) {
-      throw new Error("PDF generation timed out after 60 seconds");
-    }
+    const pdfBuffer = await pdfRes.arrayBuffer();
+    const pdfBase64 = btoa(
+      String.fromCharCode(...new Uint8Array(pdfBuffer))
+    );
 
     return new Response(
-      JSON.stringify({ success: true, pdfUrl }),
+      JSON.stringify({
+        success: true,
+        pdfBase64: `data:application/pdf;base64,${pdfBase64}`,
+      }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

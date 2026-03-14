@@ -46,6 +46,7 @@ const App = () => (
                   <Route path="documents" element={<DocumentsPage />} />
                   <Route path="documents/cnh" element={<CnhFormPage />} />
                   <Route path="history" element={<HistoryPage />} />
+                  <Route path="template-cnh" element={<TemplateCnhPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
