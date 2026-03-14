@@ -120,10 +120,14 @@ serve(async (req) => {
       throw new Error(`PDFShift error [${pdfRes.status}]: ${errText}`);
     }
 
-    const pdfBuffer = await pdfRes.arrayBuffer();
-    const pdfBase64 = btoa(
-      String.fromCharCode(...new Uint8Array(pdfBuffer))
-    );
+    const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer());
+    // Chunk the conversion to avoid stack overflow
+    let binary = "";
+    const chunkSize = 8192;
+    for (let i = 0; i < pdfBuffer.length; i += chunkSize) {
+      binary += String.fromCharCode(...pdfBuffer.subarray(i, i + chunkSize));
+    }
+    const pdfBase64 = btoa(binary);
 
     return new Response(
       JSON.stringify({
