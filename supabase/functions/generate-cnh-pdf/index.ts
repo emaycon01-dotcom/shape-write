@@ -9,25 +9,28 @@ const corsHeaders = {
 const PDFSHIFT_API_URL = "https://api.pdfshift.io/v3/convert/pdf";
 
 function buildMrz(d: Record<string, string>) {
-  const pad = (s: string, len: number) => (s + "<".repeat(len)).slice(0, len);
-  const clean = (s: string) => s.replace(/[^A-Z0-9<]/g, "").toUpperCase();
-  const reg = clean(d.registro || "00000000000");
-  const nameParts = (d.nome_completo || "NOME<<SOBRENOME").toUpperCase().split(" ");
+  const clean = (s: string) => s.replace(/[^A-Z0-9 ]/g, "").trim().toUpperCase();
+  const reg = clean(d.registro || d.numero_espelho || "00000000000");
+  const nameParts = clean(d.nome_completo || "NOME SOBRENOME").split(" ").filter(Boolean);
   const surname = nameParts[0] || "NOME";
   const given = nameParts.slice(1).join("<") || "SOBRENOME";
-  const birthParts = (d.data_nascimento || "").split(",")[0]?.split("/") || [];
-  const birthYY = birthParts[2]?.slice(2) || "00";
-  const birthMM = birthParts[1] || "01";
-  const birthDD = birthParts[0] || "01";
-  const expParts = (d.data_validade || "").split("/") || [];
-  const expYY = expParts[2]?.slice(2) || "00";
-  const expMM = expParts[1] || "01";
-  const expDD = expParts[0] || "01";
-  const gender = (d.genero || "M").charAt(0).toUpperCase();
-  const line1 = pad(`I<BRA${pad(reg, 15)}`, 30);
-  const line2 = pad(`${birthYY}${birthMM}${birthDD}${gender}${expYY}${expMM}${expDD}BRA`, 30);
-  const line3 = pad(`${surname}<<${given}`, 30);
-  return { line1, line2, line3 };
+
+  return {
+    line1: `I ${reg} BRA`,
+    line2: `${surname}<${given}`.slice(0, 30),
+  };
+}
+
+function formatRenachLines(value: string) {
+  const clean = value.replace(/\s+/g, "").toUpperCase();
+  if (!clean) return { line1: "", line2: "" };
+  if (clean.length <= 8) return { line1: clean, line2: "" };
+
+  const splitAt = Math.ceil(clean.length / 2);
+  return {
+    line1: clean.slice(0, splitAt),
+    line2: clean.slice(splitAt),
+  };
 }
 
 function buildCatDateOverlays(activeCategory: string, validDate: string) {
