@@ -431,7 +431,13 @@ export default function CnhFormPage() {
           </div>
 
           <div className="space-y-1.5">
-            <FieldLabel>1ª Habilitação</FieldLabel>
+            <div className="flex items-center justify-between">
+              <FieldLabel>1ª Habilitação</FieldLabel>
+              <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={autoFillDates} onChange={(e) => setAutoFillDates(e.target.checked)} className="rounded" />
+                Preencher datas automaticamente
+              </label>
+            </div>
             <Input value={form.primeiraHab} onChange={set("primeiraHab")} placeholder="DD/MM/AAAA" className={inputCls} required />
           </div>
 
