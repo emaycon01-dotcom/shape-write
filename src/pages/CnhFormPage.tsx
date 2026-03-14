@@ -55,6 +55,27 @@ const initial: CnhFormData = {
   numeroEspelho: "", observacoes: [], nomePai: "", nomeMae: "",
 };
 
+const NOMES_TESTE = ["PEDRO DA SILVA GOMES","MARIA OLIVEIRA SANTOS","CARLOS FERREIRA LIMA","ANA PAULA COSTA","LUCAS RODRIGUES ALVES"];
+const PAIS_TESTE = ["JOSE DA SILVA","ANTONIO FERREIRA","MARCOS OLIVEIRA","ROBERTO COSTA","PAULO RODRIGUES"];
+const MAES_TESTE = ["MARIA DA SILVA","ANA FERREIRA","CLAUDIA OLIVEIRA","SANDRA COSTA","LUCIA RODRIGUES"];
+const CIDADES_TESTE = ["SAO PAULO, SP","RIO DE JANEIRO, RJ","BELO HORIZONTE, MG","CURITIBA, PR","SALVADOR, BA"];
+const ESTADOS_TESTE = ["SAO PAULO","RIO DE JANEIRO","MINAS GERAIS","PARANA","BAHIA"];
+
+function randomDate(startYear: number, endYear: number) {
+  const d = Math.floor(Math.random() * 28) + 1;
+  const m = Math.floor(Math.random() * 12) + 1;
+  const y = startYear + Math.floor(Math.random() * (endYear - startYear));
+  return `${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`;
+}
+
+function addYears(dateStr: string, years: number) {
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) return "";
+  return `${parts[0]}/${parts[1]}/${parseInt(parts[2]) + years}`;
+}
+
+function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
+
 export default function CnhFormPage() {
   const [form, setForm] = useState<CnhFormData>(initial);
   const [foto, setFoto] = useState<File | null>(null);
@@ -63,12 +84,75 @@ export default function CnhFormPage() {
   const [assPreview, setAssPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [autoFillDates, setAutoFillDates] = useState(true);
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { addDocument } = useDocuments();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Auto-fill emissão e validade quando preencher 1ª Habilitação
+  useEffect(() => {
+    if (!autoFillDates || !form.primeiraHab) return;
+    const parts = form.primeiraHab.split("/");
+    if (parts.length === 3 && parts[2].length === 4) {
+      const today = new Date();
+      const emissao = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
+      const validade = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear() + 10}`;
+      setForm(p => ({ ...p, dataEmissao: emissao, dataValidade: validade }));
+    }
+  }, [form.primeiraHab, autoFillDates]);
+
+  const fillTest = async () => {
+    const uf = pick(UF_LIST);
+    const cidade = pick(CIDADES_TESTE);
+    const estado = pick(ESTADOS_TESTE);
+    const primeiraHab = randomDate(2015, 2023);
+    const today = new Date();
+    const emissao = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
+    const validade = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear() + 10}`;
+
+    setForm({
+      cpf: `${generateRandom(3)}.${generateRandom(3)}.${generateRandom(3)}-${generateRandom(2)}`,
+      nomeCompleto: pick(NOMES_TESTE),
+      uf,
+      genero: pick(["M","F"]),
+      nacionalidade: "BRASILEIRA",
+      dataNascimentoLocal: `${randomDate(1980, 2002)}, ${cidade}`,
+      registro: generateRandom(11),
+      categoria: pick(["A","B","AB","C","D","E"]),
+      cnhDefinitiva: pick(["SIM","NAO"]),
+      primeiraHab,
+      dataEmissao: emissao,
+      dataValidade: validade,
+      cidadeEstado: cidade,
+      estadoExtenso: estado,
+      rg: generateRandom(7) + " SSP " + uf,
+      codigoSeguranca: generateRandom(11),
+      renach: uf + generateRandom(9),
+      numeroEspelho: generateRandom(8),
+      observacoes: [pick(OBSERVACOES)],
+      nomePai: pick(PAIS_TESTE),
+      nomeMae: pick(MAES_TESTE),
+    });
+    setAutoFillDates(false);
+    // Load test images
+    setFotoPreview(testFotoUrl);
+    setAssPreview(testAssUrl);
+    toast({ title: "Formulário preenchido com dados de teste!" });
+  };
+
+  const clearForm = () => {
+    setForm(initial);
+    setFoto(null); setFotoPreview(null);
+    setAssinatura(null); setAssPreview(null);
+    setPdfPreviewUrl(null);
+    setAutoFillDates(true);
+    if (fotoRef.current) fotoRef.current.value = "";
+    if (assRef.current) assRef.current.value = "";
+    toast({ title: "Formulário limpo!" });
+  };
 
   const set = (field: keyof CnhFormData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
