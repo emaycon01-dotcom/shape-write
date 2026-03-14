@@ -15,6 +15,7 @@ const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
 const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
+const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
 const TemplateCnhPage = lazy(() => import("./pages/TemplateCnhPage"));
 const VerifyPage = lazy(() => import("./pages/VerifyPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -45,6 +46,7 @@ const App = () => (
                   <Route index element={<DashboardHome />} />
                   <Route path="documents" element={<DocumentsPage />} />
                   <Route path="documents/cnh" element={<CnhFormPage />} />
+                  <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                 </Route>

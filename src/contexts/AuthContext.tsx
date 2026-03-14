@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  deductCredit: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -78,9 +79,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("bellarus_user");
   }, []);
 
+  const deductCredit = useCallback(() => {
+    setUser((prev) => {
+      if (!prev || prev.credits < 1) return prev;
+      const updated = { ...prev, credits: prev.credits - 1 };
+      localStorage.setItem("bellarus_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, login, register, logout }}
+      value={{ user, isAuthenticated: !!user, login, register, logout, deductCredit }}
     >
       {children}
     </AuthContext.Provider>

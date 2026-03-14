@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDocuments } from "@/contexts/DocumentContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,7 +87,7 @@ export default function CnhFormPage() {
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const { addDocument } = useDocuments();
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -198,65 +197,47 @@ export default function CnhFormPage() {
     setPdfPreviewUrl(null);
 
     try {
-      // Convert images to base64 if available
       const toBase64 = (preview: string | null) => preview || "";
 
+      const bodyData = {
+        nome_completo: form.nomeCompleto,
+        cpf: form.cpf,
+        rg: form.rg,
+        data_nascimento: form.dataNascimentoLocal,
+        genero: form.genero,
+        nacionalidade: form.nacionalidade,
+        registro: form.registro,
+        categoria: form.categoria,
+        data_primeira_habilitacao: form.primeiraHab,
+        data_emissao: form.dataEmissao,
+        data_validade: form.dataValidade,
+        renach: form.renach,
+        codigo_seguranca: form.codigoSeguranca,
+        numero_espelho: form.numeroEspelho,
+        cidade_estado: form.cidadeEstado,
+        estado_extenso: form.estadoExtenso,
+        nome_pai: form.nomePai,
+        nome_mae: form.nomeMae,
+        foto_base64: toBase64(fotoPreview),
+        assinatura_base64: toBase64(assPreview),
+      };
+
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
-        body: {
-          nome_completo: form.nomeCompleto,
-          cpf: form.cpf,
-          rg: form.rg,
-          data_nascimento: form.dataNascimentoLocal,
-          genero: form.genero,
-          nacionalidade: form.nacionalidade,
-          registro: form.registro,
-          categoria: form.categoria,
-          data_primeira_habilitacao: form.primeiraHab,
-          data_emissao: form.dataEmissao,
-          data_validade: form.dataValidade,
-          renach: form.renach,
-          codigo_seguranca: form.codigoSeguranca,
-          numero_espelho: form.numeroEspelho,
-          cidade_estado: form.cidadeEstado,
-          estado_extenso: form.estadoExtenso,
-          nome_pai: form.nomePai,
-          nome_mae: form.nomeMae,
-          foto_base64: toBase64(fotoPreview),
-          assinatura_base64: toBase64(assPreview),
-        },
+        body: bodyData,
       });
 
       if (error) throw error;
 
-      if (data?.pdfBase64) {
-        setPdfPreviewUrl(data.pdfBase64);
-        toast({ title: "PDF gerado com sucesso!", description: "Veja o preview abaixo." });
+      const pdfResult = data?.pdfBase64 || data?.pdfUrl;
+      if (!pdfResult) throw new Error(data?.error || "Nenhuma URL de PDF retornada");
 
-        addDocument({
-          name: form.nomeCompleto,
-          identification: form.cpf,
-          date: form.dataEmissao,
-          description: `CNH - Cat ${form.categoria}`,
-          additionalInfo: JSON.stringify(form),
-          type: "cnh",
-          userId: user.id,
-        });
-      } else if (data?.pdfUrl) {
-        setPdfPreviewUrl(data.pdfUrl);
-        toast({ title: "PDF gerado com sucesso!", description: "Veja o preview abaixo." });
-
-        addDocument({
-          name: form.nomeCompleto,
-          identification: form.cpf,
-          date: form.dataEmissao,
-          description: `CNH - Cat ${form.categoria}`,
-          additionalInfo: JSON.stringify(form),
-          type: "cnh",
-          userId: user.id,
-        });
-      } else {
-        throw new Error(data?.error || "Nenhuma URL de PDF retornada");
-      }
+      // Navigate to preview page with the PDF data
+      navigate("/dashboard/documents/cnh/preview", {
+        state: {
+          pdfBase64: pdfResult,
+          formData: bodyData,
+        },
+      });
     } catch (err: any) {
       console.error("Erro ao gerar PDF:", err);
       toast({
@@ -550,17 +531,6 @@ export default function CnhFormPage() {
         </Button>
       </form>
 
-      {pdfPreviewUrl && (
-        <div className="mt-6 space-y-3">
-          <h2 className="text-lg font-bold text-foreground">Preview do Documento</h2>
-          <div className="glass rounded-xl overflow-hidden" style={{ height: "80vh" }}>
-            <iframe src={pdfPreviewUrl} className="w-full h-full border-0" title="PDF Preview" />
-          </div>
-          <a href={pdfPreviewUrl} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="w-full">Abrir PDF em nova aba</Button>
-          </a>
-        </div>
-      )}
     </div>
   );
 }
