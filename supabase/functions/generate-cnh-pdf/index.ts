@@ -36,37 +36,37 @@ function buildMrz(d: Record<string, string>) {
   return { line1, line2, line3 };
 }
 
-function buildCatRows(catRows: string[], activeCategory: string, validDate: string) {
+function buildCatDateRows(activeCategory: string, validDate: string) {
+  const catRows = ["ACC","A","A1","B","B1","C","C1","D","D1","BE","CE","C1E","DE","D1E"];
   const half = Math.ceil(catRows.length / 2);
   const left = catRows.slice(0, half);
   const right = catRows.slice(half);
   let html = "";
+
+  // Each row is ~13px tall, table starts at ~488px from top
+  // Left column dates at x≈138, right column dates at x≈338
+  const baseY = 500;
+  const rowH = 13.5;
 
   for (let i = 0; i < Math.max(left.length, right.length); i++) {
     const lCat = left[i] || "";
     const rCat = right[i] || "";
     const lActive = lCat && activeCategory.includes(lCat.replace("1", ""));
     const rActive = rCat && activeCategory.includes(rCat.replace("1", ""));
-    const lClass = lActive ? ' class="cat-active"' : "";
-    const rClass = rActive ? ' class="cat-active"' : "";
+    const y = baseY + (i * rowH);
 
-    html += `<tr>
-      <td class="cat-name">${lCat}</td>
-      <td${lClass}></td>
-      <td${lClass}>${lActive ? validDate : ""}</td>
-      <td${lClass}></td>
-      <td class="cat-name">${rCat}</td>
-      <td${rClass}></td>
-      <td${rClass}>${rActive ? validDate : ""}</td>
-      <td${rClass}></td>
-    </tr>`;
+    if (lActive) {
+      html += `<div class="overlay" style="top:${y}px;left:130px;font-size:6px;">${validDate}</div>`;
+    }
+    if (rActive) {
+      html += `<div class="overlay" style="top:${y}px;left:330px;font-size:6px;">${validDate}</div>`;
+    }
   }
   return html;
 }
 
 function buildCnhHtml(d: Record<string, string>) {
   const mrz = buildMrz(d);
-  const catRows = ["ACC","A","A1","B","B1","C","C1","D","D1","BE","CE","C1E","DE","D1E"];
   const templateBg = d.template_bg || "";
 
   return `<!DOCTYPE html>
@@ -102,8 +102,6 @@ function buildCnhHtml(d: Record<string, string>) {
     height: 100%;
     object-fit: fill;
   }
-
-  /* === ALL OVERLAYS === */
   .overlay {
     position: absolute;
     z-index: 10;
@@ -112,12 +110,12 @@ function buildCnhHtml(d: Record<string, string>) {
     font-weight: bold;
   }
 
-  /* Photo overlay */
+  /* === PHOTO === */
   .photo-overlay {
-    top: 148px;
-    left: 42px;
-    width: 88px;
-    height: 115px;
+    top: 160px;
+    left: 44px;
+    width: 82px;
+    height: 108px;
     overflow: hidden;
   }
   .photo-overlay img {
@@ -126,12 +124,12 @@ function buildCnhHtml(d: Record<string, string>) {
     object-fit: cover;
   }
 
-  /* Signature overlay */
+  /* === SIGNATURE === */
   .signature-overlay {
-    top: 285px;
-    left: 35px;
-    width: 100px;
-    height: 38px;
+    top: 295px;
+    left: 38px;
+    width: 94px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -142,247 +140,184 @@ function buildCnhHtml(d: Record<string, string>) {
     object-fit: contain;
   }
 
-  /* Vertical registration number (left of photo) */
-  .reg-vertical {
-    top: 330px;
-    left: 10px;
+  /* === VERTICAL REGISTRATION (left side) === */
+  .reg-vertical-left {
+    top: 360px;
+    left: 8px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 7px;
-    letter-spacing: 1px;
+    font-size: 6.5px;
+    letter-spacing: 0.8px;
     white-space: nowrap;
-    color: #333;
+    color: #222;
   }
 
   /* === CARD FIELD VALUES === */
+  /* Row 1: Nome + 1ª Hab */
   .f-nome {
-    top: 133px;
-    left: 148px;
-    font-size: 9px;
-    max-width: 200px;
+    top: 144px;
+    left: 145px;
+    font-size: 8.5px;
+    max-width: 210px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .f-primeira-hab {
-    top: 133px;
-    left: 365px;
-    font-size: 8.5px;
-  }
-  .f-nascimento {
-    top: 162px;
-    left: 148px;
+    top: 144px;
+    left: 370px;
     font-size: 8px;
+  }
+
+  /* Row 2: Data nascimento */
+  .f-nascimento {
+    top: 172px;
+    left: 145px;
+    font-size: 7.5px;
     max-width: 280px;
     white-space: nowrap;
     overflow: hidden;
   }
+
+  /* Row 3: Emissão + Validade + Categoria */
   .f-emissao {
-    top: 195px;
-    left: 148px;
-    font-size: 8.5px;
+    top: 200px;
+    left: 145px;
+    font-size: 8px;
   }
   .f-validade {
-    top: 195px;
-    left: 260px;
-    font-size: 8.5px;
+    top: 200px;
+    left: 255px;
+    font-size: 8px;
   }
   .f-cat-big {
-    top: 186px;
-    left: 396px;
-    font-size: 20px;
+    top: 192px;
+    left: 400px;
+    font-size: 18px;
     font-weight: bold;
   }
+
+  /* Row 4: Doc Identidade / RG */
   .f-rg {
-    top: 228px;
-    left: 148px;
-    font-size: 8px;
+    top: 230px;
+    left: 145px;
+    font-size: 7.5px;
     max-width: 280px;
     white-space: nowrap;
     overflow: hidden;
   }
+
+  /* Row 5: CPF + Registro + Cat Hab */
   .f-cpf {
-    top: 260px;
-    left: 148px;
-    font-size: 8.5px;
+    top: 258px;
+    left: 145px;
+    font-size: 8px;
   }
   .f-registro {
-    top: 260px;
-    left: 268px;
-    font-size: 8.5px;
+    top: 258px;
+    left: 275px;
+    font-size: 8px;
   }
   .f-cat-hab {
-    top: 260px;
-    left: 394px;
-    font-size: 9px;
+    top: 258px;
+    left: 398px;
+    font-size: 8px;
   }
+
+  /* Row 6: Nacionalidade */
   .f-nacionalidade {
-    top: 290px;
-    left: 148px;
-    font-size: 8.5px;
+    top: 286px;
+    left: 145px;
+    font-size: 8px;
   }
+
+  /* Row 7-8: Filiação */
   .f-pai {
-    top: 318px;
-    left: 148px;
-    font-size: 8.5px;
+    top: 312px;
+    left: 145px;
+    font-size: 8px;
     max-width: 280px;
     white-space: nowrap;
     overflow: hidden;
   }
   .f-mae {
-    top: 343px;
-    left: 148px;
-    font-size: 8.5px;
+    top: 334px;
+    left: 145px;
+    font-size: 8px;
     max-width: 280px;
     white-space: nowrap;
     overflow: hidden;
   }
 
-  /* === RIGHT COLUMN === */
-  .qr-overlay {
-    top: 90px;
-    left: 480px;
-    width: 170px;
-    height: 170px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: #999;
-  }
-
-  .legal-overlay {
-    top: 310px;
-    left: 455px;
-    width: 310px;
-    font-size: 7.5px;
-    font-weight: normal;
-    color: #333;
-    line-height: 1.5;
-    text-align: justify;
-  }
-
-  .serpro-overlay {
-    top: 410px;
-    left: 640px;
-    font-size: 10px;
-    font-weight: bold;
-    color: #333;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-
-  /* === CATEGORIES TABLE === */
-  .cat-table-overlay {
-    top: 395px;
-    left: 18px;
-    width: 420px;
-    z-index: 10;
-  }
-  .cat-table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 6.5px;
-  }
-  .cat-table td, .cat-table th {
-    border: 0.5px solid #999;
-    padding: 1px 3px;
-    text-align: center;
-    height: 13px;
-  }
-  .cat-table th {
-    background: #e8e8e8;
-    font-weight: bold;
-    font-size: 6px;
-  }
-  .cat-table .cat-name {
-    font-weight: bold;
-    width: 28px;
-    text-align: left;
-    padding-left: 4px;
-  }
-  .cat-table .cat-active {
-    background: #f0f0e0;
-  }
-
-  /* === OBSERVATIONS === */
+  /* === OBSERVATIONS VALUE === */
   .f-obs-value {
-    top: 540px;
+    top: 618px;
     left: 30px;
-    font-size: 8px;
+    font-size: 7.5px;
     max-width: 400px;
   }
 
   /* === SIGNING SECTION === */
   .f-espelho {
-    top: 580px;
-    left: 340px;
-    font-size: 7.5px;
+    top: 660px;
+    left: 310px;
+    font-size: 7px;
     text-align: right;
+    width: 120px;
   }
   .f-renach {
-    top: 593px;
-    left: 340px;
-    font-size: 7.5px;
+    top: 672px;
+    left: 310px;
+    font-size: 7px;
     text-align: right;
+    width: 120px;
   }
   .f-local {
-    top: 608px;
+    top: 690px;
     left: 30px;
-    font-size: 8px;
+    font-size: 7.5px;
   }
-  .f-reg-vertical-bottom {
-    top: 640px;
-    left: 10px;
+
+  /* === VERTICAL REGISTRATION (bottom left) === */
+  .reg-vertical-bottom {
+    top: 720px;
+    left: 8px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 7px;
-    letter-spacing: 1px;
+    font-size: 6.5px;
+    letter-spacing: 0.8px;
     white-space: nowrap;
-    color: #333;
+    color: #222;
   }
 
   /* === STATE NAME === */
   .f-estado {
-    top: 640px;
+    top: 718px;
     left: 18px;
     width: 420px;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
   }
 
-  /* === LEGEND === */
-  .legend-overlay {
-    top: 690px;
-    left: 18px;
-    width: 758px;
-    font-size: 5px;
-    font-weight: normal;
-    color: #555;
-    line-height: 1.5;
-  }
-
-  /* === MRZ === */
+  /* === MRZ (bottom of page) === */
   .mrz-overlay {
-    top: 760px;
-    left: 18px;
-    width: 758px;
+    top: 835px;
+    left: 30px;
+    width: 730px;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     color: #111;
     letter-spacing: 2px;
     line-height: 1.8;
-    padding: 12px 18px;
-    border: 1px solid #ccc;
   }
 </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- TEMPLATE BACKGROUND -->
+  <!-- TEMPLATE BACKGROUND IMAGE -->
   <div class="bg-template">
     ${templateBg ? `<img src="${templateBg}" />` : ""}
   </div>
@@ -397,10 +332,10 @@ function buildCnhHtml(d: Record<string, string>) {
     ${d.assinatura ? `<img src="${d.assinatura}" />` : ""}
   </div>
 
-  <!-- VERTICAL REGISTRATION -->
-  <div class="overlay reg-vertical">${d.registro || ""}</div>
+  <!-- VERTICAL REGISTRATION (left of card) -->
+  <div class="overlay reg-vertical-left">${d.registro || ""}</div>
 
-  <!-- FIELD VALUES -->
+  <!-- DYNAMIC DATA VALUES ONLY -->
   <div class="overlay f-nome">${d.nome_completo || ""}</div>
   <div class="overlay f-primeira-hab">${d.data_primeira_hab || ""}</div>
   <div class="overlay f-nascimento">${d.data_nascimento || ""}</div>
@@ -415,37 +350,13 @@ function buildCnhHtml(d: Record<string, string>) {
   <div class="overlay f-pai">${d.nome_pai || ""}</div>
   <div class="overlay f-mae">${d.nome_mae || ""}</div>
 
-  <!-- QR CODE -->
-  <div class="overlay qr-overlay">QR-CODE</div>
+  <!-- CATEGORY DATE VALUES (positioned over template table) -->
+  ${buildCatDateRows(d.categoria || "", d.data_validade || "")}
 
-  <!-- LEGAL TEXT -->
-  <div class="overlay legal-overlay">
-    Documento assinado com certificado digital em conformidade
-    com a Medida Provisória nº 2200-2/2001. Sua validade poderá
-    ser confirmada por meio do programa Assinador Serpro.
-    <br><br>
-    As orientações para instalar o Assinador Serpro e realizar a
-    validação do documento digital estão disponíveis em:
-    https://www.serpro.gov.br/assinador-digital.
-  </div>
-
-  <div class="overlay serpro-overlay"><b>SERPRO</b> / SENATRAN</div>
-
-  <!-- CATEGORIES TABLE -->
-  <div class="cat-table-overlay overlay">
-    <table class="cat-table">
-      <tr>
-        <th>9</th><th>10</th><th>11</th><th>12</th>
-        <th>9</th><th>10</th><th>11</th><th>12</th>
-      </tr>
-      ${buildCatRows(catRows, d.categoria || "", d.data_validade || "")}
-    </table>
-  </div>
-
-  <!-- OBSERVATIONS -->
+  <!-- OBSERVATIONS VALUE -->
   <div class="overlay f-obs-value">${d.observacoes || ""}</div>
 
-  <!-- SIGNING INFO -->
+  <!-- SIGNING INFO VALUES -->
   <div class="overlay f-espelho">${d.numero_espelho || ""}</div>
   <div class="overlay f-renach">${d.renach || ""}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
@@ -453,15 +364,8 @@ function buildCnhHtml(d: Record<string, string>) {
   <!-- STATE NAME -->
   <div class="overlay f-estado">${d.estado_extenso || ""}</div>
 
-  <!-- LEGEND -->
-  <div class="overlay legend-overlay">
-    2 e 1. Nome e Sobrenome / Name and Surname / Nombre y Apellidos – Primeira Habilitação / First Driver License / Primera Licencia de Conducir – 3. Data e
-    Local de Nascimento / Date and Place of Birth DD/MM/YYYY / Fecha y Lugar de Nacimiento – 4a. Data de Emissão / Issuing Date DD/MM/YYYY / Fecha de Emisión – 4b.
-    Data de Validade / Expiration Date DD/MM/YYYY / Válido Hasta – ACC – 4c. Documento Identidade – Órgão emissor / Identity Document – Issuing Authority /
-    Documento de Identificación – Autoridad Expedidora – 4d. CPF – 5. Número de registro da CNH / Driver License Number / Número de Permiso de Conducir – 9.
-    Categoria de Veículos da Carteira de Habilitação / Driver License Class / Categoría de Permisos de Conducir – Nacionalidade / Nationality / Nacionalidad –
-    Filiação / Filiation / Filiación – 12. Observações / Observations / Observaciones – Local / Place / Lugar
-  </div>
+  <!-- VERTICAL REGISTRATION (bottom) -->
+  <div class="overlay reg-vertical-bottom">${d.registro || ""}</div>
 
   <!-- MRZ -->
   <div class="overlay mrz-overlay">
