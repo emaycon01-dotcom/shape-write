@@ -128,10 +128,14 @@ function buildCatDateOverlays(activeCategory: string, d: Record<string, string>)
   ];
   let html = "";
 
-  const baseY = 404;
-  const rowH = 16.5;
-  const leftDateX = 168;
-  const rightDateX = 360;
+  // Use fixed coordinates per category from alignment editor
+  const catPositions: Record<string, { x: number; y: number; fontSize: number }> = {
+    A: { x: 137, y: 351, fontSize: 5.5 },
+    B: { x: 137, y: 372, fontSize: 5.5 },
+    C: { x: 136, y: 395, fontSize: 5.5 },
+    D: { x: 271, y: 339, fontSize: 5.5 },
+    E: { x: 271, y: 362, fontSize: 5.5 },
+  };
 
   const maxLen = Math.max(catRows.length, catRowsRight.length);
   for (let i = 0; i < maxLen; i++) {
