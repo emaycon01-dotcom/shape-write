@@ -104,22 +104,28 @@ function cleanCode(value: string) {
 function parseActiveCategories(activeCategory: string) {
   const normalized = activeCategory.replace(/\s+/g, "").toUpperCase();
   const set = new Set<string>();
-
   if (!normalized) return set;
-  if (normalized === "AB") {
-    set.add("A");
-    set.add("B");
-    return set;
+  for (const c of ["A", "B", "C", "D", "E"]) {
+    if (normalized.includes(c)) set.add(c);
   }
-
-  set.add(normalized);
   return set;
 }
 
-function buildCatDateOverlays(activeCategory: string, validDate: string) {
+function getCatDate(cat: string, d: Record<string, string>): string {
+  const key = `validade_cat_${cat.toLowerCase()}`;
+  return d[key] || d.data_validade || "";
+}
+
+function buildCatDateOverlays(activeCategory: string, d: Record<string, string>) {
   const active = parseActiveCategories(activeCategory);
-  const catRows = ["ACC", "A", "A1", "B", "B1", "C", "C1"];
-  const catRowsRight = ["D", "D1", "BE", "CE", "C1E", "DE", "D1E"];
+  // Left column categories and their parent letter
+  const catRows: [string, string][] = [
+    ["ACC", "A"], ["A", "A"], ["A1", "A"], ["B", "B"], ["B1", "B"], ["C", "C"], ["C1", "C"]
+  ];
+  // Right column categories and their parent letter
+  const catRowsRight: [string, string][] = [
+    ["D", "D"], ["D1", "D"], ["BE", "B"], ["CE", "C"], ["C1E", "C"], ["DE", "D"], ["D1E", "D"]
+  ];
   let html = "";
 
   const baseY = 404;
@@ -127,18 +133,22 @@ function buildCatDateOverlays(activeCategory: string, validDate: string) {
   const leftDateX = 168;
   const rightDateX = 360;
 
-  for (let i = 0; i < Math.max(catRows.length, catRowsRight.length); i++) {
-    const lCat = catRows[i] || "";
-    const rCat = catRowsRight[i] || "";
-    const lActive = lCat && active.has(lCat);
-    const rActive = rCat && active.has(rCat);
+  const maxLen = Math.max(catRows.length, catRowsRight.length);
+  for (let i = 0; i < maxLen; i++) {
     const y = baseY + i * rowH;
-
-    if (lActive) {
-      html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${validDate}</div>`;
+    if (i < catRows.length) {
+      const [subCat, parentCat] = catRows[i];
+      if (active.has(parentCat) || active.has(subCat)) {
+        const date = getCatDate(parentCat, d);
+        if (date) html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${date}</div>`;
+      }
     }
-    if (rActive) {
-      html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${validDate}</div>`;
+    if (i < catRowsRight.length) {
+      const [subCat, parentCat] = catRowsRight[i];
+      if (active.has(parentCat) || active.has(subCat)) {
+        const date = getCatDate(parentCat, d);
+        if (date) html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${date}</div>`;
+      }
     }
   }
   return html;
