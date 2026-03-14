@@ -118,36 +118,20 @@ function getCatDate(cat: string, d: Record<string, string>): string {
 
 function buildCatDateOverlays(activeCategory: string, d: Record<string, string>) {
   const active = parseActiveCategories(activeCategory);
-  // Left column categories and their parent letter
-  const catRows: [string, string][] = [
-    ["ACC", "A"], ["A", "A"], ["A1", "A"], ["B", "B"], ["B1", "B"], ["C", "C"], ["C1", "C"]
-  ];
-  // Right column categories and their parent letter
-  const catRowsRight: [string, string][] = [
-    ["D", "D"], ["D1", "D"], ["BE", "B"], ["CE", "C"], ["C1E", "C"], ["DE", "D"], ["D1E", "D"]
-  ];
+  const catPositions: Record<string, { x: number; y: number; fontSize: number }> = {
+    A: { x: 137, y: 351, fontSize: 5.5 },
+    B: { x: 137, y: 372, fontSize: 5.5 },
+    C: { x: 136, y: 395, fontSize: 5.5 },
+    D: { x: 271, y: 339, fontSize: 5.5 },
+    E: { x: 271, y: 362, fontSize: 5.5 },
+  };
+
   let html = "";
-
-  const baseY = 404;
-  const rowH = 16.5;
-  const leftDateX = 168;
-  const rightDateX = 360;
-
-  const maxLen = Math.max(catRows.length, catRowsRight.length);
-  for (let i = 0; i < maxLen; i++) {
-    const y = baseY + i * rowH;
-    if (i < catRows.length) {
-      const [subCat, parentCat] = catRows[i];
-      if (active.has(parentCat) || active.has(subCat)) {
-        const date = getCatDate(parentCat, d);
-        if (date) html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${date}</div>`;
-      }
-    }
-    if (i < catRowsRight.length) {
-      const [subCat, parentCat] = catRowsRight[i];
-      if (active.has(parentCat) || active.has(subCat)) {
-        const date = getCatDate(parentCat, d);
-        if (date) html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${date}</div>`;
+  for (const [cat, pos] of Object.entries(catPositions)) {
+    if (active.has(cat)) {
+      const date = getCatDate(cat, d);
+      if (date) {
+        html += `<div class="overlay" style="top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;font-weight:bold;color:#111;">${date}</div>`;
       }
     }
   }
@@ -208,7 +192,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== SIGNATURE ========== */
   .sig-overlay {
-    top: 274px; left: 92px;
+    top: 277px; left: 94px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
@@ -227,22 +211,22 @@ function buildCnhHtml(d: Record<string, string>) {
   }
 
   /* ========== CARD FIELD VALUES ========== */
-  .f-nome         { top: 144px; left: 96px; font-size: 8.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .f-primeira-hab { top: 144px; left: 303px; font-size: 7.5px; }
+  .f-nome         { top: 146px; left: 98px; font-size: 8px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 147px; left: 305px; font-size: 7.5px; }
 
-  .f-nascimento   { top: 165px; left: 187px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-nascimento   { top: 167px; left: 186px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-emissao      { top: 184px; left: 188px; font-size: 7.5px; }
-  .f-validade     { top: 184px; left: 246px; font-size: 7.5px; color: #c00; }
-  .f-cat-big      { top: 181px; left: 336px; font-size: 10px; }
+  .f-emissao      { top: 185px; left: 186px; font-size: 7.5px; }
+  .f-validade     { top: 185px; left: 247px; font-size: 7.5px; color: #c00; }
+  .f-cat-big      { top: 183px; left: 334px; font-size: 10px; }
 
-  .f-rg           { top: 204px; left: 188px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-rg           { top: 206px; left: 188px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-cpf          { top: 222px; left: 186px; font-size: 7.5px; }
-  .f-registro     { top: 222px; left: 255px; font-size: 7.5px; color: #111; }
-  .f-cat-hab      { top: 223px; left: 315px; font-size: 6px; color: #111; }
+  .f-cpf          { top: 224px; left: 189px; font-size: 7.5px; }
+  .f-registro     { top: 224px; left: 254px; font-size: 7.5px; color: #111; }
+  .f-cat-hab      { top: 224px; left: 314px; font-size: 7px; color: #111; }
 
-  .f-nacionalidade { top: 241px; left: 190px; font-size: 7.5px; }
+  .f-nacionalidade { top: 243px; left: 187px; font-size: 7.5px; }
 
   .f-pai          { top: 265px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-mae          { top: 286px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
