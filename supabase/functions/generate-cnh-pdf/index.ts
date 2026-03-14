@@ -227,22 +227,22 @@ function buildCnhHtml(d: Record<string, string>) {
   }
 
   /* ========== CARD FIELD VALUES ========== */
-  .f-nome         { top: 144px; left: 96px; font-size: 8.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .f-primeira-hab { top: 144px; left: 303px; font-size: 7.5px; }
+  .f-nome         { top: 146px; left: 98px; font-size: 8px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 147px; left: 305px; font-size: 7.5px; }
 
-  .f-nascimento   { top: 165px; left: 187px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-nascimento   { top: 167px; left: 186px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-emissao      { top: 184px; left: 188px; font-size: 7.5px; }
-  .f-validade     { top: 184px; left: 246px; font-size: 7.5px; color: #c00; }
-  .f-cat-big      { top: 181px; left: 336px; font-size: 10px; }
+  .f-emissao      { top: 185px; left: 186px; font-size: 7.5px; }
+  .f-validade     { top: 185px; left: 247px; font-size: 7.5px; color: #c00; }
+  .f-cat-big      { top: 183px; left: 334px; font-size: 10px; }
 
-  .f-rg           { top: 204px; left: 188px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-rg           { top: 206px; left: 188px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-cpf          { top: 222px; left: 186px; font-size: 7.5px; }
-  .f-registro     { top: 222px; left: 255px; font-size: 7.5px; color: #111; }
-  .f-cat-hab      { top: 223px; left: 315px; font-size: 6px; color: #111; }
+  .f-cpf          { top: 224px; left: 189px; font-size: 7.5px; }
+  .f-registro     { top: 224px; left: 254px; font-size: 7.5px; color: #111; }
+  .f-cat-hab      { top: 224px; left: 314px; font-size: 7px; color: #111; }
 
-  .f-nacionalidade { top: 241px; left: 190px; font-size: 7.5px; }
+  .f-nacionalidade { top: 243px; left: 187px; font-size: 7.5px; }
 
   .f-pai          { top: 265px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-mae          { top: 286px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
