@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -6,8 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2 } from "lucide-react";
+import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import testFotoUrl from "@/assets/test-foto.png";
+import testAssUrl from "@/assets/test-assinatura.png";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -53,6 +55,27 @@ const initial: CnhFormData = {
   numeroEspelho: "", observacoes: [], nomePai: "", nomeMae: "",
 };
 
+const NOMES_TESTE = ["PEDRO DA SILVA GOMES","MARIA OLIVEIRA SANTOS","CARLOS FERREIRA LIMA","ANA PAULA COSTA","LUCAS RODRIGUES ALVES"];
+const PAIS_TESTE = ["JOSE DA SILVA","ANTONIO FERREIRA","MARCOS OLIVEIRA","ROBERTO COSTA","PAULO RODRIGUES"];
+const MAES_TESTE = ["MARIA DA SILVA","ANA FERREIRA","CLAUDIA OLIVEIRA","SANDRA COSTA","LUCIA RODRIGUES"];
+const CIDADES_TESTE = ["SAO PAULO, SP","RIO DE JANEIRO, RJ","BELO HORIZONTE, MG","CURITIBA, PR","SALVADOR, BA"];
+const ESTADOS_TESTE = ["SAO PAULO","RIO DE JANEIRO","MINAS GERAIS","PARANA","BAHIA"];
+
+function randomDate(startYear: number, endYear: number) {
+  const d = Math.floor(Math.random() * 28) + 1;
+  const m = Math.floor(Math.random() * 12) + 1;
+  const y = startYear + Math.floor(Math.random() * (endYear - startYear));
+  return `${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`;
+}
+
+function addYears(dateStr: string, years: number) {
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) return "";
+  return `${parts[0]}/${parts[1]}/${parseInt(parts[2]) + years}`;
+}
+
+function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
+
 export default function CnhFormPage() {
   const [form, setForm] = useState<CnhFormData>(initial);
   const [foto, setFoto] = useState<File | null>(null);
@@ -61,12 +84,75 @@ export default function CnhFormPage() {
   const [assPreview, setAssPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [autoFillDates, setAutoFillDates] = useState(true);
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { addDocument } = useDocuments();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Auto-fill emissão e validade quando preencher 1ª Habilitação
+  useEffect(() => {
+    if (!autoFillDates || !form.primeiraHab) return;
+    const parts = form.primeiraHab.split("/");
+    if (parts.length === 3 && parts[2].length === 4) {
+      const today = new Date();
+      const emissao = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
+      const validade = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear() + 10}`;
+      setForm(p => ({ ...p, dataEmissao: emissao, dataValidade: validade }));
+    }
+  }, [form.primeiraHab, autoFillDates]);
+
+  const fillTest = async () => {
+    const uf = pick(UF_LIST);
+    const cidade = pick(CIDADES_TESTE);
+    const estado = pick(ESTADOS_TESTE);
+    const primeiraHab = randomDate(2015, 2023);
+    const today = new Date();
+    const emissao = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
+    const validade = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear() + 10}`;
+
+    setForm({
+      cpf: `${generateRandom(3)}.${generateRandom(3)}.${generateRandom(3)}-${generateRandom(2)}`,
+      nomeCompleto: pick(NOMES_TESTE),
+      uf,
+      genero: pick(["M","F"]),
+      nacionalidade: "BRASILEIRA",
+      dataNascimentoLocal: `${randomDate(1980, 2002)}, ${cidade}`,
+      registro: generateRandom(11),
+      categoria: pick(["A","B","AB","C","D","E"]),
+      cnhDefinitiva: pick(["SIM","NAO"]),
+      primeiraHab,
+      dataEmissao: emissao,
+      dataValidade: validade,
+      cidadeEstado: cidade,
+      estadoExtenso: estado,
+      rg: generateRandom(7) + " SSP " + uf,
+      codigoSeguranca: generateRandom(11),
+      renach: uf + generateRandom(9),
+      numeroEspelho: generateRandom(8),
+      observacoes: [pick(OBSERVACOES)],
+      nomePai: pick(PAIS_TESTE),
+      nomeMae: pick(MAES_TESTE),
+    });
+    setAutoFillDates(false);
+    // Load test images
+    setFotoPreview(testFotoUrl);
+    setAssPreview(testAssUrl);
+    toast({ title: "Formulário preenchido com dados de teste!" });
+  };
+
+  const clearForm = () => {
+    setForm(initial);
+    setFoto(null); setFotoPreview(null);
+    setAssinatura(null); setAssPreview(null);
+    setPdfPreviewUrl(null);
+    setAutoFillDates(true);
+    if (fotoRef.current) fotoRef.current.value = "";
+    if (assRef.current) assRef.current.value = "";
+    toast({ title: "Formulário limpo!" });
+  };
 
   const set = (field: keyof CnhFormData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
@@ -206,9 +292,19 @@ export default function CnhFormPage() {
 
   return (
     <div className="max-w-2xl">
-      <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground mb-4 block">
-        ← Voltar
-      </button>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground">
+          ← Voltar
+        </button>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={fillTest} className="gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/10">
+            <FlaskConical className="w-3.5 h-3.5" /> Teste
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={clearForm} className="gap-1.5 text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
+            <Trash2 className="w-3.5 h-3.5" /> Excluir
+          </Button>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* DADOS PESSOAIS */}
@@ -335,7 +431,13 @@ export default function CnhFormPage() {
           </div>
 
           <div className="space-y-1.5">
-            <FieldLabel>1ª Habilitação</FieldLabel>
+            <div className="flex items-center justify-between">
+              <FieldLabel>1ª Habilitação</FieldLabel>
+              <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={autoFillDates} onChange={(e) => setAutoFillDates(e.target.checked)} className="rounded" />
+                Preencher datas automaticamente
+              </label>
+            </div>
             <Input value={form.primeiraHab} onChange={set("primeiraHab")} placeholder="DD/MM/AAAA" className={inputCls} required />
           </div>
 
