@@ -33,28 +33,44 @@ function formatRenachLines(value: string) {
   };
 }
 
+function parseActiveCategories(activeCategory: string) {
+  const normalized = activeCategory.replace(/\s+/g, "").toUpperCase();
+  const set = new Set<string>();
+
+  if (!normalized) return set;
+  if (normalized === "AB") {
+    set.add("A");
+    set.add("B");
+    return set;
+  }
+
+  set.add(normalized);
+  return set;
+}
+
 function buildCatDateOverlays(activeCategory: string, validDate: string) {
-  const catRows = ["ACC","A","A1","B","B1","C","C1"];
-  const catRowsRight = ["D","D1","BE","CE","C1E","DE","D1E"];
+  const active = parseActiveCategories(activeCategory);
+  const catRows = ["ACC", "A", "A1", "B", "B1", "C", "C1"];
+  const catRowsRight = ["D", "D1", "BE", "CE", "C1E", "DE", "D1E"];
   let html = "";
 
-  const baseY = 392;
+  const baseY = 404;
   const rowH = 16.5;
   const leftDateX = 168;
-  const rightDateX = 368;
+  const rightDateX = 360;
 
   for (let i = 0; i < Math.max(catRows.length, catRowsRight.length); i++) {
     const lCat = catRows[i] || "";
     const rCat = catRowsRight[i] || "";
-    const lActive = lCat && activeCategory.includes(lCat.replace("1", ""));
-    const rActive = rCat && activeCategory.includes(rCat.replace("1", ""));
-    const y = baseY + (i * rowH);
+    const lActive = lCat && active.has(lCat);
+    const rActive = rCat && active.has(rCat);
+    const y = baseY + i * rowH;
 
     if (lActive) {
-      html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6.5px;font-weight:bold;">${validDate}</div>`;
+      html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${validDate}</div>`;
     }
     if (rActive) {
-      html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6.5px;font-weight:bold;">${validDate}</div>`;
+      html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6.5px;font-weight:bold;color:#111;">${validDate}</div>`;
     }
   }
   return html;
