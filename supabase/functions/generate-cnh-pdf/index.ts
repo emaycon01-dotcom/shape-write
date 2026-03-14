@@ -16,36 +16,91 @@ function buildCnhHtml(data: Record<string, string>) {
 <head>
 <meta charset="UTF-8">
 <style>
-body { margin: 0; font-family: Arial; }
-.documento { position: relative; width: 900px; height: 550px; }
-.background { position: absolute; width: 900px; height: 550px; top: 0; left: 0; }
-.campo { position: absolute; font-size: 16px; font-weight: bold; color: #000; }
-.foto { position: absolute; top: 140px; left: 60px; width: 120px; height: 140px; object-fit: cover; }
-.assinatura { position: absolute; top: 420px; left: 200px; width: 200px; }
+  @page { size: A4 landscape; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 1123px;
+    height: 794px;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+  }
+  .template-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1123px;
+    height: 794px;
+    object-fit: contain;
+    z-index: 0;
+  }
+  .field {
+    position: absolute;
+    font-size: 11px;
+    font-weight: bold;
+    color: #1a1a1a;
+    z-index: 1;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .field-small {
+    position: absolute;
+    font-size: 9px;
+    font-weight: bold;
+    color: #1a1a1a;
+    z-index: 1;
+    white-space: nowrap;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .foto {
+    position: absolute;
+    z-index: 1;
+    object-fit: cover;
+    border: none;
+  }
+  .assinatura {
+    position: absolute;
+    z-index: 1;
+    object-fit: contain;
+  }
 </style>
 </head>
 <body>
-<div class="documento">
-  <img class="background" src="${templateUrl}">
-  ${data.foto ? `<img class="foto" src="${data.foto}">` : ""}
-  <div class="campo" style="top:150px; left:220px;">${data.nome_completo || ""}</div>
-  <div class="campo" style="top:180px; left:220px;">${data.cpf || ""}</div>
-  <div class="campo" style="top:210px; left:220px;">${data.rg || ""}</div>
-  <div class="campo" style="top:240px; left:220px;">${data.data_nascimento || ""}</div>
-  <div class="campo" style="top:270px; left:220px;">${data.genero || ""}</div>
-  <div class="campo" style="top:300px; left:220px;">${data.nacionalidade || ""}</div>
-  <div class="campo" style="top:330px; left:220px;">${data.nome_pai || ""}</div>
-  <div class="campo" style="top:360px; left:220px;">${data.nome_mae || ""}</div>
-  <div class="campo" style="top:150px; left:520px;">${data.registro || ""}</div>
-  <div class="campo" style="top:180px; left:520px;">${data.categoria || ""}</div>
-  <div class="campo" style="top:210px; left:520px;">${data.data_primeira_hab || ""}</div>
-  <div class="campo" style="top:240px; left:520px;">${data.data_emissao || ""}</div>
-  <div class="campo" style="top:270px; left:520px;">${data.data_validade || ""}</div>
-  <div class="campo" style="top:300px; left:520px;">${data.renach || ""}</div>
-  <div class="campo" style="top:330px; left:520px;">${data.codigo_seguranca || ""}</div>
-  <div class="campo" style="top:360px; left:520px;">${data.numero_espelho || ""}</div>
-  <div class="campo" style="top:390px; left:520px;">${data.cidade_estado || ""}</div>
-  ${data.assinatura ? `<img class="assinatura" src="${data.assinatura}">` : ""}
+<div class="page">
+  <img class="template-bg" src="${templateUrl}" />
+
+  ${data.foto ? `<img class="foto" src="${data.foto}" style="top:155px; left:68px; width:140px; height:168px;" />` : ""}
+
+  <!-- DADOS PESSOAIS - Coluna esquerda do cartão CNH -->
+  <div class="field" style="top:118px; left:228px; max-width:220px; overflow:hidden;">${data.nome_completo || ""}</div>
+  <div class="field" style="top:148px; left:228px;">${data.cpf || ""}</div>
+  <div class="field" style="top:178px; left:228px;">${data.rg || ""}</div>
+  <div class="field" style="top:208px; left:228px; max-width:220px; font-size:10px;">${data.data_nascimento || ""}</div>
+  <div class="field" style="top:238px; left:228px;">${data.genero || ""}</div>
+  <div class="field" style="top:305px; left:228px;">${data.nacionalidade || ""}</div>
+  <div class="field" style="top:335px; left:228px;">${data.nome_pai || ""}</div>
+  <div class="field" style="top:365px; left:228px;">${data.nome_mae || ""}</div>
+
+  <!-- DADOS DO DOCUMENTO - Coluna direita -->
+  <div class="field" style="top:118px; left:620px;">${data.registro || ""}</div>
+  <div class="field" style="top:148px; left:620px;">${data.categoria || ""}</div>
+  <div class="field" style="top:178px; left:620px;">${data.data_primeira_hab || ""}</div>
+  <div class="field" style="top:208px; left:620px;">${data.data_emissao || ""}</div>
+  <div class="field" style="top:238px; left:620px;">${data.data_validade || ""}</div>
+  <div class="field" style="top:305px; left:620px;">${data.renach || ""}</div>
+  <div class="field" style="top:335px; left:620px;">${data.codigo_seguranca || ""}</div>
+  <div class="field" style="top:365px; left:620px;">${data.numero_espelho || ""}</div>
+  <div class="field" style="top:395px; left:620px;">${data.cidade_estado || ""}</div>
+
+  ${data.assinatura ? `<img class="assinatura" src="${data.assinatura}" style="top:430px; left:90px; width:220px; height:55px;" />` : ""}
 </div>
 </body>
 </html>`;
@@ -121,7 +176,6 @@ serve(async (req) => {
     }
 
     const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer());
-    // Chunk the conversion to avoid stack overflow
     let binary = "";
     const chunkSize = 8192;
     for (let i = 0; i < pdfBuffer.length; i += chunkSize) {
