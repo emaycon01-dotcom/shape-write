@@ -208,12 +208,8 @@ export default function CnhFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
-    setPdfPreviewUrl(null);
 
     try {
-      // Convert template image to base64
-      const templateB64 = await imgToBase64("/assets/template-cnh.png");
-
       const bodyData = {
         nome_completo: form.nomeCompleto,
         cpf: form.cpf,
@@ -233,9 +229,9 @@ export default function CnhFormPage() {
         estado_extenso: form.estadoExtenso,
         nome_pai: form.nomePai,
         nome_mae: form.nomeMae,
+        observacoes: form.observacoes.join(", "),
         foto_base64: fotoPreview || "",
         assinatura_base64: assPreview || "",
-        template_url: templateB64,
       };
 
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
