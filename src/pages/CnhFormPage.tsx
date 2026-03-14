@@ -154,6 +154,7 @@ export default function CnhFormPage() {
     const emissao = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
     const validade = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear() + 10}`;
 
+    const cat = pick(["A","B","AB","C","D","E","AD","AE"]);
     setForm({
       cpf: `${generateRandom(3)}.${generateRandom(3)}.${generateRandom(3)}-${generateRandom(2)}`,
       nomeCompleto: pick(NOMES_TESTE),
@@ -162,11 +163,17 @@ export default function CnhFormPage() {
       nacionalidade: "BRASILEIRA",
       dataNascimentoLocal: `${randomDate(1980, 2002)}, ${cidade}`,
       registro: generateRandom(11),
-      categoria: pick(["A","B","AB","C","D","E"]),
+      categoria: cat,
       cnhDefinitiva: pick(["SIM","NAO"]),
       primeiraHab,
       dataEmissao: emissao,
       dataValidade: validade,
+      validadeCatA: cat.includes("A") ? validade : "",
+      validadeCatB: cat.includes("B") ? validade : "",
+      validadeCatC: cat.includes("C") ? validade : "",
+      validadeCatD: cat.includes("D") ? validade : "",
+      validadeCatE: cat.includes("E") ? validade : "",
+      validadeCatManual: false,
       cidadeEstado: cidade,
       estadoExtenso: estado,
       rg: generateRandom(7) + " SSP " + uf,
