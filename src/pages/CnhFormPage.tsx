@@ -142,7 +142,20 @@ export default function CnhFormPage() {
 
       if (error) throw error;
 
-      if (data?.pdfUrl) {
+      if (data?.pdfBase64) {
+        setPdfPreviewUrl(data.pdfBase64);
+        toast({ title: "PDF gerado com sucesso!", description: "Veja o preview abaixo." });
+
+        addDocument({
+          name: form.nomeCompleto,
+          identification: form.cpf,
+          date: form.dataEmissao,
+          description: `CNH - Cat ${form.categoria}`,
+          additionalInfo: JSON.stringify(form),
+          type: "cnh",
+          userId: user.id,
+        });
+      } else if (data?.pdfUrl) {
         setPdfPreviewUrl(data.pdfUrl);
         toast({ title: "PDF gerado com sucesso!", description: "Veja o preview abaixo." });
 
@@ -151,7 +164,7 @@ export default function CnhFormPage() {
           identification: form.cpf,
           date: form.dataEmissao,
           description: `CNH - Cat ${form.categoria}`,
-          additionalInfo: JSON.stringify({ ...form, pdfUrl: data.pdfUrl }),
+          additionalInfo: JSON.stringify(form),
           type: "cnh",
           userId: user.id,
         });
