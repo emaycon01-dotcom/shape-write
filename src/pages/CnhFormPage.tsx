@@ -9,6 +9,7 @@ import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, 
 import { useToast } from "@/hooks/use-toast";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
+import templateCnhUrl from "@/assets/template-cnh-bg.jpeg";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -210,6 +211,9 @@ export default function CnhFormPage() {
     setLoading(true);
 
     try {
+      // Convert template to base64
+      const templateBase64 = await imgToBase64(templateCnhUrl);
+
       const bodyData = {
         nome_completo: form.nomeCompleto,
         cpf: form.cpf,
@@ -232,6 +236,7 @@ export default function CnhFormPage() {
         observacoes: form.observacoes.join(", "),
         foto_base64: fotoPreview || "",
         assinatura_base64: assPreview || "",
+        template_base64: templateBase64,
       };
 
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
