@@ -218,7 +218,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-emissao      { top: 187px; left: 191px; font-size: 6.5px; }
   .f-validade     { top: 187px; left: 253px; font-size: 6.5px; color: #c00; }
-  .f-cat-big      { top: 181px; left: 337px; font-size: 11px; color: #111; }
+  .f-cat-big      { top: 184px; left: 338px; font-size: 11px; color: #111; }
 
   .f-rg           { top: 207px; left: 190px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
