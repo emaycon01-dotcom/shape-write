@@ -8,16 +8,84 @@ const corsHeaders = {
 
 const PDFSHIFT_API_URL = "https://api.pdfshift.io/v3/convert/pdf";
 
+function normalizeMrzText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]/g, "")
+    .trim();
+}
+
+function toMrzToken(value: string) {
+  return normalizeMrzText(value).replace(/\s+/g, "<");
+}
+
+function toMrzDate(value: string) {
+  const br = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (br) {
+    const [, dd, mm, yyyy] = br;
+    return `${yyyy.slice(2)}${mm}${dd}`;
+  }
+
+  const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) {
+    const [, yyyy, mm, dd] = iso;
+    return `${yyyy.slice(2)}${mm}${dd}`;
+  }
+
+  return "<<<<<<";
+}
+
+function mrzCharValue(char: string) {
+  if (char === "<") return 0;
+  if (/\d/.test(char)) return Number(char);
+  return char.charCodeAt(0) - 55;
+}
+
+function mrzCheckDigit(value: string) {
+  const weights = [7, 3, 1];
+  let sum = 0;
+
+  for (let i = 0; i < value.length; i++) {
+    sum += mrzCharValue(value[i]) * weights[i % 3];
+  }
+
+  return String(sum % 10);
+}
+
 function buildMrz(d: Record<string, string>) {
-  const clean = (s: string) => s.replace(/[^A-Z0-9 ]/g, "").trim().toUpperCase();
-  const reg = clean(d.registro || d.numero_espelho || "00000000000");
-  const nameParts = clean(d.nome_completo || "NOME SOBRENOME").split(" ").filter(Boolean);
-  const surname = nameParts[0] || "NOME";
-  const given = nameParts.slice(1).join("<") || "SOBRENOME";
+  const registro = toMrzToken(d.registro || d.numero_espelho || "").replace(/[^A-Z0-9<]/g, "");
+  const docNumber = registro.padEnd(9, "<").slice(0, 9);
+  const optionalData = toMrzToken(d.numero_espelho || d.renach || "").replace(/[^A-Z0-9<]/g, "").padEnd(15, "<").slice(0, 15);
+
+  const birth = toMrzDate(d.data_nascimento || "");
+  const expiry = toMrzDate(d.data_validade || "");
+  const birthCheck = mrzCheckDigit(birth);
+  const expiryCheck = mrzCheckDigit(expiry);
+
+  const gender = normalizeMrzText(d.genero || "");
+  const sex = gender.startsWith("F") ? "F" : gender.startsWith("M") ? "M" : "<";
+
+  const personalNumber = (d.cpf || "")
+    .replace(/\D/g, "")
+    .padEnd(11, "<")
+    .slice(0, 11);
+
+  const docCheck = mrzCheckDigit(docNumber);
+  const finalCheck = mrzCheckDigit(
+    `${docNumber}${docCheck}${optionalData}${birth}${birthCheck}${expiry}${expiryCheck}${personalNumber}`
+  );
+
+  const fullName = toMrzToken(d.nome_completo || "NOME SOBRENOME")
+    .replace(/<+/g, "<<")
+    .padEnd(30, "<")
+    .slice(0, 30);
 
   return {
-    line1: `I ${reg} BRA`,
-    line2: `${surname}<${given}`.slice(0, 30),
+    line1: `I<BRA${docNumber}${docCheck}${optionalData}`,
+    line2: `${birth}${birthCheck}${sex}${expiry}${expiryCheck}BRA${personalNumber}${finalCheck}`,
+    line3: fullName,
   };
 }
 
