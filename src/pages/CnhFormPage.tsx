@@ -123,6 +123,18 @@ export default function CnhFormPage() {
     }
   }, [form.primeiraHab, autoFillDates]);
 
+  // Auto-fill per-category validity dates when not manual
+  useEffect(() => {
+    if (form.validadeCatManual || !form.dataValidade) return;
+    const cats = parseCategories(form.categoria);
+    const updates: Partial<CnhFormData> = {};
+    for (const c of ["A","B","C","D","E"]) {
+      const key = `validadeCat${c}` as keyof CnhFormData;
+      updates[key] = cats.includes(c) ? form.dataValidade : "" as any;
+    }
+    setForm(p => ({ ...p, ...updates }));
+  }, [form.dataValidade, form.categoria, form.validadeCatManual]);
+
   const imgToBase64 = async (url: string): Promise<string> => {
     const res = await fetch(url);
     const blob = await res.blob();
