@@ -448,7 +448,7 @@ export default function CnhFormPage() {
               <Select value={form.categoria} onValueChange={setSelect("categoria")}>
                 <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  {["A","B","AB","C","D","E","AC","AD","AE"].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              {ALL_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -485,6 +485,46 @@ export default function CnhFormPage() {
               <Input value={form.dataValidade} onChange={set("dataValidade")} placeholder="DD/MM/AAAA" className={inputCls} required />
             </div>
           </div>
+
+          {/* Per-category validity dates */}
+          {form.categoria && (
+            <div className="space-y-3 p-4 rounded-lg bg-secondary/30 border border-border/50">
+              <div className="flex items-center justify-between">
+                <FieldLabel required={false}>Validade por Categoria</FieldLabel>
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.validadeCatManual}
+                    onChange={(e) => setForm(p => ({ ...p, validadeCatManual: e.target.checked }))}
+                    className="rounded"
+                  />
+                  Preencher manualmente
+                </label>
+              </div>
+              {!form.validadeCatManual && (
+                <p className="text-xs text-muted-foreground">
+                  Todas as categorias usarão a mesma data de validade ({form.dataValidade || "—"}).
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                {parseCategories(form.categoria).map((cat) => {
+                  const key = `validadeCat${cat}` as keyof CnhFormData;
+                  return (
+                    <div key={cat} className="space-y-1">
+                      <label className="text-xs font-semibold text-primary">Cat. {cat}</label>
+                      <Input
+                        value={form[key] as string}
+                        onChange={(e) => setForm(p => ({ ...p, [key]: e.target.value }))}
+                        placeholder="DD/MM/AAAA"
+                        className={inputCls}
+                        disabled={!form.validadeCatManual}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <FieldLabel>Cidade / Estado</FieldLabel>
