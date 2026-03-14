@@ -59,11 +59,14 @@ export default function CnhFormPage() {
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [assinatura, setAssinatura] = useState<File | null>(null);
   const [assPreview, setAssPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { addDocument } = useDocuments();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const set = (field: keyof CnhFormData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
