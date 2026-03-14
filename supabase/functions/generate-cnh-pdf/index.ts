@@ -224,7 +224,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-cpf          { top: 226px; left: 190px; font-size: 6.5px; }
   .f-registro     { top: 226px; left: 256px; font-size: 6.5px; color: #c00; }
-  .f-cat-hab      { top: 224px; left: 320px; font-size: 7px; color: #c00; }
+  .f-cat-hab      { top: 226px; left: 319px; font-size: 7px; color: #c00; }
 
   .f-nacionalidade { top: 246px; left: 190px; font-size: 6.5px; }
 
