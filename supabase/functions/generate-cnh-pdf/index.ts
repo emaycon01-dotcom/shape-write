@@ -208,7 +208,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== SIGNATURE ========== */
   .sig-overlay {
-    top: 274px; left: 92px;
+    top: 277px; left: 94px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
