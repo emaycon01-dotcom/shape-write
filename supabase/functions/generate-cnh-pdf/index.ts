@@ -233,8 +233,8 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-obs          { top: 427px; left: 97px; font-size: 5.5px; max-width: 370px; }
 
-  .f-espelho      { top: 495px; left: 264px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
-  .f-renach       { top: 513px; left: 263px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
+  .f-espelho      { top: 495px; left: 264px; font-size: 6.5px; color: #111; white-space: nowrap; }
+  .f-renach       { top: 513px; left: 263px; font-size: 6.5px; color: #111; white-space: nowrap; }
   .f-local        { top: 505px; left: 97px; font-size: 6px; }
 
   .reg-vert-bot {
