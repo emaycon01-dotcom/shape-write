@@ -21,35 +21,27 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const {
-      nome_completo,
-      cpf,
-      rg,
-      data_nascimento,
-      categoria,
-      renach,
-      cidade_estado,
-      nome_pai,
-      nome_mae,
-      codigo_seguranca,
-      numero_espelho,
-      foto_base64,
-      assinatura_base64,
-    } = body;
 
     // Build payload matching template placeholders
     const payload: Record<string, any> = {
-      nome_completo: nome_completo || "",
-      cpf: cpf || "",
-      rg: rg || "",
-      data_nascimento: data_nascimento || "",
-      categoria: categoria || "",
-      renach: renach || "",
-      cidade_estado: cidade_estado || "",
-      nome_pai: nome_pai || "",
-      nome_mae: nome_mae || "",
-      codigo_seguranca: codigo_seguranca || "",
-      numero_espelho: numero_espelho || "",
+      nome_completo: body.nome_completo || "",
+      cpf: body.cpf || "",
+      rg: body.rg || "",
+      data_nascimento: body.data_nascimento || "",
+      genero: body.genero || "",
+      nacionalidade: body.nacionalidade || "",
+      registro: body.registro || "",
+      categoria: body.categoria || "",
+      data_primeira_habilitacao: body.data_primeira_habilitacao || "",
+      data_emissao: body.data_emissao || "",
+      data_validade: body.data_validade || "",
+      renach: body.renach || "",
+      codigo_seguranca: body.codigo_seguranca || "",
+      numero_espelho: body.numero_espelho || "",
+      cidade_estado: body.cidade_estado || "",
+      estado_extenso: body.estado_extenso || "",
+      nome_pai: body.nome_pai || "",
+      nome_mae: body.nome_mae || "",
     };
 
     // Add images as data URIs if provided
