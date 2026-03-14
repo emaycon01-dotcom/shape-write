@@ -53,11 +53,24 @@ interface CnhFormData {
   nomeMae: string;
 }
 
+const ALL_CATEGORIES = ["A","B","AB","AC","AD","AE","BC","BD","BE","C","D","E","ABC","ABD","ABE","ACD","ACE","ADE"];
+
+function parseCategories(cat: string): string[] {
+  const norm = cat.replace(/\s+/g, "").toUpperCase();
+  const cats: string[] = [];
+  for (const c of ["A","B","C","D","E"]) {
+    if (norm.includes(c)) cats.push(c);
+  }
+  return cats;
+}
+
 const initial: CnhFormData = {
   cpf: "", nomeCompleto: "", uf: "", genero: "", nacionalidade: "",
   dataNascimentoLocal: "", registro: "", categoria: "", cnhDefinitiva: "",
-  primeiraHab: "", dataEmissao: "", dataValidade: "", cidadeEstado: "",
-  estadoExtenso: "", rg: "", codigoSeguranca: "", renach: "",
+  primeiraHab: "", dataEmissao: "", dataValidade: "",
+  validadeCatA: "", validadeCatB: "", validadeCatC: "", validadeCatD: "", validadeCatE: "",
+  validadeCatManual: false,
+  cidadeEstado: "", estadoExtenso: "", rg: "", codigoSeguranca: "", renach: "",
   numeroEspelho: "", observacoes: [], nomePai: "", nomeMae: "",
 };
 
