@@ -7,6 +7,7 @@ import {
   LogOut,
   Settings,
   Users,
+  Move,
 } from "lucide-react";
 import {
   Sidebar,
