@@ -9,6 +9,7 @@ import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, 
 import { useToast } from "@/hooks/use-toast";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
+import templateCnhUrl from "@/assets/template-cnh-bg.jpeg";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
