@@ -120,7 +120,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== PHOTO ========== */
   .photo-overlay {
-    top: 130px; left: 72px;
+    top: 140px; left: 72px;
     width: 82px; height: 110px;
     overflow: hidden;
   }
@@ -128,7 +128,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== SIGNATURE ========== */
   .sig-overlay {
-    top: 275px; left: 68px;
+    top: 289px; left: 68px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
@@ -136,78 +136,65 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
-    top: 310px; left: 52px;
+    top: 326px; left: 52px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 7px;
     letter-spacing: 1.2px;
     white-space: nowrap;
-    color: #c00;
+    color: #111;
     font-weight: bold;
   }
 
   /* ========== CARD FIELD VALUES ========== */
-  /* Row 1: Nome + 1ª Habilitação */
-  .f-nome         { top: 118px; left: 164px; font-size: 8.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .f-primeira-hab { top: 118px; left: 400px; font-size: 7.5px; }
+  .f-nome         { top: 132px; left: 165px; font-size: 8.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 132px; left: 402px; font-size: 7.5px; }
 
-  /* Row 2: Data nascimento, local, UF */
-  .f-nascimento   { top: 145px; left: 164px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-nascimento   { top: 159px; left: 165px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  /* Row 3: Emissão + Validade + ACC + Categoria */
-  .f-emissao      { top: 170px; left: 164px; font-size: 7.5px; }
-  .f-validade     { top: 170px; left: 280px; font-size: 7.5px; color: #c00; }
-  .f-cat-big      { top: 162px; left: 430px; font-size: 16px; }
+  .f-emissao      { top: 184px; left: 165px; font-size: 7.5px; }
+  .f-validade     { top: 184px; left: 280px; font-size: 7.5px; color: #c00; }
+  .f-cat-big      { top: 176px; left: 430px; font-size: 16px; }
 
-  /* Row 4: Doc Identidade / RG */
-  .f-rg           { top: 195px; left: 164px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-rg           { top: 210px; left: 165px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  /* Row 5: CPF + Registro + Cat Hab */
-  .f-cpf          { top: 220px; left: 164px; font-size: 7.5px; }
-  .f-registro     { top: 220px; left: 300px; font-size: 7.5px; color: #c00; }
-  .f-cat-hab      { top: 220px; left: 418px; font-size: 8px; color: #c00; }
+  .f-cpf          { top: 236px; left: 165px; font-size: 7.5px; }
+  .f-registro     { top: 236px; left: 300px; font-size: 7.5px; color: #111; }
+  .f-cat-hab      { top: 236px; left: 418px; font-size: 8px; color: #111; }
 
-  /* Row 6: Nacionalidade */
-  .f-nacionalidade { top: 245px; left: 164px; font-size: 7.5px; }
+  .f-nacionalidade { top: 262px; left: 165px; font-size: 7.5px; }
 
-  /* Row 7: Filiação (pai) */
-  .f-pai          { top: 265px; left: 164px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-pai          { top: 282px; left: 165px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-mae          { top: 300px; left: 165px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
 
-  /* Row 8: Filiação (mãe) */
-  .f-mae          { top: 280px; left: 164px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-obs          { top: 536px; left: 72px; font-size: 7px; max-width: 370px; }
 
-  /* ========== OBSERVATIONS ========== */
-  .f-obs          { top: 520px; left: 72px; font-size: 7px; max-width: 370px; }
+  .f-espelho      { top: 588px; left: 350px; font-size: 6.5px; text-align: right; width: 110px; color: #111; line-height: 1.15; white-space: pre-line; }
+  .f-renach       { top: 602px; left: 350px; font-size: 6.5px; text-align: right; width: 110px; color: #111; line-height: 1.15; white-space: pre-line; }
+  .f-local        { top: 621px; left: 72px; font-size: 7px; }
 
-  /* ========== SIGNING SECTION ========== */
-  .f-espelho      { top: 570px; left: 350px; font-size: 6.5px; text-align: right; width: 110px; }
-  .f-renach       { top: 582px; left: 350px; font-size: 6.5px; text-align: right; width: 110px; }
-  .f-local        { top: 600px; left: 72px; font-size: 7px; }
-
-  /* ========== VERTICAL REG (bottom) ========== */
   .reg-vert-bot {
-    top: 620px; left: 52px;
+    top: 646px; left: 52px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 7px;
     letter-spacing: 1.2px;
     white-space: nowrap;
-    color: #c00;
+    color: #111;
     font-weight: bold;
   }
 
-  /* ========== STATE NAME ========== */
-  .f-estado       { top: 635px; left: 60px; width: 410px; text-align: center; font-size: 15px; }
+  .f-estado       { top: 662px; left: 60px; width: 410px; text-align: center; font-size: 15px; }
 
-  /* ========== MRZ ========== */
   .mrz-overlay {
-    top: 750px; left: 58px;
-    width: 410px;
+    top: 784px; left: 58px;
+    width: 420px;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 10px;
+    font-size: 11px;
     color: #111;
-    letter-spacing: 2px;
-    line-height: 1.8;
+    letter-spacing: 1.6px;
+    line-height: 1.6;
+    white-space: pre-line;
   }
 </style>
 </head>
