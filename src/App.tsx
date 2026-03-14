@@ -17,6 +17,7 @@ const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
 const TemplateCnhPage = lazy(() => import("./pages/TemplateCnhPage"));
+const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
 const VerifyPage = lazy(() => import("./pages/VerifyPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
