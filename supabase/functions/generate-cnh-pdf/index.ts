@@ -11,42 +11,36 @@ const PDFSHIFT_API_URL = "https://api.pdfshift.io/v3/convert/pdf";
 function buildMrz(d: Record<string, string>) {
   const pad = (s: string, len: number) => (s + "<".repeat(len)).slice(0, len);
   const clean = (s: string) => s.replace(/[^A-Z0-9<]/g, "").toUpperCase();
-
   const reg = clean(d.registro || "00000000000");
   const nameParts = (d.nome_completo || "NOME<<SOBRENOME").toUpperCase().split(" ");
   const surname = nameParts[0] || "NOME";
   const given = nameParts.slice(1).join("<") || "SOBRENOME";
-
   const birthParts = (d.data_nascimento || "").split(",")[0]?.split("/") || [];
   const birthYY = birthParts[2]?.slice(2) || "00";
   const birthMM = birthParts[1] || "01";
   const birthDD = birthParts[0] || "01";
-
   const expParts = (d.data_validade || "").split("/") || [];
   const expYY = expParts[2]?.slice(2) || "00";
   const expMM = expParts[1] || "01";
   const expDD = expParts[0] || "01";
-
   const gender = (d.genero || "M").charAt(0).toUpperCase();
-
   const line1 = pad(`I<BRA${pad(reg, 15)}`, 30);
   const line2 = pad(`${birthYY}${birthMM}${birthDD}${gender}${expYY}${expMM}${expDD}BRA`, 30);
   const line3 = pad(`${surname}<<${given}`, 30);
-
   return { line1, line2, line3 };
 }
 
-function buildCatDateRows(activeCategory: string, validDate: string) {
+function buildCatDateOverlays(activeCategory: string, validDate: string) {
   const catRows = ["ACC","A","A1","B","B1","C","C1","D","D1","BE","CE","C1E","DE","D1E"];
   const half = Math.ceil(catRows.length / 2);
   const left = catRows.slice(0, half);
   const right = catRows.slice(half);
   let html = "";
 
-  // Each row is ~13px tall, table starts at ~488px from top
-  // Left column dates at x≈138, right column dates at x≈338
-  const baseY = 500;
-  const rowH = 13.5;
+  const baseY = 355;
+  const rowH = 14.2;
+  const leftDateX = 155;
+  const rightDateX = 355;
 
   for (let i = 0; i < Math.max(left.length, right.length); i++) {
     const lCat = left[i] || "";
@@ -56,10 +50,10 @@ function buildCatDateRows(activeCategory: string, validDate: string) {
     const y = baseY + (i * rowH);
 
     if (lActive) {
-      html += `<div class="overlay" style="top:${y}px;left:130px;font-size:6px;">${validDate}</div>`;
+      html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6px;font-weight:bold;">${validDate}</div>`;
     }
     if (rActive) {
-      html += `<div class="overlay" style="top:${y}px;left:330px;font-size:6px;">${validDate}</div>`;
+      html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6px;font-weight:bold;">${validDate}</div>`;
     }
   }
   return html;
@@ -91,15 +85,12 @@ function buildCnhHtml(d: Record<string, string>) {
   }
   .bg-template {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     z-index: 0;
   }
   .bg-template img {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: fill;
   }
   .overlay {
@@ -110,204 +101,93 @@ function buildCnhHtml(d: Record<string, string>) {
     font-weight: bold;
   }
 
-  /* === PHOTO === */
+  /* ========== PHOTO ========== */
   .photo-overlay {
-    top: 160px;
-    left: 44px;
-    width: 82px;
-    height: 108px;
+    top: 118px; left: 68px;
+    width: 78px; height: 108px;
     overflow: hidden;
   }
-  .photo-overlay img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .photo-overlay img { width:100%; height:100%; object-fit:cover; }
 
-  /* === SIGNATURE === */
-  .signature-overlay {
-    top: 295px;
-    left: 38px;
-    width: 94px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* ========== SIGNATURE ========== */
+  .sig-overlay {
+    top: 253px; left: 60px;
+    width: 92px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
   }
-  .signature-overlay img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
+  .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; }
 
-  /* === VERTICAL REGISTRATION (left side) === */
-  .reg-vertical-left {
-    top: 360px;
-    left: 8px;
+  /* ========== VERTICAL TEXT (left of card) ========== */
+  .reg-vert-top {
+    top: 295px; left: 50px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 6.5px;
-    letter-spacing: 0.8px;
-    white-space: nowrap;
-    color: #222;
-  }
-
-  /* === CARD FIELD VALUES === */
-  /* Row 1: Nome + 1ª Hab */
-  .f-nome {
-    top: 144px;
-    left: 145px;
-    font-size: 8.5px;
-    max-width: 210px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .f-primeira-hab {
-    top: 144px;
-    left: 370px;
-    font-size: 8px;
-  }
-
-  /* Row 2: Data nascimento */
-  .f-nascimento {
-    top: 172px;
-    left: 145px;
     font-size: 7.5px;
-    max-width: 280px;
+    letter-spacing: 1.2px;
     white-space: nowrap;
-    overflow: hidden;
-  }
-
-  /* Row 3: Emissão + Validade + Categoria */
-  .f-emissao {
-    top: 200px;
-    left: 145px;
-    font-size: 8px;
-  }
-  .f-validade {
-    top: 200px;
-    left: 255px;
-    font-size: 8px;
-  }
-  .f-cat-big {
-    top: 192px;
-    left: 400px;
-    font-size: 18px;
+    color: #c00;
     font-weight: bold;
   }
+
+  /* ========== CARD FIELD VALUES ========== */
+  /* Row 1: Nome + 1ª Habilitação */
+  .f-nome         { top: 103px; left: 158px; font-size: 9px; max-width: 218px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 103px; left: 392px; font-size: 8px; }
+
+  /* Row 2: Data nascimento, local, UF */
+  .f-nascimento   { top: 130px; left: 158px; font-size: 7.5px; max-width: 310px; white-space: nowrap; overflow: hidden; }
+
+  /* Row 3: Emissão + Validade + ACC + Categoria */
+  .f-emissao      { top: 157px; left: 158px; font-size: 8px; }
+  .f-validade     { top: 157px; left: 265px; font-size: 8px; color: #c00; }
+  .f-cat-big      { top: 148px; left: 415px; font-size: 18px; }
 
   /* Row 4: Doc Identidade / RG */
-  .f-rg {
-    top: 230px;
-    left: 145px;
-    font-size: 7.5px;
-    max-width: 280px;
-    white-space: nowrap;
-    overflow: hidden;
-  }
+  .f-rg           { top: 183px; left: 158px; font-size: 7.5px; max-width: 310px; white-space: nowrap; overflow: hidden; }
 
   /* Row 5: CPF + Registro + Cat Hab */
-  .f-cpf {
-    top: 258px;
-    left: 145px;
-    font-size: 8px;
-  }
-  .f-registro {
-    top: 258px;
-    left: 275px;
-    font-size: 8px;
-  }
-  .f-cat-hab {
-    top: 258px;
-    left: 398px;
-    font-size: 8px;
-  }
+  .f-cpf          { top: 210px; left: 158px; font-size: 8px; }
+  .f-registro     { top: 210px; left: 290px; font-size: 8px; color: #c00; }
+  .f-cat-hab      { top: 210px; left: 405px; font-size: 8.5px; color: #c00; }
 
   /* Row 6: Nacionalidade */
-  .f-nacionalidade {
-    top: 286px;
-    left: 145px;
-    font-size: 8px;
-  }
+  .f-nacionalidade { top: 236px; left: 158px; font-size: 8px; }
 
-  /* Row 7-8: Filiação */
-  .f-pai {
-    top: 312px;
-    left: 145px;
-    font-size: 8px;
-    max-width: 280px;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-  .f-mae {
-    top: 334px;
-    left: 145px;
-    font-size: 8px;
-    max-width: 280px;
-    white-space: nowrap;
-    overflow: hidden;
-  }
+  /* Row 7: Filiação (pai) */
+  .f-pai          { top: 260px; left: 158px; font-size: 8px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  /* === OBSERVATIONS VALUE === */
-  .f-obs-value {
-    top: 618px;
-    left: 30px;
-    font-size: 7.5px;
-    max-width: 400px;
-  }
+  /* Row 8: Filiação (mãe) */
+  .f-mae          { top: 278px; left: 158px; font-size: 8px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  /* === SIGNING SECTION === */
-  .f-espelho {
-    top: 660px;
-    left: 310px;
-    font-size: 7px;
-    text-align: right;
-    width: 120px;
-  }
-  .f-renach {
-    top: 672px;
-    left: 310px;
-    font-size: 7px;
-    text-align: right;
-    width: 120px;
-  }
-  .f-local {
-    top: 690px;
-    left: 30px;
-    font-size: 7.5px;
-  }
+  /* ========== OBSERVATIONS ========== */
+  .f-obs          { top: 492px; left: 68px; font-size: 7.5px; max-width: 380px; }
 
-  /* === VERTICAL REGISTRATION (bottom left) === */
-  .reg-vertical-bottom {
-    top: 720px;
-    left: 8px;
+  /* ========== SIGNING SECTION ========== */
+  .f-espelho      { top: 535px; left: 345px; font-size: 7px; text-align: right; width: 115px; }
+  .f-renach       { top: 548px; left: 345px; font-size: 7px; text-align: right; width: 115px; }
+  .f-local        { top: 567px; left: 68px; font-size: 7.5px; }
+
+  /* ========== VERTICAL REG (bottom) ========== */
+  .reg-vert-bot {
+    top: 590px; left: 50px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 6.5px;
-    letter-spacing: 0.8px;
+    font-size: 7.5px;
+    letter-spacing: 1.2px;
     white-space: nowrap;
-    color: #222;
-  }
-
-  /* === STATE NAME === */
-  .f-estado {
-    top: 718px;
-    left: 18px;
-    width: 420px;
-    text-align: center;
-    font-size: 16px;
+    color: #c00;
     font-weight: bold;
   }
 
-  /* === MRZ (bottom of page) === */
+  /* ========== STATE NAME ========== */
+  .f-estado       { top: 598px; left: 60px; width: 410px; text-align: center; font-size: 17px; }
+
+  /* ========== MRZ ========== */
   .mrz-overlay {
-    top: 835px;
-    left: 30px;
-    width: 730px;
+    top: 712px; left: 55px;
+    width: 420px;
     font-family: 'Courier New', Courier, monospace;
     font-size: 11px;
-    font-weight: bold;
     color: #111;
     letter-spacing: 2px;
     line-height: 1.8;
@@ -316,26 +196,21 @@ function buildCnhHtml(d: Record<string, string>) {
 </head>
 <body>
 <div class="page">
-
-  <!-- TEMPLATE BACKGROUND IMAGE -->
+  <!-- BACKGROUND TEMPLATE -->
   <div class="bg-template">
     ${templateBg ? `<img src="${templateBg}" />` : ""}
   </div>
 
   <!-- PHOTO -->
-  <div class="overlay photo-overlay">
-    ${d.foto ? `<img src="${d.foto}" />` : ""}
-  </div>
+  <div class="overlay photo-overlay">${d.foto ? `<img src="${d.foto}" />` : ""}</div>
 
   <!-- SIGNATURE -->
-  <div class="overlay signature-overlay">
-    ${d.assinatura ? `<img src="${d.assinatura}" />` : ""}
-  </div>
+  <div class="overlay sig-overlay">${d.assinatura ? `<img src="${d.assinatura}" />` : ""}</div>
 
-  <!-- VERTICAL REGISTRATION (left of card) -->
-  <div class="overlay reg-vertical-left">${d.registro || ""}</div>
+  <!-- VERTICAL REGISTRATION (top) -->
+  <div class="overlay reg-vert-top">${d.registro || ""}</div>
 
-  <!-- DYNAMIC DATA VALUES ONLY -->
+  <!-- CARD FIELD VALUES -->
   <div class="overlay f-nome">${d.nome_completo || ""}</div>
   <div class="overlay f-primeira-hab">${d.data_primeira_hab || ""}</div>
   <div class="overlay f-nascimento">${d.data_nascimento || ""}</div>
@@ -350,22 +225,22 @@ function buildCnhHtml(d: Record<string, string>) {
   <div class="overlay f-pai">${d.nome_pai || ""}</div>
   <div class="overlay f-mae">${d.nome_mae || ""}</div>
 
-  <!-- CATEGORY DATE VALUES (positioned over template table) -->
-  ${buildCatDateRows(d.categoria || "", d.data_validade || "")}
+  <!-- CATEGORY DATE VALUES -->
+  ${buildCatDateOverlays(d.categoria || "", d.data_validade || "")}
 
-  <!-- OBSERVATIONS VALUE -->
-  <div class="overlay f-obs-value">${d.observacoes || ""}</div>
+  <!-- OBSERVATIONS -->
+  <div class="overlay f-obs">${d.observacoes || ""}</div>
 
-  <!-- SIGNING INFO VALUES -->
+  <!-- SIGNING INFO -->
   <div class="overlay f-espelho">${d.numero_espelho || ""}</div>
   <div class="overlay f-renach">${d.renach || ""}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
 
+  <!-- VERTICAL REGISTRATION (bottom) -->
+  <div class="overlay reg-vert-bot">${d.registro || ""}</div>
+
   <!-- STATE NAME -->
   <div class="overlay f-estado">${d.estado_extenso || ""}</div>
-
-  <!-- VERTICAL REGISTRATION (bottom) -->
-  <div class="overlay reg-vertical-bottom">${d.registro || ""}</div>
 
   <!-- MRZ -->
   <div class="overlay mrz-overlay">
@@ -373,7 +248,6 @@ function buildCnhHtml(d: Record<string, string>) {
     ${mrz.line2}<br>
     ${mrz.line3}
   </div>
-
 </div>
 </body>
 </html>`;
@@ -427,7 +301,6 @@ serve(async (req) => {
     }
 
     const html = buildCnhHtml(data);
-
     console.log("Sending HTML to PDFShift...");
 
     const pdfRes = await fetch(PDFSHIFT_API_URL, {
