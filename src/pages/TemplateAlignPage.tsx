@@ -40,7 +40,7 @@ const defaultFields: FieldDef[] = [
   { id: "rg", label: "RG", sampleText: "3963221 SSP PR", x: 190, y: 207, fontSize: 6.5 },
   { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 190, y: 226, fontSize: 6.5 },
   { id: "registro", label: "Registro", sampleText: "07915888995", x: 256, y: 226, fontSize: 6.5 },
-  { id: "cat_hab", label: "Cat. Hab", sampleText: "AB", x: 318, y: 226, fontSize: 7 },
+  { id: "cat_hab", label: "Cat. Hab", sampleText: "AB", x: 320, y: 224, fontSize: 7 },
   { id: "nacionalidade", label: "Nacionalidade", sampleText: "BRASILEIRA", x: 190, y: 246, fontSize: 6.5 },
   { id: "pai", label: "Pai", sampleText: "JOSE DA SILVA", x: 190, y: 266, fontSize: 6.5 },
   { id: "mae", label: "Mãe", sampleText: "SANDRA COSTA", x: 190, y: 286, fontSize: 6.5 },
