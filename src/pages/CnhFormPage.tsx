@@ -36,6 +36,12 @@ interface CnhFormData {
   primeiraHab: string;
   dataEmissao: string;
   dataValidade: string;
+  validadeCatA: string;
+  validadeCatB: string;
+  validadeCatC: string;
+  validadeCatD: string;
+  validadeCatE: string;
+  validadeCatManual: boolean;
   cidadeEstado: string;
   estadoExtenso: string;
   rg: string;
@@ -47,11 +53,24 @@ interface CnhFormData {
   nomeMae: string;
 }
 
+const ALL_CATEGORIES = ["A","B","AB","AC","AD","AE","BC","BD","BE","C","D","E","ABC","ABD","ABE","ACD","ACE","ADE"];
+
+function parseCategories(cat: string): string[] {
+  const norm = cat.replace(/\s+/g, "").toUpperCase();
+  const cats: string[] = [];
+  for (const c of ["A","B","C","D","E"]) {
+    if (norm.includes(c)) cats.push(c);
+  }
+  return cats;
+}
+
 const initial: CnhFormData = {
   cpf: "", nomeCompleto: "", uf: "", genero: "", nacionalidade: "",
   dataNascimentoLocal: "", registro: "", categoria: "", cnhDefinitiva: "",
-  primeiraHab: "", dataEmissao: "", dataValidade: "", cidadeEstado: "",
-  estadoExtenso: "", rg: "", codigoSeguranca: "", renach: "",
+  primeiraHab: "", dataEmissao: "", dataValidade: "",
+  validadeCatA: "", validadeCatB: "", validadeCatC: "", validadeCatD: "", validadeCatE: "",
+  validadeCatManual: false,
+  cidadeEstado: "", estadoExtenso: "", rg: "", codigoSeguranca: "", renach: "",
   numeroEspelho: "", observacoes: [], nomePai: "", nomeMae: "",
 };
 
@@ -104,6 +123,18 @@ export default function CnhFormPage() {
     }
   }, [form.primeiraHab, autoFillDates]);
 
+  // Auto-fill per-category validity dates when not manual
+  useEffect(() => {
+    if (form.validadeCatManual || !form.dataValidade) return;
+    const cats = parseCategories(form.categoria);
+    const updates: Record<string, string> = {};
+    for (const c of ["A","B","C","D","E"]) {
+      const key = `validadeCat${c}`;
+      updates[key] = cats.includes(c) ? form.dataValidade : "";
+    }
+    setForm(p => ({ ...p, ...updates } as CnhFormData));
+  }, [form.dataValidade, form.categoria, form.validadeCatManual]);
+
   const imgToBase64 = async (url: string): Promise<string> => {
     const res = await fetch(url);
     const blob = await res.blob();
@@ -123,6 +154,7 @@ export default function CnhFormPage() {
     const emissao = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
     const validade = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear() + 10}`;
 
+    const cat = pick(["A","B","AB","C","D","E","AD","AE"]);
     setForm({
       cpf: `${generateRandom(3)}.${generateRandom(3)}.${generateRandom(3)}-${generateRandom(2)}`,
       nomeCompleto: pick(NOMES_TESTE),
@@ -131,11 +163,17 @@ export default function CnhFormPage() {
       nacionalidade: "BRASILEIRA",
       dataNascimentoLocal: `${randomDate(1980, 2002)}, ${cidade}`,
       registro: generateRandom(11),
-      categoria: pick(["A","B","AB","C","D","E"]),
+      categoria: cat,
       cnhDefinitiva: pick(["SIM","NAO"]),
       primeiraHab,
       dataEmissao: emissao,
       dataValidade: validade,
+      validadeCatA: cat.includes("A") ? validade : "",
+      validadeCatB: cat.includes("B") ? validade : "",
+      validadeCatC: cat.includes("C") ? validade : "",
+      validadeCatD: cat.includes("D") ? validade : "",
+      validadeCatE: cat.includes("E") ? validade : "",
+      validadeCatManual: false,
       cidadeEstado: cidade,
       estadoExtenso: estado,
       rg: generateRandom(7) + " SSP " + uf,
@@ -214,7 +252,7 @@ export default function CnhFormPage() {
       // Convert template to base64
       const templateBase64 = await imgToBase64(templateCnhUrl);
 
-      const bodyData = {
+        const bodyData = {
         nome_completo: form.nomeCompleto,
         cpf: form.cpf,
         rg: form.rg,
@@ -226,6 +264,11 @@ export default function CnhFormPage() {
         data_primeira_habilitacao: form.primeiraHab,
         data_emissao: form.dataEmissao,
         data_validade: form.dataValidade,
+        validade_cat_a: form.validadeCatA,
+        validade_cat_b: form.validadeCatB,
+        validade_cat_c: form.validadeCatC,
+        validade_cat_d: form.validadeCatD,
+        validade_cat_e: form.validadeCatE,
         renach: form.renach,
         codigo_seguranca: form.codigoSeguranca,
         numero_espelho: form.numeroEspelho,
@@ -412,7 +455,7 @@ export default function CnhFormPage() {
               <Select value={form.categoria} onValueChange={setSelect("categoria")}>
                 <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  {["A","B","AB","C","D","E","AC","AD","AE"].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              {ALL_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -449,6 +492,46 @@ export default function CnhFormPage() {
               <Input value={form.dataValidade} onChange={set("dataValidade")} placeholder="DD/MM/AAAA" className={inputCls} required />
             </div>
           </div>
+
+          {/* Per-category validity dates */}
+          {form.categoria && (
+            <div className="space-y-3 p-4 rounded-lg bg-secondary/30 border border-border/50">
+              <div className="flex items-center justify-between">
+                <FieldLabel required={false}>Validade por Categoria</FieldLabel>
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.validadeCatManual}
+                    onChange={(e) => setForm(p => ({ ...p, validadeCatManual: e.target.checked }))}
+                    className="rounded"
+                  />
+                  Preencher manualmente
+                </label>
+              </div>
+              {!form.validadeCatManual && (
+                <p className="text-xs text-muted-foreground">
+                  Todas as categorias usarão a mesma data de validade ({form.dataValidade || "—"}).
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                {parseCategories(form.categoria).map((cat) => {
+                  const key = `validadeCat${cat}` as keyof CnhFormData;
+                  return (
+                    <div key={cat} className="space-y-1">
+                      <label className="text-xs font-semibold text-primary">Cat. {cat}</label>
+                      <Input
+                        value={form[key] as string}
+                        onChange={(e) => setForm(p => ({ ...p, [key]: e.target.value }))}
+                        placeholder="DD/MM/AAAA"
+                        className={inputCls}
+                        disabled={!form.validadeCatManual}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <FieldLabel>Cidade / Estado</FieldLabel>
