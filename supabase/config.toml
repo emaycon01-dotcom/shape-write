@@ -1,1 +1,4 @@
 project_id = "doycwownddyxfqntifca"
+
+[functions.generate-cnh-pdf]
+verify_jwt = false

@@ -2,10 +2,12 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Upload, X, User, FileText, Info, Sparkles } from "lucide-react";
+import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -57,11 +59,14 @@ export default function CnhFormPage() {
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [assinatura, setAssinatura] = useState<File | null>(null);
   const [assPreview, setAssPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { addDocument } = useDocuments();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const set = (field: keyof CnhFormData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
@@ -100,19 +105,52 @@ export default function CnhFormPage() {
     if (ref.current) ref.current.value = "";
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    addDocument({
-      name: form.nomeCompleto,
-      identification: form.cpf,
-      date: form.dataEmissao,
-      description: `CNH - Cat ${form.categoria}`,
-      additionalInfo: JSON.stringify(form),
-      type: "cnh",
-      userId: user.id,
-    });
-    navigate("/dashboard/history");
+    setLoading(true);
+    setPdfPreviewUrl(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
+        body: {
+          nome_completo: form.nomeCompleto,
+          cpf: form.cpf,
+          rg: form.rg,
+          data_nascimento: form.dataNascimentoLocal,
+          categoria: form.categoria,
+          renach: form.renach,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.pdfUrl) {
+        setPdfPreviewUrl(data.pdfUrl);
+        toast({ title: "PDF gerado com sucesso!", description: "Veja o preview abaixo." });
+
+        addDocument({
+          name: form.nomeCompleto,
+          identification: form.cpf,
+          date: form.dataEmissao,
+          description: `CNH - Cat ${form.categoria}`,
+          additionalInfo: JSON.stringify({ ...form, pdfUrl: data.pdfUrl }),
+          type: "cnh",
+          userId: user.id,
+        });
+      } else {
+        throw new Error(data?.error || "Nenhuma URL de PDF retornada");
+      }
+    } catch (err: any) {
+      console.error("Erro ao gerar PDF:", err);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: err?.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputCls = "bg-secondary border-border text-foreground placeholder:text-muted-foreground";
@@ -371,10 +409,26 @@ export default function CnhFormPage() {
           </div>
         </div>
 
-        <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold">
-          <Eye className="w-5 h-5 mr-2" /> Gerar Preview
+        <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold" disabled={loading}>
+          {loading ? (
+            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Gerando PDF...</>
+          ) : (
+            <><Eye className="w-5 h-5 mr-2" /> Gerar Preview</>
+          )}
         </Button>
       </form>
+
+      {pdfPreviewUrl && (
+        <div className="mt-6 space-y-3">
+          <h2 className="text-lg font-bold text-foreground">Preview do Documento</h2>
+          <div className="glass rounded-xl overflow-hidden" style={{ height: "80vh" }}>
+            <iframe src={pdfPreviewUrl} className="w-full h-full border-0" title="PDF Preview" />
+          </div>
+          <a href={pdfPreviewUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" className="w-full">Abrir PDF em nova aba</Button>
+          </a>
+        </div>
+      )}
     </div>
   );
 }
