@@ -50,6 +50,7 @@ const App = () => (
                   <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
+                  <Route path="template-align" element={<TemplateAlignPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
