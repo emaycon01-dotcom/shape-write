@@ -1,8 +1,8 @@
 CNH PDF layout rules, field color expectations, and text-format constraints.
 
 ## Field Colors
-- **Red (#c00):** validade, registro, categoria (cat_big + cat_hab)
-- **Black (#111):** all other fields (nome, cpf, rg, espelho, renach, etc.)
+- **Red (#c00):** validade, registro, categoria pequena (cat_hab)
+- **Black (#111):** all other fields including categoria grande (cat_big), nome, cpf, rg, espelho, renach, etc.
 - Número espelho must always be black (never red).
 
 ## Text Format
