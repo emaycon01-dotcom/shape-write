@@ -112,6 +112,9 @@ export default function CnhFormPage() {
     setPdfPreviewUrl(null);
 
     try {
+      // Convert images to base64 if available
+      const toBase64 = (preview: string | null) => preview || "";
+
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
         body: {
           nome_completo: form.nomeCompleto,
@@ -120,6 +123,8 @@ export default function CnhFormPage() {
           data_nascimento: form.dataNascimentoLocal,
           categoria: form.categoria,
           renach: form.renach,
+          foto_base64: toBase64(fotoPreview),
+          assinatura_base64: toBase64(assPreview),
         },
       });
 
