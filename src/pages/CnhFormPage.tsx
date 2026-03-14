@@ -103,6 +103,16 @@ export default function CnhFormPage() {
     }
   }, [form.primeiraHab, autoFillDates]);
 
+  const imgToBase64 = async (url: string): Promise<string> => {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const fillTest = async () => {
     const uf = pick(UF_LIST);
     const cidade = pick(CIDADES_TESTE);
@@ -136,9 +146,13 @@ export default function CnhFormPage() {
       nomeMae: pick(MAES_TESTE),
     });
     setAutoFillDates(false);
-    // Load test images
-    setFotoPreview(testFotoUrl);
-    setAssPreview(testAssUrl);
+    // Load test images as base64
+    const [fotoB64, assB64] = await Promise.all([
+      imgToBase64(testFotoUrl),
+      imgToBase64(testAssUrl),
+    ]);
+    setFotoPreview(fotoB64);
+    setAssPreview(assB64);
     toast({ title: "Formulário preenchido com dados de teste!" });
   };
 
@@ -197,7 +211,8 @@ export default function CnhFormPage() {
     setPdfPreviewUrl(null);
 
     try {
-      const toBase64 = (preview: string | null) => preview || "";
+      // Convert template image to base64
+      const templateB64 = await imgToBase64("/assets/template-cnh.png");
 
       const bodyData = {
         nome_completo: form.nomeCompleto,
@@ -218,8 +233,9 @@ export default function CnhFormPage() {
         estado_extenso: form.estadoExtenso,
         nome_pai: form.nomePai,
         nome_mae: form.nomeMae,
-        foto_base64: toBase64(fotoPreview),
-        assinatura_base64: toBase64(assPreview),
+        foto_base64: fotoPreview || "",
+        assinatura_base64: assPreview || "",
+        template_url: templateB64,
       };
 
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
