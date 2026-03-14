@@ -292,9 +292,19 @@ export default function CnhFormPage() {
 
   return (
     <div className="max-w-2xl">
-      <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground mb-4 block">
-        ← Voltar
-      </button>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground">
+          ← Voltar
+        </button>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={fillTest} className="gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/10">
+            <FlaskConical className="w-3.5 h-3.5" /> Teste
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={clearForm} className="gap-1.5 text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
+            <Trash2 className="w-3.5 h-3.5" /> Excluir
+          </Button>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* DADOS PESSOAIS */}
