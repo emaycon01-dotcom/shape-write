@@ -87,7 +87,7 @@ export default function CnhFormPage() {
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const { addDocument } = useDocuments();
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
