@@ -3,62 +3,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function uploadBase64ToPdfCo(
-  apiKey: string,
-  base64Data: string,
-  fileName: string
-): Promise<string | null> {
-  if (!base64Data) return null;
-
-  // Remove data URI prefix if present
-  const cleanBase64 = base64Data.replace(/^data:[^;]+;base64,/, "");
-
-  // Get presigned URL for upload
-  const presignRes = await fetch(
-    "https://api.pdf.co/v1/file/upload/get-presigned-url",
-    {
-      method: "GET",
-      headers: { "x-api-key": apiKey },
-    }
-  );
-
-  if (!presignRes.ok) {
-    const errText = await presignRes.text();
-    console.error("Presign error:", errText);
-    return null;
-  }
-
-  const presignData = await presignRes.json();
-  if (!presignData.presignedUrl || !presignData.url) {
-    console.error("No presigned URL returned:", presignData);
-    return null;
-  }
-
-  // Decode base64 to binary
-  const binaryStr = atob(cleanBase64);
-  const bytes = new Uint8Array(binaryStr.length);
-  for (let i = 0; i < binaryStr.length; i++) {
-    bytes[i] = binaryStr.charCodeAt(i);
-  }
-
-  // Upload to presigned URL
-  const uploadRes = await fetch(presignData.presignedUrl, {
-    method: "PUT",
-    headers: { "Content-Type": "application/octet-stream" },
-    body: bytes,
-  });
-
-  if (!uploadRes.ok) {
-    const errText = await uploadRes.text();
-    console.error("Upload error:", errText);
-    return null;
-  }
-
-  return presignData.url;
-}
+const TEMPLATE_ID = "A1AC7D64-938D-4DD5-8375-1232F9BF6D67";
+const PDFMONKEY_API_URL = "https://api.pdfmonkey.io/api/v1/documents";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -66,9 +15,9 @@ serve(async (req) => {
   }
 
   try {
-    const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY");
-    if (!PDFCO_API_KEY) {
-      throw new Error("PDFCO_API_KEY is not configured");
+    const PDFMONKEY_API_KEY = Deno.env.get("PDFMONKEY_API_KEY");
+    if (!PDFMONKEY_API_KEY) {
+      throw new Error("PDFMONKEY_API_KEY is not configured");
     }
 
     const body = await req.json();
@@ -79,135 +28,108 @@ serve(async (req) => {
       data_nascimento,
       categoria,
       renach,
+      cidade_estado,
+      nome_pai,
+      nome_mae,
+      codigo_seguranca,
+      numero_espelho,
       foto_base64,
       assinatura_base64,
     } = body;
 
-    // Upload images to PDF.co if provided
-    const [fotoUrl, assinaturaUrl] = await Promise.all([
-      foto_base64
-        ? uploadBase64ToPdfCo(PDFCO_API_KEY, foto_base64, "foto.png")
-        : Promise.resolve(null),
-      assinatura_base64
-        ? uploadBase64ToPdfCo(PDFCO_API_KEY, assinatura_base64, "assinatura.png")
-        : Promise.resolve(null),
-    ]);
-
-    console.log("Uploaded foto URL:", fotoUrl);
-    console.log("Uploaded assinatura URL:", assinaturaUrl);
-
-    // Build text annotations
-    const textAnnotations = [
-      { text: nome_completo || "", x: 0, y: 0, size: 12, pages: "0", type: "TextField", id: "NOME_COMPLETO" },
-      { text: cpf || "", x: 0, y: 0, size: 12, pages: "0", type: "TextField", id: "CPF" },
-      { text: rg || "", x: 0, y: 0, size: 12, pages: "0", type: "TextField", id: "RG" },
-      { text: data_nascimento || "", x: 0, y: 0, size: 12, pages: "0", type: "TextField", id: "DATA_NASCIMENTO" },
-      { text: categoria || "", x: 0, y: 0, size: 12, pages: "0", type: "TextField", id: "CATEGORIA" },
-      { text: renach || "", x: 0, y: 0, size: 12, pages: "0", type: "TextField", id: "RENACH" },
-    ];
-
-    // Build image annotations
-    const imageAnnotations: any[] = [];
-
-    if (fotoUrl) {
-      imageAnnotations.push({
-        url: fotoUrl,
-        x: 0,
-        y: 0,
-        width: 100,
-        height: 130,
-        pages: "0",
-        type: "image",
-        id: "FOTO",
-      });
-    }
-
-    if (assinaturaUrl) {
-      imageAnnotations.push({
-        url: assinaturaUrl,
-        x: 0,
-        y: 0,
-        width: 180,
-        height: 50,
-        pages: "0",
-        type: "image",
-        id: "ASSINATURA",
-      });
-    }
-
-    const allAnnotations = [...textAnnotations, ...imageAnnotations];
-
-    // Build images array for the API
-    const images: any[] = [];
-    if (fotoUrl) {
-      images.push({
-        url: fotoUrl,
-        x: 0,
-        y: 0,
-        width: 100,
-        height: 130,
-        pages: "0",
-      });
-    }
-    if (assinaturaUrl) {
-      images.push({
-        url: assinaturaUrl,
-        x: 0,
-        y: 0,
-        width: 180,
-        height: 50,
-        pages: "0",
-      });
-    }
-
-    // Build the request body
-    const requestBody: any = {
-      url: "filetoken://2c190eb74ebbaee55d25c452481b44714335fe67cff15d128f",
-      annotations: textAnnotations,
-      async: false,
+    // Build payload matching template placeholders
+    const payload: Record<string, any> = {
+      nome_completo: nome_completo || "",
+      cpf: cpf || "",
+      rg: rg || "",
+      data_nascimento: data_nascimento || "",
+      categoria: categoria || "",
+      renach: renach || "",
+      cidade_estado: cidade_estado || "",
+      nome_pai: nome_pai || "",
+      nome_mae: nome_mae || "",
+      codigo_seguranca: codigo_seguranca || "",
+      numero_espelho: numero_espelho || "",
     };
 
-    // Add images if available
-    if (images.length > 0) {
-      requestBody.images = images;
+    // Add images as data URIs if provided
+    if (foto_base64) {
+      payload.foto = foto_base64.startsWith("data:")
+        ? foto_base64
+        : `data:image/png;base64,${foto_base64}`;
+    }
+    if (assinatura_base64) {
+      payload.assinatura = assinatura_base64.startsWith("data:")
+        ? assinatura_base64
+        : `data:image/png;base64,${assinatura_base64}`;
     }
 
-    console.log("PDF.co request body:", JSON.stringify(requestBody));
+    console.log("Creating PDFMonkey document with template:", TEMPLATE_ID);
 
-    // Call PDF.co API
-    const pdfcoResponse = await fetch(
-      "https://api.pdf.co/v1/pdf/edit/add",
-      {
-        method: "POST",
-        headers: {
-          "x-api-key": PDFCO_API_KEY,
-          "Content-Type": "application/json",
+    // Create document via PDFMonkey API
+    const createRes = await fetch(PDFMONKEY_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PDFMONKEY_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        document: {
+          document_template_id: TEMPLATE_ID,
+          payload,
+          status: "pending",
         },
-        body: JSON.stringify(requestBody),
+      }),
+    });
+
+    if (!createRes.ok) {
+      const errText = await createRes.text();
+      throw new Error(`PDFMonkey create error [${createRes.status}]: ${errText}`);
+    }
+
+    const createData = await createRes.json();
+    const docId = createData?.document?.id;
+
+    if (!docId) {
+      throw new Error("No document ID returned from PDFMonkey");
+    }
+
+    console.log("PDFMonkey document created:", docId);
+
+    // Poll for completion (max 60s)
+    const maxAttempts = 30;
+    let pdfUrl: string | null = null;
+
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+
+      const statusRes = await fetch(`${PDFMONKEY_API_URL}/${docId}`, {
+        headers: { Authorization: `Bearer ${PDFMONKEY_API_KEY}` },
+      });
+
+      if (!statusRes.ok) continue;
+
+      const statusData = await statusRes.json();
+      const status = statusData?.document?.status;
+
+      console.log(`Poll ${i + 1}: status=${status}`);
+
+      if (status === "success") {
+        pdfUrl = statusData.document.download_url;
+        break;
+      } else if (status === "failure") {
+        throw new Error(
+          `PDFMonkey generation failed: ${JSON.stringify(statusData.document.failure_cause)}`
+        );
       }
-    );
-
-    if (!pdfcoResponse.ok) {
-      const errorText = await pdfcoResponse.text();
-      throw new Error(`PDF.co API error [${pdfcoResponse.status}]: ${errorText}`);
     }
 
-    const pdfcoData = await pdfcoResponse.json();
-
-    if (pdfcoData.error) {
-      throw new Error(`PDF.co error: ${JSON.stringify(pdfcoData)}`);
+    if (!pdfUrl) {
+      throw new Error("PDF generation timed out after 60 seconds");
     }
-
-    const resultUrl = pdfcoData?.url;
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        pdfUrl: resultUrl,
-        fotoUrl,
-        assinaturaUrl,
-        raw: pdfcoData,
-      }),
+      JSON.stringify({ success: true, pdfUrl }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
