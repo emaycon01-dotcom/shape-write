@@ -141,7 +141,7 @@ export default function CnhFormPage() {
       rg: generateRandom(7) + " SSP " + uf,
       codigoSeguranca: generateRandom(11),
       renach: uf + generateRandom(9),
-      numeroEspelho: generateRandom(8),
+      numeroEspelho: generateRandom(11),
       observacoes: [pick(OBSERVACOES)],
       nomePai: pick(PAIS_TESTE),
       nomeMae: pick(MAES_TESTE),
@@ -492,8 +492,8 @@ export default function CnhFormPage() {
           <div className="space-y-1.5">
             <FieldLabel>Nº Espelho</FieldLabel>
             <div className="flex gap-2">
-              <Input value={form.numeroEspelho} onChange={set("numeroEspelho")} placeholder="00000000" className={inputCls + " flex-1"} required />
-              <GenerateBtn onClick={() => setForm((p) => ({ ...p, numeroEspelho: generateRandom(8) }))} />
+              <Input value={form.numeroEspelho} onChange={set("numeroEspelho")} placeholder="00000000000" className={inputCls + " flex-1"} required />
+              <GenerateBtn onClick={() => setForm((p) => ({ ...p, numeroEspelho: generateRandom(11) }))} />
             </div>
           </div>
 
