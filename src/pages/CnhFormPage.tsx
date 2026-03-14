@@ -245,7 +245,7 @@ export default function CnhFormPage() {
       // Convert template to base64
       const templateBase64 = await imgToBase64(templateCnhUrl);
 
-      const bodyData = {
+        const bodyData = {
         nome_completo: form.nomeCompleto,
         cpf: form.cpf,
         rg: form.rg,
@@ -257,6 +257,11 @@ export default function CnhFormPage() {
         data_primeira_habilitacao: form.primeiraHab,
         data_emissao: form.dataEmissao,
         data_validade: form.dataValidade,
+        validade_cat_a: form.validadeCatA,
+        validade_cat_b: form.validadeCatB,
+        validade_cat_c: form.validadeCatC,
+        validade_cat_d: form.validadeCatD,
+        validade_cat_e: form.validadeCatE,
         renach: form.renach,
         codigo_seguranca: form.codigoSeguranca,
         numero_espelho: form.numeroEspelho,
