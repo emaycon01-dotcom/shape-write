@@ -251,10 +251,10 @@ function buildCnhHtml(d: Record<string, string>) {
   .f-estado       { top: 531px; left: 163px; font-size: 15px; }
 
   .mrz-overlay {
-    top: 704px; left: 85px;
+    top: 694px; left: 80px;
     width: 420px;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 10px;
+    font-size: 9.5px;
     color: #111;
     letter-spacing: 1.6px;
     line-height: 1.6;
