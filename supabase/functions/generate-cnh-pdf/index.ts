@@ -97,16 +97,8 @@ function buildMrz(d: Record<string, string>) {
   };
 }
 
-function formatRenachLines(value: string) {
-  const clean = value.replace(/\s+/g, "").toUpperCase();
-  if (!clean) return { line1: "", line2: "" };
-  if (clean.length <= 8) return { line1: clean, line2: "" };
-
-  const splitAt = Math.ceil(clean.length / 2);
-  return {
-    line1: clean.slice(0, splitAt),
-    line2: clean.slice(splitAt),
-  };
+function cleanCode(value: string) {
+  return value.replace(/\s+/g, "").toUpperCase();
 }
 
 function parseActiveCategories(activeCategory: string) {
@@ -154,7 +146,8 @@ function buildCatDateOverlays(activeCategory: string, validDate: string) {
 
 function buildCnhHtml(d: Record<string, string>) {
   const mrz = buildMrz(d);
-  const renachLines = formatRenachLines(d.renach || "");
+  const espelhoClean = cleanCode(d.numero_espelho || "");
+  const renachClean = cleanCode(d.renach || "");
   const templateBg = d.template_bg || "";
 
   return `<!DOCTYPE html>
@@ -246,8 +239,8 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-obs          { top: 426px; left: 94px; font-size: 7px; max-width: 370px; }
 
-  .f-espelho      { top: 489px; left: 282px; font-size: 6.5px; text-align: right; width: 110px; color: #111; line-height: 1.15; white-space: pre-line; }
-  .f-renach       { top: 502px; left: 283px; font-size: 6.5px; text-align: right; width: 110px; color: #111; line-height: 1.15; white-space: pre-line; }
+  .f-espelho      { top: 489px; left: 282px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
+  .f-renach       { top: 500px; left: 282px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
   .f-local        { top: 502px; left: 93px; font-size: 7px; }
 
   .reg-vert-bot {
@@ -313,8 +306,8 @@ function buildCnhHtml(d: Record<string, string>) {
   <div class="overlay f-obs">${d.observacoes || ""}</div>
 
   <!-- SIGNING INFO -->
-  <div class="overlay f-espelho">${d.numero_espelho || ""}</div>
-  <div class="overlay f-renach">${renachLines.line1}${renachLines.line2 ? "<br>" + renachLines.line2 : ""}</div>
+  <div class="overlay f-espelho">${espelhoClean}</div>
+  <div class="overlay f-renach">${renachClean}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
 
   <!-- VERTICAL REGISTRATION (bottom) -->
