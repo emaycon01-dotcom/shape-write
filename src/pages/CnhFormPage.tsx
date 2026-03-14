@@ -532,17 +532,6 @@ export default function CnhFormPage() {
         </Button>
       </form>
 
-      {pdfPreviewUrl && (
-        <div className="mt-6 space-y-3">
-          <h2 className="text-lg font-bold text-foreground">Preview do Documento</h2>
-          <div className="glass rounded-xl overflow-hidden" style={{ height: "80vh" }}>
-            <iframe src={pdfPreviewUrl} className="w-full h-full border-0" title="PDF Preview" />
-          </div>
-          <a href={pdfPreviewUrl} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="w-full">Abrir PDF em nova aba</Button>
-          </a>
-        </div>
-      )}
     </div>
   );
 }

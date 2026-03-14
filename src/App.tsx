@@ -46,6 +46,7 @@ const App = () => (
                   <Route index element={<DashboardHome />} />
                   <Route path="documents" element={<DocumentsPage />} />
                   <Route path="documents/cnh" element={<CnhFormPage />} />
+                  <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                 </Route>
