@@ -36,6 +36,12 @@ interface CnhFormData {
   primeiraHab: string;
   dataEmissao: string;
   dataValidade: string;
+  validadeCatA: string;
+  validadeCatB: string;
+  validadeCatC: string;
+  validadeCatD: string;
+  validadeCatE: string;
+  validadeCatManual: boolean;
   cidadeEstado: string;
   estadoExtenso: string;
   rg: string;
