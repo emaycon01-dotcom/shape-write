@@ -31,29 +31,27 @@ function buildMrz(d: Record<string, string>) {
 }
 
 function buildCatDateOverlays(activeCategory: string, validDate: string) {
-  const catRows = ["ACC","A","A1","B","B1","C","C1","D","D1","BE","CE","C1E","DE","D1E"];
-  const half = Math.ceil(catRows.length / 2);
-  const left = catRows.slice(0, half);
-  const right = catRows.slice(half);
+  const catRows = ["ACC","A","A1","B","B1","C","C1"];
+  const catRowsRight = ["D","D1","BE","CE","C1E","DE","D1E"];
   let html = "";
 
-  const baseY = 355;
-  const rowH = 14.2;
-  const leftDateX = 155;
-  const rightDateX = 355;
+  const baseY = 392;
+  const rowH = 16.5;
+  const leftDateX = 168;
+  const rightDateX = 368;
 
-  for (let i = 0; i < Math.max(left.length, right.length); i++) {
-    const lCat = left[i] || "";
-    const rCat = right[i] || "";
+  for (let i = 0; i < Math.max(catRows.length, catRowsRight.length); i++) {
+    const lCat = catRows[i] || "";
+    const rCat = catRowsRight[i] || "";
     const lActive = lCat && activeCategory.includes(lCat.replace("1", ""));
     const rActive = rCat && activeCategory.includes(rCat.replace("1", ""));
     const y = baseY + (i * rowH);
 
     if (lActive) {
-      html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6px;font-weight:bold;">${validDate}</div>`;
+      html += `<div class="overlay" style="top:${y}px;left:${leftDateX}px;font-size:6.5px;font-weight:bold;">${validDate}</div>`;
     }
     if (rActive) {
-      html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6px;font-weight:bold;">${validDate}</div>`;
+      html += `<div class="overlay" style="top:${y}px;left:${rightDateX}px;font-size:6.5px;font-weight:bold;">${validDate}</div>`;
     }
   }
   return html;
