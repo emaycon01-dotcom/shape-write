@@ -119,11 +119,11 @@ function getCatDate(cat: string, d: Record<string, string>): string {
 function buildCatDateOverlays(activeCategory: string, d: Record<string, string>) {
   const active = parseActiveCategories(activeCategory);
   const catPositions: Record<string, { x: number; y: number; fontSize: number }> = {
-    A: { x: 168, y: 349, fontSize: 5 },
-    B: { x: 170, y: 371, fontSize: 5 },
-    C: { x: 171, y: 394, fontSize: 5 },
-    D: { x: 271, y: 338, fontSize: 5 },
-    E: { x: 271, y: 361, fontSize: 5 },
+    A: { x: 170, y: 353, fontSize: 4.5 },
+    B: { x: 168, y: 375, fontSize: 4.5 },
+    C: { x: 169, y: 397, fontSize: 4.5 },
+    D: { x: 272, y: 342, fontSize: 4.5 },
+    E: { x: 271, y: 375, fontSize: 4.5 },
   };
 
   let html = "";
@@ -192,7 +192,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== SIGNATURE ========== */
   .sig-overlay {
-    top: 277px; left: 94px;
+    top: 276px; left: 93px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
@@ -211,31 +211,31 @@ function buildCnhHtml(d: Record<string, string>) {
   }
 
   /* ========== CARD FIELD VALUES ========== */
-  .f-nome         { top: 145px; left: 102px; font-size: 8px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .f-primeira-hab { top: 147px; left: 307px; font-size: 7.5px; }
+  .f-nome         { top: 148px; left: 99px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 147px; left: 309px; font-size: 6.5px; }
 
-  .f-nascimento   { top: 166px; left: 190px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-nascimento   { top: 166px; left: 190px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-emissao      { top: 186px; left: 190px; font-size: 7.5px; }
-  .f-validade     { top: 185px; left: 248px; font-size: 7.5px; color: #c00; }
-  .f-cat-big      { top: 183px; left: 336px; font-size: 10px; }
+  .f-emissao      { top: 186px; left: 194px; font-size: 6.5px; }
+  .f-validade     { top: 185px; left: 250px; font-size: 6.5px; color: #c00; }
+  .f-cat-big      { top: 183px; left: 338px; font-size: 10px; }
 
-  .f-rg           { top: 206px; left: 190px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-rg           { top: 205px; left: 191px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-cpf          { top: 223px; left: 191px; font-size: 7.5px; }
-  .f-registro     { top: 224px; left: 257px; font-size: 7.5px; color: #111; }
-  .f-cat-hab      { top: 226px; left: 317px; font-size: 7px; color: #111; }
+  .f-cpf          { top: 224px; left: 191px; font-size: 6.5px; }
+  .f-registro     { top: 224px; left: 257px; font-size: 6.5px; color: #111; }
+  .f-cat-hab      { top: 224px; left: 318px; font-size: 7px; color: #111; }
 
-  .f-nacionalidade { top: 243px; left: 190px; font-size: 7px; }
+  .f-nacionalidade { top: 243px; left: 190px; font-size: 6.5px; }
 
-  .f-pai          { top: 265px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-mae          { top: 286px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-pai          { top: 266px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-mae          { top: 286px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
 
   .f-obs          { top: 427px; left: 97px; font-size: 5.5px; max-width: 370px; }
 
-  .f-espelho      { top: 492px; left: 274px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
-  .f-renach       { top: 503px; left: 273px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
-  .f-local        { top: 505px; left: 95px; font-size: 6px; }
+  .f-espelho      { top: 495px; left: 264px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
+  .f-renach       { top: 513px; left: 263px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
+  .f-local        { top: 505px; left: 97px; font-size: 6px; }
 
   .reg-vert-bot {
     top: 551px; left: 59px;
