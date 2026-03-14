@@ -218,13 +218,13 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-emissao      { top: 187px; left: 191px; font-size: 6.5px; }
   .f-validade     { top: 187px; left: 253px; font-size: 6.5px; color: #c00; }
-  .f-cat-big      { top: 183px; left: 338px; font-size: 10px; color: #111; }
+  .f-cat-big      { top: 181px; left: 337px; font-size: 11px; color: #111; }
 
   .f-rg           { top: 207px; left: 190px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
   .f-cpf          { top: 226px; left: 190px; font-size: 6.5px; }
   .f-registro     { top: 226px; left: 256px; font-size: 6.5px; color: #c00; }
-  .f-cat-hab      { top: 226px; left: 318px; font-size: 7px; color: #c00; }
+  .f-cat-hab      { top: 224px; left: 320px; font-size: 7px; color: #c00; }
 
   .f-nacionalidade { top: 246px; left: 190px; font-size: 6.5px; }
 
@@ -235,7 +235,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-espelho      { top: 495px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; }
   .f-renach       { top: 509px; left: 280px; font-size: 6.5px; color: #111; white-space: nowrap; }
-  .f-local        { top: 505px; left: 97px; font-size: 6px; }
+  .f-local        { top: 505px; left: 100px; font-size: 6px; }
 
   .reg-vert-bot {
     top: 558px; left: 64px;
@@ -251,10 +251,10 @@ function buildCnhHtml(d: Record<string, string>) {
   .f-estado       { top: 531px; left: 163px; font-size: 15px; }
 
   .mrz-overlay {
-    top: 704px; left: 85px;
+    top: 694px; left: 80px;
     width: 420px;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 10px;
+    font-size: 9.5px;
     color: #111;
     letter-spacing: 1.6px;
     line-height: 1.6;
