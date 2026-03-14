@@ -238,7 +238,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   <!-- SIGNING INFO -->
   <div class="overlay f-espelho">${d.numero_espelho || ""}</div>
-  <div class="overlay f-renach">${d.renach || ""}</div>
+  <div class="overlay f-renach">${renachLines.line1}${renachLines.line2 ? "<br>" + renachLines.line2 : ""}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
 
   <!-- VERTICAL REGISTRATION (bottom) -->
@@ -248,11 +248,7 @@ function buildCnhHtml(d: Record<string, string>) {
   <div class="overlay f-estado">${d.estado_extenso || ""}</div>
 
   <!-- MRZ -->
-  <div class="overlay mrz-overlay">
-    ${mrz.line1}<br>
-    ${mrz.line2}<br>
-    ${mrz.line3}
-  </div>
+  <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}</div>
 </div>
 </body>
 </html>`;
