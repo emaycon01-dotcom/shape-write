@@ -190,7 +190,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== PHOTO ========== */
   .photo-overlay {
-    top: 166px; left: 98px;
+    top: 167px; left: 98px;
     width: 82px; height: 110px;
     overflow: hidden;
   }
@@ -198,7 +198,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== SIGNATURE ========== */
   .sig-overlay {
-    top: 278px; left: 90px;
+    top: 274px; left: 92px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
@@ -206,10 +206,10 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
-    top: 311px; left: 67px;
+    top: 311px; left: 63px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 7px;
+    font-size: 10.5px;
     letter-spacing: 1.2px;
     white-space: nowrap;
     color: #111;
@@ -217,50 +217,50 @@ function buildCnhHtml(d: Record<string, string>) {
   }
 
   /* ========== CARD FIELD VALUES ========== */
-  .f-nome         { top: 143px; left: 96px; font-size: 8.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .f-primeira-hab { top: 141px; left: 301px; font-size: 7.5px; }
+  .f-nome         { top: 144px; left: 96px; font-size: 8.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 144px; left: 303px; font-size: 7.5px; }
 
-  .f-nascimento   { top: 165px; left: 186px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-nascimento   { top: 165px; left: 187px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-emissao      { top: 184px; left: 186px; font-size: 7.5px; }
-  .f-validade     { top: 180px; left: 243px; font-size: 7.5px; color: #c00; }
-  .f-cat-big      { top: 176px; left: 334px; font-size: 16px; }
+  .f-emissao      { top: 184px; left: 188px; font-size: 7.5px; }
+  .f-validade     { top: 184px; left: 246px; font-size: 7.5px; color: #c00; }
+  .f-cat-big      { top: 181px; left: 336px; font-size: 10px; }
 
-  .f-rg           { top: 204px; left: 190px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-rg           { top: 204px; left: 188px; font-size: 7px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
   .f-cpf          { top: 222px; left: 186px; font-size: 7.5px; }
   .f-registro     { top: 222px; left: 255px; font-size: 7.5px; color: #111; }
-  .f-cat-hab      { top: 221px; left: 314px; font-size: 8px; color: #111; }
+  .f-cat-hab      { top: 223px; left: 315px; font-size: 6px; color: #111; }
 
-  .f-nacionalidade { top: 241px; left: 187px; font-size: 7.5px; }
+  .f-nacionalidade { top: 241px; left: 190px; font-size: 7.5px; }
 
-  .f-pai          { top: 264px; left: 188px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-mae          { top: 281px; left: 187px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-pai          { top: 265px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-mae          { top: 286px; left: 191px; font-size: 7.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
 
-  .f-obs          { top: 426px; left: 94px; font-size: 7px; max-width: 370px; }
+  .f-obs          { top: 427px; left: 97px; font-size: 5.5px; max-width: 370px; }
 
-  .f-espelho      { top: 489px; left: 282px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
-  .f-renach       { top: 500px; left: 282px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
-  .f-local        { top: 502px; left: 93px; font-size: 7px; }
+  .f-espelho      { top: 495px; left: 276px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
+  .f-renach       { top: 510px; left: 275px; font-size: 6.5px; text-align: right; width: 110px; color: #111; white-space: nowrap; }
+  .f-local        { top: 503px; left: 94px; font-size: 7px; }
 
   .reg-vert-bot {
-    top: 559px; left: 69px;
+    top: 551px; left: 59px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 7px;
+    font-size: 10.5px;
     letter-spacing: 1.2px;
     white-space: nowrap;
     color: #111;
     font-weight: bold;
   }
 
-  .f-estado       { top: 529px; left: 144px; font-size: 15px; }
+  .f-estado       { top: 523px; left: 147px; font-size: 15px; }
 
   .mrz-overlay {
-    top: 694px; left: 93px;
+    top: 704px; left: 85px;
     width: 420px;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 11px;
+    font-size: 10px;
     color: #111;
     letter-spacing: 1.6px;
     line-height: 1.6;
