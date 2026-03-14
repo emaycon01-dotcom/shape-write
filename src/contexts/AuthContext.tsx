@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  deductCredit: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
