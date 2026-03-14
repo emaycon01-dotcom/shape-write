@@ -78,6 +78,7 @@ function buildCatDateOverlays(activeCategory: string, validDate: string) {
 
 function buildCnhHtml(d: Record<string, string>) {
   const mrz = buildMrz(d);
+  const renachLines = formatRenachLines(d.renach || "");
   const templateBg = d.template_bg || "";
 
   return `<!DOCTYPE html>
