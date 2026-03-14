@@ -316,7 +316,7 @@ function buildCnhHtml(d: Record<string, string>) {
   <div class="overlay f-estado">${d.estado_extenso || ""}</div>
 
   <!-- MRZ -->
-  <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}</div>
+  <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
 </html>`;
