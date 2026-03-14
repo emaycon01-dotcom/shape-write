@@ -141,7 +141,7 @@ export default function CnhFormPage() {
       rg: generateRandom(7) + " SSP " + uf,
       codigoSeguranca: generateRandom(11),
       renach: uf + generateRandom(9),
-      numeroEspelho: generateRandom(8),
+      numeroEspelho: generateRandom(11),
       observacoes: [pick(OBSERVACOES)],
       nomePai: pick(PAIS_TESTE),
       nomeMae: pick(MAES_TESTE),
