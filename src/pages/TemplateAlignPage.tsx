@@ -1,11 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, RotateCcw, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
 
-// These are the current coordinates from the edge function (A4 = 794x1123)
-// The editor uses a scaled-down canvas. All positions are in the 794x1123 coordinate space.
 const PAGE_W = 794;
 const PAGE_H = 1123;
 
@@ -39,14 +40,134 @@ const defaultFields: FieldDef[] = [
   { id: "pai", label: "Pai", sampleText: "JOSE DA SILVA", x: 165, y: 282, fontSize: 7.5 },
   { id: "mae", label: "Mãe", sampleText: "SANDRA COSTA", x: 165, y: 300, fontSize: 7.5 },
   { id: "obs", label: "Observações", sampleText: "EAR", x: 72, y: 536, fontSize: 7 },
-  { id: "espelho", label: "Nº Espelho", sampleText: "77424319", x: 350, y: 588, fontSize: 6.5 },
-  { id: "renach", label: "RENACH", sampleText: "PB5271\n25303", x: 350, y: 602, fontSize: 6.5 },
+  { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 350, y: 588, fontSize: 6.5 },
+  { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 350, y: 602, fontSize: 6.5 },
   { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 72, y: 621, fontSize: 7 },
   { id: "estado", label: "Estado", sampleText: "BAHIA", x: 240, y: 662, fontSize: 15 },
   { id: "mrz", label: "MRZ", sampleText: "I<BRA079158889PB927125303<<<<\n8903118M3603147BRA<<<<<<<<<<<4\nMARIA<<OLIVEIRA<<SANTOS<<<<<<<", x: 58, y: 784, fontSize: 9 },
   { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 52, y: 326, fontSize: 7, rotate: -90 },
   { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 52, y: 646, fontSize: 7, rotate: -90 },
 ];
+
+function FieldPropertiesPanel({
+  field,
+  onUpdate,
+}: {
+  field: FieldDef;
+  onUpdate: (updates: Partial<FieldDef>) => void;
+}) {
+  const isBox = field.id === "photo" || field.id === "signature";
+
+  return (
+    <div className="glass rounded-lg p-3 space-y-3 text-sm">
+      <div className="flex items-center justify-between">
+        <span className="font-semibold text-primary font-display">{field.label}</span>
+        <span className="text-muted-foreground font-mono text-xs">
+          x:{field.x} y:{field.y}
+        </span>
+      </div>
+
+      {/* Position controls */}
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label className="text-xs text-muted-foreground">X</Label>
+          <Input
+            type="number"
+            value={field.x}
+            onChange={(e) => onUpdate({ x: Math.max(0, Number(e.target.value)) })}
+            className="h-7 text-xs font-mono bg-secondary/50"
+          />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">Y</Label>
+          <Input
+            type="number"
+            value={field.y}
+            onChange={(e) => onUpdate({ y: Math.max(0, Number(e.target.value)) })}
+            className="h-7 text-xs font-mono bg-secondary/50"
+          />
+        </div>
+      </div>
+
+      {/* Font size control */}
+      <div>
+        <Label className="text-xs text-muted-foreground">Tamanho da fonte</Label>
+        <div className="flex items-center gap-2 mt-1">
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-7 w-7"
+            onClick={() => onUpdate({ fontSize: Math.max(4, field.fontSize - 0.5) })}
+          >
+            <Minus className="w-3 h-3" />
+          </Button>
+          <Input
+            type="number"
+            step="0.5"
+            min="4"
+            max="40"
+            value={field.fontSize}
+            onChange={(e) => onUpdate({ fontSize: Math.max(4, Number(e.target.value)) })}
+            className="h-7 text-xs font-mono text-center bg-secondary/50 w-16"
+          />
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-7 w-7"
+            onClick={() => onUpdate({ fontSize: Math.min(40, field.fontSize + 0.5) })}
+          >
+            <Plus className="w-3 h-3" />
+          </Button>
+          <Slider
+            value={[field.fontSize]}
+            min={4}
+            max={40}
+            step={0.5}
+            onValueChange={([v]) => onUpdate({ fontSize: v })}
+            className="flex-1"
+          />
+        </div>
+      </div>
+
+      {/* Size controls for boxes */}
+      {isBox && (
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label className="text-xs text-muted-foreground">Largura</Label>
+            <Input
+              type="number"
+              value={field.w || 80}
+              onChange={(e) => onUpdate({ w: Math.max(10, Number(e.target.value)) })}
+              className="h-7 text-xs font-mono bg-secondary/50"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">Altura</Label>
+            <Input
+              type="number"
+              value={field.h || 80}
+              onChange={(e) => onUpdate({ h: Math.max(10, Number(e.target.value)) })}
+              className="h-7 text-xs font-mono bg-secondary/50"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Rotation for rotated fields */}
+      {field.rotate !== undefined && (
+        <div>
+          <Label className="text-xs text-muted-foreground">Rotação (graus)</Label>
+          <Input
+            type="number"
+            value={field.rotate}
+            onChange={(e) => onUpdate({ rotate: Number(e.target.value) })}
+            className="h-7 text-xs font-mono bg-secondary/50"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function TemplateAlignPage() {
   const [fields, setFields] = useState<FieldDef[]>(() => {
@@ -63,17 +184,19 @@ export default function TemplateAlignPage() {
   const [scale, setScale] = useState(1);
   const { toast } = useToast();
 
-  // Compute scale based on container width
   useEffect(() => {
     const updateScale = () => {
       if (containerRef.current) {
-        const containerW = containerRef.current.clientWidth;
-        setScale(containerW / PAGE_W);
+        setScale(containerRef.current.clientWidth / PAGE_W);
       }
     };
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
+  const updateField = useCallback((id: string, updates: Partial<FieldDef>) => {
+    setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, fieldId: string) => {
@@ -82,18 +205,11 @@ export default function TemplateAlignPage() {
     setSelected(fieldId);
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-
     const field = fields.find(f => f.id === fieldId);
     if (!field) return;
-
     const mouseX = (e.clientX - rect.left) / scale;
     const mouseY = (e.clientY - rect.top) / scale;
-
-    setDragging({
-      id: fieldId,
-      offsetX: mouseX - field.x,
-      offsetY: mouseY - field.y,
-    });
+    setDragging({ id: fieldId, offsetX: mouseX - field.x, offsetY: mouseY - field.y });
   }, [fields, scale]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent, fieldId: string) => {
@@ -101,48 +217,32 @@ export default function TemplateAlignPage() {
     setSelected(fieldId);
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-
     const field = fields.find(f => f.id === fieldId);
     if (!field) return;
-
     const touch = e.touches[0];
     const mouseX = (touch.clientX - rect.left) / scale;
     const mouseY = (touch.clientY - rect.top) / scale;
-
-    setDragging({
-      id: fieldId,
-      offsetX: mouseX - field.x,
-      offsetY: mouseY - field.y,
-    });
+    setDragging({ id: fieldId, offsetX: mouseX - field.x, offsetY: mouseY - field.y });
   }, [fields, scale]);
 
   useEffect(() => {
     if (!dragging) return;
-
     const handleMove = (clientX: number, clientY: number) => {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-
       const x = Math.round((clientX - rect.left) / scale - dragging.offsetX);
       const y = Math.round((clientY - rect.top) / scale - dragging.offsetY);
-
       setFields(prev => prev.map(f =>
         f.id === dragging.id ? { ...f, x: Math.max(0, x), y: Math.max(0, y) } : f
       ));
     };
-
     const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
-    const onTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      handleMove(e.touches[0].clientX, e.touches[0].clientY);
-    };
+    const onTouchMove = (e: TouchEvent) => { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); };
     const onEnd = () => setDragging(null);
-
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onEnd);
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onEnd);
-
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onEnd);
@@ -154,7 +254,6 @@ export default function TemplateAlignPage() {
   // Arrow key nudging
   useEffect(() => {
     if (!selected) return;
-
     const handleKey = (e: KeyboardEvent) => {
       const step = e.shiftKey ? 5 : 1;
       let dx = 0, dy = 0;
@@ -163,13 +262,11 @@ export default function TemplateAlignPage() {
       if (e.key === "ArrowUp") dy = -step;
       if (e.key === "ArrowDown") dy = step;
       if (dx === 0 && dy === 0) return;
-
       e.preventDefault();
       setFields(prev => prev.map(f =>
         f.id === selected ? { ...f, x: Math.max(0, f.x + dx), y: Math.max(0, f.y + dy) } : f
       ));
     };
-
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [selected]);
@@ -186,42 +283,33 @@ export default function TemplateAlignPage() {
     toast({ title: "Posições resetadas!" });
   };
 
-  const copyCssCode = () => {
-    const lines = fields.map(f => {
-      if (f.id === "photo") return `  .photo-overlay { top: ${f.y}px; left: ${f.x}px; width: ${f.w}px; height: ${f.h}px; }`;
-      if (f.id === "signature") return `  .sig-overlay { top: ${f.y}px; left: ${f.x}px; width: ${f.w}px; height: ${f.h}px; }`;
-      if (f.id === "reg_vert_top") return `  .reg-vert-top { top: ${f.y}px; left: ${f.x}px; }`;
-      if (f.id === "reg_vert_bot") return `  .reg-vert-bot { top: ${f.y}px; left: ${f.x}px; }`;
-      if (f.id === "mrz") return `  .mrz-overlay { top: ${f.y}px; left: ${f.x}px; }`;
-
-      const classMap: Record<string, string> = {
-        nome: "f-nome", primeira_hab: "f-primeira-hab", nascimento: "f-nascimento",
-        emissao: "f-emissao", validade: "f-validade", cat_big: "f-cat-big",
-        rg: "f-rg", cpf: "f-cpf", registro: "f-registro", cat_hab: "f-cat-hab",
-        nacionalidade: "f-nacionalidade", pai: "f-pai", mae: "f-mae",
-        obs: "f-obs", espelho: "f-espelho", renach: "f-renach",
-        local: "f-local", estado: "f-estado",
-      };
-      const cls = classMap[f.id] || f.id;
-      return `  .${cls} { top: ${f.y}px; left: ${f.x}px; font-size: ${f.fontSize}px; }`;
-    });
-
-    navigator.clipboard.writeText(lines.join("\n"));
-    toast({ title: "CSS copiado!", description: "Cole no edge function para aplicar." });
+  const copyCode = () => {
+    const obj = fields.reduce((acc, f) => {
+      acc[f.id] = { x: f.x, y: f.y, fontSize: f.fontSize, ...(f.w ? { w: f.w } : {}), ...(f.h ? { h: f.h } : {}), ...(f.rotate !== undefined ? { rotate: f.rotate } : {}) };
+      return acc;
+    }, {} as Record<string, any>);
+    navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
+    toast({ title: "Coordenadas copiadas!", description: "Cole no chat para aplicar no edge function." });
   };
 
   const selectedField = fields.find(f => f.id === selected);
 
+  // CNH uses Arial/Helvetica officially
+  const getCnhFont = (fieldId: string) => {
+    if (fieldId === "mrz") return "'Courier New', 'Courier', monospace";
+    return "'Arial', 'Helvetica Neue', 'Helvetica', sans-serif";
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-xl font-bold text-foreground">Editor de Alinhamento CNH</h1>
+        <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento CNH</h1>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={resetPositions} className="gap-1.5">
             <RotateCcw className="w-4 h-4" /> Reset
           </Button>
-          <Button size="sm" variant="outline" onClick={copyCssCode} className="gap-1.5">
-            <Copy className="w-4 h-4" /> Copiar CSS
+          <Button size="sm" variant="outline" onClick={copyCode} className="gap-1.5">
+            <Copy className="w-4 h-4" /> Copiar Coords
           </Button>
           <Button size="sm" onClick={savePositions} className="gap-1.5">
             <Save className="w-4 h-4" /> Salvar
@@ -230,19 +318,15 @@ export default function TemplateAlignPage() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Arraste os campos para posicioná-los sobre o template. Use setas do teclado para ajuste fino (Shift = 5px).
-        Clique em "Copiar CSS" para gerar o código e me envie para aplicar.
+        Arraste os campos para posicioná-los. Use setas do teclado (Shift = 5px). Clique num campo para ajustar tamanho da fonte e posição.
       </p>
 
-      {/* Selected field info */}
+      {/* Properties panel for selected field */}
       {selectedField && (
-        <div className="glass rounded-lg p-3 flex items-center gap-4 text-sm">
-          <span className="font-semibold text-primary">{selectedField.label}</span>
-          <span className="text-muted-foreground">
-            x: <span className="text-foreground font-mono">{selectedField.x}</span> &nbsp;
-            y: <span className="text-foreground font-mono">{selectedField.y}</span>
-          </span>
-        </div>
+        <FieldPropertiesPanel
+          field={selectedField}
+          onUpdate={(updates) => updateField(selectedField.id, updates)}
+        />
       )}
 
       {/* Canvas */}
@@ -257,7 +341,6 @@ export default function TemplateAlignPage() {
           }}
           onClick={() => setSelected(null)}
         >
-          {/* Template background */}
           <img
             src={templateBgUrl}
             alt="Template CNH"
@@ -266,7 +349,6 @@ export default function TemplateAlignPage() {
             draggable={false}
           />
 
-          {/* Draggable fields */}
           {fields.map((f) => {
             const isSelected = f.id === selected;
             const isBox = f.id === "photo" || f.id === "signature";
@@ -282,7 +364,7 @@ export default function TemplateAlignPage() {
                   left: `${(f.x / PAGE_W) * 100}%`,
                   fontSize: `${f.fontSize * scale}px`,
                   fontWeight: "bold",
-                  fontFamily: f.id === "mrz" ? "'Courier New', monospace" : "Arial, sans-serif",
+                  fontFamily: getCnhFont(f.id),
                   color: f.color || "#111",
                   whiteSpace: "pre-line",
                   border: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.2)",
@@ -303,7 +385,7 @@ export default function TemplateAlignPage() {
                     background: isSelected ? "hsl(var(--primary) / 0.15)" : "rgba(200,200,200,0.3)",
                   } : {}),
                 }}
-                title={`${f.label}: x=${f.x}, y=${f.y}`}
+                title={`${f.label}: x=${f.x}, y=${f.y}, font=${f.fontSize}`}
               >
                 {isBox ? (
                   <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
