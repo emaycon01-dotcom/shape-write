@@ -32,6 +32,7 @@ const defaultFields: FieldDef[] = [
   { id: "emissao", label: "Emissão", sampleText: "14/03/2026", x: 165, y: 184, fontSize: 7.5 },
   { id: "validade", label: "Validade", sampleText: "14/03/2036", x: 280, y: 184, fontSize: 7.5, color: "#c00" },
   { id: "cat_big", label: "Cat. Grande", sampleText: "AB", x: 430, y: 176, fontSize: 16 },
+  { id: "validade_cat", label: "Validade Cat.", sampleText: "14/03/2036", x: 380, y: 200, fontSize: 7, color: "#c00" },
   { id: "rg", label: "RG", sampleText: "3963221 SSP PR", x: 165, y: 210, fontSize: 7 },
   { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 165, y: 236, fontSize: 7.5 },
   { id: "registro", label: "Registro", sampleText: "07915888995", x: 300, y: 236, fontSize: 7.5 },
