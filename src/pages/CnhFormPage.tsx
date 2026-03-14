@@ -127,12 +127,12 @@ export default function CnhFormPage() {
   useEffect(() => {
     if (form.validadeCatManual || !form.dataValidade) return;
     const cats = parseCategories(form.categoria);
-    const updates: Partial<CnhFormData> = {};
+    const updates: Record<string, string> = {};
     for (const c of ["A","B","C","D","E"]) {
-      const key = `validadeCat${c}` as keyof CnhFormData;
-      updates[key] = cats.includes(c) ? form.dataValidade : "" as any;
+      const key = `validadeCat${c}`;
+      updates[key] = cats.includes(c) ? form.dataValidade : "";
     }
-    setForm(p => ({ ...p, ...updates }));
+    setForm(p => ({ ...p, ...updates } as CnhFormData));
   }, [form.dataValidade, form.categoria, form.validadeCatManual]);
 
   const imgToBase64 = async (url: string): Promise<string> => {
