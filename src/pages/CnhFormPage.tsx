@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -6,8 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2 } from "lucide-react";
+import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import testFotoUrl from "@/assets/test-foto.png";
+import testAssUrl from "@/assets/test-assinatura.png";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
