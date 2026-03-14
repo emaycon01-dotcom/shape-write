@@ -103,6 +103,16 @@ export default function CnhFormPage() {
     }
   }, [form.primeiraHab, autoFillDates]);
 
+  const imgToBase64 = async (url: string): Promise<string> => {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const fillTest = async () => {
     const uf = pick(UF_LIST);
     const cidade = pick(CIDADES_TESTE);
@@ -136,9 +146,13 @@ export default function CnhFormPage() {
       nomeMae: pick(MAES_TESTE),
     });
     setAutoFillDates(false);
-    // Load test images
-    setFotoPreview(testFotoUrl);
-    setAssPreview(testAssUrl);
+    // Load test images as base64
+    const [fotoB64, assB64] = await Promise.all([
+      imgToBase64(testFotoUrl),
+      imgToBase64(testAssUrl),
+    ]);
+    setFotoPreview(fotoB64);
+    setAssPreview(assB64);
     toast({ title: "Formulário preenchido com dados de teste!" });
   };
 
