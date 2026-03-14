@@ -218,13 +218,13 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-emissao      { top: 187px; left: 191px; font-size: 6.5px; }
   .f-validade     { top: 187px; left: 253px; font-size: 6.5px; color: #c00; }
-  .f-cat-big      { top: 181px; left: 337px; font-size: 11px; color: #111; }
+  .f-cat-big      { top: 184px; left: 338px; font-size: 11px; color: #111; }
 
   .f-rg           { top: 207px; left: 190px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
   .f-cpf          { top: 226px; left: 190px; font-size: 6.5px; }
   .f-registro     { top: 226px; left: 256px; font-size: 6.5px; color: #c00; }
-  .f-cat-hab      { top: 224px; left: 320px; font-size: 7px; color: #c00; }
+  .f-cat-hab      { top: 226px; left: 319px; font-size: 7px; color: #c00; }
 
   .f-nacionalidade { top: 246px; left: 190px; font-size: 6.5px; }
 
