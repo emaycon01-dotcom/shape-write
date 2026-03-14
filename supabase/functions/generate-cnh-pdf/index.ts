@@ -36,666 +36,6 @@ function buildMrz(d: Record<string, string>) {
   return { line1, line2, line3 };
 }
 
-function buildCnhHtml(d: Record<string, string>) {
-  const mrz = buildMrz(d);
-  const cats = (d.categoria || "B").split("");
-  const catRows = ["ACC","A","A1","B","B1","C","C1","D","D1","BE","CE","C1E","DE","D1E"];
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  @page { size: A4 portrait; margin: 0; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    background: #fff;
-  }
-  .page {
-    width: 794px;
-    min-height: 1123px;
-    position: relative;
-    background: #fff;
-    overflow: hidden;
-  }
-
-  /* === TOP HEADER BAR === */
-  .top-header {
-    background: linear-gradient(135deg, #1b3a4b 0%, #264653 100%);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 20px;
-    height: 42px;
-  }
-  .top-header .republic {
-    font-size: 10px;
-    font-weight: bold;
-    line-height: 1.3;
-  }
-  .top-header .republic small {
-    font-size: 7.5px;
-    font-weight: normal;
-    display: block;
-  }
-  .top-header .govbr {
-    font-size: 14px;
-    font-weight: bold;
-    font-style: italic;
-    color: #fff;
-  }
-
-  /* === MAIN CONTENT === */
-  .main-content {
-    display: flex;
-    gap: 15px;
-    padding: 12px 18px 8px 18px;
-  }
-  .left-col { flex: 0 0 420px; }
-  .right-col { flex: 1; }
-
-  /* === CNH CARD === */
-  .cnh-card {
-    border: 1.5px solid #666;
-    border-radius: 3px;
-    overflow: hidden;
-    position: relative;
-  }
-  .card-header {
-    background: linear-gradient(135deg, #c9b97a 0%, #d4c68a 50%, #c9b97a 100%);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 8px;
-    min-height: 32px;
-  }
-  .card-header-text {
-    font-size: 6.5px;
-    font-weight: bold;
-    color: #1a3a1a;
-    text-transform: uppercase;
-    line-height: 1.3;
-    text-align: center;
-    flex: 1;
-  }
-  .card-header .br-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #009c3b;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-weight: bold;
-    font-size: 9px;
-    border: 2px solid #ffdf00;
-    flex-shrink: 0;
-  }
-  .card-subtitle {
-    background: #e8e0c8;
-    font-size: 6px;
-    font-weight: bold;
-    text-align: center;
-    padding: 2px 4px;
-    color: #333;
-    letter-spacing: 0.3px;
-    border-bottom: 1px solid #999;
-  }
-
-  /* Card body */
-  .card-body {
-    display: flex;
-    min-height: 280px;
-    position: relative;
-  }
-
-  /* Photo area */
-  .photo-area {
-    width: 105px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 4px 4px 4px;
-    border-right: 1px solid #999;
-    position: relative;
-  }
-  .photo-box {
-    width: 92px;
-    height: 120px;
-    border: 1px solid #999;
-    overflow: hidden;
-    background: #f5f5f5;
-  }
-  .photo-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .valid-text {
-    position: absolute;
-    left: -12px;
-    top: 50%;
-    transform: rotate(-90deg) translateX(-50%);
-    transform-origin: 0 0;
-    font-size: 5.5px;
-    color: #333;
-    font-weight: bold;
-    white-space: nowrap;
-    letter-spacing: 1px;
-  }
-  .valid-number {
-    position: absolute;
-    left: 2px;
-    top: 50%;
-    transform: rotate(-90deg) translateX(-50%);
-    transform-origin: 0 0;
-    font-size: 9px;
-    color: #333;
-    font-weight: bold;
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-  .signature-area {
-    margin-top: 6px;
-    width: 92px;
-    min-height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .signature-area img {
-    max-width: 90px;
-    max-height: 40px;
-    object-fit: contain;
-  }
-  .signature-label {
-    font-size: 5px;
-    color: #666;
-    text-align: center;
-    margin-top: 2px;
-  }
-
-  /* Fields area */
-  .fields-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .field-row {
-    display: flex;
-    border-bottom: 1px solid #bbb;
-    min-height: 26px;
-  }
-  .field-row:last-child { border-bottom: none; }
-  .field {
-    padding: 2px 6px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border-right: 1px solid #bbb;
-    overflow: hidden;
-  }
-  .field:last-child { border-right: none; }
-  .field-label {
-    font-size: 5px;
-    color: #666;
-    text-transform: uppercase;
-    line-height: 1;
-    margin-bottom: 1px;
-  }
-  .field-value {
-    font-size: 9.5px;
-    font-weight: bold;
-    color: #111;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .field-value.small { font-size: 8px; }
-
-  /* Dates row with category */
-  .dates-row {
-    display: flex;
-    align-items: stretch;
-    border-bottom: 1px solid #bbb;
-    min-height: 28px;
-  }
-  .cat-display {
-    width: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: bold;
-    color: #111;
-    border-left: 1px solid #bbb;
-  }
-  .acc-icons {
-    width: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-left: 1px solid #bbb;
-    gap: 1px;
-    flex-wrap: wrap;
-    padding: 2px;
-  }
-  .acc-icon {
-    width: 12px;
-    height: 8px;
-    background: #333;
-    border-radius: 1px;
-    opacity: 0.3;
-  }
-  .acc-icon.active { opacity: 1; }
-
-  /* === CATEGORIES TABLE === */
-  .cat-table {
-    border: 1.5px solid #666;
-    border-top: none;
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 6.5px;
-  }
-  .cat-table td, .cat-table th {
-    border: 0.5px solid #999;
-    padding: 1px 3px;
-    text-align: center;
-    height: 14px;
-  }
-  .cat-table th {
-    background: #e8e8e8;
-    font-weight: bold;
-    font-size: 6px;
-  }
-  .cat-table .cat-name {
-    font-weight: bold;
-    width: 28px;
-    text-align: left;
-    padding-left: 4px;
-  }
-  .cat-table .cat-date {
-    font-size: 6px;
-    color: #333;
-  }
-  .cat-table .cat-active {
-    background: #f0f0e0;
-  }
-
-  /* === OBSERVATIONS === */
-  .obs-section {
-    border: 1.5px solid #666;
-    border-top: none;
-    padding: 4px 8px;
-    min-height: 28px;
-  }
-  .obs-label {
-    font-size: 5.5px;
-    color: #666;
-    font-weight: bold;
-  }
-  .obs-value {
-    font-size: 8px;
-    font-weight: bold;
-    color: #111;
-    margin-top: 1px;
-  }
-
-  /* === SIGNING INFO === */
-  .signing-section {
-    border: 1.5px solid #666;
-    border-top: none;
-    padding: 6px 8px;
-    display: flex;
-    position: relative;
-    min-height: 95px;
-  }
-  .signing-left {
-    flex: 1;
-  }
-  .signing-right {
-    text-align: right;
-    font-size: 7.5px;
-    font-weight: bold;
-    color: #333;
-    line-height: 1.6;
-  }
-  .signed-text {
-    font-size: 7px;
-    color: #666;
-    text-align: center;
-    margin-top: 10px;
-  }
-  .signed-dept {
-    font-size: 6px;
-    color: #666;
-    text-align: center;
-  }
-  .local-label {
-    font-size: 5px;
-    color: #666;
-    margin-top: 6px;
-  }
-  .local-value {
-    font-size: 8px;
-    font-weight: bold;
-    color: #111;
-  }
-  .signing-number {
-    position: absolute;
-    left: -14px;
-    top: 50%;
-    transform: rotate(-90deg) translateX(-50%);
-    transform-origin: 0 0;
-    font-size: 9px;
-    font-weight: bold;
-    color: #333;
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-
-  /* === STATE NAME === */
-  .state-name {
-    border: 1.5px solid #666;
-    border-top: none;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    color: #111;
-    padding: 6px 8px;
-  }
-
-  /* === QR CODE SECTION === */
-  .qr-section {
-    border: 1.5px solid #666;
-    padding: 8px;
-    margin-bottom: 12px;
-  }
-  .qr-label {
-    font-size: 8px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 6px;
-    display: block;
-  }
-  .qr-placeholder {
-    width: 200px;
-    height: 200px;
-    background: #f0f0f0;
-    border: 1px solid #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    font-size: 10px;
-    color: #999;
-  }
-
-  /* === LEGAL TEXT === */
-  .legal-text {
-    font-size: 7.5px;
-    color: #333;
-    line-height: 1.5;
-    margin-top: 12px;
-    text-align: justify;
-  }
-  .serpro {
-    font-size: 11px;
-    font-weight: bold;
-    color: #333;
-    text-align: right;
-    margin-top: 16px;
-    letter-spacing: 1px;
-  }
-
-  /* === LEGEND === */
-  .legend {
-    margin: 10px 18px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    font-size: 5px;
-    color: #555;
-    line-height: 1.5;
-  }
-
-  /* === MRZ === */
-  .mrz {
-    margin: 8px 18px;
-    padding: 12px 18px;
-    border: 1px solid #ccc;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 12px;
-    font-weight: bold;
-    color: #111;
-    letter-spacing: 2px;
-    line-height: 1.8;
-  }
-</style>
-</head>
-<body>
-<div class="page">
-
-  <!-- TOP HEADER -->
-  <div class="top-header">
-    <div class="republic">
-      REPÚBLICA FEDERATIVA DO BRASIL
-      <small>MINISTÉRIO DA INFRAESTRUTURA</small>
-      <small>SECRETARIA NACIONAL DE TRÂNSITO - SENATRAN</small>
-    </div>
-    <div class="govbr">gov.br</div>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <div class="main-content">
-
-    <!-- LEFT COLUMN -->
-    <div class="left-col">
-
-      <!-- CNH CARD -->
-      <div class="cnh-card">
-        <div class="card-header">
-          <div class="card-header-text">
-            REPÚBLICA FEDERATIVA DO BRASIL<br>
-            MINISTÉRIO DA INFRAESTRUTURA<br>
-            SECRETARIA NACIONAL DE TRÂNSITO
-          </div>
-          <div class="br-badge">BR</div>
-        </div>
-        <div class="card-subtitle">
-          CARTEIRA NACIONAL DE HABILITAÇÃO / DRIVER LICENSE / PERMISO DE CONDUCCIÓN
-        </div>
-
-        <div class="card-body">
-          <!-- Photo area -->
-          <div class="photo-area">
-            <div class="valid-text">VÁLIDA EM TODO O TERRITÓRIO NACIONAL</div>
-            <div class="valid-number">${d.registro || ""}</div>
-            <div class="photo-box">
-              ${d.foto ? `<img src="${d.foto}" />` : ""}
-            </div>
-            <div class="signature-area">
-              ${d.assinatura ? `<img src="${d.assinatura}" />` : ""}
-            </div>
-            <div class="signature-label">7 ASSINATURA DO PORTADOR</div>
-          </div>
-
-          <!-- Fields -->
-          <div class="fields-area">
-            <!-- Nome | 1ª Habilitação -->
-            <div class="field-row">
-              <div class="field" style="flex:2">
-                <span class="field-label">2 e 1 NOME E SOBRENOME</span>
-                <span class="field-value">${d.nome_completo || ""}</span>
-              </div>
-              <div class="field" style="flex:1">
-                <span class="field-label">1ª HABILITAÇÃO</span>
-                <span class="field-value">${d.data_primeira_hab || ""}</span>
-              </div>
-            </div>
-
-            <!-- Data Nascimento -->
-            <div class="field-row">
-              <div class="field">
-                <span class="field-label">3 DATA, LOCAL E UF DE NASCIMENTO</span>
-                <span class="field-value small">${d.data_nascimento || ""}</span>
-              </div>
-            </div>
-
-            <!-- Emissão | Validade | ACC | Cat -->
-            <div class="dates-row">
-              <div class="field" style="flex:1">
-                <span class="field-label">4a DATA EMISSÃO</span>
-                <span class="field-value">${d.data_emissao || ""}</span>
-              </div>
-              <div class="field" style="flex:1">
-                <span class="field-label">4b VALIDADE</span>
-                <span class="field-value">${d.data_validade || ""}</span>
-              </div>
-              <div class="acc-icons">
-                <div class="acc-icon"></div>
-                <div class="acc-icon"></div>
-                <div class="acc-icon"></div>
-                <div class="acc-icon"></div>
-                <div class="acc-icon"></div>
-              </div>
-              <div class="cat-display">${d.categoria || ""}</div>
-            </div>
-
-            <!-- Doc Identidade -->
-            <div class="field-row">
-              <div class="field">
-                <span class="field-label">4c DOC IDENTIDADE / ÓRG EMISSOR/UF</span>
-                <span class="field-value">${d.rg || ""}</span>
-              </div>
-            </div>
-
-            <!-- CPF | Nº Registro | Cat Hab -->
-            <div class="field-row">
-              <div class="field" style="flex:1">
-                <span class="field-label">4d CPF</span>
-                <span class="field-value">${d.cpf || ""}</span>
-              </div>
-              <div class="field" style="flex:1">
-                <span class="field-label">5 Nº REGISTRO</span>
-                <span class="field-value">${d.registro || ""}</span>
-              </div>
-              <div class="field" style="flex:0 0 45px">
-                <span class="field-label">9 CAT HAB</span>
-                <span class="field-value">${d.categoria || ""}</span>
-              </div>
-            </div>
-
-            <!-- Nacionalidade -->
-            <div class="field-row">
-              <div class="field">
-                <span class="field-label">NACIONALIDADE</span>
-                <span class="field-value">${d.nacionalidade || ""}</span>
-              </div>
-            </div>
-
-            <!-- Filiação Pai -->
-            <div class="field-row">
-              <div class="field">
-                <span class="field-label">FILIAÇÃO</span>
-                <span class="field-value">${d.nome_pai || ""}</span>
-              </div>
-            </div>
-
-            <!-- Filiação Mãe -->
-            <div class="field-row">
-              <div class="field">
-                <span class="field-value">${d.nome_mae || ""}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CATEGORIES TABLE -->
-      <table class="cat-table">
-        <tr>
-          <th>9</th><th>10</th><th>11</th><th>12</th>
-          <th>9</th><th>10</th><th>11</th><th>12</th>
-        </tr>
-        ${buildCatRows(catRows, d.categoria || "", d.data_validade || "")}
-      </table>
-
-      <!-- OBSERVATIONS -->
-      <div class="obs-section">
-        <span class="obs-label">12 OBSERVAÇÕES</span>
-        <div class="obs-value">${d.observacoes || ""}</div>
-      </div>
-
-      <!-- SIGNING INFO -->
-      <div class="signing-section">
-        <div class="signing-number">${d.registro || ""}</div>
-        <div class="signing-left">
-          <div class="signed-text">ASSINADO DIGITALMENTE</div>
-          <div class="signed-dept">DEPARTAMENTO ESTADUAL DE TRÂNSITO</div>
-          <div class="local-label">LOCAL</div>
-          <div class="local-value">${d.cidade_estado || ""}</div>
-        </div>
-        <div class="signing-right">
-          ${d.numero_espelho || ""}<br>
-          ${d.renach || ""}
-        </div>
-      </div>
-
-      <!-- STATE NAME -->
-      <div class="state-name">${d.estado_extenso || ""}</div>
-    </div>
-
-    <!-- RIGHT COLUMN -->
-    <div class="right-col">
-      <div class="qr-section">
-        <span class="qr-label">QR-CODE</span>
-        <div class="qr-placeholder">QR-CODE</div>
-      </div>
-
-      <div class="legal-text">
-        Documento assinado com certificado digital em conformidade
-        com a Medida Provisória nº 2200-2/2001. Sua validade poderá
-        ser confirmada por meio do programa Assinador Serpro.
-        <br><br>
-        As orientações para instalar o Assinador Serpro e realizar a
-        validação do documento digital estão disponíveis em:
-        https://www.serpro.gov.br/assinador-digital.
-      </div>
-
-      <div class="serpro"><b>SERPRO</b> / SENATRAN</div>
-    </div>
-  </div>
-
-  <!-- LEGEND -->
-  <div class="legend">
-    2 e 1. Nome e Sobrenome / Name and Surname / Nombre y Apellidos – Primeira Habilitação / First Driver License / Primera Licencia de Conducir – 3. Data e
-    Local de Nascimento / Date and Place of Birth DD/MM/YYYY / Fecha y Lugar de Nacimiento – 4a. Data de Emissão / Issuing Date DD/MM/YYYY / Fecha de Emisión – 4b.
-    Data de Validade / Expiration Date DD/MM/YYYY / Válido Hasta – ACC – 4c. Documento Identidade – Órgão emissor / Identity Document – Issuing Authority /
-    Documento de Identificación – Autoridad Expedidora – 4d. CPF – 5. Número de registro da CNH / Driver License Number / Número de Permiso de Conducir – 9.
-    Categoria de Veículos da Carteira de Habilitação / Driver License Class / Categoría de Permisos de Conducir – Nacionalidade / Nationality / Nacionalidad –
-    Filiação / Filiation / Filiación – 12. Observações / Observations / Observaciones – Local / Place / Lugar
-  </div>
-
-  <!-- MRZ -->
-  <div class="mrz">
-    ${mrz.line1}<br>
-    ${mrz.line2}<br>
-    ${mrz.line3}
-  </div>
-
-</div>
-</body>
-</html>`;
-}
-
 function buildCatRows(catRows: string[], activeCategory: string, validDate: string) {
   const half = Math.ceil(catRows.length / 2);
   const left = catRows.slice(0, half);
@@ -722,6 +62,417 @@ function buildCatRows(catRows: string[], activeCategory: string, validDate: stri
     </tr>`;
   }
   return html;
+}
+
+function buildCnhHtml(d: Record<string, string>) {
+  const mrz = buildMrz(d);
+  const catRows = ["ACC","A","A1","B","B1","C","C1","D","D1","BE","CE","C1E","DE","D1E"];
+  const templateBg = d.template_bg || "";
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4 portrait; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #fff;
+  }
+  .page {
+    width: 794px;
+    height: 1123px;
+    position: relative;
+    background: #fff;
+    overflow: hidden;
+  }
+  .bg-template {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  .bg-template img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
+
+  /* === ALL OVERLAYS === */
+  .overlay {
+    position: absolute;
+    z-index: 10;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    font-weight: bold;
+  }
+
+  /* Photo overlay */
+  .photo-overlay {
+    top: 148px;
+    left: 42px;
+    width: 88px;
+    height: 115px;
+    overflow: hidden;
+  }
+  .photo-overlay img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Signature overlay */
+  .signature-overlay {
+    top: 285px;
+    left: 35px;
+    width: 100px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .signature-overlay img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  /* Vertical registration number (left of photo) */
+  .reg-vertical {
+    top: 330px;
+    left: 10px;
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    font-size: 7px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    color: #333;
+  }
+
+  /* === CARD FIELD VALUES === */
+  .f-nome {
+    top: 133px;
+    left: 148px;
+    font-size: 9px;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .f-primeira-hab {
+    top: 133px;
+    left: 365px;
+    font-size: 8.5px;
+  }
+  .f-nascimento {
+    top: 162px;
+    left: 148px;
+    font-size: 8px;
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .f-emissao {
+    top: 195px;
+    left: 148px;
+    font-size: 8.5px;
+  }
+  .f-validade {
+    top: 195px;
+    left: 260px;
+    font-size: 8.5px;
+  }
+  .f-cat-big {
+    top: 186px;
+    left: 396px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .f-rg {
+    top: 228px;
+    left: 148px;
+    font-size: 8px;
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .f-cpf {
+    top: 260px;
+    left: 148px;
+    font-size: 8.5px;
+  }
+  .f-registro {
+    top: 260px;
+    left: 268px;
+    font-size: 8.5px;
+  }
+  .f-cat-hab {
+    top: 260px;
+    left: 394px;
+    font-size: 9px;
+  }
+  .f-nacionalidade {
+    top: 290px;
+    left: 148px;
+    font-size: 8.5px;
+  }
+  .f-pai {
+    top: 318px;
+    left: 148px;
+    font-size: 8.5px;
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .f-mae {
+    top: 343px;
+    left: 148px;
+    font-size: 8.5px;
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* === RIGHT COLUMN === */
+  .qr-overlay {
+    top: 90px;
+    left: 480px;
+    width: 170px;
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #999;
+  }
+
+  .legal-overlay {
+    top: 310px;
+    left: 455px;
+    width: 310px;
+    font-size: 7.5px;
+    font-weight: normal;
+    color: #333;
+    line-height: 1.5;
+    text-align: justify;
+  }
+
+  .serpro-overlay {
+    top: 410px;
+    left: 640px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #333;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* === CATEGORIES TABLE === */
+  .cat-table-overlay {
+    top: 395px;
+    left: 18px;
+    width: 420px;
+    z-index: 10;
+  }
+  .cat-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 6.5px;
+  }
+  .cat-table td, .cat-table th {
+    border: 0.5px solid #999;
+    padding: 1px 3px;
+    text-align: center;
+    height: 13px;
+  }
+  .cat-table th {
+    background: #e8e8e8;
+    font-weight: bold;
+    font-size: 6px;
+  }
+  .cat-table .cat-name {
+    font-weight: bold;
+    width: 28px;
+    text-align: left;
+    padding-left: 4px;
+  }
+  .cat-table .cat-active {
+    background: #f0f0e0;
+  }
+
+  /* === OBSERVATIONS === */
+  .f-obs-value {
+    top: 540px;
+    left: 30px;
+    font-size: 8px;
+    max-width: 400px;
+  }
+
+  /* === SIGNING SECTION === */
+  .f-espelho {
+    top: 580px;
+    left: 340px;
+    font-size: 7.5px;
+    text-align: right;
+  }
+  .f-renach {
+    top: 593px;
+    left: 340px;
+    font-size: 7.5px;
+    text-align: right;
+  }
+  .f-local {
+    top: 608px;
+    left: 30px;
+    font-size: 8px;
+  }
+  .f-reg-vertical-bottom {
+    top: 640px;
+    left: 10px;
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    font-size: 7px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    color: #333;
+  }
+
+  /* === STATE NAME === */
+  .f-estado {
+    top: 640px;
+    left: 18px;
+    width: 420px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  /* === LEGEND === */
+  .legend-overlay {
+    top: 690px;
+    left: 18px;
+    width: 758px;
+    font-size: 5px;
+    font-weight: normal;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  /* === MRZ === */
+  .mrz-overlay {
+    top: 760px;
+    left: 18px;
+    width: 758px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    font-weight: bold;
+    color: #111;
+    letter-spacing: 2px;
+    line-height: 1.8;
+    padding: 12px 18px;
+    border: 1px solid #ccc;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- TEMPLATE BACKGROUND -->
+  <div class="bg-template">
+    ${templateBg ? `<img src="${templateBg}" />` : ""}
+  </div>
+
+  <!-- PHOTO -->
+  <div class="overlay photo-overlay">
+    ${d.foto ? `<img src="${d.foto}" />` : ""}
+  </div>
+
+  <!-- SIGNATURE -->
+  <div class="overlay signature-overlay">
+    ${d.assinatura ? `<img src="${d.assinatura}" />` : ""}
+  </div>
+
+  <!-- VERTICAL REGISTRATION -->
+  <div class="overlay reg-vertical">${d.registro || ""}</div>
+
+  <!-- FIELD VALUES -->
+  <div class="overlay f-nome">${d.nome_completo || ""}</div>
+  <div class="overlay f-primeira-hab">${d.data_primeira_hab || ""}</div>
+  <div class="overlay f-nascimento">${d.data_nascimento || ""}</div>
+  <div class="overlay f-emissao">${d.data_emissao || ""}</div>
+  <div class="overlay f-validade">${d.data_validade || ""}</div>
+  <div class="overlay f-cat-big">${d.categoria || ""}</div>
+  <div class="overlay f-rg">${d.rg || ""}</div>
+  <div class="overlay f-cpf">${d.cpf || ""}</div>
+  <div class="overlay f-registro">${d.registro || ""}</div>
+  <div class="overlay f-cat-hab">${d.categoria || ""}</div>
+  <div class="overlay f-nacionalidade">${d.nacionalidade || ""}</div>
+  <div class="overlay f-pai">${d.nome_pai || ""}</div>
+  <div class="overlay f-mae">${d.nome_mae || ""}</div>
+
+  <!-- QR CODE -->
+  <div class="overlay qr-overlay">QR-CODE</div>
+
+  <!-- LEGAL TEXT -->
+  <div class="overlay legal-overlay">
+    Documento assinado com certificado digital em conformidade
+    com a Medida Provisória nº 2200-2/2001. Sua validade poderá
+    ser confirmada por meio do programa Assinador Serpro.
+    <br><br>
+    As orientações para instalar o Assinador Serpro e realizar a
+    validação do documento digital estão disponíveis em:
+    https://www.serpro.gov.br/assinador-digital.
+  </div>
+
+  <div class="overlay serpro-overlay"><b>SERPRO</b> / SENATRAN</div>
+
+  <!-- CATEGORIES TABLE -->
+  <div class="cat-table-overlay overlay">
+    <table class="cat-table">
+      <tr>
+        <th>9</th><th>10</th><th>11</th><th>12</th>
+        <th>9</th><th>10</th><th>11</th><th>12</th>
+      </tr>
+      ${buildCatRows(catRows, d.categoria || "", d.data_validade || "")}
+    </table>
+  </div>
+
+  <!-- OBSERVATIONS -->
+  <div class="overlay f-obs-value">${d.observacoes || ""}</div>
+
+  <!-- SIGNING INFO -->
+  <div class="overlay f-espelho">${d.numero_espelho || ""}</div>
+  <div class="overlay f-renach">${d.renach || ""}</div>
+  <div class="overlay f-local">${d.cidade_estado || ""}</div>
+
+  <!-- STATE NAME -->
+  <div class="overlay f-estado">${d.estado_extenso || ""}</div>
+
+  <!-- LEGEND -->
+  <div class="overlay legend-overlay">
+    2 e 1. Nome e Sobrenome / Name and Surname / Nombre y Apellidos – Primeira Habilitação / First Driver License / Primera Licencia de Conducir – 3. Data e
+    Local de Nascimento / Date and Place of Birth DD/MM/YYYY / Fecha y Lugar de Nacimiento – 4a. Data de Emissão / Issuing Date DD/MM/YYYY / Fecha de Emisión – 4b.
+    Data de Validade / Expiration Date DD/MM/YYYY / Válido Hasta – ACC – 4c. Documento Identidade – Órgão emissor / Identity Document – Issuing Authority /
+    Documento de Identificación – Autoridad Expedidora – 4d. CPF – 5. Número de registro da CNH / Driver License Number / Número de Permiso de Conducir – 9.
+    Categoria de Veículos da Carteira de Habilitação / Driver License Class / Categoría de Permisos de Conducir – Nacionalidade / Nationality / Nacionalidad –
+    Filiação / Filiation / Filiación – 12. Observações / Observations / Observaciones – Local / Place / Lugar
+  </div>
+
+  <!-- MRZ -->
+  <div class="overlay mrz-overlay">
+    ${mrz.line1}<br>
+    ${mrz.line2}<br>
+    ${mrz.line3}
+  </div>
+
+</div>
+</body>
+</html>`;
 }
 
 serve(async (req) => {
@@ -757,6 +508,7 @@ serve(async (req) => {
       nome_pai: body.nome_pai || "",
       nome_mae: body.nome_mae || "",
       observacoes: body.observacoes || "",
+      template_bg: body.template_base64 || "",
     };
 
     if (body.foto_base64) {
