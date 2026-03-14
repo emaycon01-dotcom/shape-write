@@ -27,6 +27,7 @@ const mainItems = [
   { title: "Painel", url: "/dashboard", icon: LayoutDashboard },
   { title: "Documentos", url: "/dashboard/documents", icon: FileText },
   { title: "Histórico", url: "/dashboard/history", icon: History },
+  { title: "Alinhamento", url: "/dashboard/template-align", icon: Move },
 ];
 
 const adminItems = [
