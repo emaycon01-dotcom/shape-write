@@ -310,7 +310,7 @@ function buildCnhHtml(d: Record<string, string>) {
   <div class="overlay f-mae">${d.nome_mae || ""}</div>
 
   <!-- CATEGORY DATE VALUES -->
-  ${buildCatDateOverlays(d.categoria || "", d.data_validade || "")}
+  ${buildCatDateOverlays(d.categoria || "", d)}
 
   <!-- OBSERVATIONS -->
   <div class="overlay f-obs">${d.observacoes || ""}</div>
