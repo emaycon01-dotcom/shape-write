@@ -179,7 +179,7 @@ function buildCnhHtml(d: Record<string, string>) {
     z-index: 10;
     font-family: Arial, Helvetica, sans-serif;
     color: #111;
-    font-weight: bold;
+    font-weight: normal;
   }
 
   /* ========== PHOTO ========== */
