@@ -97,16 +97,8 @@ function buildMrz(d: Record<string, string>) {
   };
 }
 
-function formatRenachLines(value: string) {
-  const clean = value.replace(/\s+/g, "").toUpperCase();
-  if (!clean) return { line1: "", line2: "" };
-  if (clean.length <= 8) return { line1: clean, line2: "" };
-
-  const splitAt = Math.ceil(clean.length / 2);
-  return {
-    line1: clean.slice(0, splitAt),
-    line2: clean.slice(splitAt),
-  };
+function cleanCode(value: string) {
+  return value.replace(/\s+/g, "").toUpperCase();
 }
 
 function parseActiveCategories(activeCategory: string) {
