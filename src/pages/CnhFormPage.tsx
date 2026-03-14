@@ -105,19 +105,52 @@ export default function CnhFormPage() {
     if (ref.current) ref.current.value = "";
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    addDocument({
-      name: form.nomeCompleto,
-      identification: form.cpf,
-      date: form.dataEmissao,
-      description: `CNH - Cat ${form.categoria}`,
-      additionalInfo: JSON.stringify(form),
-      type: "cnh",
-      userId: user.id,
-    });
-    navigate("/dashboard/history");
+    setLoading(true);
+    setPdfPreviewUrl(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
+        body: {
+          nome_completo: form.nomeCompleto,
+          cpf: form.cpf,
+          rg: form.rg,
+          data_nascimento: form.dataNascimentoLocal,
+          categoria: form.categoria,
+          renach: form.renach,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.pdfUrl) {
+        setPdfPreviewUrl(data.pdfUrl);
+        toast({ title: "PDF gerado com sucesso!", description: "Veja o preview abaixo." });
+
+        addDocument({
+          name: form.nomeCompleto,
+          identification: form.cpf,
+          date: form.dataEmissao,
+          description: `CNH - Cat ${form.categoria}`,
+          additionalInfo: JSON.stringify({ ...form, pdfUrl: data.pdfUrl }),
+          type: "cnh",
+          userId: user.id,
+        });
+      } else {
+        throw new Error(data?.error || "Nenhuma URL de PDF retornada");
+      }
+    } catch (err: any) {
+      console.error("Erro ao gerar PDF:", err);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: err?.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputCls = "bg-secondary border-border text-foreground placeholder:text-muted-foreground";
