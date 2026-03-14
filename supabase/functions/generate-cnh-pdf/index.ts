@@ -44,16 +44,15 @@ serve(async (req) => {
       nome_mae: body.nome_mae || "",
     };
 
-    // Add images as data URIs if provided
-    if (foto_base64) {
-      payload.foto = foto_base64.startsWith("data:")
-        ? foto_base64
-        : `data:image/png;base64,${foto_base64}`;
+    if (body.foto_base64) {
+      payload.foto = body.foto_base64.startsWith("data:")
+        ? body.foto_base64
+        : `data:image/png;base64,${body.foto_base64}`;
     }
-    if (assinatura_base64) {
-      payload.assinatura = assinatura_base64.startsWith("data:")
-        ? assinatura_base64
-        : `data:image/png;base64,${assinatura_base64}`;
+    if (body.assinatura_base64) {
+      payload.assinatura = body.assinatura_base64.startsWith("data:")
+        ? body.assinatura_base64
+        : `data:image/png;base64,${body.assinatura_base64}`;
     }
 
     console.log("Creating PDFMonkey document with template:", TEMPLATE_ID);
