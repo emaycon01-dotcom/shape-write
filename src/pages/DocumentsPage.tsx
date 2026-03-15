@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { FileText } from "lucide-react";
 
+import { Smartphone } from "lucide-react";
+
 const docTypes = [
-  { id: "cnh", name: "CNH Digital (2024)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh" },
-  { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "" },
-  { id: "certificado", name: "Certificado", description: "Certificado digital personalizado", credits: 1, route: "" },
+  { id: "cnh", name: "CNH Digital (2024)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh", icon: FileText },
+  { id: "esim", name: "E-SIM Digital", description: "E-SIM Vivo ou Claro com DDD aleatório ou específico", credits: 1.3, route: "/dashboard/documents/esim", icon: Smartphone },
+  { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "", icon: FileText },
+  { id: "certificado", name: "Certificado", description: "Certificado digital personalizado", credits: 1, route: "", icon: FileText },
 ];
 
 export default function DocumentsPage() {
@@ -25,7 +28,7 @@ export default function DocumentsPage() {
             disabled={!dt.route}
           >
             <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-              <FileText className="w-6 h-6 text-primary" />
+              <dt.icon className="w-6 h-6 text-primary" />
             </div>
             <h3 className="font-display font-semibold text-foreground mb-1">{dt.name}</h3>
             <p className="text-sm text-muted-foreground mb-3">{dt.description}</p>
