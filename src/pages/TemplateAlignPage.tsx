@@ -408,3 +408,25 @@ function CnhAlignContent() {
     </div>
   );
 }
+
+export default function TemplateAlignPage() {
+  return (
+    <div className="max-w-5xl mx-auto p-4 space-y-4">
+      <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
+      <Tabs defaultValue="cnh" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="cnh">CNH</TabsTrigger>
+          <TabsTrigger value="certidao">CERT NASCIMENTO</TabsTrigger>
+        </TabsList>
+        <TabsContent value="cnh">
+          <CnhAlignContent />
+        </TabsContent>
+        <TabsContent value="certidao">
+          <Suspense fallback={<div className="flex items-center justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <CertidaoAlignPage />
+          </Suspense>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
