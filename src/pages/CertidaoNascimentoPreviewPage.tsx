@@ -52,6 +52,7 @@ export default function CertidaoNascimentoPreviewPage() {
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rendered, setRendered] = useState(false);
+  const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
 
   const positions = fieldPositions || DEFAULT_POSITIONS;
 
