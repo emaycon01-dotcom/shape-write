@@ -19,20 +19,20 @@ interface FieldPos {
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   nome: { x: 309, y: 255, fontSize: 15 },
   cpf: { x: 117, y: 280, fontSize: 14 },
-  matricula: { x: 212, y: 309, fontSize: 18 },
-  dataNascimentoExtenso: { x: 119, y: 352, fontSize: 12 },
+  matricula: { x: 211, y: 309, fontSize: 17 },
+  dataNascimentoExtenso: { x: 114, y: 350, fontSize: 11 },
   dia: { x: 542, y: 351, fontSize: 10 },
   mes: { x: 584, y: 350, fontSize: 10 },
   ano: { x: 642, y: 351, fontSize: 10 },
   horaNascimento: { x: 153, y: 381, fontSize: 14 },
-  naturalidade: { x: 136, y: 420, fontSize: 9 },
+  naturalidade: { x: 118, y: 416, fontSize: 12 },
   municipioRegistro: { x: 247, y: 382, fontSize: 12 },
-  localNascimento: { x: 370, y: 432, fontSize: 9 },
+  localNascimento: { x: 363, y: 431, fontSize: 10 },
   sexo: { x: 612, y: 418, fontSize: 10 },
-  filiacao: { x: 124, y: 461, fontSize: 14 },
+  filiacao: { x: 112, y: 462, fontSize: 12 },
   avos: { x: 118, y: 507, fontSize: 12 },
   gemeos: { x: 118, y: 541, fontSize: 10 },
-  dataRegistro: { x: 121, y: 573, fontSize: 13 },
+  dataRegistro: { x: 111, y: 571, fontSize: 13 },
 };
 
 export default function CertidaoNascimentoPreviewPage() {
