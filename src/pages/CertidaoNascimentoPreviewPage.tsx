@@ -63,6 +63,7 @@ export default function CertidaoNascimentoPreviewPage() {
     if (!ctx) return;
 
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
