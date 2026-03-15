@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, Share2, CreditCard, Lock, Loader2, Download } from "lucide-react";
+import { ArrowLeft, Eye, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateUrl from "@/assets/template-certidao-nascimento.jpg";
 
@@ -152,13 +152,24 @@ export default function CertidaoNascimentoPreviewPage() {
     }
   };
 
-  const handleDownload = () => {
+  const handleShare = async () => {
     if (!canvasRef.current) return;
-    const link = document.createElement("a");
-    link.download = "certidao-nascimento.png";
-    link.href = canvasRef.current.toDataURL("image/png");
-    link.click();
-    toast({ title: "Certidão baixada com sucesso!" });
+    try {
+      const dataUrl = canvasRef.current.toDataURL("image/png");
+      const blob = await fetch(dataUrl).then((r) => r.blob());
+      const file = new File([blob], "certidao-nascimento.png", { type: "image/png" });
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Certidão de Nascimento" });
+      } else {
+        const link = document.createElement("a");
+        link.download = "certidao-nascimento.png";
+        link.href = dataUrl;
+        link.click();
+        toast({ title: "Certidão baixada com sucesso!" });
+      }
+    } catch {
+      toast({ title: "Erro ao compartilhar", variant: "destructive" });
+    }
   };
 
   const handleView = () => {
@@ -234,8 +245,8 @@ export default function CertidaoNascimentoPreviewPage() {
           <Button variant="gradient" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleView}>
             <Eye className="w-5 h-5 mr-2" /> Ver
           </Button>
-          <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleDownload}>
-            <Download className="w-5 h-5 mr-2" /> Baixar
+          <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleShare}>
+            <Share2 className="w-5 h-5 mr-2" /> Compartilhar
           </Button>
         </div>
       )}
