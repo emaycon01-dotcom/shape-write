@@ -103,7 +103,7 @@ export default function CertidaoNascimentoPreviewPage() {
       drawField("filiacao", filiacaoText);
 
       // Avós
-      const avosText = `${formData.avoMaterna || "-"} e ${formData.avoMaterno || "-"} / ${formData.avoPaterna || "-"} e ${formData.avoPaterno || "-"}`;
+      const avosText = [formData.avoMaterna, formData.avoPaterna, formData.avoMaterno, formData.avoPaterno].filter(Boolean).join(", ");
       drawField("avos", avosText);
 
       drawField("gemeos", formData.gemeos);
