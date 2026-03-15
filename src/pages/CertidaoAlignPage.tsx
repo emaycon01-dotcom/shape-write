@@ -30,7 +30,7 @@ const defaultFields: FieldDef[] = [
   { id: "horaNascimento", label: "Hora Nasc.", sampleText: "14:30", x: 153, y: 381, fontSize: 14 },
   { id: "naturalidade", label: "Naturalidade", sampleText: "RIO DE JANEIRO - RJ", x: 118, y: 416, fontSize: 12 },
   { id: "municipioRegistro", label: "Mun. Registro", sampleText: "RIO DE JANEIRO - RJ", x: 247, y: 382, fontSize: 12 },
-  { id: "localNascimento", label: "Local Nasc.", sampleText: "HOSPITAL MUNICIPAL", x: 376, y: 424, fontSize: 10 },
+  { id: "localNascimento", label: "Local Nasc.", sampleText: "HOSPITAL MUNICIPAL", x: 364, y: 428, fontSize: 10 },
   { id: "sexo", label: "Sexo", sampleText: "FEMININO", x: 612, y: 418, fontSize: 10 },
   { id: "filiacao", label: "Filiação", sampleText: "JOSE DA SILVA E SANDRA COSTA", x: 112, y: 462, fontSize: 12 },
   { id: "avos", label: "Avós", sampleText: "ANA MARIA, JOAO PEDRO, ROSA LIMA, CARLOS SOUZA", x: 109, y: 504, fontSize: 10.5 },

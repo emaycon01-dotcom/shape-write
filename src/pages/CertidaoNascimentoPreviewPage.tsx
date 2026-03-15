@@ -27,7 +27,7 @@ const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   horaNascimento: { x: 153, y: 381, fontSize: 14 },
   naturalidade: { x: 118, y: 416, fontSize: 12 },
   municipioRegistro: { x: 247, y: 382, fontSize: 12 },
-  localNascimento: { x: 376, y: 424, fontSize: 10 },
+  localNascimento: { x: 364, y: 428, fontSize: 10 },
   sexo: { x: 612, y: 418, fontSize: 10 },
   filiacao: { x: 112, y: 462, fontSize: 12 },
   avos: { x: 109, y: 504, fontSize: 10.5 },
