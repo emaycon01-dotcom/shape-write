@@ -13,6 +13,7 @@ import {
   Crown,
   Wrench,
   Download,
+  PenTool,
 } from "lucide-react";
 import {
   Sidebar,
