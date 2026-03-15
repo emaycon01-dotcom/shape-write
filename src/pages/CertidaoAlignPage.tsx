@@ -25,7 +25,7 @@ const defaultFields: FieldDef[] = [
   { id: "matricula", label: "Matrícula", sampleText: "123456 01 55 2025 1 00001 001 0000001-00", x: 211, y: 309, fontSize: 17 },
   { id: "dataNascimentoExtenso", label: "Nasc. Extenso", sampleText: "ONZE DE MARÇO DE MIL NOVECENTOS E OITENTA E NOVE", x: 114, y: 350, fontSize: 11 },
   { id: "dia", label: "Dia", sampleText: "11", x: 542, y: 351, fontSize: 10 },
-  { id: "mes", label: "Mês", sampleText: "MARÇO", x: 590, y: 351, fontSize: 10 },
+  { id: "mes", label: "Mês", sampleText: "MARÇO", x: 590, y: 353, fontSize: 10 },
   { id: "ano", label: "Ano", sampleText: "1989", x: 642, y: 351, fontSize: 10 },
   { id: "horaNascimento", label: "Hora Nasc.", sampleText: "14:30", x: 153, y: 381, fontSize: 14 },
   { id: "naturalidade", label: "Naturalidade", sampleText: "RIO DE JANEIRO - RJ", x: 118, y: 416, fontSize: 12 },
