@@ -114,6 +114,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {user?.role === "admin" && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
               ADMINISTRAÇÃO
