@@ -50,6 +50,7 @@ export default function EsimDigitalPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [operadora, setOperadora] = useState<Operadora>(null);
+  const [termosAceitos, setTermosAceitos] = useState<"vivo" | "claro" | null>(null);
   const [tipoDDD, setTipoDDD] = useState<TipoDDD>("aleatorio");
   const [estado, setEstado] = useState("");
 
