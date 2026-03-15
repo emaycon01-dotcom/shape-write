@@ -19,6 +19,12 @@ const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
 const TemplateCnhPage = lazy(() => import("./pages/TemplateCnhPage"));
 const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
 const VerifyPage = lazy(() => import("./pages/VerifyPage"));
+const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
+const PlanosPage = lazy(() => import("./pages/PlanosPage"));
+const TransferirPage = lazy(() => import("./pages/TransferirPage"));
+const RevendedoresPage = lazy(() => import("./pages/RevendedoresPage"));
+const MetricasPage = lazy(() => import("./pages/MetricasPage"));
+const ConfiguracoesPage = lazy(() => import("./pages/ConfiguracoesPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -49,6 +55,12 @@ const App = () => (
                   <Route path="documents/cnh" element={<CnhFormPage />} />
                   <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
+                  <Route path="recarregar" element={<RecarregarPage />} />
+                  <Route path="planos" element={<PlanosPage />} />
+                  <Route path="transferir" element={<TransferirPage />} />
+                  <Route path="revendedores" element={<RevendedoresPage />} />
+                  <Route path="metricas" element={<MetricasPage />} />
+                  <Route path="configuracoes" element={<ConfiguracoesPage />} />
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                   <Route path="template-align" element={<TemplateAlignPage />} />
                 </Route>
