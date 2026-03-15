@@ -1,11 +1,14 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
+
+const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
