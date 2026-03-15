@@ -104,6 +104,8 @@ interface CertidaoFormData {
   avoPaterna: string;
   avoPaterno: string;
   gemeos: string;
+  municipioRegistro: string;
+  ufRegistro: string;
   dataRegistroExtenso: string;
 }
 
