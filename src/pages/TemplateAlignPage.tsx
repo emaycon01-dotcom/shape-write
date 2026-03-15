@@ -177,7 +177,7 @@ function FieldPropertiesPanel({
   );
 }
 
-export default function TemplateAlignPage() {
+function CnhAlignContent() {
   const [fields, setFields] = useState<FieldDef[]>(() => {
     const saved = localStorage.getItem("cnh-field-positions");
     if (saved) {
