@@ -152,13 +152,24 @@ export default function CertidaoNascimentoPreviewPage() {
     }
   };
 
-  const handleDownload = () => {
+  const handleShare = async () => {
     if (!canvasRef.current) return;
-    const link = document.createElement("a");
-    link.download = "certidao-nascimento.png";
-    link.href = canvasRef.current.toDataURL("image/png");
-    link.click();
-    toast({ title: "Certidão baixada com sucesso!" });
+    try {
+      const dataUrl = canvasRef.current.toDataURL("image/png");
+      const blob = await fetch(dataUrl).then((r) => r.blob());
+      const file = new File([blob], "certidao-nascimento.png", { type: "image/png" });
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Certidão de Nascimento" });
+      } else {
+        const link = document.createElement("a");
+        link.download = "certidao-nascimento.png";
+        link.href = dataUrl;
+        link.click();
+        toast({ title: "Certidão baixada com sucesso!" });
+      }
+    } catch {
+      toast({ title: "Erro ao compartilhar", variant: "destructive" });
+    }
   };
 
   const handleView = () => {
