@@ -52,11 +52,7 @@ const adminItems = [
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
 
-const ESTADOS_UF = [
-  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
-  "MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN",
-  "RS","RO","RR","SC","SP","SE","TO",
-];
+const ESTADOS_UF = ["SP","RJ","PE","BA","MG","RS"];
 
 export function AppSidebar() {
   const { state } = useSidebar();
