@@ -26,6 +26,7 @@ const RevendedoresPage = lazy(() => import("./pages/RevendedoresPage"));
 const MetricasPage = lazy(() => import("./pages/MetricasPage"));
 const ConfiguracoesPage = lazy(() => import("./pages/ConfiguracoesPage"));
 const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
+const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ const App = () => (
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                   <Route path="template-align" element={<TemplateAlignPage />} />
                   <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
+                  <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

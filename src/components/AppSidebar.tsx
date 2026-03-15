@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
@@ -14,6 +15,8 @@ import {
   Wrench,
   Download,
   PenTool,
+  MapPin,
+  ChevronDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +30,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.png";
 
 const commonItems = [
@@ -46,6 +50,12 @@ const adminItems = [
   { title: "Transferir", url: "/dashboard/transferir", icon: Send },
   { title: "Métricas", url: "/dashboard/metricas", icon: BarChart3 },
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
+];
+
+const ESTADOS_UF = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
+  "MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN",
+  "RS","RO","RR","SC","SP","SE","TO",
 ];
 
 export function AppSidebar() {
@@ -114,6 +124,36 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
+              SERVIÇOS FÍSICOS
+              <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {ESTADOS_UF.map((uf) => (
+                    <SidebarMenuItem key={uf}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={`/dashboard/cnh-fisica/${uf.toLowerCase()}`}
+                          className="hover:bg-secondary/50"
+                          activeClassName="bg-secondary text-primary font-medium"
+                        >
+                          <MapPin className="mr-2 h-4 w-4" />
+                          {!collapsed && <span>CNH {uf}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </SidebarGroup>
+
         {user?.role === "admin" && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
