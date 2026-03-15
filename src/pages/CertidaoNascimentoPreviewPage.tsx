@@ -69,14 +69,14 @@ export default function CertidaoNascimentoPreviewPage() {
       const scaleX = img.naturalWidth / PAGE_W;
       const scaleY = img.naturalHeight / PAGE_H;
 
-      ctx.fillStyle = "#111";
+      ctx.fillStyle = "#000";
       ctx.textBaseline = "top";
 
       const drawField = (key: string, text: string) => {
         const pos = positions[key];
         if (!pos || !text) return;
         ctx.font = `${pos.fontSize * scaleX}px Arial`;
-        ctx.fillText(text, pos.x * scaleX, pos.y * scaleY);
+        ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
       };
 
       drawField("nome", formData.nomeCompleto);
