@@ -33,6 +33,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.png";
+import { SupportDialog } from "@/components/SupportDialog";
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
