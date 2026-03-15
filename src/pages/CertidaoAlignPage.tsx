@@ -22,20 +22,20 @@ interface FieldDef {
 const defaultFields: FieldDef[] = [
   { id: "nome", label: "Nome", sampleText: "MARIA OLIVEIRA SANTOS", x: 309, y: 255, fontSize: 15 },
   { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 117, y: 280, fontSize: 14 },
-  { id: "matricula", label: "Matrícula", sampleText: "123456 01 55 2025 1 00001 001 0000001-00", x: 212, y: 309, fontSize: 18 },
-  { id: "dataNascimentoExtenso", label: "Nasc. Extenso", sampleText: "ONZE DE MARÇO DE MIL NOVECENTOS E OITENTA E NOVE", x: 119, y: 352, fontSize: 12 },
+  { id: "matricula", label: "Matrícula", sampleText: "123456 01 55 2025 1 00001 001 0000001-00", x: 211, y: 309, fontSize: 17 },
+  { id: "dataNascimentoExtenso", label: "Nasc. Extenso", sampleText: "ONZE DE MARÇO DE MIL NOVECENTOS E OITENTA E NOVE", x: 114, y: 350, fontSize: 11 },
   { id: "dia", label: "Dia", sampleText: "11", x: 542, y: 351, fontSize: 10 },
   { id: "mes", label: "Mês", sampleText: "MARÇO", x: 584, y: 350, fontSize: 10 },
   { id: "ano", label: "Ano", sampleText: "1989", x: 642, y: 351, fontSize: 10 },
   { id: "horaNascimento", label: "Hora Nasc.", sampleText: "14:30", x: 153, y: 381, fontSize: 14 },
-  { id: "naturalidade", label: "Naturalidade", sampleText: "RIO DE JANEIRO - RJ", x: 136, y: 420, fontSize: 9 },
+  { id: "naturalidade", label: "Naturalidade", sampleText: "RIO DE JANEIRO - RJ", x: 118, y: 416, fontSize: 12 },
   { id: "municipioRegistro", label: "Mun. Registro", sampleText: "RIO DE JANEIRO - RJ", x: 247, y: 382, fontSize: 12 },
-  { id: "localNascimento", label: "Local Nasc.", sampleText: "HOSPITAL MUNICIPAL", x: 370, y: 432, fontSize: 9 },
+  { id: "localNascimento", label: "Local Nasc.", sampleText: "HOSPITAL MUNICIPAL", x: 363, y: 431, fontSize: 10 },
   { id: "sexo", label: "Sexo", sampleText: "FEMININO", x: 612, y: 418, fontSize: 10 },
-  { id: "filiacao", label: "Filiação", sampleText: "JOSE DA SILVA E SANDRA COSTA", x: 124, y: 461, fontSize: 14 },
+  { id: "filiacao", label: "Filiação", sampleText: "JOSE DA SILVA E SANDRA COSTA", x: 112, y: 462, fontSize: 12 },
   { id: "avos", label: "Avós", sampleText: "ANA MARIA, JOAO PEDRO, ROSA LIMA, CARLOS SOUZA", x: 118, y: 507, fontSize: 12 },
   { id: "gemeos", label: "Gêmeos", sampleText: "NAO CONSTA", x: 118, y: 541, fontSize: 10 },
-  { id: "dataRegistro", label: "Data Registro", sampleText: "15/03/2026", x: 121, y: 573, fontSize: 13 },
+  { id: "dataRegistro", label: "Data Registro", sampleText: "15/03/2026", x: 111, y: 571, fontSize: 13 },
 ];
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (u: Partial<FieldDef>) => void }) {
