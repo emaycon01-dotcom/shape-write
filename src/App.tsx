@@ -58,6 +58,7 @@ const App = () => (
                   <Route path="documents" element={<DocumentsPage />} />
                   <Route path="documents/cnh" element={<CnhFormPage />} />
                   <Route path="documents/esim" element={<EsimDigitalPage />} />
+                  <Route path="documents/recargas" element={<RecargasPage />} />
                   <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
