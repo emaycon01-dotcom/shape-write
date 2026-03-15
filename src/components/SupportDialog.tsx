@@ -6,18 +6,20 @@ interface SupportDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const MSG = encodeURIComponent("Olá 👋, vim pelo painel do Bellarus, poderia me ajudar? 😁");
+
 const supportMembers = [
   {
     name: "Souza",
     role: "CEO & SUPORTE",
     icon: Crown,
-    link: "https://wa.me/5581992120805",
+    link: `https://wa.me/5581992120805?text=${MSG}`,
   },
   {
     name: "G7",
     role: "GERENTE & SUPORTE",
     icon: Shield,
-    link: "https://wa.me/5581960002805",
+    link: `https://wa.me/5581960002805?text=${MSG}`,
   },
 ];
 
