@@ -116,7 +116,7 @@ const initial: CertidaoFormData = {
   localNascimento: "", municipioNascimento: "", estadoNascimento: "",
   sexo: "", nomeMae: "", nomePai: "",
   avoMaterna: "", avoMaterno: "", avoPaterna: "", avoPaterno: "",
-  gemeos: "NÃO", dataRegistroExtenso: "",
+  gemeos: "NÃO", municipioRegistro: "", ufRegistro: "", dataRegistroExtenso: "",
 };
 
 const NOMES_TESTE = ["PEDRO DA SILVA GOMES","MARIA OLIVEIRA SANTOS","CARLOS FERREIRA LIMA","ANA PAULA COSTA"];
