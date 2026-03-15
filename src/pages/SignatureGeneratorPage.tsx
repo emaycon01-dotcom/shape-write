@@ -24,7 +24,7 @@ export default function SignatureGeneratorPage() {
 
   const generateSignature = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !name.trim()) return;
+    if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -32,14 +32,30 @@ export default function SignatureGeneratorPage() {
     canvas.width = 600;
     canvas.height = 200;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // White background
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = color;
-    ctx.font = `48px ${FONTS[selectedFont].family}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(name, canvas.width / 2, canvas.height / 2);
+    if (name.trim()) {
+      ctx.fillStyle = color;
+      ctx.font = `48px ${FONTS[selectedFont].family}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(name, canvas.width / 2, canvas.height / 2);
+    }
   }, [name, selectedFont, color]);
+
+  // Auto-generate on every change
+  useState(() => { generateSignature(); });
+  const prevDeps = useRef({ name, selectedFont, color });
+  if (
+    prevDeps.current.name !== name ||
+    prevDeps.current.selectedFont !== selectedFont ||
+    prevDeps.current.color !== color
+  ) {
+    prevDeps.current = { name, selectedFont, color };
+    setTimeout(generateSignature, 0);
+  }
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -60,7 +76,10 @@ export default function SignatureGeneratorPage() {
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext("2d");
-      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      if (ctx) {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
     }
   };
 
@@ -139,11 +158,9 @@ export default function SignatureGeneratorPage() {
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button onClick={generateSignature} disabled={!name.trim()} className="flex-1">
-              Gerar Assinatura
-            </Button>
-            <Button variant="outline" onClick={handleReset}>
-              <RotateCcw className="w-4 h-4" />
+            <Button variant="outline" onClick={handleReset} className="w-full">
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Limpar
             </Button>
           </div>
         </CardContent>
