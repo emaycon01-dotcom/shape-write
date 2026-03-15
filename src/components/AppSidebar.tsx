@@ -181,6 +181,13 @@ export function AppSidebar() {
         )}
 
         <div className="mt-auto p-4 space-y-2">
+          <button
+            onClick={() => setSupportOpen(true)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
+          >
+            <Headphones className="w-4 h-4" />
+            {!collapsed && "Suporte"}
+          </button>
           {!collapsed && user && (
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           )}
@@ -192,6 +199,8 @@ export function AppSidebar() {
             {!collapsed && "Sair"}
           </button>
         </div>
+
+        <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
       </SidebarContent>
     </Sidebar>
   );
