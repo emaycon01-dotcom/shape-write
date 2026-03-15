@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
@@ -14,6 +15,8 @@ import {
   Wrench,
   Download,
   PenTool,
+  MapPin,
+  ChevronDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +30,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.png";
 
 const commonItems = [
@@ -46,6 +50,12 @@ const adminItems = [
   { title: "Transferir", url: "/dashboard/transferir", icon: Send },
   { title: "Métricas", url: "/dashboard/metricas", icon: BarChart3 },
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
+];
+
+const ESTADOS_UF = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
+  "MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN",
+  "RS","RO","RR","SC","SP","SE","TO",
 ];
 
 export function AppSidebar() {
