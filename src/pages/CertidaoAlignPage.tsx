@@ -20,22 +20,22 @@ interface FieldDef {
 }
 
 const defaultFields: FieldDef[] = [
-  { id: "nome", label: "Nome", sampleText: "MARIA OLIVEIRA SANTOS", x: 160, y: 108, fontSize: 10 },
-  { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 450, y: 108, fontSize: 10 },
-  { id: "matricula", label: "Matrícula", sampleText: "123456 01 55 2025 1 00001 001 0000001-00", x: 160, y: 130, fontSize: 8 },
-  { id: "dataNascimentoExtenso", label: "Nasc. Extenso", sampleText: "ONZE DE MARÇO DE MIL NOVECENTOS E OITENTA E NOVE", x: 160, y: 160, fontSize: 9 },
-  { id: "dia", label: "Dia", sampleText: "11", x: 450, y: 160, fontSize: 9 },
-  { id: "mes", label: "Mês", sampleText: "MARÇO", x: 500, y: 160, fontSize: 9 },
-  { id: "ano", label: "Ano", sampleText: "1989", x: 580, y: 160, fontSize: 9 },
-  { id: "horaNascimento", label: "Hora Nasc.", sampleText: "14:30", x: 160, y: 190, fontSize: 9 },
-  { id: "naturalidade", label: "Naturalidade", sampleText: "RIO DE JANEIRO - RJ", x: 350, y: 190, fontSize: 9 },
-  { id: "municipioRegistro", label: "Mun. Registro", sampleText: "RIO DE JANEIRO - RJ", x: 160, y: 220, fontSize: 9 },
-  { id: "localNascimento", label: "Local Nasc.", sampleText: "HOSPITAL MUNICIPAL", x: 450, y: 220, fontSize: 9 },
-  { id: "sexo", label: "Sexo", sampleText: "FEMININO", x: 700, y: 220, fontSize: 9 },
-  { id: "filiacao", label: "Filiação", sampleText: "JOSE DA SILVA, SANDRA COSTA", x: 160, y: 250, fontSize: 9 },
-  { id: "avos", label: "Avós", sampleText: "ANA MARIA, JOAO PEDRO, ROSA LIMA, CARLOS SOUZA", x: 160, y: 280, fontSize: 8 },
-  { id: "gemeos", label: "Gêmeos", sampleText: "NAO CONSTA", x: 160, y: 310, fontSize: 9 },
-  { id: "dataRegistro", label: "Data Registro", sampleText: "15/03/2026", x: 160, y: 340, fontSize: 9 },
+  { id: "nome", label: "Nome", sampleText: "MARIA OLIVEIRA SANTOS", x: 292, y: 252, fontSize: 15 },
+  { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 118, y: 277, fontSize: 14 },
+  { id: "matricula", label: "Matrícula", sampleText: "123456 01 55 2025 1 00001 001 0000001-00", x: 186, y: 308, fontSize: 20 },
+  { id: "dataNascimentoExtenso", label: "Nasc. Extenso", sampleText: "ONZE DE MARÇO DE MIL NOVECENTOS E OITENTA E NOVE", x: 114, y: 349, fontSize: 12 },
+  { id: "dia", label: "Dia", sampleText: "11", x: 533, y: 349, fontSize: 10 },
+  { id: "mes", label: "Mês", sampleText: "MARÇO", x: 575, y: 350, fontSize: 10 },
+  { id: "ano", label: "Ano", sampleText: "1989", x: 633, y: 350, fontSize: 10 },
+  { id: "horaNascimento", label: "Hora Nasc.", sampleText: "14:30", x: 144, y: 381, fontSize: 14 },
+  { id: "naturalidade", label: "Naturalidade", sampleText: "RIO DE JANEIRO - RJ", x: 480, y: 429, fontSize: 10 },
+  { id: "municipioRegistro", label: "Mun. Registro", sampleText: "RIO DE JANEIRO - RJ", x: 247, y: 382, fontSize: 12 },
+  { id: "localNascimento", label: "Local Nasc.", sampleText: "HOSPITAL MUNICIPAL", x: 368, y: 428, fontSize: 10 },
+  { id: "sexo", label: "Sexo", sampleText: "FEMININO", x: 612, y: 418, fontSize: 10 },
+  { id: "filiacao", label: "Filiação", sampleText: "JOSE DA SILVA E SANDRA COSTA", x: 117, y: 456, fontSize: 14 },
+  { id: "avos", label: "Avós", sampleText: "ANA MARIA, JOAO PEDRO, ROSA LIMA, CARLOS SOUZA", x: 121, y: 502, fontSize: 14 },
+  { id: "gemeos", label: "Gêmeos", sampleText: "NAO CONSTA", x: 177, y: 412, fontSize: 14 },
+  { id: "dataRegistro", label: "Data Registro", sampleText: "15/03/2026", x: 221, y: 571, fontSize: 13 },
 ];
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (u: Partial<FieldDef>) => void }) {
