@@ -218,13 +218,28 @@ export default function CertidaoNascimentoFormPage() {
 
   const handlePreview = (e: React.FormEvent) => {
     e.preventDefault();
-    // Get saved alignment positions
-    const savedPositions = localStorage.getItem("certidao-field-positions");
+    // Get saved alignment positions and convert from array to record if needed
+    const savedRaw = localStorage.getItem("certidao-field-positions");
+    let fieldPositions: Record<string, { x: number; y: number; fontSize: number }> | null = null;
+    if (savedRaw) {
+      try {
+        const parsed = JSON.parse(savedRaw);
+        if (Array.isArray(parsed)) {
+          // Convert FieldDef[] to Record<string, FieldPos>
+          fieldPositions = parsed.reduce((acc: Record<string, { x: number; y: number; fontSize: number }>, f: any) => {
+            acc[f.id] = { x: f.x, y: f.y, fontSize: f.fontSize };
+            return acc;
+          }, {});
+        } else {
+          fieldPositions = parsed;
+        }
+      } catch { /* ignore */ }
+    }
     navigate("/dashboard/documents/certidao-nascimento/preview", {
       state: {
         formData: form,
         templateUrl,
-        fieldPositions: savedPositions ? JSON.parse(savedPositions) : null,
+        fieldPositions,
       },
     });
   };
