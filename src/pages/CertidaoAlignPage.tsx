@@ -20,22 +20,22 @@ interface FieldDef {
 }
 
 const defaultFields: FieldDef[] = [
-  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 160, y: 108, fontSize: 10 },
-  { id: "cpf", label: "CPF", sampleText: "123.456.789-00", x: 450, y: 108, fontSize: 10 },
-  { id: "matricula", label: "Matrícula", sampleText: "000687 01 55 1990 1 00031 189 0031464 43", x: 160, y: 130, fontSize: 8 },
-  { id: "dataNascimentoExtenso", label: "Nasc. Extenso", sampleText: "cinco de março de dois mil e vinte", x: 160, y: 160, fontSize: 9 },
-  { id: "dia", label: "Dia", sampleText: "05", x: 450, y: 160, fontSize: 9 },
-  { id: "mes", label: "Mês", sampleText: "03", x: 500, y: 160, fontSize: 9 },
-  { id: "ano", label: "Ano", sampleText: "2024", x: 580, y: 160, fontSize: 9 },
-  { id: "horaNascimento", label: "Hora Nasc.", sampleText: "14:30", x: 160, y: 190, fontSize: 9 },
-  { id: "naturalidade", label: "Naturalidade", sampleText: "Rio de Janeiro - RJ", x: 350, y: 190, fontSize: 9 },
-  { id: "municipioRegistro", label: "Mun. Registro", sampleText: "Rio de Janeiro - RJ", x: 160, y: 220, fontSize: 9 },
-  { id: "localNascimento", label: "Local Nasc.", sampleText: "Hospital Municipal, Rio de Janeiro - RJ", x: 450, y: 220, fontSize: 9 },
-  { id: "sexo", label: "Sexo", sampleText: "MASCULINO", x: 700, y: 220, fontSize: 9 },
-  { id: "filiacao", label: "Filiação", sampleText: "MARIA DA SILVA e JOSE DA SILVA", x: 160, y: 250, fontSize: 9 },
+  { id: "nome", label: "Nome", sampleText: "", x: 160, y: 108, fontSize: 10 },
+  { id: "cpf", label: "CPF", sampleText: "", x: 450, y: 108, fontSize: 10 },
+  { id: "matricula", label: "Matrícula", sampleText: "", x: 160, y: 130, fontSize: 8 },
+  { id: "dataNascimentoExtenso", label: "Nasc. Extenso", sampleText: "", x: 160, y: 160, fontSize: 9 },
+  { id: "dia", label: "Dia", sampleText: "", x: 450, y: 160, fontSize: 9 },
+  { id: "mes", label: "Mês", sampleText: "", x: 500, y: 160, fontSize: 9 },
+  { id: "ano", label: "Ano", sampleText: "", x: 580, y: 160, fontSize: 9 },
+  { id: "horaNascimento", label: "Hora Nasc.", sampleText: "", x: 160, y: 190, fontSize: 9 },
+  { id: "naturalidade", label: "Naturalidade", sampleText: "", x: 350, y: 190, fontSize: 9 },
+  { id: "municipioRegistro", label: "Mun. Registro", sampleText: "", x: 160, y: 220, fontSize: 9 },
+  { id: "localNascimento", label: "Local Nasc.", sampleText: "", x: 450, y: 220, fontSize: 9 },
+  { id: "sexo", label: "Sexo", sampleText: "", x: 700, y: 220, fontSize: 9 },
+  { id: "filiacao", label: "Filiação", sampleText: "", x: 160, y: 250, fontSize: 9 },
   { id: "avos", label: "Avós", sampleText: "", x: 160, y: 280, fontSize: 8 },
-  { id: "gemeos", label: "Gêmeos", sampleText: "NÃO", x: 160, y: 310, fontSize: 9 },
-  { id: "dataRegistro", label: "Data Registro", sampleText: "dezessete de novembro de dois mil e vinte e um", x: 160, y: 340, fontSize: 9 },
+  { id: "gemeos", label: "Gêmeos", sampleText: "", x: 160, y: 310, fontSize: 9 },
+  { id: "dataRegistro", label: "Data Registro", sampleText: "", x: 160, y: 340, fontSize: 9 },
 ];
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (u: Partial<FieldDef>) => void }) {
