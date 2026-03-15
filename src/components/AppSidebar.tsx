@@ -49,6 +49,7 @@ const adminItems = [
   { title: "Revendedores", url: "/dashboard/revendedores", icon: Users },
   { title: "Transferir", url: "/dashboard/transferir", icon: Send },
   { title: "Métricas", url: "/dashboard/metricas", icon: BarChart3 },
+  { title: "Alinhamento", url: "/dashboard/template-align", icon: Wrench },
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
 
