@@ -72,7 +72,7 @@ export default function RecarregarPage() {
   const [selectedPacote, setSelectedPacote] = useState<Pacote | null>(null);
   const [sliderValue, setSliderValue] = useState([5]);
 
-  const sliderPrice = sliderValue[0] * 14;
+  const sliderPrice = sliderValue[0] * 20;
 
   const handleBuy = () => {
     const credits = selectedPacote?.credits ?? sliderValue[0];
