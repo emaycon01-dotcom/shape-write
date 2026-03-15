@@ -14,6 +14,7 @@ const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
 const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
+const EsimDigitalPage = lazy(() => import("./pages/EsimDigitalPage"));
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
 const TemplateCnhPage = lazy(() => import("./pages/TemplateCnhPage"));
