@@ -124,6 +124,36 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
+              SERVIÇOS FÍSICOS
+              <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {ESTADOS_UF.map((uf) => (
+                    <SidebarMenuItem key={uf}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={`/dashboard/cnh-fisica/${uf.toLowerCase()}`}
+                          className="hover:bg-secondary/50"
+                          activeClassName="bg-secondary text-primary font-medium"
+                        >
+                          <MapPin className="mr-2 h-4 w-4" />
+                          {!collapsed && <span>CNH {uf}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </SidebarGroup>
+
         {user?.role === "admin" && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
