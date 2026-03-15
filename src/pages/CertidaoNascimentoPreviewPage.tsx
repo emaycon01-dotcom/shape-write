@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, Share2, CreditCard, Lock, Loader2, Download } from "lucide-react";
+import { ArrowLeft, Eye, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateUrl from "@/assets/template-certidao-nascimento.jpg";
 
