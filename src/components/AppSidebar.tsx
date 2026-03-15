@@ -38,7 +38,7 @@ import { SupportDialog } from "@/components/SupportDialog";
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Serviços", url: "/dashboard/documents", icon: FileText },
+  { title: "Serviços Digitais", url: "/dashboard/documents", icon: FileText },
   { title: "Histórico", url: "/dashboard/history", icon: History },
   { title: "Recarregar", url: "/dashboard/recarregar", icon: CreditCard },
   { title: "Planos", url: "/dashboard/planos", icon: Crown },
