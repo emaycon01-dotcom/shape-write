@@ -94,7 +94,7 @@ export default function CertidaoNascimentoPreviewPage() {
 
       drawField("horaNascimento", formData.horaNascimento);
       drawField("naturalidade", `${formData.naturalidade} - ${formData.federacao}`);
-      drawField("municipioRegistro", `${formData.municipioNascimento} - ${formData.estadoNascimento}`);
+      drawField("municipioRegistro", `${formData.municipioRegistro || formData.municipioNascimento} - ${formData.ufRegistro || formData.estadoNascimento}`);
       drawField("localNascimento", `${formData.localNascimento}, ${formData.municipioNascimento} - ${formData.estadoNascimento}`);
       drawField("sexo", formData.sexo);
 
