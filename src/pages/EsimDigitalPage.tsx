@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Smartphone, Signal } from "lucide-react";
+import { ArrowLeft, Smartphone, Signal, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +50,7 @@ export default function EsimDigitalPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [operadora, setOperadora] = useState<Operadora>(null);
+  const [termosAceitos, setTermosAceitos] = useState<"vivo" | "claro" | null>(null);
   const [tipoDDD, setTipoDDD] = useState<TipoDDD>("aleatorio");
   const [estado, setEstado] = useState("");
 
@@ -73,6 +74,66 @@ export default function EsimDigitalPage() {
 
     window.open(`https://wa.me/5581992120805?text=${msg}`, "_blank");
   };
+
+  // Tela de termos — Vivo
+  if (operadora === "vivo" && termosAceitos !== "vivo") {
+    return (
+      <div>
+        <button onClick={() => setOperadora(null)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </button>
+        <h1 className="font-display text-3xl font-bold text-foreground mb-1">E-SIM Vivo</h1>
+        <p className="text-muted-foreground mb-6">Leia os termos antes de continuar</p>
+
+        <div className="glass rounded-xl p-6 max-w-2xl space-y-4">
+          <h2 className="font-display font-semibold text-foreground text-lg flex items-center gap-2">📜 TERMOS DE USO – eSIM</h2>
+          <p className="text-sm text-muted-foreground">Ao adquirir um eSIM conosco, você concorda com as condições abaixo:</p>
+          <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
+            <li>Não há garantia após a ativação do eSIM.</li>
+            <li>Caso o eSIM apresente erro ou fique sem sinal na primeira ativação, poderá ser realizada troca após análise.</li>
+            <li>Os eSIMs disponibilizados são do plano Vivo Easy, pois a operadora não comercializa mais plano Controle no formato eSIM.</li>
+            <li>O eSIM só pode ser vinculado a um único aparelho. Após a primeira ativação, o EID do celular fica associado ao dispositivo, impossibilitando o uso em outro aparelho.</li>
+            <li>Uso incorreto não possui garantia, incluindo tentativa de reutilização do QR Code (exemplo: tela com botão de repetir).</li>
+            <li>Não garantimos funcionamento em celulares que já foram utilizados anteriormente para ativar Vivo Controle.</li>
+          </ul>
+          <div className="flex items-center gap-2 pt-2 border-t border-border">
+            <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />
+            <p className="text-sm text-muted-foreground">Ao continuar, o usuário declara que leu e concorda com todos os termos acima.</p>
+          </div>
+          <Button onClick={() => setTermosAceitos("vivo")} className="w-full" size="lg">CONTINUAR</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Tela de termos — Claro
+  if (operadora === "claro" && termosAceitos !== "claro") {
+    return (
+      <div>
+        <button onClick={() => setOperadora(null)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </button>
+        <h1 className="font-display text-3xl font-bold text-foreground mb-1">E-SIM Claro</h1>
+        <p className="text-muted-foreground mb-6">Leia os termos antes de continuar</p>
+
+        <div className="glass rounded-xl p-6 max-w-2xl space-y-4">
+          <h2 className="font-display font-semibold text-foreground text-lg flex items-center gap-2">📜 TERMOS DE USO – eSIM</h2>
+          <p className="text-sm text-muted-foreground">Ao adquirir um eSIM conosco, você concorda com as condições abaixo:</p>
+          <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
+            <li>Não há garantia após a ativação do eSIM.</li>
+            <li>Caso o eSIM apresente erro ou fique sem sinal na primeira ativação, poderá ser realizada troca após análise.</li>
+            <li>O eSIM só pode ser vinculado a um único aparelho. Após a primeira ativação, o EID do celular fica associado ao dispositivo, impossibilitando o uso em outro aparelho.</li>
+            <li>Uso incorreto não possui garantia, incluindo tentativa de reutilização do QR Code (exemplo: tela com botão de repetir).</li>
+          </ul>
+          <div className="flex items-center gap-2 pt-2 border-t border-border">
+            <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />
+            <p className="text-sm text-muted-foreground">Ao continuar, o usuário declara que leu e concorda com todos os termos acima.</p>
+          </div>
+          <Button onClick={() => setTermosAceitos("claro")} className="w-full" size="lg">CONTINUAR</Button>
+        </div>
+      </div>
+    );
+  }
 
   // Seleção de operadora
   if (!operadora) {
