@@ -309,9 +309,9 @@ function CnhAlignContent() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-4">
+    <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento CNH</h1>
+        <h2 className="text-lg font-bold text-foreground font-display">Alinhamento - CNH</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={resetPositions} className="gap-1.5">
             <RotateCcw className="w-4 h-4" /> Reset
