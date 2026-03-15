@@ -104,6 +104,8 @@ interface CertidaoFormData {
   avoPaterna: string;
   avoPaterno: string;
   gemeos: string;
+  municipioRegistro: string;
+  ufRegistro: string;
   dataRegistroExtenso: string;
 }
 
@@ -114,7 +116,7 @@ const initial: CertidaoFormData = {
   localNascimento: "", municipioNascimento: "", estadoNascimento: "",
   sexo: "", nomeMae: "", nomePai: "",
   avoMaterna: "", avoMaterno: "", avoPaterna: "", avoPaterno: "",
-  gemeos: "NÃO", dataRegistroExtenso: "",
+  gemeos: "NÃO", municipioRegistro: "", ufRegistro: "", dataRegistroExtenso: "",
 };
 
 const NOMES_TESTE = ["PEDRO DA SILVA GOMES","MARIA OLIVEIRA SANTOS","CARLOS FERREIRA LIMA","ANA PAULA COSTA"];
@@ -202,6 +204,8 @@ export default function CertidaoNascimentoFormPage() {
       avoPaterna: pick(AVOS_TESTE),
       avoPaterno: pick(AVOS_TESTE),
       gemeos: "NÃO",
+      municipioRegistro: cidade,
+      ufRegistro: uf,
       dataRegistroExtenso: dateToExtenso(dataReg),
     });
     toast({ title: "Formulário preenchido com dados de teste!" });
@@ -407,6 +411,20 @@ export default function CertidaoNascimentoFormPage() {
         {/* REGISTRO */}
         <div className="glass rounded-xl p-6 space-y-4">
           <SectionHeader icon={FileText} title="Registro" />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <FieldLabel>Município de Registro</FieldLabel>
+              <Input value={form.municipioRegistro} onChange={set("municipioRegistro")} placeholder="Ex: São Paulo" className={inputCls} required />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel>Unidade da Federação</FieldLabel>
+              <Select value={form.ufRegistro} onValueChange={setSelect("ufRegistro")}>
+                <SelectTrigger className={inputCls}><SelectValue placeholder="UF" /></SelectTrigger>
+                <SelectContent>{UF_LIST.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <div className="space-y-1.5">
             <FieldLabel>Data do Registro (por extenso)</FieldLabel>
