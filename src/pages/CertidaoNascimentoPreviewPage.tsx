@@ -75,7 +75,7 @@ export default function CertidaoNascimentoPreviewPage() {
       const drawField = (key: string, text: string) => {
         const pos = positions[key];
         if (!pos || !text) return;
-        ctx.font = `${pos.fontSize * scaleX}px Arial`;
+        ctx.font = `bold ${pos.fontSize * scaleX}px Arial`;
         ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
       };
 
