@@ -245,8 +245,8 @@ export default function CertidaoNascimentoPreviewPage() {
           <Button variant="gradient" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleView}>
             <Eye className="w-5 h-5 mr-2" /> Ver
           </Button>
-          <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleDownload}>
-            <Download className="w-5 h-5 mr-2" /> Baixar
+          <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleShare}>
+            <Share2 className="w-5 h-5 mr-2" /> Compartilhar
           </Button>
         </div>
       )}
