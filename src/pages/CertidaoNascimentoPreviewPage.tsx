@@ -127,6 +127,26 @@ export default function CertidaoNascimentoPreviewPage() {
     );
   }
 
+  const generatePdfFromCanvas = (): string | null => {
+    if (!canvasRef.current) return null;
+    const canvas = canvasRef.current;
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+    const canvasRatio = canvas.height / canvas.width;
+    const imgHeight = pdfWidth * canvasRatio;
+
+    if (imgHeight <= pdfHeight) {
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+    } else {
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    }
+
+    return pdf.output("datauristring");
+  };
+
   const handleGenerate = async () => {
     if (!user) return;
     if (user.credits < 1) {
@@ -135,6 +155,10 @@ export default function CertidaoNascimentoPreviewPage() {
     }
     setLoading(true);
     try {
+      const pdfUrl = generatePdfFromCanvas();
+      if (!pdfUrl) throw new Error("Falha ao gerar PDF");
+      setPdfDataUrl(pdfUrl);
+
       deductCredit();
       addDocument({
         name: formData.nomeCompleto || "",
@@ -155,19 +179,18 @@ export default function CertidaoNascimentoPreviewPage() {
   };
 
   const handleShare = async () => {
-    if (!canvasRef.current) return;
+    if (!pdfDataUrl) return;
     try {
-      const dataUrl = canvasRef.current.toDataURL("image/png");
-      const blob = await fetch(dataUrl).then((r) => r.blob());
-      const file = new File([blob], "certidao-nascimento.png", { type: "image/png" });
+      const blob = await fetch(pdfDataUrl).then((r) => r.blob());
+      const file = new File([blob], "certidao-nascimento.pdf", { type: "application/pdf" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: "Certidão de Nascimento" });
       } else {
         const link = document.createElement("a");
-        link.download = "certidao-nascimento.png";
-        link.href = dataUrl;
+        link.download = "certidao-nascimento.pdf";
+        link.href = pdfDataUrl;
         link.click();
-        toast({ title: "Certidão baixada com sucesso!" });
+        toast({ title: "PDF baixado com sucesso!" });
       }
     } catch {
       toast({ title: "Erro ao compartilhar", variant: "destructive" });
@@ -175,11 +198,12 @@ export default function CertidaoNascimentoPreviewPage() {
   };
 
   const handleView = () => {
-    if (!canvasRef.current) return;
-    const dataUrl = canvasRef.current.toDataURL("image/png");
+    if (!pdfDataUrl) return;
     const win = window.open();
     if (win) {
-      win.document.write(`<img src="${dataUrl}" style="max-width:100%;"/>`);
+      win.document.write(
+        `<iframe src="${pdfDataUrl}" style="width:100%;height:100%;border:none;" title="PDF"></iframe>`
+      );
     }
   };
 
