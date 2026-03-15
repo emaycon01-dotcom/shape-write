@@ -37,6 +37,10 @@ const commonItems = [
   { title: "Planos", url: "/dashboard/planos", icon: Crown },
 ];
 
+const toolItems = [
+  { title: "Gerador de Assinatura", url: "/dashboard/ferramentas/assinatura", icon: PenTool },
+];
+
 const adminItems = [
   { title: "Revendedores", url: "/dashboard/revendedores", icon: Users },
   { title: "Transferir", url: "/dashboard/transferir", icon: Send },
