@@ -158,11 +158,9 @@ export default function SignatureGeneratorPage() {
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button onClick={generateSignature} disabled={!name.trim()} className="flex-1">
-              Gerar Assinatura
-            </Button>
-            <Button variant="outline" onClick={handleReset}>
-              <RotateCcw className="w-4 h-4" />
+            <Button variant="outline" onClick={handleReset} className="w-full">
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Limpar
             </Button>
           </div>
         </CardContent>
