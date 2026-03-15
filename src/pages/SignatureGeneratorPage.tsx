@@ -24,7 +24,7 @@ export default function SignatureGeneratorPage() {
 
   const generateSignature = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !name.trim()) return;
+    if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -32,14 +32,30 @@ export default function SignatureGeneratorPage() {
     canvas.width = 600;
     canvas.height = 200;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // White background
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = color;
-    ctx.font = `48px ${FONTS[selectedFont].family}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(name, canvas.width / 2, canvas.height / 2);
+    if (name.trim()) {
+      ctx.fillStyle = color;
+      ctx.font = `48px ${FONTS[selectedFont].family}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(name, canvas.width / 2, canvas.height / 2);
+    }
   }, [name, selectedFont, color]);
+
+  // Auto-generate on every change
+  useState(() => { generateSignature(); });
+  const prevDeps = useRef({ name, selectedFont, color });
+  if (
+    prevDeps.current.name !== name ||
+    prevDeps.current.selectedFont !== selectedFont ||
+    prevDeps.current.color !== color
+  ) {
+    prevDeps.current = { name, selectedFont, color };
+    setTimeout(generateSignature, 0);
+  }
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
