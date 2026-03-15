@@ -28,7 +28,7 @@ export default function DocumentsPage() {
             disabled={!dt.route}
           >
             <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-              <FileText className="w-6 h-6 text-primary" />
+              <dt.icon className="w-6 h-6 text-primary" />
             </div>
             <h3 className="font-display font-semibold text-foreground mb-1">{dt.name}</h3>
             <p className="text-sm text-muted-foreground mb-3">{dt.description}</p>
