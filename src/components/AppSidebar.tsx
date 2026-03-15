@@ -7,7 +7,12 @@ import {
   LogOut,
   Settings,
   Users,
-  Move,
+  CreditCard,
+  Send,
+  BarChart3,
+  Crown,
+  Wrench,
+  Download,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,28 +28,29 @@ import {
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.png";
 
-const mainItems = [
-  { title: "Painel", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Documentos", url: "/dashboard/documents", icon: FileText },
+const commonItems = [
+  { title: "Início", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Serviços", url: "/dashboard/documents", icon: FileText },
   { title: "Histórico", url: "/dashboard/history", icon: History },
+  { title: "Recarregar", url: "/dashboard/recarregar", icon: CreditCard },
+  { title: "Planos", url: "/dashboard/planos", icon: Crown },
 ];
 
 const adminItems = [
-  { title: "Alinhamento", url: "/dashboard/template-align", icon: Move },
-  { title: "Gerenciar Usuários", url: "/dashboard/admin/users", icon: Users },
-  { title: "Configurações", url: "/dashboard/admin/settings", icon: Settings },
+  { title: "Revendedores", url: "/dashboard/revendedores", icon: Users },
+  { title: "Transferir", url: "/dashboard/transferir", icon: Send },
+  { title: "Métricas", url: "/dashboard/metricas", icon: BarChart3 },
+  { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
-  const location = useLocation();
 
   return (
     <Sidebar collapsible="icon">
       <SidebarContent className="flex flex-col h-full">
-        {/* Logo */}
         {!collapsed && (
           <div className="px-4 py-5 flex items-center gap-3">
             <img src={logo} alt="Bellarus" className="w-9 h-9" />
@@ -61,7 +67,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
+              {commonItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
@@ -106,7 +112,10 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        <div className="mt-auto p-4">
+        <div className="mt-auto p-4 space-y-2">
+          {!collapsed && user && (
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          )}
           <button
             onClick={logout}
             className="flex items-center gap-2 text-sm text-destructive hover:text-destructive/80 transition-colors"
