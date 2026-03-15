@@ -17,22 +17,22 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  nome: { x: 160, y: 108, fontSize: 10 },
-  cpf: { x: 450, y: 108, fontSize: 10 },
-  matricula: { x: 160, y: 130, fontSize: 8 },
-  dataNascimentoExtenso: { x: 160, y: 160, fontSize: 9 },
-  dia: { x: 450, y: 160, fontSize: 9 },
-  mes: { x: 500, y: 160, fontSize: 9 },
-  ano: { x: 580, y: 160, fontSize: 9 },
-  horaNascimento: { x: 160, y: 190, fontSize: 9 },
-  naturalidade: { x: 350, y: 190, fontSize: 9 },
-  municipioRegistro: { x: 160, y: 220, fontSize: 9 },
-  localNascimento: { x: 450, y: 220, fontSize: 9 },
-  sexo: { x: 700, y: 220, fontSize: 9 },
-  filiacao: { x: 160, y: 250, fontSize: 9 },
-  avos: { x: 160, y: 280, fontSize: 8 },
-  gemeos: { x: 160, y: 310, fontSize: 9 },
-  dataRegistro: { x: 160, y: 340, fontSize: 9 },
+  nome: { x: 292, y: 252, fontSize: 15 },
+  cpf: { x: 118, y: 277, fontSize: 14 },
+  matricula: { x: 186, y: 308, fontSize: 20 },
+  dataNascimentoExtenso: { x: 114, y: 349, fontSize: 12 },
+  dia: { x: 533, y: 349, fontSize: 10 },
+  mes: { x: 575, y: 350, fontSize: 10 },
+  ano: { x: 633, y: 350, fontSize: 10 },
+  horaNascimento: { x: 144, y: 381, fontSize: 14 },
+  naturalidade: { x: 480, y: 429, fontSize: 10 },
+  municipioRegistro: { x: 247, y: 382, fontSize: 12 },
+  localNascimento: { x: 368, y: 428, fontSize: 10 },
+  sexo: { x: 612, y: 418, fontSize: 10 },
+  filiacao: { x: 117, y: 456, fontSize: 14 },
+  avos: { x: 121, y: 502, fontSize: 14 },
+  gemeos: { x: 177, y: 412, fontSize: 14 },
+  dataRegistro: { x: 221, y: 571, fontSize: 13 },
 };
 
 export default function CertidaoNascimentoPreviewPage() {
