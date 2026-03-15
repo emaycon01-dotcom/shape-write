@@ -144,7 +144,7 @@ export default function RecarregarPage() {
             setSelectedPacote(null);
           }}
           min={1}
-          max={100}
+          max={4}
           step={1}
           className="mb-4"
         />
