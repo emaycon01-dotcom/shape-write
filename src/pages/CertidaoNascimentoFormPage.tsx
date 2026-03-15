@@ -204,6 +204,8 @@ export default function CertidaoNascimentoFormPage() {
       avoPaterna: pick(AVOS_TESTE),
       avoPaterno: pick(AVOS_TESTE),
       gemeos: "NÃO",
+      municipioRegistro: cidade,
+      ufRegistro: uf,
       dataRegistroExtenso: dateToExtenso(dataReg),
     });
     toast({ title: "Formulário preenchido com dados de teste!" });
