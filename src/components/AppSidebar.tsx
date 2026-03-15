@@ -17,6 +17,7 @@ import {
   PenTool,
   MapPin,
   ChevronDown,
+  Headphones,
 } from "lucide-react";
 import {
   Sidebar,
