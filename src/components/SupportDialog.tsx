@@ -11,13 +11,13 @@ const supportMembers = [
     name: "Souza",
     role: "CEO & SUPORTE",
     icon: Crown,
-    link: "#",
+    link: "https://wa.me/5581992120805",
   },
   {
     name: "G7",
     role: "GERENTE & SUPORTE",
     icon: Shield,
-    link: "#",
+    link: "https://wa.me/5581960002805",
   },
 ];
 
