@@ -18,6 +18,7 @@ import {
   MapPin,
   ChevronDown,
   Headphones,
+  Palette,
 } from "lucide-react";
 import {
   Sidebar,
