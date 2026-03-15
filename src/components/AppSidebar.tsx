@@ -91,7 +91,29 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {user?.role === "admin" && (
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
+            FERRAMENTAS
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {toolItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className="hover:bg-secondary/50"
+                      activeClassName="bg-secondary text-primary font-medium"
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
           <SidebarGroup>
             <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
               ADMINISTRAÇÃO

@@ -64,6 +64,7 @@ const App = () => (
                   <Route path="configuracoes" element={<ConfiguracoesPage />} />
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                   <Route path="template-align" element={<TemplateAlignPage />} />
+                  <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
