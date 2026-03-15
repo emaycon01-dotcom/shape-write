@@ -25,6 +25,7 @@ const TransferirPage = lazy(() => import("./pages/TransferirPage"));
 const RevendedoresPage = lazy(() => import("./pages/RevendedoresPage"));
 const MetricasPage = lazy(() => import("./pages/MetricasPage"));
 const ConfiguracoesPage = lazy(() => import("./pages/ConfiguracoesPage"));
+const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
                   <Route path="configuracoes" element={<ConfiguracoesPage />} />
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                   <Route path="template-align" element={<TemplateAlignPage />} />
+                  <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
