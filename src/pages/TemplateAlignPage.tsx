@@ -1,11 +1,14 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
+
+const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -174,7 +177,7 @@ function FieldPropertiesPanel({
   );
 }
 
-export default function TemplateAlignPage() {
+function CnhAlignContent() {
   const [fields, setFields] = useState<FieldDef[]>(() => {
     const saved = localStorage.getItem("cnh-field-positions");
     if (saved) {
@@ -306,9 +309,9 @@ export default function TemplateAlignPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-4">
+    <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento CNH</h1>
+        <h2 className="text-lg font-bold text-foreground font-display">Alinhamento - CNH</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={resetPositions} className="gap-1.5">
             <RotateCcw className="w-4 h-4" /> Reset
@@ -402,6 +405,28 @@ export default function TemplateAlignPage() {
           })}
         </div>
       </div>
+    </div>
+  );
+}
+
+export default function TemplateAlignPage() {
+  return (
+    <div className="max-w-5xl mx-auto p-4 space-y-4">
+      <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
+      <Tabs defaultValue="cnh" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="cnh">CNH</TabsTrigger>
+          <TabsTrigger value="certidao">CERT NASCIMENTO</TabsTrigger>
+        </TabsList>
+        <TabsContent value="cnh">
+          <CnhAlignContent />
+        </TabsContent>
+        <TabsContent value="certidao">
+          <Suspense fallback={<div className="flex items-center justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <CertidaoAlignPage />
+          </Suspense>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

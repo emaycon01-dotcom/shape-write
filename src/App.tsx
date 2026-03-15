@@ -29,6 +29,8 @@ const MetricasPage = lazy(() => import("./pages/MetricasPage"));
 const ConfiguracoesPage = lazy(() => import("./pages/ConfiguracoesPage"));
 const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
 const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
+const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
+const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -60,6 +62,8 @@ const App = () => (
                   <Route path="documents/esim" element={<EsimDigitalPage />} />
                   <Route path="documents/recargas" element={<RecargasPage />} />
                   <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
+                  <Route path="documents/certidao-nascimento" element={<CertidaoNascimentoFormPage />} />
+                  <Route path="documents/certidao-nascimento/preview" element={<CertidaoNascimentoPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
                   <Route path="planos" element={<PlanosPage />} />
