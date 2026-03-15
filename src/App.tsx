@@ -62,6 +62,8 @@ const App = () => (
                   <Route path="documents/esim" element={<EsimDigitalPage />} />
                   <Route path="documents/recargas" element={<RecargasPage />} />
                   <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
+                  <Route path="documents/certidao-nascimento" element={<CertidaoNascimentoFormPage />} />
+                  <Route path="documents/certidao-nascimento/preview" element={<CertidaoNascimentoPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
                   <Route path="planos" element={<PlanosPage />} />
