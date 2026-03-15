@@ -5,6 +5,7 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { jsPDF } from "jspdf";
 import templateUrl from "@/assets/template-certidao-nascimento.jpg";
 
 const PAGE_W = 794;
