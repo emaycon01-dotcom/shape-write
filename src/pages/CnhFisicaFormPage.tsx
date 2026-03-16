@@ -268,7 +268,10 @@ export default function CnhFisicaFormPage() {
     setLoading(true);
 
     try {
-      const templateBase64 = await imgToBase64(templateCnhFisicaUrl);
+      const [templateBase64, templateVersoBase64] = await Promise.all([
+        imgToBase64(templateCnhFisicaUrl),
+        imgToBase64(templateCnhFisicaVersoUrl),
+      ]);
 
       const bodyData = {
         nome_completo: form.nomeCompleto,
@@ -298,6 +301,7 @@ export default function CnhFisicaFormPage() {
         foto_base64: fotoPreview || "",
         assinatura_base64: assPreview || "",
         template_base64: templateBase64,
+        template_verso_base64: templateVersoBase64,
         tipo: "fisica",
         estado_fisica: estadoSelecionado,
       };
