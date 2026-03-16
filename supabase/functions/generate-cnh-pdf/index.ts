@@ -209,7 +209,7 @@ function buildCatDateOverlays(activeCategory: string, d: Record<string, string>)
     A: { x: 169, y: 280, fontSize: 4.5 },
     B: { x: 169, y: 302, fontSize: 4.5 },
     C: { x: 169, y: 323, fontSize: 4.5 },
-    D: { x: 272, y: 270, fontSize: 4.5 },
+    D: { x: 271, y: 268, fontSize: 4.5 },
     E: { x: 271, y: 291, fontSize: 4.5 },
   };
 
