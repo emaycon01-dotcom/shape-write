@@ -298,7 +298,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
-    top: 250px; left: 54px;
+    top: 248px; left: 66px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
