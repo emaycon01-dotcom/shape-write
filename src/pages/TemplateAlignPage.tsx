@@ -421,8 +421,11 @@ function CnhAlignContent() {
   return <GenericAlignContent templateUrl={templateBgUrl} storageKey="cnh-field-positions" title="Alinhamento - CNH" fields={defaultFields} />;
 }
 
+// CNH Física frente: same fields as digital but WITHOUT MRZ (MRZ only on verso)
+const defaultFisicaFrenteFields = defaultFields.filter(f => f.id !== "mrz");
+
 function CnhFisicaAlignContent() {
-  return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física (Frente)" fields={defaultFields} />;
+  return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física (Frente)" fields={defaultFisicaFrenteFields} />;
 }
 
 const defaultVersoFields: FieldDef[] = [
