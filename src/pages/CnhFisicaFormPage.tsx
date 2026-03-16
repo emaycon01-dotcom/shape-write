@@ -180,7 +180,7 @@ export default function CnhFisicaFormPage() {
       genero: pick(["M","F"]),
       nacionalidade: "BRASILEIRA",
       dataNascimentoLocal: `${randomDate(1980, 2002)}, ${cidade}`,
-      registro: generateRandom(11),
+      registro: generateRandom(9),
       categoria: cat,
       cnhDefinitiva: pick(["SIM","NAO"]),
       primeiraHab,
