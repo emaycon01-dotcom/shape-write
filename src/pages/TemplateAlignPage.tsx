@@ -421,8 +421,36 @@ function CnhAlignContent() {
   return <GenericAlignContent templateUrl={templateBgUrl} storageKey="cnh-field-positions" title="Alinhamento - CNH" fields={defaultFields} />;
 }
 
-// CNH Física frente: same fields as digital but WITHOUT MRZ (MRZ only on verso)
-const defaultFisicaFrenteFields = defaultFields.filter(f => f.id !== "mrz");
+// CNH Física frente: coordenadas reais da edge function (sem MRZ)
+const defaultFisicaFrenteFields: FieldDef[] = [
+  { id: "photo", label: "Foto", sampleText: "[FOTO]", x: 88, y: 106, fontSize: 8, w: 82, h: 110, color: "#999" },
+  { id: "signature", label: "Assinatura", sampleText: "[ASSINATURA]", x: 85, y: 216, fontSize: 7, w: 95, h: 32, color: "#999" },
+  { id: "nome", label: "Nome", sampleText: "MARIA OLIVEIRA SANTOS", x: 94, y: 87, fontSize: 6.5 },
+  { id: "primeira_hab", label: "1ª Hab", sampleText: "27/09/2017", x: 300, y: 86, fontSize: 6.5 },
+  { id: "nascimento", label: "Nascimento", sampleText: "11/03/1989, RIO DE JANEIRO, RJ", x: 185, y: 106, fontSize: 6.5 },
+  { id: "emissao", label: "Emissão", sampleText: "14/03/2026", x: 184, y: 125, fontSize: 6.5 },
+  { id: "validade", label: "Validade", sampleText: "14/03/2036", x: 246, y: 125, fontSize: 6.5, color: "#c00" },
+  { id: "cat_big", label: "Cat. Grande", sampleText: "AB", x: 328, y: 120, fontSize: 11 },
+  { id: "rg", label: "RG", sampleText: "3963221 SSP PR", x: 184, y: 144, fontSize: 6.5 },
+  { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 184, y: 163, fontSize: 6.5 },
+  { id: "registro", label: "Registro", sampleText: "07915888995", x: 251, y: 163, fontSize: 6.5, color: "#c00" },
+  { id: "cat_hab", label: "Cat. Hab", sampleText: "AB", x: 312, y: 162, fontSize: 7, color: "#c00" },
+  { id: "nacionalidade", label: "Nacionalidade", sampleText: "BRASILEIRA", x: 184, y: 182, fontSize: 6.5 },
+  { id: "pai", label: "Pai", sampleText: "JOSE DA SILVA", x: 184, y: 200, fontSize: 6.5 },
+  { id: "mae", label: "Mãe", sampleText: "SANDRA COSTA", x: 184, y: 217, fontSize: 6.5 },
+  { id: "validade_cat_a", label: "Validade Cat. A", sampleText: "14/03/2036", x: 169, y: 280, fontSize: 4.5 },
+  { id: "validade_cat_b", label: "Validade Cat. B", sampleText: "14/03/2036", x: 169, y: 302, fontSize: 4.5 },
+  { id: "validade_cat_c", label: "Validade Cat. C", sampleText: "14/03/2036", x: 169, y: 323, fontSize: 4.5 },
+  { id: "validade_cat_d", label: "Validade Cat. D", sampleText: "14/03/2036", x: 272, y: 270, fontSize: 4.5 },
+  { id: "validade_cat_e", label: "Validade Cat. E", sampleText: "14/03/2036", x: 271, y: 291, fontSize: 4.5 },
+  { id: "obs", label: "Observações", sampleText: "EAR", x: 95, y: 359, fontSize: 5.5 },
+  { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 277, y: 416, fontSize: 6.5 },
+  { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 277, y: 424, fontSize: 6.5 },
+  { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 91, y: 434, fontSize: 6 },
+  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 162, y: 446, fontSize: 15, color: "#1a5c2a" },
+  { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 59, y: 253, fontSize: 14, rotate: -90 },
+  { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 61, y: 484, fontSize: 14, rotate: -90 },
+];
 
 function CnhFisicaAlignContent() {
   return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física (Frente)" fields={defaultFisicaFrenteFields} />;
