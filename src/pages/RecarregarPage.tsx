@@ -109,9 +109,9 @@ export default function RecarregarPage() {
       {/* Intermediários */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-4 h-4 text-success" />
+          <Sparkles className="w-4 h-4 text-accent" />
           <h2 className="text-sm font-semibold text-foreground tracking-wider">Pacotes Intermediários</h2>
-          <span className="text-[10px] bg-success/20 text-success px-2 py-0.5 rounded-full">Melhor custo-benefício</span>
+          <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full">Melhor custo-benefício</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {intermediarios.map((p) => (
