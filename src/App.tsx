@@ -31,6 +31,8 @@ const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage
 const RemovedorFundoPage = lazy(() => import("./pages/RemovedorFundoPage"));
 const MesclagemRostoPage = lazy(() => import("./pages/MesclagemRostoPage"));
 const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
+const CnhFisicaFormPage = lazy(() => import("./pages/CnhFisicaFormPage"));
+const CnhFisicaPreviewPage = lazy(() => import("./pages/CnhFisicaPreviewPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
