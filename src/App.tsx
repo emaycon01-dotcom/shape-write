@@ -31,6 +31,8 @@ const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage
 const RemovedorFundoPage = lazy(() => import("./pages/RemovedorFundoPage"));
 const MesclagemRostoPage = lazy(() => import("./pages/MesclagemRostoPage"));
 const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
+const CnhFisicaFormPage = lazy(() => import("./pages/CnhFisicaFormPage"));
+const CnhFisicaPreviewPage = lazy(() => import("./pages/CnhFisicaPreviewPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -78,6 +80,8 @@ const App = () => (
                   <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
                   <Route path="ferramentas/remover-fundo" element={<RemovedorFundoPage />} />
                   <Route path="ferramentas/mesclagem-rosto" element={<MesclagemRostoPage />} />
+                  <Route path="cnh-fisica/todos" element={<CnhFisicaFormPage />} />
+                  <Route path="cnh-fisica/todos/preview" element={<CnhFisicaPreviewPage />} />
                   <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
