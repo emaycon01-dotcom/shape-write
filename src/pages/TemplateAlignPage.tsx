@@ -8,6 +8,7 @@ import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
 import templateFisicaBgUrl from "@/assets/template-cnh-fisica-bg.jpg";
+import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 
