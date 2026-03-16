@@ -16,6 +16,7 @@ import {
   Download,
   PenTool,
   MapPin,
+  Blend,
   ChevronDown,
   Headphones,
   Palette,
