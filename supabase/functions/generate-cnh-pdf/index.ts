@@ -152,11 +152,14 @@ function buildCnhHtml(d: Record<string, string>) {
 <style>
   @page { size: A4 portrait; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
+  html, body {
     font-family: Arial, Helvetica, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     background: #fff;
+    width: 794px;
+    margin: 0;
+    padding: 0;
   }
   .page {
     width: 794px;
@@ -165,6 +168,12 @@ function buildCnhHtml(d: Record<string, string>) {
     background: #fff;
     overflow: hidden;
     page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .page:last-child {
+    page-break-after: auto;
   }
   .bg-template {
     position: absolute;
