@@ -8,6 +8,7 @@ import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
 import templateFisicaBgUrl from "@/assets/template-cnh-fisica-bg.jpg";
+import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 
@@ -421,7 +422,11 @@ function CnhAlignContent() {
 }
 
 function CnhFisicaAlignContent() {
-  return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física" fields={defaultFields} />;
+  return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física (Frente)" fields={defaultFields} />;
+}
+
+function CnhFisicaVersoAlignContent() {
+  return <GenericAlignContent templateUrl={templateFisicaVersoBgUrl} storageKey="cnh-fisica-verso-field-positions" title="Alinhamento - CNH Física (Verso)" fields={[]} />;
 }
 
 export default function TemplateAlignPage() {
@@ -452,12 +457,16 @@ export default function TemplateAlignPage() {
         </TabsContent>
 
         <TabsContent value="fisicos">
-          <Tabs defaultValue="cnh-fisica" className="w-full">
+          <Tabs defaultValue="cnh-fisica-frente" className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="cnh-fisica">CNH FÍSICA</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-frente">CNH FÍSICA (FRENTE)</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-verso">CNH FÍSICA (VERSO)</TabsTrigger>
             </TabsList>
-            <TabsContent value="cnh-fisica">
+            <TabsContent value="cnh-fisica-frente">
               <CnhFisicaAlignContent />
+            </TabsContent>
+            <TabsContent value="cnh-fisica-verso">
+              <CnhFisicaVersoAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>

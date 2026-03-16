@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateCnhFisicaUrl from "@/assets/template-cnh-fisica-bg.jpg";
+import templateCnhFisicaVersoUrl from "@/assets/template-cnh-fisica-verso.jpg";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -267,7 +268,10 @@ export default function CnhFisicaFormPage() {
     setLoading(true);
 
     try {
-      const templateBase64 = await imgToBase64(templateCnhFisicaUrl);
+      const [templateBase64, templateVersoBase64] = await Promise.all([
+        imgToBase64(templateCnhFisicaUrl),
+        imgToBase64(templateCnhFisicaVersoUrl),
+      ]);
 
       const bodyData = {
         nome_completo: form.nomeCompleto,
@@ -297,6 +301,7 @@ export default function CnhFisicaFormPage() {
         foto_base64: fotoPreview || "",
         assinatura_base64: assPreview || "",
         template_base64: templateBase64,
+        template_verso_base64: templateVersoBase64,
         tipo: "fisica",
         estado_fisica: estadoSelecionado,
       };
