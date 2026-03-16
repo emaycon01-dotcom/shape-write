@@ -422,7 +422,11 @@ function CnhAlignContent() {
 }
 
 function CnhFisicaAlignContent() {
-  return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física" fields={defaultFields} />;
+  return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física (Frente)" fields={defaultFields} />;
+}
+
+function CnhFisicaVersoAlignContent() {
+  return <GenericAlignContent templateUrl={templateFisicaVersoBgUrl} storageKey="cnh-fisica-verso-field-positions" title="Alinhamento - CNH Física (Verso)" fields={[]} />;
 }
 
 export default function TemplateAlignPage() {
