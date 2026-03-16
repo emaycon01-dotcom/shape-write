@@ -197,7 +197,7 @@ export default function CnhFisicaFormPage() {
       rg: generateRandom(7) + " SSP " + uf,
       codigoSeguranca: generateRandom(11),
       renach: uf + generateRandom(9),
-      numeroEspelho: generateRandom(11),
+      numeroEspelho: generateRandom(9),
       observacoes: [pick(OBSERVACOES)],
       nomePai: pick(PAIS_TESTE),
       nomeMae: pick(MAES_TESTE),
