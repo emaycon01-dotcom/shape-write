@@ -218,7 +218,7 @@ function buildCatDateOverlays(activeCategory: string, d: Record<string, string>)
     if (active.has(cat)) {
       const date = getCatDate(cat, d);
       if (date) {
-        html += `<div class="overlay" style="top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;font-weight:bold;color:#111;">${date}</div>`;
+        html += `<div class="overlay" style="top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;font-weight:normal;color:#111;">${date}</div>`;
       }
     }
   }
