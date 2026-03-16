@@ -465,8 +465,37 @@ function CnhFisicaVersoAlignContent() {
 }
 
 function CnhFisicaFullContent() {
+  const { toast } = useToast();
+
+  const copyFullCode = () => {
+    const frenteSaved = localStorage.getItem("cnh-fisica-field-positions");
+    const versoSaved = localStorage.getItem("cnh-fisica-verso-field-positions");
+
+    const frenteFields: FieldDef[] = frenteSaved ? JSON.parse(frenteSaved) : defaultFisicaFrenteFields;
+    const versoFields: FieldDef[] = versoSaved ? JSON.parse(versoSaved) : defaultVersoFields;
+
+    const toObj = (fields: FieldDef[]) =>
+      fields.reduce((acc, f) => {
+        acc[f.id] = { x: f.x, y: f.y, fontSize: f.fontSize, ...(f.w ? { w: f.w } : {}), ...(f.h ? { h: f.h } : {}), ...(f.rotate !== undefined ? { rotate: f.rotate } : {}) };
+        return acc;
+      }, {} as Record<string, any>);
+
+    const result = {
+      frente: toObj(frenteFields),
+      verso: toObj(versoFields),
+    };
+
+    navigator.clipboard.writeText(JSON.stringify(result, null, 2));
+    toast({ title: "Coordenadas completas copiadas!", description: "Frente + Verso copiados para aplicar na edge function." });
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button size="sm" variant="outline" onClick={copyFullCode} className="gap-1.5">
+          <Copy className="w-4 h-4" /> Copiar Coords (Frente + Verso)
+        </Button>
+      </div>
       <CnhFisicaAlignContent />
       <div className="border-t border-border pt-6">
         <CnhFisicaVersoAlignContent />
