@@ -298,7 +298,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
-    top: 256px; left: 56px;
+    top: 250px; left: 54px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -331,12 +331,12 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
 
-  .f-espelho      { top: 418px; left: 276px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
-  .f-renach       { top: 427px; left: 276px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-espelho      { top: 417px; left: 278px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-renach       { top: 426px; left: 279px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-local        { top: 434px; left: 91px; font-size: 6px; }
 
   .reg-vert-bot {
-    top: 484px; left: 58px;
+    top: 478px; left: 57px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
