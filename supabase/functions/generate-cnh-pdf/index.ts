@@ -298,7 +298,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
-    top: 256px; left: 58px;
+    top: 256px; left: 56px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -316,27 +316,27 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-emissao      { top: 123px; left: 189px; font-size: 6.5px; }
   .f-validade     { top: 124px; left: 248px; font-size: 6.5px; color: #c00; }
-  .f-cat-big      { top: 121px; left: 329px; font-size: 11px; color: #111; }
+  .f-cat-big      { top: 121px; left: 331px; font-size: 11px; color: #111; }
 
-  .f-rg           { top: 142px; left: 183px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-rg           { top: 143px; left: 184px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-cpf          { top: 161px; left: 183px; font-size: 6.5px; }
+  .f-cpf          { top: 161px; left: 185px; font-size: 6.5px; }
   .f-registro     { top: 161px; left: 250px; font-size: 6.5px; color: #c00; }
   .f-cat-hab      { top: 162px; left: 312px; font-size: 7px; color: #c00; }
 
-  .f-nacionalidade { top: 180px; left: 183px; font-size: 6.5px; }
+  .f-nacionalidade { top: 180px; left: 184px; font-size: 6.5px; }
 
   .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
 
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
 
-  .f-espelho      { top: 416px; left: 277px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
-  .f-renach       { top: 427px; left: 275px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-espelho      { top: 418px; left: 276px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-renach       { top: 427px; left: 276px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-local        { top: 434px; left: 91px; font-size: 6px; }
 
   .reg-vert-bot {
-    top: 490px; left: 62px;
+    top: 484px; left: 58px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -346,7 +346,7 @@ function buildCnhHtml(d: Record<string, string>) {
     font-weight: bold;
   }
 
-  .f-estado       { top: 446px; left: 160px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
+  .f-estado       { top: 444px; left: 171px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
 
   .mrz-overlay {
     top: 624px; left: 126px;
