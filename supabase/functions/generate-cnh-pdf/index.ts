@@ -409,8 +409,7 @@ function buildCnhHtml(d: Record<string, string>) {
   <!-- STATE NAME -->
   <div class="overlay f-estado">${d.estado_extenso || ""}</div>
 
-  <!-- MRZ -->
-  <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <!-- MRZ removed from front page - only on verso/QR code page -->
 </div>
 
 <!-- ==================== PAGE 2: VERSO / QR CODE ==================== -->
