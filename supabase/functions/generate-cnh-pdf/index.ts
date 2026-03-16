@@ -143,6 +143,7 @@ function buildCnhHtml(d: Record<string, string>) {
   const espelhoClean = cleanCode(d.numero_espelho || "");
   const renachClean = cleanCode(d.renach || "");
   const templateBg = d.template_bg || "";
+  const templateVersoBg = d.template_verso_bg || "";
 
   return `<!DOCTYPE html>
 <html>
@@ -163,6 +164,7 @@ function buildCnhHtml(d: Record<string, string>) {
     position: relative;
     background: #fff;
     overflow: hidden;
+    page-break-after: always;
   }
   .bg-template {
     position: absolute;
@@ -263,6 +265,7 @@ function buildCnhHtml(d: Record<string, string>) {
 </style>
 </head>
 <body>
+<!-- ==================== PAGE 1: FRONT ==================== -->
 <div class="page">
   <!-- BACKGROUND TEMPLATE -->
   <div class="bg-template">
@@ -313,6 +316,13 @@ function buildCnhHtml(d: Record<string, string>) {
   <!-- MRZ -->
   <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
+
+<!-- ==================== PAGE 2: VERSO / QR CODE ==================== -->
+<div class="page">
+  <div class="bg-template">
+    ${templateVersoBg ? `<img src="${templateVersoBg}" />` : ""}
+  </div>
+</div>
 </body>
 </html>`;
 }
@@ -356,6 +366,7 @@ serve(async (req) => {
       nome_mae: body.nome_mae || "",
       observacoes: body.observacoes || "",
       template_bg: body.template_base64 || "",
+      template_verso_bg: body.template_verso_base64 || "",
     };
 
     if (body.foto_base64) {
