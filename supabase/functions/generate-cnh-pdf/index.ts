@@ -248,7 +248,7 @@ function buildCnhHtml(d: Record<string, string>) {
     font-weight: bold;
   }
 
-  .f-estado       { top: 531px; left: 163px; font-size: 15px; }
+  .f-estado       { top: 531px; left: 163px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
 
   .mrz-overlay {
     top: 694px; left: 80px;
