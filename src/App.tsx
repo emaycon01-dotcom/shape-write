@@ -28,6 +28,7 @@ const RevendedoresPage = lazy(() => import("./pages/RevendedoresPage"));
 const MetricasPage = lazy(() => import("./pages/MetricasPage"));
 const ConfiguracoesPage = lazy(() => import("./pages/ConfiguracoesPage"));
 const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
+const RemovedorFundoPage = lazy(() => import("./pages/RemovedorFundoPage"));
 const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
