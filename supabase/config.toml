@@ -2,3 +2,9 @@ project_id = "doycwownddyxfqntifca"
 
 [functions.generate-cnh-pdf]
 verify_jwt = false
+
+[functions.face-merge]
+verify_jwt = false
+
+[functions.remove-background]
+verify_jwt = false

@@ -16,6 +16,7 @@ import {
   Download,
   PenTool,
   MapPin,
+  Blend,
   ChevronDown,
   Headphones,
   Palette,
@@ -48,6 +49,7 @@ const commonItems = [
 const toolItems = [
   { title: "Gerador de Assinatura", url: "/dashboard/ferramentas/assinatura", icon: PenTool },
   { title: "Removedor de Fundo", url: "/dashboard/ferramentas/remover-fundo", icon: ImageIcon },
+  { title: "Mesclagem de Rosto", url: "/dashboard/ferramentas/mesclagem-rosto", icon: Blend },
 ];
 
 const adminItems = [
