@@ -48,7 +48,7 @@ function PacoteCard({ p, selected, onSelect }: { p: Pacote; selected: boolean; o
       } ${p.premium ? "border-yellow-500/50" : ""}`}
     >
       {p.discount && (
-        <span className="absolute -top-2 -right-2 bg-success text-success-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
+        <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
           -{p.discount}%
         </span>
       )}
