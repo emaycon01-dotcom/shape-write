@@ -336,7 +336,7 @@ function buildCnhHtml(d: Record<string, string>) {
   .f-local        { top: 434px; left: 91px; font-size: 6px; }
 
   .reg-vert-bot {
-    top: 473px; left: 72px;
+    top: 477px; left: 68px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -346,7 +346,7 @@ function buildCnhHtml(d: Record<string, string>) {
     font-weight: bold;
   }
 
-  .f-estado       { top: 446px; left: 159px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
+  .f-estado       { top: 450px; left: 175px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
 
   .mrz-overlay {
     top: 624px; left: 126px;
