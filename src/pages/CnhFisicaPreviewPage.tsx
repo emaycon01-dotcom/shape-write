@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Eye, Share2, ArrowLeft, Loader2, CreditCard, Lock } from "lucide-react";
+import { Eye, Share2, ArrowLeft, Loader2, CreditCard, Lock, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CnhFisicaPreviewPage() {
