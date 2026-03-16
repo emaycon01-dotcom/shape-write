@@ -11,30 +11,35 @@ serve(async (req) => {
   }
 
   try {
-    const { baseImage, referenceImage, intensity } = await req.json();
+    const { baseImage, referenceImage, mode } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const hasReference = !!referenceImage;
-    const pct = Math.round((intensity ?? 50));
 
     let prompt: string;
-    if (hasReference) {
-      prompt = `You are a face morphing expert. Merge these two face images together. The first image is the base face, and the second image is the reference face. Apply a ${pct}% blend intensity — at 0% keep the base face unchanged, at 100% make it look exactly like the reference face. At ${pct}%, smoothly blend the facial features (face shape, eyes, nose, mouth, jawline) proportionally. Keep the result photorealistic and natural-looking. Output ONLY the merged face image.`;
+    if (hasReference && mode === "merge") {
+      prompt = `You are a professional face swap expert. Take the face from the SECOND image (reference) and place it onto the FIRST image (base), replacing the base face completely. The output must:
+- Use the reference face's eyes, nose, mouth, jawline, skin tone and all facial features
+- Keep the base image's hair, body, clothing, background and pose
+- Match lighting, shadows and skin color seamlessly
+- Look completely photorealistic with no artifacts, seams or distortions
+- The result should look like the reference person is in the base photo
+Output ONLY the final face-swapped image, nothing else.`;
     } else {
-      prompt = `You are a face adjustment expert. Take this face image and apply a ${pct}% facial structure adjustment. Subtly reshape the face proportions — adjust the jawline, cheekbones, and facial symmetry to create a more refined look. At 0% keep original, at 100% apply maximum reshaping. Currently at ${pct}%. Keep the result photorealistic and natural. Output ONLY the adjusted face image.`;
+      prompt = `You are a professional portrait retouching expert. Take this face photo and enhance it:
+- Improve facial symmetry and proportions
+- Smooth skin while keeping natural texture
+- Enhance jawline definition
+- Improve overall facial structure
+- Keep the result looking natural and photorealistic
+Output ONLY the enhanced face image.`;
     }
 
     const content: any[] = [{ type: "text", text: prompt }];
-    content.push({
-      type: "image_url",
-      image_url: { url: baseImage },
-    });
+    content.push({ type: "image_url", image_url: { url: baseImage } });
     if (hasReference) {
-      content.push({
-        type: "image_url",
-        image_url: { url: referenceImage },
-      });
+      content.push({ type: "image_url", image_url: { url: referenceImage } });
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -44,7 +49,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3-pro-image-preview",
         messages: [{ role: "user", content }],
         modalities: ["image", "text"],
       }),
