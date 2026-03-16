@@ -457,12 +457,16 @@ export default function TemplateAlignPage() {
         </TabsContent>
 
         <TabsContent value="fisicos">
-          <Tabs defaultValue="cnh-fisica" className="w-full">
+          <Tabs defaultValue="cnh-fisica-frente" className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="cnh-fisica">CNH FÍSICA</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-frente">CNH FÍSICA (FRENTE)</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-verso">CNH FÍSICA (VERSO)</TabsTrigger>
             </TabsList>
-            <TabsContent value="cnh-fisica">
+            <TabsContent value="cnh-fisica-frente">
               <CnhFisicaAlignContent />
+            </TabsContent>
+            <TabsContent value="cnh-fisica-verso">
+              <CnhFisicaVersoAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>
