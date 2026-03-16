@@ -19,6 +19,7 @@ import {
   ChevronDown,
   Headphones,
   Palette,
+  ImageIcon,
 } from "lucide-react";
 import {
   Sidebar,
