@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
+import templateFisicaBgUrl from "@/assets/template-cnh-fisica-bg.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 
