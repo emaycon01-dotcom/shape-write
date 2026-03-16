@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -99,6 +100,29 @@ function buildMrz(d: Record<string, string>) {
 
 function cleanCode(value: string) {
   return value.replace(/\s+/g, "").toUpperCase();
+}
+
+function dataUrlToBytes(value: string) {
+  const base64 = value.includes(",") ? value.split(",")[1] : value;
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = "";
+  const chunkSize = 8192;
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+
+  return btoa(binary);
 }
 
 function parseActiveCategories(activeCategory: string) {
@@ -412,13 +436,25 @@ serve(async (req) => {
       throw new Error(`PDFShift error [${pdfRes.status}]: ${errText}`);
     }
 
-    const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer());
-    let binary = "";
-    const chunkSize = 8192;
-    for (let i = 0; i < pdfBuffer.length; i += chunkSize) {
-      binary += String.fromCharCode(...pdfBuffer.subarray(i, i + chunkSize));
+    let pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer());
+
+    if (body.tipo === "fisica" && body.template_pdf_base64) {
+      const generatedPdf = await PDFDocument.load(pdfBuffer);
+      const templatePdf = await PDFDocument.load(dataUrlToBytes(body.template_pdf_base64));
+      const mergedPdf = await PDFDocument.create();
+
+      const generatedPages = await mergedPdf.copyPages(generatedPdf, [0]);
+      generatedPages.forEach((page) => mergedPdf.addPage(page));
+
+      if (templatePdf.getPageCount() > 1) {
+        const templatePages = await mergedPdf.copyPages(templatePdf, [1]);
+        templatePages.forEach((page) => mergedPdf.addPage(page));
+      }
+
+      pdfBuffer = await mergedPdf.save();
     }
-    const pdfBase64 = btoa(binary);
+
+    const pdfBase64 = bytesToBase64(pdfBuffer);
 
     return new Response(
       JSON.stringify({

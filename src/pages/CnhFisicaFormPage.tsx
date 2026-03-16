@@ -12,6 +12,8 @@ import testAssUrl from "@/assets/test-assinatura.png";
 import templateCnhFisicaUrl from "@/assets/template-cnh-fisica-bg.jpg";
 import templateCnhFisicaVersoUrl from "@/assets/template-cnh-fisica-verso.jpg";
 
+const templateCnhFisicaPdfUrl = "/assets/template-cnh-fisica.pdf";
+
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
   "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"
@@ -268,9 +270,10 @@ export default function CnhFisicaFormPage() {
     setLoading(true);
 
     try {
-      const [templateBase64, templateVersoBase64] = await Promise.all([
+      const [templateBase64, templateVersoBase64, templatePdfBase64] = await Promise.all([
         imgToBase64(templateCnhFisicaUrl),
         imgToBase64(templateCnhFisicaVersoUrl),
+        imgToBase64(templateCnhFisicaPdfUrl),
       ]);
 
       const bodyData = {
@@ -302,6 +305,7 @@ export default function CnhFisicaFormPage() {
         assinatura_base64: assPreview || "",
         template_base64: templateBase64,
         template_verso_base64: templateVersoBase64,
+        template_pdf_base64: templatePdfBase64,
         tipo: "fisica",
         estado_fisica: estadoSelecionado,
       };
