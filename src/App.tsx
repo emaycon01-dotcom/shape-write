@@ -28,6 +28,7 @@ const RevendedoresPage = lazy(() => import("./pages/RevendedoresPage"));
 const MetricasPage = lazy(() => import("./pages/MetricasPage"));
 const ConfiguracoesPage = lazy(() => import("./pages/ConfiguracoesPage"));
 const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
+const RemovedorFundoPage = lazy(() => import("./pages/RemovedorFundoPage"));
 const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
@@ -74,6 +75,7 @@ const App = () => (
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                   <Route path="template-align" element={<TemplateAlignPage />} />
                   <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
+                  <Route path="ferramentas/remover-fundo" element={<RemovedorFundoPage />} />
                   <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
