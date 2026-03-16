@@ -267,7 +267,7 @@ export default function CnhFisicaFormPage() {
     setLoading(true);
 
     try {
-      const templateBase64 = await imgToBase64(templateCnhUrl);
+      const templateBase64 = await imgToBase64(templateCnhFisicaUrl);
 
       const bodyData = {
         nome_completo: form.nomeCompleto,
