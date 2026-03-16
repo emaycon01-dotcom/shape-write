@@ -309,7 +309,7 @@ function buildCnhHtml(d: Record<string, string>) {
   }
 
   /* ========== CARD FIELD VALUES ========== */
-  .f-nome         { top: 87px; left: 94px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-nome         { top: 86px; left: 95px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .f-primeira-hab { top: 86px; left: 300px; font-size: 6.5px; }
 
   .f-nascimento   { top: 106px; left: 185px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
