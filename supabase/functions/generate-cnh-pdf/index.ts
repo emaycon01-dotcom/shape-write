@@ -298,7 +298,7 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
-    top: 248px; left: 66px;
+    top: 250px; left: 62px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -331,12 +331,12 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
 
-  .f-espelho      { top: 421px; left: 286px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
-  .f-renach       { top: 430px; left: 285px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-espelho      { top: 419px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-renach       { top: 428px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-local        { top: 434px; left: 91px; font-size: 6px; }
 
   .reg-vert-bot {
-    top: 473px; left: 72px;
+    top: 477px; left: 68px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -346,7 +346,7 @@ function buildCnhHtml(d: Record<string, string>) {
     font-weight: bold;
   }
 
-  .f-estado       { top: 446px; left: 159px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
+  .f-estado       { top: 450px; left: 175px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
 
   .mrz-overlay {
     top: 624px; left: 126px;
@@ -419,7 +419,7 @@ function buildCnhHtml(d: Record<string, string>) {
   </div>
 
   <!-- MRZ on verso page -->
-  <div class="overlay" style="top:425px;left:466px;width:460px;font-family:'Courier New',Courier,monospace;font-size:14px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="top:425px;left:460px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
 </html>`;
