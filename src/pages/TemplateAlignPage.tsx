@@ -457,7 +457,7 @@ function CnhFisicaAlignContent() {
 }
 
 const defaultVersoFields: FieldDef[] = [
-  { id: "mrz_verso", label: "MRZ (Verso)", sampleText: "I<BRA079158889PB927125303<<<<\n8903118M3603147BRA<<<<<<<<<<<4\nMARIA<<OLIVEIRA<<SANTOS<<<<<<<", x: 170, y: 500, fontSize: 12 },
+  { id: "mrz_verso", label: "MRZ (Verso)", sampleText: "I<BRA079158889PB927125303<<<<\n8903118M3603147BRA<<<<<<<<<<<4\nMARIA<<OLIVEIRA<<SANTOS<<<<<<<", x: 472, y: 425, fontSize: 15 },
 ];
 
 function CnhFisicaVersoAlignContent() {
