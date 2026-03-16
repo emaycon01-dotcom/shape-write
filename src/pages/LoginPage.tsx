@@ -33,7 +33,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left brand panel */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-secondary/30">
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-background">
         <div className="text-center">
           <img src={logo} alt="Bellarus" className="w-40 h-40 mx-auto mb-6" />
           <h2 className="font-display text-3xl font-bold tracking-wider text-foreground">
