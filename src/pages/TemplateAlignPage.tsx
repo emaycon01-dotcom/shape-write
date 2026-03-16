@@ -11,6 +11,7 @@ import templateFisicaBgUrl from "@/assets/template-cnh-fisica-bg.jpg";
 import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
+const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
