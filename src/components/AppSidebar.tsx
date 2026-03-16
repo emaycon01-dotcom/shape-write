@@ -60,7 +60,7 @@ const adminItems = [
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
 
-const ESTADOS_UF = ["SP","RJ","PE","BA","MG","RS"];
+
 
 type ThemeMode = "default" | "dark-blue" | "light";
 
