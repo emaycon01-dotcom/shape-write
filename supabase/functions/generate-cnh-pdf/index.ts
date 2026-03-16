@@ -419,7 +419,7 @@ function buildCnhHtml(d: Record<string, string>) {
   </div>
 
   <!-- MRZ on verso page -->
-  <div class="overlay" style="top:428px;left:470px;width:460px;font-family:'Courier New',Courier,monospace;font-size:14px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="top:422px;left:447px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
 </html>`;
