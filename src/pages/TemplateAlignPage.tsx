@@ -425,7 +425,7 @@ function CnhAlignContent() {
 const defaultFisicaFrenteFields: FieldDef[] = [
   { id: "photo", label: "Foto", sampleText: "[FOTO]", x: 88, y: 106, fontSize: 8, w: 82, h: 110, color: "#999" },
   { id: "signature", label: "Assinatura", sampleText: "[ASSINATURA]", x: 85, y: 216, fontSize: 7, w: 95, h: 32, color: "#999" },
-  { id: "nome", label: "Nome", sampleText: "MARIA OLIVEIRA SANTOS", x: 94, y: 87, fontSize: 6.5 },
+  { id: "nome", label: "Nome", sampleText: "MARIA OLIVEIRA SANTOS", x: 95, y: 86, fontSize: 6.5 },
   { id: "primeira_hab", label: "1ª Hab", sampleText: "27/09/2017", x: 300, y: 86, fontSize: 6.5 },
   { id: "nascimento", label: "Nascimento", sampleText: "11/03/1989, RIO DE JANEIRO, RJ", x: 185, y: 106, fontSize: 6.5 },
   { id: "emissao", label: "Emissão", sampleText: "14/03/2026", x: 189, y: 123, fontSize: 6.5 },
@@ -444,12 +444,12 @@ const defaultFisicaFrenteFields: FieldDef[] = [
   { id: "validade_cat_d", label: "Validade Cat. D", sampleText: "14/03/2036", x: 271, y: 268, fontSize: 4.5 },
   { id: "validade_cat_e", label: "Validade Cat. E", sampleText: "14/03/2036", x: 271, y: 291, fontSize: 4.5 },
   { id: "obs", label: "Observações", sampleText: "EAR", x: 95, y: 359, fontSize: 5.5 },
-  { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 278, y: 417, fontSize: 6.5 },
-  { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 279, y: 426, fontSize: 6.5 },
+  { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 281, y: 419, fontSize: 6.5 },
+  { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 281, y: 428, fontSize: 6.5 },
   { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 91, y: 434, fontSize: 6 },
-  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 171, y: 444, fontSize: 15, color: "#1a5c2a" },
-  { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 54, y: 250, fontSize: 15, rotate: -90 },
-  { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 57, y: 478, fontSize: 15, rotate: -90 },
+  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 166, y: 446, fontSize: 15, color: "#1a5c2a" },
+  { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 60, y: 243, fontSize: 15, rotate: -90 },
+  { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 66, y: 468, fontSize: 15, rotate: -90 },
 ];
 
 function CnhFisicaAlignContent() {
