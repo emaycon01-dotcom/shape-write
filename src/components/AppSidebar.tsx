@@ -46,6 +46,7 @@ const commonItems = [
 
 const toolItems = [
   { title: "Gerador de Assinatura", url: "/dashboard/ferramentas/assinatura", icon: PenTool },
+  { title: "Removedor de Fundo", url: "/dashboard/ferramentas/remover-fundo", icon: ImageIcon },
 ];
 
 const adminItems = [
