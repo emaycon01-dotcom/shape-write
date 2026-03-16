@@ -178,13 +178,23 @@ function FieldPropertiesPanel({
   );
 }
 
-function CnhAlignContent() {
+function GenericAlignContent({
+  templateUrl,
+  storageKey,
+  title,
+  fields: defaultFieldsProp,
+}: {
+  templateUrl: string;
+  storageKey: string;
+  title: string;
+  fields: FieldDef[];
+}) {
   const [fields, setFields] = useState<FieldDef[]>(() => {
-    const saved = localStorage.getItem("cnh-field-positions");
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       try { return JSON.parse(saved); } catch { /* ignore */ }
     }
-    return defaultFields;
+    return defaultFieldsProp;
   });
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -260,7 +270,6 @@ function CnhAlignContent() {
     };
   }, [dragging, scale]);
 
-  // Arrow key nudging
   useEffect(() => {
     if (!selected) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -281,13 +290,13 @@ function CnhAlignContent() {
   }, [selected]);
 
   const savePositions = () => {
-    localStorage.setItem("cnh-field-positions", JSON.stringify(fields));
+    localStorage.setItem(storageKey, JSON.stringify(fields));
     toast({ title: "Posições salvas!", description: "As coordenadas foram salvas no navegador." });
   };
 
   const resetPositions = () => {
-    setFields(defaultFields);
-    localStorage.removeItem("cnh-field-positions");
+    setFields(defaultFieldsProp);
+    localStorage.removeItem(storageKey);
     setSelected(null);
     toast({ title: "Posições resetadas!" });
   };
@@ -303,7 +312,6 @@ function CnhAlignContent() {
 
   const selectedField = fields.find(f => f.id === selected);
 
-  // CNH uses Arial/Helvetica officially
   const getCnhFont = (fieldId: string) => {
     if (fieldId === "mrz") return "'Courier New', 'Courier', monospace";
     return "'Arial', 'Helvetica Neue', 'Helvetica', sans-serif";
@@ -312,7 +320,7 @@ function CnhAlignContent() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-lg font-bold text-foreground font-display">Alinhamento - CNH</h2>
+        <h2 className="text-lg font-bold text-foreground font-display">{title}</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={resetPositions} className="gap-1.5">
             <RotateCcw className="w-4 h-4" /> Reset
@@ -330,7 +338,6 @@ function CnhAlignContent() {
         Arraste os campos para posicioná-los. Use setas do teclado (Shift = 5px). Clique num campo para ajustar tamanho da fonte e posição.
       </p>
 
-      {/* Properties panel for selected field */}
       {selectedField && (
         <FieldPropertiesPanel
           field={selectedField}
@@ -338,7 +345,6 @@ function CnhAlignContent() {
         />
       )}
 
-      {/* Canvas */}
       <div className="overflow-auto border border-border rounded-xl bg-white">
         <div
           ref={containerRef}
@@ -351,8 +357,8 @@ function CnhAlignContent() {
           onClick={() => setSelected(null)}
         >
           <img
-            src={templateBgUrl}
-            alt="Template CNH"
+            src={templateUrl}
+            alt="Template"
             className="absolute inset-0 w-full h-full"
             style={{ objectFit: "fill" }}
             draggable={false}
@@ -408,6 +414,14 @@ function CnhAlignContent() {
       </div>
     </div>
   );
+}
+
+function CnhAlignContent() {
+  return <GenericAlignContent templateUrl={templateBgUrl} storageKey="cnh-field-positions" title="Alinhamento - CNH" fields={defaultFields} />;
+}
+
+function CnhFisicaAlignContent() {
+  return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física" fields={defaultFields} />;
 }
 
 export default function TemplateAlignPage() {
