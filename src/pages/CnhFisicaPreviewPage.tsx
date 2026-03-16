@@ -231,7 +231,7 @@ export default function CnhFisicaPreviewPage() {
             className="w-full h-12 rounded-xl font-semibold"
             onClick={downloadPdf}
           >
-            <ArrowLeft className="w-5 h-5 mr-2 rotate-[270deg]" /> Baixar PDF
+            <Download className="w-5 h-5 mr-2" /> Baixar PDF
           </Button>
         </div>
       )}
