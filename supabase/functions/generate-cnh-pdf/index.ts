@@ -102,6 +102,29 @@ function cleanCode(value: string) {
   return value.replace(/\s+/g, "").toUpperCase();
 }
 
+function dataUrlToBytes(value: string) {
+  const base64 = value.includes(",") ? value.split(",")[1] : value;
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = "";
+  const chunkSize = 8192;
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+
+  return btoa(binary);
+}
+
 function parseActiveCategories(activeCategory: string) {
   const normalized = activeCategory.replace(/\s+/g, "").toUpperCase();
   const set = new Set<string>();
