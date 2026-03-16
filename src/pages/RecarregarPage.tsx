@@ -150,7 +150,7 @@ export default function RecarregarPage() {
         />
         <div className="flex items-center justify-between">
           <span className="text-sm text-foreground font-semibold">{sliderValue[0]} créditos</span>
-          <span className="text-sm text-success font-bold">{formatBRL(sliderPrice)}</span>
+          <span className="text-sm text-accent font-bold">{formatBRL(sliderPrice)}</span>
         </div>
       </div>
 
