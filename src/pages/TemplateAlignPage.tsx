@@ -425,8 +425,12 @@ function CnhFisicaAlignContent() {
   return <GenericAlignContent templateUrl={templateFisicaBgUrl} storageKey="cnh-fisica-field-positions" title="Alinhamento - CNH Física (Frente)" fields={defaultFields} />;
 }
 
+const defaultVersoFields: FieldDef[] = [
+  { id: "mrz_verso", label: "MRZ (Verso)", sampleText: "I<BRA079158889PB927125303<<<<\n8903118M3603147BRA<<<<<<<<<<<4\nMARIA<<OLIVEIRA<<SANTOS<<<<<<<", x: 170, y: 500, fontSize: 12 },
+];
+
 function CnhFisicaVersoAlignContent() {
-  return <GenericAlignContent templateUrl={templateFisicaVersoBgUrl} storageKey="cnh-fisica-verso-field-positions" title="Alinhamento - CNH Física (Verso)" fields={[]} />;
+  return <GenericAlignContent templateUrl={templateFisicaVersoBgUrl} storageKey="cnh-fisica-verso-field-positions" title="Alinhamento - CNH Física (Verso)" fields={defaultVersoFields} />;
 }
 
 function CnhFisicaFullContent() {
