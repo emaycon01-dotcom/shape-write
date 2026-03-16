@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Eye, Share2, ArrowLeft, Loader2, CreditCard, Lock } from "lucide-react";
+import { Eye, Share2, ArrowLeft, Loader2, CreditCard, Lock, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CnhFisicaPreviewPage() {
@@ -209,20 +209,29 @@ export default function CnhFisicaPreviewPage() {
           </Button>
         </div>
       ) : (
-        <div className="flex gap-3">
-          <Button
-            variant="gradient"
-            className="flex-1 h-12 rounded-xl font-semibold"
-            onClick={handleView}
-          >
-            <Eye className="w-5 h-5 mr-2" /> Ver PDF
-          </Button>
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-3">
+            <Button
+              variant="gradient"
+              className="flex-1 h-12 rounded-xl font-semibold"
+              onClick={handleView}
+            >
+              <Eye className="w-5 h-5 mr-2" /> Ver PDF
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 h-12 rounded-xl font-semibold"
+              onClick={handleShare}
+            >
+              <Share2 className="w-5 h-5 mr-2" /> Compartilhar
+            </Button>
+          </div>
           <Button
             variant="outline"
-            className="flex-1 h-12 rounded-xl font-semibold"
-            onClick={handleShare}
+            className="w-full h-12 rounded-xl font-semibold"
+            onClick={downloadPdf}
           >
-            <Share2 className="w-5 h-5 mr-2" /> Compartilhar
+            <Download className="w-5 h-5 mr-2" /> Baixar PDF
           </Button>
         </div>
       )}

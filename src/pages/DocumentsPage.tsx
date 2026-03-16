@@ -33,8 +33,8 @@ export default function DocumentsPage() {
             <h3 className="font-display font-semibold text-foreground mb-1">{dt.name}</h3>
             <p className="text-sm text-muted-foreground mb-3">{dt.description}</p>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-success font-medium">{dt.credits} Crédito</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-success/20 text-success">{dt.route ? "ATIVO" : "EM BREVE"}</span>
+              <span className="text-sm text-accent font-medium">{dt.credits} Crédito</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">{dt.route ? "ATIVO" : "EM BREVE"}</span>
             </div>
           </button>
         ))}
