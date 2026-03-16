@@ -62,7 +62,7 @@ function PacoteCard({ p, selected, onSelect }: { p: Pacote; selected: boolean; o
       <span className="inline-block mt-2 text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded">
         R$ {p.pricePerUnit.toFixed(2)}/un
       </span>
-      <p className="text-sm font-bold text-success mt-2">{formatBRL(p.total)}</p>
+      <p className="text-sm font-bold text-accent mt-2">{formatBRL(p.total)}</p>
     </button>
   );
 }
