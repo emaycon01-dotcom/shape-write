@@ -8,6 +8,69 @@ const corsHeaders = {
 };
 
 const PDFSHIFT_API_URL = "https://api.pdfshift.io/v3/convert/pdf";
+const PDFCO_API_URL = "https://api.pdf.co/v1/pdf/convert/from/html";
+
+async function generateWithPdfShift(html: string, apiKey: string) {
+  const pdfRes = await fetch(PDFSHIFT_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${btoa(`api:${apiKey}`)}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      source: html,
+      landscape: false,
+      use_print: true,
+      format: "A4",
+      margin: { top: "0", bottom: "0", left: "0", right: "0" },
+    }),
+  });
+
+  if (!pdfRes.ok) {
+    const errText = await pdfRes.text();
+    throw new Error(`PDFShift error [${pdfRes.status}]: ${errText}`);
+  }
+
+  return new Uint8Array(await pdfRes.arrayBuffer());
+}
+
+async function generateWithPdfCo(html: string, apiKey: string) {
+  const pdfRes = await fetch(PDFCO_API_URL, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      html,
+      name: "cnh.pdf",
+      async: false,
+      margins: "0px 0px 0px 0px",
+      paperSize: "A4",
+      orientation: "Portrait",
+      printBackground: true,
+    }),
+  });
+
+  const payload = await pdfRes.json().catch(async () => ({
+    error: true,
+    message: await pdfRes.text().catch(() => "Unknown PDF.co error"),
+  }));
+
+  if (!pdfRes.ok || payload?.error || !payload?.url) {
+    throw new Error(
+      `PDF.co error [${pdfRes.status}]: ${payload?.message || payload?.error || "Failed to create PDF"}`
+    );
+  }
+
+  const fileRes = await fetch(payload.url);
+  if (!fileRes.ok) {
+    const errText = await fileRes.text();
+    throw new Error(`PDF.co file download error [${fileRes.status}]: ${errText}`);
+  }
+
+  return new Uint8Array(await fileRes.arrayBuffer());
+}
 
 function normalizeMrzText(value: string) {
   return value
