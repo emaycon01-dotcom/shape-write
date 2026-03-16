@@ -429,6 +429,17 @@ function CnhFisicaVersoAlignContent() {
   return <GenericAlignContent templateUrl={templateFisicaVersoBgUrl} storageKey="cnh-fisica-verso-field-positions" title="Alinhamento - CNH Física (Verso)" fields={[]} />;
 }
 
+function CnhFisicaFullContent() {
+  return (
+    <div className="space-y-8">
+      <CnhFisicaAlignContent />
+      <div className="border-t border-border pt-6">
+        <CnhFisicaVersoAlignContent />
+      </div>
+    </div>
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -457,11 +468,15 @@ export default function TemplateAlignPage() {
         </TabsContent>
 
         <TabsContent value="fisicos">
-          <Tabs defaultValue="cnh-fisica-frente" className="w-full">
+          <Tabs defaultValue="cnh-fisica-completa" className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="cnh-fisica-frente">CNH FÍSICA (FRENTE)</TabsTrigger>
-              <TabsTrigger value="cnh-fisica-verso">CNH FÍSICA (VERSO)</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-completa">CNH FÍSICA (COMPLETA)</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-frente">FRENTE</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-verso">VERSO</TabsTrigger>
             </TabsList>
+            <TabsContent value="cnh-fisica-completa">
+              <CnhFisicaFullContent />
+            </TabsContent>
             <TabsContent value="cnh-fisica-frente">
               <CnhFisicaAlignContent />
             </TabsContent>
