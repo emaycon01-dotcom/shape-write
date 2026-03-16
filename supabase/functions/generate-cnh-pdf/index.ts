@@ -298,10 +298,10 @@ function buildCnhHtml(d: Record<string, string>) {
 
   /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
-    top: 253px; left: 59px;
+    top: 256px; left: 58px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: 1.2px;
     white-space: nowrap;
     color: #111;
@@ -314,17 +314,17 @@ function buildCnhHtml(d: Record<string, string>) {
 
   .f-nascimento   { top: 106px; left: 185px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-emissao      { top: 125px; left: 184px; font-size: 6.5px; }
-  .f-validade     { top: 125px; left: 246px; font-size: 6.5px; color: #c00; }
-  .f-cat-big      { top: 120px; left: 328px; font-size: 11px; color: #111; }
+  .f-emissao      { top: 123px; left: 189px; font-size: 6.5px; }
+  .f-validade     { top: 124px; left: 248px; font-size: 6.5px; color: #c00; }
+  .f-cat-big      { top: 121px; left: 329px; font-size: 11px; color: #111; }
 
-  .f-rg           { top: 144px; left: 184px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-rg           { top: 142px; left: 183px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
 
-  .f-cpf          { top: 163px; left: 184px; font-size: 6.5px; }
-  .f-registro     { top: 163px; left: 251px; font-size: 6.5px; color: #c00; }
+  .f-cpf          { top: 161px; left: 183px; font-size: 6.5px; }
+  .f-registro     { top: 161px; left: 250px; font-size: 6.5px; color: #c00; }
   .f-cat-hab      { top: 162px; left: 312px; font-size: 7px; color: #c00; }
 
-  .f-nacionalidade { top: 182px; left: 184px; font-size: 6.5px; }
+  .f-nacionalidade { top: 180px; left: 183px; font-size: 6.5px; }
 
   .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
@@ -332,21 +332,21 @@ function buildCnhHtml(d: Record<string, string>) {
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
 
   .f-espelho      { top: 416px; left: 277px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
-  .f-renach       { top: 424px; left: 277px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-renach       { top: 427px; left: 275px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-local        { top: 434px; left: 91px; font-size: 6px; }
 
   .reg-vert-bot {
-    top: 484px; left: 61px;
+    top: 490px; left: 62px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: 1.2px;
     white-space: nowrap;
     color: #111;
     font-weight: bold;
   }
 
-  .f-estado       { top: 446px; left: 162px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
+  .f-estado       { top: 446px; left: 160px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
 
   .mrz-overlay {
     top: 624px; left: 126px;
