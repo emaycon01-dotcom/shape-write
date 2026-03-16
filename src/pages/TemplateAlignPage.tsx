@@ -520,6 +520,7 @@ export default function TemplateAlignPage() {
             <TabsList className="mb-4">
               <TabsTrigger value="cnh">CNH</TabsTrigger>
               <TabsTrigger value="certidao">CERT NASCIMENTO</TabsTrigger>
+              <TabsTrigger value="comprovante">COMPROVANTE RES.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh">
               <CnhAlignContent />
@@ -527,6 +528,11 @@ export default function TemplateAlignPage() {
             <TabsContent value="certidao">
               <Suspense fallback={<div className="flex items-center justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
                 <CertidaoAlignPage />
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="comprovante">
+              <Suspense fallback={<div className="flex items-center justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+                <ComprovanteResidenciaAlignPage />
               </Suspense>
             </TabsContent>
           </Tabs>

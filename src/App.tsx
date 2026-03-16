@@ -70,6 +70,8 @@ const App = () => (
                   <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
                   <Route path="documents/certidao-nascimento" element={<CertidaoNascimentoFormPage />} />
                   <Route path="documents/certidao-nascimento/preview" element={<CertidaoNascimentoPreviewPage />} />
+                  <Route path="documents/comprovante-residencia" element={<ComprovanteResidenciaFormPage />} />
+                  <Route path="documents/comprovante-residencia/preview" element={<ComprovanteResidenciaPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
                   <Route path="planos" element={<PlanosPage />} />
