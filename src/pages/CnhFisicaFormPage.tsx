@@ -270,9 +270,10 @@ export default function CnhFisicaFormPage() {
     setLoading(true);
 
     try {
-      const [templateBase64, templateVersoBase64] = await Promise.all([
+      const [templateBase64, templateVersoBase64, templatePdfBase64] = await Promise.all([
         imgToBase64(templateCnhFisicaUrl),
         imgToBase64(templateCnhFisicaVersoUrl),
+        imgToBase64(templateCnhFisicaPdfUrl),
       ]);
 
       const bodyData = {
@@ -304,6 +305,7 @@ export default function CnhFisicaFormPage() {
         assinatura_base64: assPreview || "",
         template_base64: templateBase64,
         template_verso_base64: templateVersoBase64,
+        template_pdf_base64: templatePdfBase64,
         tipo: "fisica",
         estado_fisica: estadoSelecionado,
       };

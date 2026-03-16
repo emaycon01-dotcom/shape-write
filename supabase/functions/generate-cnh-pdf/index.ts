@@ -436,13 +436,25 @@ serve(async (req) => {
       throw new Error(`PDFShift error [${pdfRes.status}]: ${errText}`);
     }
 
-    const pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer());
-    let binary = "";
-    const chunkSize = 8192;
-    for (let i = 0; i < pdfBuffer.length; i += chunkSize) {
-      binary += String.fromCharCode(...pdfBuffer.subarray(i, i + chunkSize));
+    let pdfBuffer = new Uint8Array(await pdfRes.arrayBuffer());
+
+    if (body.tipo === "fisica" && body.template_pdf_base64) {
+      const generatedPdf = await PDFDocument.load(pdfBuffer);
+      const templatePdf = await PDFDocument.load(dataUrlToBytes(body.template_pdf_base64));
+      const mergedPdf = await PDFDocument.create();
+
+      const generatedPages = await mergedPdf.copyPages(generatedPdf, [0]);
+      generatedPages.forEach((page) => mergedPdf.addPage(page));
+
+      if (templatePdf.getPageCount() > 1) {
+        const templatePages = await mergedPdf.copyPages(templatePdf, [1]);
+        templatePages.forEach((page) => mergedPdf.addPage(page));
+      }
+
+      pdfBuffer = await mergedPdf.save();
     }
-    const pdfBase64 = btoa(binary);
+
+    const pdfBase64 = bytesToBase64(pdfBuffer);
 
     return new Response(
       JSON.stringify({
