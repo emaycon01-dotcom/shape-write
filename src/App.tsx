@@ -35,6 +35,8 @@ const CnhFisicaFormPage = lazy(() => import("./pages/CnhFisicaFormPage"));
 const CnhFisicaPreviewPage = lazy(() => import("./pages/CnhFisicaPreviewPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
+const ComprovanteResidenciaFormPage = lazy(() => import("./pages/ComprovanteResidenciaFormPage"));
+const ComprovanteResidenciaPreviewPage = lazy(() => import("./pages/ComprovanteResidenciaPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
