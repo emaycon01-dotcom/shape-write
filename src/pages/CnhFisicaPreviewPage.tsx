@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -21,6 +21,17 @@ export default function CnhFisicaPreviewPage() {
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const fileName = useMemo(() => {
+    const safeName = (formData?.nome_completo || "cnh-fisica")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    return `${safeName || "cnh-fisica"}.pdf`;
+  }, [formData]);
+
   if (!pdfBase64 || !formData) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -31,6 +42,27 @@ export default function CnhFisicaPreviewPage() {
       </div>
     );
   }
+
+  const getPdfBlob = async () => fetch(pdfBase64).then((r) => r.blob());
+
+  const downloadPdf = async () => {
+    const blob = await getPdfBlob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  };
+
+  const openPdf = async () => {
+    const blob = await getPdfBlob();
+    const objectUrl = URL.createObjectURL(blob);
+    window.open(objectUrl, "_blank", "noopener,noreferrer");
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  };
 
   const handleGenerate = async () => {
     if (!user) return;
@@ -58,9 +90,10 @@ export default function CnhFisicaPreviewPage() {
       });
 
       setPaid(true);
+      await downloadPdf();
       toast({
         title: "Documento gerado com sucesso!",
-        description: "1 crédito foi descontado. Você pode visualizar e compartilhar.",
+        description: "1 crédito foi descontado e o PDF foi baixado no seu dispositivo.",
       });
     } catch {
       toast({
@@ -75,15 +108,12 @@ export default function CnhFisicaPreviewPage() {
 
   const handleShare = async () => {
     try {
-      const blob = await fetch(pdfBase64).then((r) => r.blob());
-      const file = new File([blob], "cnh-fisica.pdf", { type: "application/pdf" });
-      if (navigator.share && navigator.canShare({ files: [file] })) {
+      const blob = await getPdfBlob();
+      const file = new File([blob], fileName, { type: "application/pdf" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: "CNH Física" });
       } else {
-        const link = document.createElement("a");
-        link.href = pdfBase64;
-        link.download = "cnh-fisica.pdf";
-        link.click();
+        await downloadPdf();
         toast({ title: "PDF baixado com sucesso!" });
       }
     } catch {
@@ -91,12 +121,15 @@ export default function CnhFisicaPreviewPage() {
     }
   };
 
-  const handleView = () => {
-    const win = window.open();
-    if (win) {
-      win.document.write(
-        `<iframe src="${pdfBase64}" style="width:100%;height:100%;border:none;" title="PDF"></iframe>`
-      );
+  const handleView = async () => {
+    try {
+      await openPdf();
+    } catch {
+      toast({
+        title: "Erro ao abrir PDF",
+        description: "Baixe o arquivo para visualizar no dispositivo.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -114,7 +147,7 @@ export default function CnhFisicaPreviewPage() {
       </h1>
       <p className="text-muted-foreground text-sm mb-6">
         {paid
-          ? "Seu documento está pronto para visualização e compartilhamento."
+          ? "Seu documento foi baixado e também pode ser visualizado ou compartilhado novamente."
           : "Confira o preview abaixo. Para gerar o documento final, clique em Gerar (1 crédito)."}
       </p>
 
