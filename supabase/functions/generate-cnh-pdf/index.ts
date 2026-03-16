@@ -505,15 +505,16 @@ serve(async (req) => {
 
     if (body.tipo === "fisica" && body.template_pdf_base64) {
       const generatedPdf = await PDFDocument.load(pdfBuffer);
-      const templatePdf = await PDFDocument.load(dataUrlToBytes(body.template_pdf_base64));
       const mergedPdf = await PDFDocument.create();
 
-      const generatedPages = await mergedPdf.copyPages(generatedPdf, [0]);
-      generatedPages.forEach((page) => mergedPdf.addPage(page));
+      // Page 1 (front): from generated PDF with overlays
+      const frontPages = await mergedPdf.copyPages(generatedPdf, [0]);
+      frontPages.forEach((page) => mergedPdf.addPage(page));
 
-      if (templatePdf.getPageCount() > 1) {
-        const templatePages = await mergedPdf.copyPages(templatePdf, [1]);
-        templatePages.forEach((page) => mergedPdf.addPage(page));
+      // Page 2 (verso/QR code): from generated PDF with MRZ overlay
+      if (generatedPdf.getPageCount() > 1) {
+        const versoPages = await mergedPdf.copyPages(generatedPdf, [1]);
+        versoPages.forEach((page) => mergedPdf.addPage(page));
       }
 
       pdfBuffer = await mergedPdf.save();
