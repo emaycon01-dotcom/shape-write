@@ -48,7 +48,7 @@ function PacoteCard({ p, selected, onSelect }: { p: Pacote; selected: boolean; o
       } ${p.premium ? "border-yellow-500/50" : ""}`}
     >
       {p.discount && (
-        <span className="absolute -top-2 -right-2 bg-success text-success-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
+        <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
           -{p.discount}%
         </span>
       )}
@@ -62,7 +62,7 @@ function PacoteCard({ p, selected, onSelect }: { p: Pacote; selected: boolean; o
       <span className="inline-block mt-2 text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded">
         R$ {p.pricePerUnit.toFixed(2)}/un
       </span>
-      <p className="text-sm font-bold text-success mt-2">{formatBRL(p.total)}</p>
+      <p className="text-sm font-bold text-accent mt-2">{formatBRL(p.total)}</p>
     </button>
   );
 }
@@ -109,9 +109,9 @@ export default function RecarregarPage() {
       {/* Intermediários */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-4 h-4 text-success" />
+          <Sparkles className="w-4 h-4 text-accent" />
           <h2 className="text-sm font-semibold text-foreground tracking-wider">Pacotes Intermediários</h2>
-          <span className="text-[10px] bg-success/20 text-success px-2 py-0.5 rounded-full">Melhor custo-benefício</span>
+          <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full">Melhor custo-benefício</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {intermediarios.map((p) => (
@@ -150,7 +150,7 @@ export default function RecarregarPage() {
         />
         <div className="flex items-center justify-between">
           <span className="text-sm text-foreground font-semibold">{sliderValue[0]} créditos</span>
-          <span className="text-sm text-success font-bold">{formatBRL(sliderPrice)}</span>
+          <span className="text-sm text-accent font-bold">{formatBRL(sliderPrice)}</span>
         </div>
       </div>
 
