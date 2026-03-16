@@ -80,6 +80,8 @@ const App = () => (
                   <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
                   <Route path="ferramentas/remover-fundo" element={<RemovedorFundoPage />} />
                   <Route path="ferramentas/mesclagem-rosto" element={<MesclagemRostoPage />} />
+                  <Route path="cnh-fisica/todos" element={<CnhFisicaFormPage />} />
+                  <Route path="cnh-fisica/todos/preview" element={<CnhFisicaPreviewPage />} />
                   <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
