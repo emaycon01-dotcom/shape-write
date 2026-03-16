@@ -95,8 +95,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              variant="gradient"
-              className="w-full h-12 rounded-lg text-base"
+              className="w-full h-12 rounded-lg text-base bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
               disabled={loading}
             >
               {loading ? "Entrando..." : "Entrar"}

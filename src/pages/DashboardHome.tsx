@@ -27,7 +27,7 @@ export default function DashboardHome() {
   const isAdmin = user?.role === "admin";
 
   const stats = [
-    { label: "CRÉDITOS", value: user?.credits ?? 0, icon: Zap, color: "text-yellow-400" },
+    { label: "CRÉDITOS", value: user?.credits ?? 0, icon: Zap, color: "text-accent" },
     { label: "TRANSFERÊNCIA", value: 0, icon: Send, color: "text-primary" },
     { label: "HOJE", value: userDocs.filter(d => d.createdAt.startsWith(new Date().toISOString().split("T")[0])).length, icon: CalendarDays, color: "text-success" },
     { label: "EQUIPE", value: isAdmin ? 2 : 0, icon: Users, color: "text-accent" },
