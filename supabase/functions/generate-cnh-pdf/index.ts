@@ -206,11 +206,11 @@ function getCatDate(cat: string, d: Record<string, string>): string {
 function buildCatDateOverlays(activeCategory: string, d: Record<string, string>) {
   const active = parseActiveCategories(activeCategory);
   const catPositions: Record<string, { x: number; y: number; fontSize: number }> = {
-    A: { x: 171, y: 353, fontSize: 4.5 },
-    B: { x: 171, y: 375, fontSize: 4.5 },
-    C: { x: 171, y: 397, fontSize: 4.5 },
-    D: { x: 275, y: 342, fontSize: 4.5 },
-    E: { x: 274, y: 375, fontSize: 4.5 },
+    A: { x: 169, y: 280, fontSize: 4.5 },
+    B: { x: 169, y: 302, fontSize: 4.5 },
+    C: { x: 169, y: 323, fontSize: 4.5 },
+    D: { x: 272, y: 270, fontSize: 4.5 },
+    E: { x: 271, y: 291, fontSize: 4.5 },
   };
 
   let html = "";
