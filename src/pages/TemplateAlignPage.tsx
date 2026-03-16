@@ -443,7 +443,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cnh-fisica">CNH FÍSICA</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica">
-              <CnhAlignContent />
+              <CnhFisicaAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>
