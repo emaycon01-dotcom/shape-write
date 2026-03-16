@@ -54,7 +54,7 @@ const defaultFields: FieldDef[] = [
   { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 280, y: 509, fontSize: 6.5 },
   { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 100, y: 505, fontSize: 6 },
   { id: "estado", label: "Estado", sampleText: "BAHIA", x: 163, y: 531, fontSize: 15 },
-  { id: "mrz", label: "MRZ", sampleText: "I<BRA079158889PB927125303<<<<\n8903118M3603147BRA<<<<<<<<<<<4\nMARIA<<OLIVEIRA<<SANTOS<<<<<<<", x: 126, y: 624, fontSize: 9.5 },
+  { id: "mrz", label: "MRZ", sampleText: "I<BRA079158889PB927125303<<<<\n8903118M3603147BRA<<<<<<<<<<<4\nMARIA<<OLIVEIRA<<SANTOS<<<<<<<", x: 80, y: 694, fontSize: 9.5 },
   { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 65, y: 315, fontSize: 12, rotate: -90 },
   { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 64, y: 558, fontSize: 11.5, rotate: -90 },
 ];
