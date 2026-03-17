@@ -11,6 +11,7 @@ export interface Document {
   createdAt: string;
   status: "ativo" | "revogado" | "expirado";
   userId: string;
+  pdfDataUrl?: string;
 }
 
 interface DocumentContextType {
