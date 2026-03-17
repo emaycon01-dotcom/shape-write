@@ -51,6 +51,17 @@ const categories: DocCategory[] = [
     ],
   },
   {
+    id: "escolares",
+    name: "ESCOLARES",
+    emoji: "🎓",
+    icon: FileText,
+    items: [
+      { id: "historico-escolar", name: "Histórico Escolar", description: "Histórico escolar digital personalizado", credits: 1, route: "", icon: FileText },
+      { id: "certificado-escolar", name: "Certificado Escolar", description: "Certificado escolar digital personalizado", credits: 1, route: "", icon: FileText },
+      { id: "conclusao-escolar", name: "Conclusão Escolar", description: "Conclusão escolar digital personalizada", credits: 1, route: "", icon: FileText },
+    ],
+  },
+  {
     id: "medicos",
     name: "MÉDICOS E EXAMES",
     emoji: "🧑‍⚕️",
