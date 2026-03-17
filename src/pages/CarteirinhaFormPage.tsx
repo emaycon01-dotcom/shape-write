@@ -28,6 +28,7 @@ interface CarteirinhaFormData {
   cidade: string;
   uf: string;
   dataFormacao: string;
+  dataValidade: string;
   contatoEmergencia1: string;
   contatoEmergencia2: string;
 }
@@ -40,6 +41,7 @@ const initial: CarteirinhaFormData = {
   cidade: "",
   uf: "",
   dataFormacao: "",
+  dataValidade: "",
   contatoEmergencia1: "",
   contatoEmergencia2: "",
 };
@@ -126,6 +128,7 @@ export default function CarteirinhaFormPage() {
       cidade: pick(CIDADES),
       uf,
       dataFormacao: randomDate(2015, 2024),
+      dataValidade: randomDate(2025, 2030),
       contatoEmergencia1: `(${generateRandom(2)}) ${generateRandom(5)}-${generateRandom(4)}`,
       contatoEmergencia2: `(${generateRandom(2)}) ${generateRandom(5)}-${generateRandom(4)}`,
     });
@@ -172,6 +175,7 @@ export default function CarteirinhaFormPage() {
         cidade: form.cidade,
         uf: form.uf,
         data_formacao: form.dataFormacao,
+        data_validade: form.dataValidade,
         contato_emergencia_1: form.contatoEmergencia1,
         contato_emergencia_2: form.contatoEmergencia2,
         foto_base64: fotoPreview || "",
@@ -278,6 +282,11 @@ export default function CarteirinhaFormPage() {
               <FieldLabel>Data de Formação</FieldLabel>
               <Input value={form.dataFormacao} onChange={set("dataFormacao")} placeholder="DD/MM/AAAA" className={inputCls} required />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <FieldLabel>Data de Validade</FieldLabel>
+            <Input value={form.dataValidade} onChange={set("dataValidade")} placeholder="DD/MM/AAAA" className={inputCls} required />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

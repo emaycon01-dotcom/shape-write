@@ -33,6 +33,7 @@ serve(async (req) => {
       cidade,
       uf,
       data_formacao,
+      data_validade,
       contato_emergencia_1,
       contato_emergencia_2,
       foto_base64,
@@ -76,6 +77,7 @@ serve(async (req) => {
       nascimento: { x: 88, y: height - 460 - 25, fontSize: 25 },
       cidade_uf: { x: 220, y: height - 459 - 25, fontSize: 25 },
       formacao: { x: 598, y: height - 224 - 25, fontSize: 25 },
+      validade: { x: 598, y: height - 300 - 25, fontSize: 25 },
       emergencia1: { x: 135, y: height - 812 - 25, fontSize: 25 },
       emergencia2: { x: 486, y: height - 810 - 25, fontSize: 25 },
     };
@@ -119,6 +121,7 @@ serve(async (req) => {
     drawText(data_nascimento || "", "nascimento");
     drawText(`${cidade || ""}, ${uf || ""}`, "cidade_uf");
     drawText(data_formacao || "", "formacao");
+    drawText(data_validade || "", "validade");
     drawText(contato_emergencia_1 || "", "emergencia1");
     drawText(contato_emergencia_2 || "", "emergencia2");
 
