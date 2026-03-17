@@ -21,7 +21,7 @@ interface FieldDef {
 }
 
 const defaultFields: FieldDef[] = [
-  { id: "clienteEmpresa", label: "Cliente/Empresa", sampleText: "TRANSPORTADORA NORTE LTDA", x: 107, y: 137, fontSize: 14 },
+  { id: "clienteEmpresa", label: "Cliente/Empresa", sampleText: "TRANSPORTADORA NORTE LTDA", x: 109, y: 135, fontSize: 14 },
   { id: "nomeCompleto", label: "Nome Completo", sampleText: "JOSE CARLOS DA SILVA", x: 86, y: 207, fontSize: 14 },
   { id: "laudo", label: "Laudo Nº", sampleText: "CNJ00494237", x: 109, y: 227, fontSize: 14 },
   { id: "cnpj", label: "CNPJ", sampleText: "08.075.074/0001-07", x: 85, y: 248, fontSize: 14 },
