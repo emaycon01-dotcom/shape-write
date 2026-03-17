@@ -37,6 +37,8 @@ const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimento
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const ComprovanteResidenciaFormPage = lazy(() => import("./pages/ComprovanteResidenciaFormPage"));
 const ComprovanteResidenciaPreviewPage = lazy(() => import("./pages/ComprovanteResidenciaPreviewPage"));
+const ExameToxicologicoFormPage = lazy(() => import("./pages/ExameToxicologicoFormPage"));
+const ExameToxicologicoPreviewPage = lazy(() => import("./pages/ExameToxicologicoPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -72,6 +74,8 @@ const App = () => (
                   <Route path="documents/certidao-nascimento/preview" element={<CertidaoNascimentoPreviewPage />} />
                   <Route path="documents/comprovante-residencia" element={<ComprovanteResidenciaFormPage />} />
                   <Route path="documents/comprovante-residencia/preview" element={<ComprovanteResidenciaPreviewPage />} />
+                  <Route path="documents/exame-toxicologico" element={<ExameToxicologicoFormPage />} />
+                  <Route path="documents/exame-toxicologico/preview" element={<ExameToxicologicoPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
                   <Route path="planos" element={<PlanosPage />} />

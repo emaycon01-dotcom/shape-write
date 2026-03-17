@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Smartphone, Phone, Home } from "lucide-react";
+import { FileText, Smartphone, Phone, Home, FlaskConical } from "lucide-react";
 
 const docTypes = [
   { id: "cnh", name: "CNH Digital (2024)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh", icon: FileText },
   { id: "certidao", name: "Certidão de Nascimento", description: "Certidão de Nascimento digital com preenchimento automático", credits: 1, route: "/dashboard/documents/certidao-nascimento", icon: FileText },
   { id: "comprovante", name: "Comprovante de Residência", description: "Comprovante de residência digital com preenchimento automático", credits: 1, route: "/dashboard/documents/comprovante-residencia", icon: Home },
+  { id: "exame-toxico", name: "Exame Toxicológico", description: "Exame toxicológico digital com preenchimento automático", credits: 1, route: "/dashboard/documents/exame-toxicologico", icon: FlaskConical },
   { id: "esim", name: "E-SIM Digital", description: "E-SIM Vivo ou Claro com DDD aleatório ou específico", credits: 1.3, route: "/dashboard/documents/esim", icon: Smartphone },
   { id: "recargas", name: "Recargas", description: "Recarga Claro, Vivo ou TIM com 50% de desconto", credits: 0.5, route: "/dashboard/documents/recargas", icon: Phone },
   { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "", icon: FileText },

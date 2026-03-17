@@ -12,6 +12,7 @@ import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
+const ExameToxicologicoAlignPage = lazy(() => import("./ExameToxicologicoAlignPage"));
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -521,6 +522,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cnh">CNH</TabsTrigger>
               <TabsTrigger value="certidao">CERT NASCIMENTO</TabsTrigger>
               <TabsTrigger value="comprovante">COMPROVANTE RES.</TabsTrigger>
+              <TabsTrigger value="exame-toxico">EXAME TOXICO.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh">
               <CnhAlignContent />
@@ -533,6 +535,11 @@ export default function TemplateAlignPage() {
             <TabsContent value="comprovante">
               <Suspense fallback={<div className="flex items-center justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
                 <ComprovanteResidenciaAlignPage />
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="exame-toxico">
+              <Suspense fallback={<div className="flex items-center justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+                <ExameToxicologicoAlignPage />
               </Suspense>
             </TabsContent>
           </Tabs>
