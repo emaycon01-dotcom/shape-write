@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
 import templateUrl from "@/assets/template-comprovante-residencia.jpg";
@@ -172,7 +172,7 @@ export default function ComprovanteResidenciaPreviewPage() {
     }
   };
 
-  const handleView = async () => {
+  const handleDownload = async () => {
     if (!pdfDataUrl) return;
     try {
       const blob = await fetch(pdfDataUrl).then((r) => r.blob());
@@ -182,8 +182,9 @@ export default function ComprovanteResidenciaPreviewPage() {
       link.download = "comprovante-residencia.pdf";
       link.click();
       setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      toast({ title: "PDF baixado com sucesso!" });
     } catch {
-      toast({ title: "Erro ao abrir PDF", variant: "destructive" });
+      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
     }
   };
 
@@ -248,8 +249,8 @@ export default function ComprovanteResidenciaPreviewPage() {
         </div>
       ) : (
         <div className="flex gap-3">
-          <Button variant="gradient" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleView}>
-            <Eye className="w-5 h-5 mr-2" /> Ver
+          <Button variant="gradient" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleDownload}>
+            <Download className="w-5 h-5 mr-2" /> Baixar
           </Button>
           <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleShare}>
             <Share2 className="w-5 h-5 mr-2" /> Compartilhar

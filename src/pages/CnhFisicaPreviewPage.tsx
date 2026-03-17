@@ -121,15 +121,12 @@ export default function CnhFisicaPreviewPage() {
     }
   };
 
-  const handleView = async () => {
+  const handleDownload = async () => {
     try {
-      await openPdf();
+      await downloadPdf();
+      toast({ title: "PDF baixado com sucesso!" });
     } catch {
-      toast({
-        title: "Erro ao abrir PDF",
-        description: "Baixe o arquivo para visualizar no dispositivo.",
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
     }
   };
 
@@ -211,18 +208,10 @@ export default function CnhFisicaPreviewPage() {
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex gap-3">
-            <Button
-              variant="gradient"
-              className="flex-1 h-12 rounded-xl font-semibold"
-              onClick={handleView}
-            >
-              <Eye className="w-5 h-5 mr-2" /> Ver PDF
+            <Button variant="gradient" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleDownload}>
+              <Download className="w-5 h-5 mr-2" /> Baixar
             </Button>
-            <Button
-              variant="outline"
-              className="flex-1 h-12 rounded-xl font-semibold"
-              onClick={handleShare}
-            >
+            <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleShare}>
               <Share2 className="w-5 h-5 mr-2" /> Compartilhar
             </Button>
           </div>
