@@ -1,15 +1,66 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Smartphone, Phone, Home, FlaskConical } from "lucide-react";
+import { FileText, Smartphone, Phone, Home, FlaskConical, CreditCard, Stethoscope, FileCheck } from "lucide-react";
 
-const docTypes = [
-  { id: "cnh", name: "CNH Digital (2024)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh", icon: FileText },
-  { id: "certidao", name: "Certidão de Nascimento", description: "Certidão de Nascimento digital com preenchimento automático", credits: 1, route: "/dashboard/documents/certidao-nascimento", icon: FileText },
-  { id: "comprovante", name: "Comprovante de Residência", description: "Comprovante de residência digital com preenchimento automático", credits: 1, route: "/dashboard/documents/comprovante-residencia", icon: Home },
-  { id: "exame-toxico", name: "Exame Toxicológico", description: "Exame toxicológico digital com preenchimento automático", credits: 1, route: "/dashboard/documents/exame-toxicologico", icon: FlaskConical },
-  { id: "esim", name: "E-SIM Digital", description: "E-SIM Vivo ou Claro com DDD aleatório ou específico", credits: 1.3, route: "/dashboard/documents/esim", icon: Smartphone },
-  { id: "recargas", name: "Recargas", description: "Recarga Claro, Vivo ou TIM com 50% de desconto", credits: 0.5, route: "/dashboard/documents/recargas", icon: Phone },
-  { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "", icon: FileText },
-  { id: "certificado", name: "Certificado", description: "Certificado digital personalizado", credits: 1, route: "", icon: FileText },
+interface DocItem {
+  id: string;
+  name: string;
+  description: string;
+  credits: number;
+  route: string;
+  icon: React.ElementType;
+}
+
+interface DocCategory {
+  id: string;
+  name: string;
+  emoji: string;
+  icon: React.ElementType;
+  items: DocItem[];
+}
+
+const categories: DocCategory[] = [
+  {
+    id: "celulares",
+    name: "SERVIÇOS CELULARES",
+    emoji: "📱",
+    icon: Smartphone,
+    items: [
+      { id: "recargas", name: "Recarga Celular", description: "Recarga Claro, Vivo ou TIM com 50% de desconto", credits: 0.5, route: "/dashboard/documents/recargas", icon: Phone },
+      { id: "esim", name: "Chip Virtual (eSIM)", description: "E-SIM Vivo ou Claro com DDD aleatório ou específico", credits: 1.3, route: "/dashboard/documents/esim", icon: Smartphone },
+    ],
+  },
+  {
+    id: "documentos",
+    name: "DOCUMENTOS DIGITAIS",
+    emoji: "🪪",
+    icon: FileText,
+    items: [
+      { id: "cnh", name: "CNH Digital (2024)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh", icon: FileText },
+      { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "", icon: FileText },
+    ],
+  },
+  {
+    id: "comprovantes",
+    name: "COMPROVANTES",
+    emoji: "📄",
+    icon: FileCheck,
+    items: [
+      { id: "comprovante", name: "Comprovante de Residência", description: "Comprovante de residência digital com preenchimento automático", credits: 1, route: "/dashboard/documents/comprovante-residencia", icon: Home },
+      { id: "comprovante-renda", name: "Comprovante de Renda", description: "Comprovante de renda digital personalizado", credits: 1, route: "", icon: FileCheck },
+      { id: "comprovante-pagamento", name: "Comprovante de Pagamento", description: "Comprovante de pagamento digital", credits: 1, route: "", icon: CreditCard },
+    ],
+  },
+  {
+    id: "medicos",
+    name: "MÉDICOS E EXAMES",
+    emoji: "🧑‍⚕️",
+    icon: Stethoscope,
+    items: [
+      { id: "exame-toxico", name: "Exame Toxicológico", description: "Exame toxicológico digital com preenchimento automático", credits: 1, route: "/dashboard/documents/exame-toxicologico", icon: FlaskConical },
+      { id: "atestado", name: "Atestado Médico", description: "Atestado médico digital personalizado", credits: 1, route: "", icon: Stethoscope },
+      { id: "receita", name: "Receita Médica", description: "Receita médica digital personalizada", credits: 1, route: "", icon: Stethoscope },
+    ],
+  },
 ];
 
 export default function DocumentsPage() {
@@ -20,25 +71,41 @@ export default function DocumentsPage() {
       <h1 className="font-display text-3xl font-bold text-foreground mb-1">Módulos de Documentos</h1>
       <p className="text-muted-foreground mb-8">Escolha um serviço para começar</p>
 
-      <p className="text-xs text-muted-foreground tracking-widest mb-4">DOCUMENTOS DIGITAIS</p>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {docTypes.map((dt) => (
-          <button
-            key={dt.id}
-            onClick={() => dt.route && navigate(dt.route)}
-            className="glass rounded-xl p-6 text-left hover:border-primary/40 transition-colors group disabled:opacity-50"
-            disabled={!dt.route}
-          >
-            <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-              <dt.icon className="w-6 h-6 text-primary" />
+      <div className="space-y-10">
+        {categories.map((cat) => (
+          <section key={cat.id}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg shrink-0">
+                {cat.emoji}
+              </div>
+              <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                {cat.name}
+              </h2>
             </div>
-            <h3 className="font-display font-semibold text-foreground mb-1">{dt.name}</h3>
-            <p className="text-sm text-muted-foreground mb-3">{dt.description}</p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-accent font-medium">{dt.credits} Crédito</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">{dt.route ? "ATIVO" : "EM BREVE"}</span>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {cat.items.map((dt) => (
+                <button
+                  key={dt.id}
+                  onClick={() => dt.route && navigate(dt.route)}
+                  className="glass rounded-xl p-6 text-left hover:border-primary/40 transition-colors group disabled:opacity-50"
+                  disabled={!dt.route}
+                >
+                  <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <dt.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="font-display font-semibold text-foreground mb-1">{dt.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-3">{dt.description}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-accent font-medium">{dt.credits} Crédito{dt.credits !== 1 ? "s" : ""}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${dt.route ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}>
+                      {dt.route ? "ATIVO" : "EM BREVE"}
+                    </span>
+                  </div>
+                </button>
+              ))}
             </div>
-          </button>
+          </section>
         ))}
       </div>
     </div>

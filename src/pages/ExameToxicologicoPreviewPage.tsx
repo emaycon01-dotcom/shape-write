@@ -142,6 +142,7 @@ export default function ExameToxicologicoPreviewPage() {
         additionalInfo: JSON.stringify(formData),
         type: "exame-toxicologico",
         userId: user.id,
+        pdfDataUrl: pdfUrl,
       });
       setPaid(true);
       toast({ title: "Documento gerado com sucesso!", description: "1 crédito foi descontado." });

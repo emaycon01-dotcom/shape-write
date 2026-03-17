@@ -1,31 +1,23 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Download, QrCode, ExternalLink } from "lucide-react";
+import { Eye, QrCode, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
-import jsPDF from "jspdf";
 
 export default function HistoryPage() {
   const { user } = useAuth();
   const { documents } = useDocuments();
   const userDocs = documents.filter((d) => d.userId === user?.id);
 
-  const generatePDF = (doc: typeof documents[0]) => {
-    const pdf = new jsPDF();
-    pdf.setFontSize(20);
-    pdf.text("BELLARUS SISTEMAS", 105, 20, { align: "center" });
-    pdf.setFontSize(12);
-    pdf.text(`Documento: ${doc.type.toUpperCase()}`, 20, 40);
-    pdf.text(`ID: ${doc.id}`, 20, 50);
-    pdf.text(`Nome: ${doc.name}`, 20, 60);
-    pdf.text(`Identificação: ${doc.identification}`, 20, 70);
-    pdf.text(`Data: ${doc.date}`, 20, 80);
-    pdf.text(`Descrição: ${doc.description}`, 20, 90);
-    pdf.text(`Info Adicional: ${doc.additionalInfo}`, 20, 100);
-    pdf.text(`Criado em: ${new Date(doc.createdAt).toLocaleString("pt-BR")}`, 20, 110);
-    pdf.text(`Status: ${doc.status}`, 20, 120);
-    pdf.text(`Verificação: ${window.location.origin}/verify/${doc.id}`, 20, 140);
-    pdf.save(`documento-${doc.id}.pdf`);
+  const handleView = (doc: typeof documents[0]) => {
+    if (doc.pdfDataUrl) {
+      const win = window.open();
+      if (win) {
+        win.document.write(
+          `<iframe src="${doc.pdfDataUrl}" style="width:100%;height:100%;border:none;" title="PDF"></iframe>`
+        );
+      }
+    }
   };
 
   return (
@@ -56,9 +48,15 @@ export default function HistoryPage() {
                 <p className="text-xs text-muted-foreground">{new Date(doc.createdAt).toLocaleString("pt-BR")}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => generatePDF(doc)}>
-                  <Download className="w-4 h-4" /> PDF
-                </Button>
+                {doc.pdfDataUrl ? (
+                  <Button variant="outline" size="sm" onClick={() => handleView(doc)}>
+                    <Eye className="w-4 h-4" /> Ver PDF
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" disabled>
+                    <Eye className="w-4 h-4" /> Sem PDF
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`/verify/${doc.id}`} target="_blank">
                     <ExternalLink className="w-4 h-4" /> Verificar
