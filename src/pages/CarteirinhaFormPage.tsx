@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, X, User, FileText, FlaskConical, Trash2, IdCard } from "lucide-react";
+import { Upload, X, User, FileText, FlaskConical, Trash2, IdCard, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import testFotoUrl from "@/assets/test-foto.png";
 
@@ -61,6 +62,18 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+const TEMPLATE_PDF_URLS: Record<string, string> = {
+  bombeiro: "/assets/template-carteira-bombeiro.pdf",
+  porteiro: "/assets/template-carteira-porteiro.pdf",
+  "agente-financeiro": "/assets/template-carteira-agente-financeiro.pdf",
+};
+
+const STORAGE_KEYS: Record<string, string> = {
+  bombeiro: "carteirinha-bombeiro-field-positions",
+  porteiro: "carteirinha-porteiro-field-positions",
+  "agente-financeiro": "carteirinha-agente-field-positions",
+};
+
 export default function CarteirinhaFormPage() {
   const { tipo } = useParams<{ tipo: string }>();
   const navigate = useNavigate();
@@ -70,6 +83,7 @@ export default function CarteirinhaFormPage() {
   const [form, setForm] = useState<CarteirinhaFormData>(initial);
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const fotoRef = useRef<HTMLInputElement>(null);
 
   const tipoLabel = TIPO_LABELS[tipo || ""] || "Carteirinha";
@@ -126,20 +140,75 @@ export default function CarteirinhaFormPage() {
     toast({ title: "Formulário limpo!" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    setLoading(true);
 
-    navigate(`/dashboard/documentos-fisicos/carteirinhas/${tipo}/preview`, {
-      state: {
-        formData: {
-          ...form,
-          tipo: tipo || "",
-          tipoLabel,
-          foto_base64: fotoPreview || "",
+    try {
+      // Load template PDF as base64
+      const templateRes = await fetch(TEMPLATE_PDF_URLS[tipo || "bombeiro"]);
+      const templateBlob = await templateRes.blob();
+      const templateBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(templateBlob);
+      });
+
+      // Load saved field positions
+      const storageKey = STORAGE_KEYS[tipo || "bombeiro"];
+      let fieldPositions = null;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try { fieldPositions = JSON.parse(saved); } catch { /* ignore */ }
+      }
+
+      const bodyData = {
+        tipo: tipo || "",
+        numero_registro: form.numeroRegistro,
+        nome_completo: form.nomeCompleto,
+        cpf: form.cpf,
+        data_nascimento: form.dataNascimento,
+        cidade: form.cidade,
+        uf: form.uf,
+        data_formacao: form.dataFormacao,
+        contato_emergencia_1: form.contatoEmergencia1,
+        contato_emergencia_2: form.contatoEmergencia2,
+        foto_base64: fotoPreview || "",
+        template_pdf_base64: templateBase64,
+        field_positions: fieldPositions,
+      };
+
+      const { data, error } = await supabase.functions.invoke("generate-carteirinha-pdf", {
+        body: bodyData,
+      });
+
+      if (error) throw error;
+
+      const pdfResult = data?.pdfBase64;
+      if (!pdfResult) throw new Error(data?.error || "Nenhum PDF retornado");
+
+      navigate(`/dashboard/documentos-fisicos/carteirinhas/${tipo}/preview`, {
+        state: {
+          pdfBase64: pdfResult,
+          formData: {
+            ...form,
+            tipo: tipo || "",
+            tipoLabel,
+            foto_base64: fotoPreview || "",
+          },
         },
-      },
-    });
+      });
+    } catch (err: any) {
+      console.error("Erro ao gerar PDF:", err);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: err?.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputCls = "bg-secondary border-border text-foreground placeholder:text-muted-foreground";
@@ -282,8 +351,12 @@ export default function CarteirinhaFormPage() {
           </div>
         </div>
 
-        <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold">
-          <FileText className="w-5 h-5 mr-2" /> Gerar Documento
+        <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold" disabled={loading}>
+          {loading ? (
+            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Gerando PDF...</>
+          ) : (
+            <><FileText className="w-5 h-5 mr-2" /> Gerar Documento</>
+          )}
         </Button>
       </form>
     </div>

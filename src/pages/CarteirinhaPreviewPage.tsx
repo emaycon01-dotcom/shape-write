@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -15,9 +15,14 @@ export default function CarteirinhaPreviewPage() {
   const { addDocument } = useDocuments();
   const { toast } = useToast();
 
-  const { formData } = (location.state as { formData: Record<string, string> }) || {};
+  const { pdfBase64, formData } = (location.state as {
+    pdfBase64?: string;
+    formData: Record<string, string>;
+  }) || {};
+
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   const tipo = formData?.tipo || "bombeiro";
   const tipoLabel = formData?.tipoLabel || "Carteirinha";
@@ -32,6 +37,20 @@ export default function CarteirinhaPreviewPage() {
     return `${safeName || "carteirinha"}.pdf`;
   }, [formData, tipo]);
 
+  // Convert base64 to blob URL for iframe
+  useEffect(() => {
+    if (!pdfBase64) return;
+    fetch(pdfBase64)
+      .then((r) => r.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        setBlobUrl(url);
+      });
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    };
+  }, [pdfBase64]);
+
   if (!formData) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -42,6 +61,20 @@ export default function CarteirinhaPreviewPage() {
       </div>
     );
   }
+
+  const getPdfBlob = async () => fetch(pdfBase64!).then((r) => r.blob());
+
+  const downloadPdf = async () => {
+    const blob = await getPdfBlob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  };
 
   const handleGenerate = async () => {
     if (!user) return;
@@ -56,7 +89,6 @@ export default function CarteirinhaPreviewPage() {
 
     setLoading(true);
     try {
-      // Deduct 1.5 credits (deductCredit is called once for 1, we handle 1.5)
       deductCredit(CREDIT_COST);
 
       addDocument({
@@ -70,9 +102,10 @@ export default function CarteirinhaPreviewPage() {
       });
 
       setPaid(true);
+      await downloadPdf();
       toast({
         title: "Documento gerado com sucesso!",
-        description: `${CREDIT_COST} créditos foram descontados.`,
+        description: `${CREDIT_COST} créditos foram descontados e o PDF foi baixado.`,
       });
     } catch {
       toast({
@@ -86,12 +119,27 @@ export default function CarteirinhaPreviewPage() {
   };
 
   const handleDownload = async () => {
-    // PDF generation will be implemented when templates are provided
-    toast({ title: "PDF será gerado quando o template estiver disponível", description: "Envie o PDF template para ativar a geração." });
+    try {
+      await downloadPdf();
+      toast({ title: "PDF baixado com sucesso!" });
+    } catch {
+      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
+    }
   };
 
   const handleShare = async () => {
-    toast({ title: "Compartilhamento será ativado com o template de PDF" });
+    try {
+      const blob = await getPdfBlob();
+      const file = new File([blob], fileName, { type: "application/pdf" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: tipoLabel });
+      } else {
+        await downloadPdf();
+        toast({ title: "PDF baixado com sucesso!" });
+      }
+    } catch {
+      toast({ title: "Erro ao compartilhar", variant: "destructive" });
+    }
   };
 
   return (
@@ -108,72 +156,42 @@ export default function CarteirinhaPreviewPage() {
       </h1>
       <p className="text-muted-foreground text-sm mb-6">
         {paid
-          ? "Seu documento foi gerado e pode ser baixado ou compartilhado."
-          : `Confira os dados abaixo. Para gerar o documento final, clique em Gerar (${CREDIT_COST} créditos).`}
+          ? "Seu documento foi baixado e pode ser visualizado ou compartilhado novamente."
+          : `Confira o preview abaixo. Para gerar o documento final, clique em Gerar (${CREDIT_COST} créditos).`}
       </p>
 
-      {/* Preview Card */}
-      <div className="glass rounded-xl overflow-hidden mb-6 p-6">
-        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border/50">
-          <IdCard className="w-6 h-6 text-primary" />
-          <h2 className="font-display font-bold text-foreground">{tipoLabel}</h2>
-        </div>
-
-        <div className="flex gap-6">
-          {formData.foto_base64 && (
-            <img
-              src={formData.foto_base64}
-              alt="Foto 3x4"
-              className="w-24 h-32 object-cover rounded-lg border border-border shrink-0"
-            />
+      {/* PDF Preview */}
+      {blobUrl && (
+        <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
+          <iframe
+            src={blobUrl}
+            className="w-full h-full border-0"
+            title="PDF Preview"
+          />
+          {!paid && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden select-none flex items-center justify-center">
+              <div className="absolute inset-0" style={{
+                background: "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.06) 80px, hsl(var(--destructive) / 0.06) 82px)",
+              }} />
+              {Array.from({ length: 12 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="absolute text-destructive/20 font-bold whitespace-nowrap select-none"
+                  style={{
+                    fontSize: "18px",
+                    transform: `rotate(-35deg)`,
+                    top: `${10 + (i % 4) * 25}%`,
+                    left: `${-10 + Math.floor(i / 4) * 40}%`,
+                    letterSpacing: "2px",
+                  }}
+                >
+                  PROPRIEDADE BELLARUS NÃO COPIE
+                </span>
+              ))}
+            </div>
           )}
-
-          <div className="flex-1 space-y-2 text-sm">
-            <div>
-              <span className="text-muted-foreground">Nº Registro:</span>{" "}
-              <span className="font-semibold text-foreground">{formData.numeroRegistro}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Nome:</span>{" "}
-              <span className="font-semibold text-foreground">{formData.nomeCompleto}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">CPF:</span>{" "}
-              <span className="font-semibold text-foreground">{formData.cpf}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Nascimento:</span>{" "}
-              <span className="font-semibold text-foreground">{formData.dataNascimento}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Cidade/UF:</span>{" "}
-              <span className="font-semibold text-foreground">{formData.cidade}, {formData.uf}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Formação:</span>{" "}
-              <span className="font-semibold text-foreground">{formData.dataFormacao}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Emergência 1:</span>{" "}
-              <span className="font-semibold text-foreground">{formData.contatoEmergencia1}</span>
-            </div>
-            {formData.contatoEmergencia2 && (
-              <div>
-                <span className="text-muted-foreground">Emergência 2:</span>{" "}
-                <span className="font-semibold text-foreground">{formData.contatoEmergencia2}</span>
-              </div>
-            )}
-          </div>
         </div>
-
-        {!paid && (
-          <div className="mt-4 pt-3 border-t border-border/50">
-            <p className="text-xs text-muted-foreground italic">
-              * O PDF final será gerado sobre o template oficial após confirmação do pagamento.
-            </p>
-          </div>
-        )}
-      </div>
+      )}
 
       {!paid ? (
         <div className="space-y-3">

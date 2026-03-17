@@ -9,6 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
 import templateFisicaBgUrl from "@/assets/template-cnh-fisica-bg.jpg";
 import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
+import templateBombeiroUrl from "@/assets/template-carteira-bombeiro.jpg";
+import templatePorteiroUrl from "@/assets/template-carteira-porteiro.jpg";
+import templateAgenteUrl from "@/assets/template-carteira-agente-financeiro.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
@@ -518,25 +521,20 @@ const defaultCarteirinhaFields: FieldDef[] = [
   { id: "emergencia2", label: "Emergência 2", sampleText: "(11) 88888-0000", x: 150, y: 220, fontSize: 7 },
 ];
 
-function CarteirinhaAlignPlaceholder({ tipo, storageKey }: { tipo: string; storageKey: string }) {
+const CARTEIRINHA_TEMPLATES: Record<string, string> = {
+  bombeiro: templateBombeiroUrl,
+  porteiro: templatePorteiroUrl,
+  "agente-financeiro": templateAgenteUrl,
+};
+
+function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string; tipoLabel: string; storageKey: string }) {
   return (
-    <div className="space-y-4">
-      <div className="glass rounded-xl p-6 text-center">
-        <h3 className="font-display font-bold text-foreground mb-2">Alinhamento — Carteira de {tipo}</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Envie o PDF template para ativar o editor de alinhamento visual. Os campos do formulário serão posicionados sobre o template.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Campos disponíveis: Foto, Nº Registro, Nome, CPF, Nascimento, Cidade/UF, Formação, Contatos de Emergência
-        </p>
-      </div>
-      <GenericAlignContent
-        templateUrl=""
-        storageKey={storageKey}
-        title={`Alinhamento — Carteira de ${tipo}`}
-        fields={defaultCarteirinhaFields}
-      />
-    </div>
+    <GenericAlignContent
+      templateUrl={CARTEIRINHA_TEMPLATES[tipo] || ""}
+      storageKey={storageKey}
+      title={`Alinhamento — Carteira de ${tipoLabel}`}
+      fields={defaultCarteirinhaFields}
+    />
   );
 }
 
@@ -599,13 +597,13 @@ export default function TemplateAlignPage() {
               <CnhFisicaVersoAlignContent />
             </TabsContent>
             <TabsContent value="cart-bombeiro">
-              <CarteirinhaAlignPlaceholder tipo="Bombeiro" storageKey="carteirinha-bombeiro-field-positions" />
+              <CarteirinhaAlignContent tipo="bombeiro" tipoLabel="Bombeiro" storageKey="carteirinha-bombeiro-field-positions" />
             </TabsContent>
             <TabsContent value="cart-porteiro">
-              <CarteirinhaAlignPlaceholder tipo="Porteiro / Vigia" storageKey="carteirinha-porteiro-field-positions" />
+              <CarteirinhaAlignContent tipo="porteiro" tipoLabel="Porteiro / Vigia" storageKey="carteirinha-porteiro-field-positions" />
             </TabsContent>
             <TabsContent value="cart-agente">
-              <CarteirinhaAlignPlaceholder tipo="Agente Financeiro" storageKey="carteirinha-agente-field-positions" />
+              <CarteirinhaAlignContent tipo="agente-financeiro" tipoLabel="Agente Financeiro" storageKey="carteirinha-agente-field-positions" />
             </TabsContent>
           </Tabs>
         </TabsContent>
