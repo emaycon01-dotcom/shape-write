@@ -22,7 +22,6 @@ import {
   Palette,
   ImageIcon,
   IdCard,
-  IdCard,
 } from "lucide-react";
 import {
   Sidebar,
