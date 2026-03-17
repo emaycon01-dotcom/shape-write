@@ -225,7 +225,147 @@ function buildCatDateOverlays(activeCategory: string, d: Record<string, string>)
   return html;
 }
 
-function buildCnhHtml(d: Record<string, string>) {
+function buildCnhDigitalHtml(d: Record<string, string>) {
+  const mrz = buildMrz(d);
+  const espelhoClean = cleanCode(d.numero_espelho || "");
+  const renachClean = cleanCode(d.renach || "");
+  const templateBg = d.template_bg || "";
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4 portrait; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #fff;
+    width: 794px;
+    margin: 0;
+    padding: 0;
+  }
+  .page {
+    width: 794px;
+    height: 1123px;
+    position: relative;
+    background: #fff;
+    overflow: hidden;
+  }
+  .bg-template {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
+  .bg-template img {
+    width: 100%; height: 100%;
+    object-fit: fill;
+  }
+  .overlay {
+    position: absolute;
+    z-index: 10;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    font-weight: normal;
+  }
+  .photo-overlay {
+    top: 106px; left: 88px;
+    width: 82px; height: 110px;
+    overflow: hidden;
+  }
+  .photo-overlay img { width:100%; height:100%; object-fit:cover; }
+  .sig-overlay {
+    top: 216px; left: 85px;
+    width: 95px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; }
+  .reg-vert-top {
+    top: 250px; left: 62px;
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    font-size: 15px;
+    letter-spacing: 1.2px;
+    white-space: nowrap;
+    color: #111;
+    font-weight: bold;
+  }
+  .f-nome         { top: 86px; left: 95px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 86px; left: 300px; font-size: 6.5px; }
+  .f-nascimento   { top: 106px; left: 185px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-emissao      { top: 123px; left: 189px; font-size: 6.5px; }
+  .f-validade     { top: 124px; left: 248px; font-size: 6.5px; color: #c00; }
+  .f-cat-big      { top: 121px; left: 331px; font-size: 11px; color: #111; }
+  .f-rg           { top: 143px; left: 184px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-cpf          { top: 161px; left: 185px; font-size: 6.5px; }
+  .f-registro     { top: 161px; left: 250px; font-size: 6.5px; color: #c00; }
+  .f-cat-hab      { top: 162px; left: 312px; font-size: 7px; color: #c00; }
+  .f-nacionalidade { top: 180px; left: 184px; font-size: 6.5px; }
+  .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
+  .f-espelho      { top: 419px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-renach       { top: 428px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-local        { top: 434px; left: 91px; font-size: 6px; }
+  .reg-vert-bot {
+    top: 477px; left: 68px;
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    font-size: 15px;
+    letter-spacing: 1.2px;
+    white-space: nowrap;
+    color: #111;
+    font-weight: bold;
+  }
+  .mrz-overlay {
+    top: 624px; left: 126px;
+    width: 420px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9.5px;
+    color: #111;
+    letter-spacing: 1.6px;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bg-template">
+    ${templateBg ? `<img src="${templateBg}" />` : ""}
+  </div>
+  <div class="overlay photo-overlay">${d.foto ? `<img src="${d.foto}" />` : ""}</div>
+  <div class="overlay sig-overlay">${d.assinatura ? `<img src="${d.assinatura}" />` : ""}</div>
+  <div class="overlay reg-vert-top">${d.registro || ""}</div>
+  <div class="overlay f-nome">${d.nome_completo || ""}</div>
+  <div class="overlay f-primeira-hab">${d.data_primeira_hab || ""}</div>
+  <div class="overlay f-nascimento">${d.data_nascimento || ""}</div>
+  <div class="overlay f-emissao">${d.data_emissao || ""}</div>
+  <div class="overlay f-validade">${d.data_validade || ""}</div>
+  <div class="overlay f-cat-big">${d.categoria || ""}</div>
+  <div class="overlay f-rg">${d.rg || ""}</div>
+  <div class="overlay f-cpf">${d.cpf || ""}</div>
+  <div class="overlay f-registro">${d.registro || ""}</div>
+  <div class="overlay f-cat-hab">${d.categoria || ""}</div>
+  <div class="overlay f-nacionalidade">${d.nacionalidade || ""}</div>
+  <div class="overlay f-pai">${d.nome_pai || ""}</div>
+  <div class="overlay f-mae">${d.nome_mae || ""}</div>
+  ${buildCatDateOverlays(d.categoria || "", d)}
+  <div class="overlay f-obs">${d.observacoes || ""}</div>
+  <div class="overlay f-espelho">${espelhoClean}</div>
+  <div class="overlay f-renach">${renachClean}</div>
+  <div class="overlay f-local">${d.cidade_estado || ""}</div>
+  <div class="overlay reg-vert-bot">${d.registro || ""}</div>
+  <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+</div>
+</body>
+</html>`;
+}
+
+function buildCnhFisicaHtml(d: Record<string, string>) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
   const renachClean = cleanCode(d.renach || "");
@@ -279,24 +419,18 @@ function buildCnhHtml(d: Record<string, string>) {
     color: #111;
     font-weight: normal;
   }
-
-  /* ========== PHOTO ========== */
   .photo-overlay {
     top: 106px; left: 88px;
     width: 82px; height: 110px;
     overflow: hidden;
   }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; }
-
-  /* ========== SIGNATURE ========== */
   .sig-overlay {
     top: 216px; left: 85px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; }
-
-  /* ========== VERTICAL TEXT (left of card) ========== */
   .reg-vert-top {
     top: 250px; left: 62px;
     transform: rotate(-90deg);
@@ -307,34 +441,23 @@ function buildCnhHtml(d: Record<string, string>) {
     color: #111;
     font-weight: bold;
   }
-
-  /* ========== CARD FIELD VALUES ========== */
   .f-nome         { top: 86px; left: 95px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .f-primeira-hab { top: 86px; left: 300px; font-size: 6.5px; }
-
   .f-nascimento   { top: 106px; left: 185px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
-
   .f-emissao      { top: 123px; left: 189px; font-size: 6.5px; }
   .f-validade     { top: 124px; left: 248px; font-size: 6.5px; color: #c00; }
   .f-cat-big      { top: 121px; left: 331px; font-size: 11px; color: #111; }
-
   .f-rg           { top: 143px; left: 184px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
-
   .f-cpf          { top: 161px; left: 185px; font-size: 6.5px; }
   .f-registro     { top: 161px; left: 250px; font-size: 6.5px; color: #c00; }
   .f-cat-hab      { top: 162px; left: 312px; font-size: 7px; color: #c00; }
-
   .f-nacionalidade { top: 180px; left: 184px; font-size: 6.5px; }
-
   .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
-
   .f-espelho      { top: 419px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-renach       { top: 428px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-local        { top: 434px; left: 91px; font-size: 6px; }
-
   .reg-vert-bot {
     top: 477px; left: 68px;
     transform: rotate(-90deg);
@@ -345,9 +468,7 @@ function buildCnhHtml(d: Record<string, string>) {
     color: #111;
     font-weight: bold;
   }
-
   .f-estado       { top: 450px; left: 175px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
-
   .mrz-overlay {
     top: 624px; left: 126px;
     width: 420px;
@@ -361,23 +482,13 @@ function buildCnhHtml(d: Record<string, string>) {
 </style>
 </head>
 <body>
-<!-- ==================== PAGE 1: FRONT ==================== -->
 <div class="page">
-  <!-- BACKGROUND TEMPLATE -->
   <div class="bg-template">
     ${templateBg ? `<img src="${templateBg}" />` : ""}
   </div>
-
-  <!-- PHOTO -->
   <div class="overlay photo-overlay">${d.foto ? `<img src="${d.foto}" />` : ""}</div>
-
-  <!-- SIGNATURE -->
   <div class="overlay sig-overlay">${d.assinatura ? `<img src="${d.assinatura}" />` : ""}</div>
-
-  <!-- VERTICAL REGISTRATION (top) -->
   <div class="overlay reg-vert-top">${d.registro || ""}</div>
-
-  <!-- CARD FIELD VALUES -->
   <div class="overlay f-nome">${d.nome_completo || ""}</div>
   <div class="overlay f-primeira-hab">${d.data_primeira_hab || ""}</div>
   <div class="overlay f-nascimento">${d.data_nascimento || ""}</div>
@@ -391,34 +502,18 @@ function buildCnhHtml(d: Record<string, string>) {
   <div class="overlay f-nacionalidade">${d.nacionalidade || ""}</div>
   <div class="overlay f-pai">${d.nome_pai || ""}</div>
   <div class="overlay f-mae">${d.nome_mae || ""}</div>
-
-  <!-- CATEGORY DATE VALUES -->
   ${buildCatDateOverlays(d.categoria || "", d)}
-
-  <!-- OBSERVATIONS -->
   <div class="overlay f-obs">${d.observacoes || ""}</div>
-
-  <!-- SIGNING INFO -->
   <div class="overlay f-espelho">${espelhoClean}</div>
   <div class="overlay f-renach">${renachClean}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
-
-  <!-- VERTICAL REGISTRATION (bottom) -->
   <div class="overlay reg-vert-bot">${d.registro || ""}</div>
-
-  <!-- STATE NAME -->
   <div class="overlay f-estado">${d.estado_extenso || ""}</div>
-
-  <!-- MRZ removed from front page - only on verso/QR code page -->
 </div>
-
-<!-- ==================== PAGE 2: VERSO / QR CODE ==================== -->
 <div class="page">
   <div class="bg-template">
     ${templateVersoBg ? `<img src="${templateVersoBg}" />` : ""}
   </div>
-
-  <!-- MRZ on verso page -->
   <div class="overlay" style="top:422px;left:447px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
