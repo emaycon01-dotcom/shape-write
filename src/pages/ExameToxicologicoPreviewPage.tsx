@@ -79,7 +79,7 @@ export default function ExameToxicologicoPreviewPage() {
       const BLACK = "#000000";
       const RED = "#CC0000";
 
-      drawField("clienteEmpresa", formData.clienteEmpresa, BLUE);
+      drawField("clienteEmpresa", formData.clienteEmpresa, BLACK);
       drawField("nomeCompleto", formData.nomeCompleto, BLUE, true);
       drawField("laudo", formData.laudo, BLUE);
       drawField("cnpj", formData.cnpj, BLUE);
