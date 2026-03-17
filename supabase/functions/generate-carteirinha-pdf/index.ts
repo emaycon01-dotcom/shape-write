@@ -79,19 +79,19 @@ serve(async (req) => {
 
     // Default positions in alignment-page coordinates (top-left origin, 794x1123)
     const rawPositions: Record<string, { x: number; y: number; fontSize: number }> = {
-      numero_registro: { x: 280, y: 128, fontSize: 25 },
-      nome: { x: 75, y: 286, fontSize: 25 },
-      cpf: { x: 76, y: 364, fontSize: 25 },
-      nascimento: { x: 67, y: 442, fontSize: 25 },
-      cidade_uf: { x: 198, y: 442, fontSize: 25 },
-      formacao: { x: 64, y: 635, fontSize: 25 },
-      validade: { x: 578, y: 208, fontSize: 25 },
-      emergencia1: { x: 67, y: 795, fontSize: 25 },
-      emergencia2: { x: 414, y: 793, fontSize: 25 },
+      numero_registro: { x: 284, y: 127, fontSize: 25 },
+      nome: { x: 76, y: 281, fontSize: 25 },
+      cpf: { x: 80, y: 357, fontSize: 25 },
+      nascimento: { x: 77, y: 437, fontSize: 25 },
+      cidade_uf: { x: 210, y: 436, fontSize: 25 },
+      formacao: { x: 72, y: 630, fontSize: 25 },
+      validade: { x: 580, y: 202, fontSize: 25 },
+      emergencia1: { x: 78, y: 789, fontSize: 25 },
+      emergencia2: { x: 429, y: 789, fontSize: 25 },
     };
 
     // Default photo position in alignment-page coordinates
-    let rawPhoto = { x: 52, y: 0, w: 155, h: 211 };
+    let rawPhoto = { x: 55, y: 67, w: 150, h: 200 };
 
     // If alignment positions are provided in the body, use them
     if (body.field_positions) {
