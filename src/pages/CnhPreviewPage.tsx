@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -20,6 +20,19 @@ export default function CnhPreviewPage() {
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pdfBase64) return;
+    let url: string;
+    fetch(pdfBase64)
+      .then((r) => r.blob())
+      .then((blob) => {
+        url = URL.createObjectURL(blob);
+        setBlobUrl(url);
+      });
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
     return (
@@ -127,7 +140,7 @@ export default function CnhPreviewPage() {
       {/* PDF Preview area */}
       <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
         <iframe
-          src={pdfBase64}
+          src={blobUrl || ""}
           className="w-full h-full border-0"
           title="PDF Preview"
         />
