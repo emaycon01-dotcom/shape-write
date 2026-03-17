@@ -74,6 +74,8 @@ const App = () => (
                   <Route path="documents/certidao-nascimento/preview" element={<CertidaoNascimentoPreviewPage />} />
                   <Route path="documents/comprovante-residencia" element={<ComprovanteResidenciaFormPage />} />
                   <Route path="documents/comprovante-residencia/preview" element={<ComprovanteResidenciaPreviewPage />} />
+                  <Route path="documents/exame-toxicologico" element={<ExameToxicologicoFormPage />} />
+                  <Route path="documents/exame-toxicologico/preview" element={<ExameToxicologicoPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
                   <Route path="planos" element={<PlanosPage />} />
