@@ -71,15 +71,15 @@ serve(async (req) => {
 
     // Default positions (will be overridden by alignment data if provided)
     const positions: Record<string, { x: number; y: number; fontSize: number }> = {
-      numero_registro: { x: 293, y: height - 147 - 25, fontSize: 25 },
-      nome: { x: 85, y: height - 304 - 25, fontSize: 25 },
-      cpf: { x: 95, y: height - 382 - 25, fontSize: 25 },
-      nascimento: { x: 88, y: height - 460 - 25, fontSize: 25 },
-      cidade_uf: { x: 220, y: height - 459 - 25, fontSize: 25 },
-      formacao: { x: 598, y: height - 224 - 25, fontSize: 25 },
-      validade: { x: 598, y: height - 300 - 25, fontSize: 25 },
-      emergencia1: { x: 135, y: height - 812 - 25, fontSize: 25 },
-      emergencia2: { x: 486, y: height - 810 - 25, fontSize: 25 },
+      numero_registro: { x: 291, y: height - 154 - 8, fontSize: 8 },
+      nome: { x: 80, y: height - 313 - 8, fontSize: 8 },
+      cpf: { x: 87, y: height - 395 - 8, fontSize: 8 },
+      nascimento: { x: 100, y: height - 468 - 8, fontSize: 8 },
+      cidade_uf: { x: 198, y: height - 468 - 8, fontSize: 8 },
+      formacao: { x: 109, y: height - 665 - 8, fontSize: 8 },
+      validade: { x: 109, y: height - 700 - 8, fontSize: 8 },
+      emergencia1: { x: 170, y: height - 828 - 7, fontSize: 7 },
+      emergencia2: { x: 539, y: height - 829 - 7, fontSize: 7 },
     };
 
     // If alignment positions are provided in the body, use them
@@ -138,7 +138,7 @@ serve(async (req) => {
           image = await pdfDoc.embedJpg(photoBytes);
         }
 
-        const photoPos = body.field_positions?.photo || { x: 51, y: 59, w: 155, h: 210 };
+        const photoPos = body.field_positions?.photo || { x: 89, y: 113, w: 82, h: 110 };
         page.drawImage(image, {
           x: photoPos.x,
           y: height - photoPos.y - (photoPos.h || 110),
