@@ -281,56 +281,57 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
     font-weight: normal;
   }
   .photo-overlay {
-    top: 106px; left: 88px;
+    top: 167px; left: 98px;
     width: 82px; height: 110px;
     overflow: hidden;
   }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; }
   .sig-overlay {
-    top: 216px; left: 85px;
+    top: 276px; left: 93px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; }
   .reg-vert-top {
-    top: 250px; left: 62px;
+    top: 315px; left: 65px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 15px;
+    font-size: 12px;
     letter-spacing: 1.2px;
     white-space: nowrap;
     color: #111;
     font-weight: bold;
   }
-  .f-nome         { top: 86px; left: 95px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .f-primeira-hab { top: 86px; left: 300px; font-size: 6.5px; }
-  .f-nascimento   { top: 106px; left: 185px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
-  .f-emissao      { top: 123px; left: 189px; font-size: 6.5px; }
-  .f-validade     { top: 124px; left: 248px; font-size: 6.5px; color: #c00; }
-  .f-cat-big      { top: 121px; left: 331px; font-size: 11px; color: #111; }
-  .f-rg           { top: 143px; left: 184px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
-  .f-cpf          { top: 161px; left: 185px; font-size: 6.5px; }
-  .f-registro     { top: 161px; left: 250px; font-size: 6.5px; color: #c00; }
-  .f-cat-hab      { top: 162px; left: 312px; font-size: 7px; color: #c00; }
-  .f-nacionalidade { top: 180px; left: 184px; font-size: 6.5px; }
-  .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
-  .f-espelho      { top: 419px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
-  .f-renach       { top: 428px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
-  .f-local        { top: 434px; left: 91px; font-size: 6px; }
+  .f-nome         { top: 149px; left: 100px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-primeira-hab { top: 149px; left: 308px; font-size: 6.5px; }
+  .f-nascimento   { top: 168px; left: 192px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-emissao      { top: 187px; left: 191px; font-size: 6.5px; }
+  .f-validade     { top: 187px; left: 253px; font-size: 6.5px; color: #c00; }
+  .f-cat-big      { top: 184px; left: 338px; font-size: 11px; color: #111; }
+  .f-rg           { top: 207px; left: 190px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
+  .f-cpf          { top: 226px; left: 190px; font-size: 6.5px; }
+  .f-registro     { top: 226px; left: 256px; font-size: 6.5px; color: #c00; }
+  .f-cat-hab      { top: 226px; left: 319px; font-size: 7px; color: #c00; }
+  .f-nacionalidade { top: 246px; left: 190px; font-size: 6.5px; }
+  .f-pai          { top: 266px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-mae          { top: 286px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-obs          { top: 427px; left: 97px; font-size: 5.5px; max-width: 370px; }
+  .f-espelho      { top: 495px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-renach       { top: 509px; left: 280px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-local        { top: 505px; left: 100px; font-size: 6px; }
+  .f-estado       { top: 531px; left: 163px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
   .reg-vert-bot {
-    top: 477px; left: 68px;
+    top: 558px; left: 64px;
     transform: rotate(-90deg);
     transform-origin: left top;
-    font-size: 15px;
+    font-size: 11.5px;
     letter-spacing: 1.2px;
     white-space: nowrap;
     color: #111;
     font-weight: bold;
   }
   .mrz-overlay {
-    top: 624px; left: 126px;
+    top: 694px; left: 80px;
     width: 420px;
     font-family: 'Courier New', Courier, monospace;
     font-size: 9.5px;
@@ -362,11 +363,12 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
   <div class="overlay f-nacionalidade">${d.nacionalidade || ""}</div>
   <div class="overlay f-pai">${d.nome_pai || ""}</div>
   <div class="overlay f-mae">${d.nome_mae || ""}</div>
-  ${buildCatDateOverlays(d.categoria || "", d)}
+  ${buildCatDateOverlays(d.categoria || "", d, "digital")}
   <div class="overlay f-obs">${d.observacoes || ""}</div>
   <div class="overlay f-espelho">${espelhoClean}</div>
   <div class="overlay f-renach">${renachClean}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
+  <div class="overlay f-estado">${d.estado_extenso || ""}</div>
   <div class="overlay reg-vert-bot">${d.registro || ""}</div>
   <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
