@@ -70,14 +70,14 @@ serve(async (req) => {
 
     // Default positions (will be overridden by alignment data if provided)
     const positions: Record<string, { x: number; y: number; fontSize: number }> = {
-      numero_registro: { x: 150, y: height - 80, fontSize: 8 },
-      nome: { x: 150, y: height - 100, fontSize: 8 },
-      cpf: { x: 150, y: height - 120, fontSize: 8 },
-      nascimento: { x: 150, y: height - 140, fontSize: 8 },
-      cidade_uf: { x: 150, y: height - 160, fontSize: 8 },
-      formacao: { x: 150, y: height - 180, fontSize: 8 },
-      emergencia1: { x: 150, y: height - 200, fontSize: 7 },
-      emergencia2: { x: 150, y: height - 220, fontSize: 7 },
+      numero_registro: { x: 293, y: height - 147 - 25, fontSize: 25 },
+      nome: { x: 85, y: height - 304 - 25, fontSize: 25 },
+      cpf: { x: 95, y: height - 382 - 25, fontSize: 25 },
+      nascimento: { x: 88, y: height - 460 - 25, fontSize: 25 },
+      cidade_uf: { x: 220, y: height - 459 - 25, fontSize: 25 },
+      formacao: { x: 598, y: height - 224 - 25, fontSize: 25 },
+      emergencia1: { x: 135, y: height - 812 - 25, fontSize: 25 },
+      emergencia2: { x: 486, y: height - 810 - 25, fontSize: 25 },
     };
 
     // If alignment positions are provided in the body, use them
