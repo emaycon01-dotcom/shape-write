@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Smartphone, Phone, Home, FlaskConical, CreditCard, Stethoscope, FileCheck } from "lucide-react";
+import { FileText, Smartphone, Phone, Home, FlaskConical, CreditCard, Stethoscope, FileCheck, Wrench } from "lucide-react";
 
 interface DocItem {
   id: string;
