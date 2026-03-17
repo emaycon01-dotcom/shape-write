@@ -21,15 +21,15 @@ interface FieldDef {
 }
 
 const defaultFields: FieldDef[] = [
-  { id: "clienteEmpresa", label: "Cliente/Empresa", sampleText: "TRANSPORTADORA NORTE LTDA", x: 104, y: 135, fontSize: 14 },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "JOSE CARLOS DA SILVA", x: 83, y: 206, fontSize: 14 },
-  { id: "laudo", label: "Laudo Nº", sampleText: "CNJ00494237", x: 103, y: 226, fontSize: 14 },
-  { id: "cnpj", label: "CNPJ", sampleText: "08.075.074/0001-07", x: 79, y: 247, fontSize: 14 },
-  { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 70, y: 270, fontSize: 14, bold: true },
-  { id: "dataColeta", label: "Data Coleta", sampleText: "12/03/2026", x: 400, y: 249, fontSize: 12 },
-  { id: "dataRecebimento", label: "Data Recebimento", sampleText: "14/03/2026", x: 381, y: 268, fontSize: 12 },
-  { id: "dataResultado", label: "Data Resultado", sampleText: "17/03/2026", x: 374, y: 289, fontSize: 12 },
-  { id: "dataValidade", label: "Data Validade", sampleText: "17/09/2026", x: 362, y: 227, fontSize: 12 },
+  { id: "clienteEmpresa", label: "Cliente/Empresa", sampleText: "TRANSPORTADORA NORTE LTDA", x: 109, y: 139, fontSize: 14 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "JOSE CARLOS DA SILVA", x: 86, y: 207, fontSize: 14 },
+  { id: "laudo", label: "Laudo Nº", sampleText: "CNJ00494237", x: 107, y: 227, fontSize: 14 },
+  { id: "cnpj", label: "CNPJ", sampleText: "08.075.074/0001-07", x: 85, y: 248, fontSize: 14 },
+  { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 75, y: 270, fontSize: 14, bold: true },
+  { id: "dataColeta", label: "Data Coleta", sampleText: "12/03/2026", x: 401, y: 249, fontSize: 12 },
+  { id: "dataRecebimento", label: "Data Recebimento", sampleText: "14/03/2026", x: 384, y: 269, fontSize: 12 },
+  { id: "dataResultado", label: "Data Resultado", sampleText: "17/03/2026", x: 377, y: 289, fontSize: 12 },
+  { id: "dataValidade", label: "Data Validade", sampleText: "17/09/2026", x: 363, y: 228, fontSize: 12 },
 ];
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (u: Partial<FieldDef>) => void }) {
