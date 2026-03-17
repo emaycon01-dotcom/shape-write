@@ -20,6 +20,19 @@ export default function CnhPreviewPage() {
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pdfBase64) return;
+    let url: string;
+    fetch(pdfBase64)
+      .then((r) => r.blob())
+      .then((blob) => {
+        url = URL.createObjectURL(blob);
+        setBlobUrl(url);
+      });
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
     return (
