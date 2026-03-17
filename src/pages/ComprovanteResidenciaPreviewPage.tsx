@@ -172,7 +172,7 @@ export default function ComprovanteResidenciaPreviewPage() {
     }
   };
 
-  const handleView = async () => {
+  const handleDownload = async () => {
     if (!pdfDataUrl) return;
     try {
       const blob = await fetch(pdfDataUrl).then((r) => r.blob());
@@ -182,8 +182,9 @@ export default function ComprovanteResidenciaPreviewPage() {
       link.download = "comprovante-residencia.pdf";
       link.click();
       setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      toast({ title: "PDF baixado com sucesso!" });
     } catch {
-      toast({ title: "Erro ao abrir PDF", variant: "destructive" });
+      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
     }
   };
 
