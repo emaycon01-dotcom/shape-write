@@ -199,13 +199,19 @@ export default function CertidaoNascimentoPreviewPage() {
     }
   };
 
-  const handleView = () => {
+  const handleDownload = async () => {
     if (!pdfDataUrl) return;
-    const win = window.open();
-    if (win) {
-      win.document.write(
-        `<iframe src="${pdfDataUrl}" style="width:100%;height:100%;border:none;" title="PDF"></iframe>`
-      );
+    try {
+      const blob = await fetch(pdfDataUrl).then((r) => r.blob());
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "certidao-nascimento.pdf";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      toast({ title: "PDF baixado com sucesso!" });
+    } catch {
+      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
     }
   };
 
