@@ -40,9 +40,7 @@ serve(async (req) => {
     const pdfBytes = Uint8Array.from(atob(pdfBase64Clean), (c) => c.charCodeAt(0));
 
     // Import pdf-lib
-    const { PDFDocument, rgb, StandardFonts } = await import(
-      "https://cdn.skypack.dev/pdf-lib@1.17.1?dts"
-    );
+    const { PDFDocument, rgb, StandardFonts } = await import("npm:pdf-lib@1.17.1");
 
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pages = pdfDoc.getPages();
