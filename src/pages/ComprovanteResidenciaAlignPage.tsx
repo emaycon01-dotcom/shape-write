@@ -23,8 +23,8 @@ interface FieldDef {
 const defaultFields: FieldDef[] = [
   { id: "nome1", label: "Nome (1ª vez)", sampleText: "GREICE KELLY DA SILVA", x: 160, y: 6, fontSize: 12.5 },
   { id: "nome2", label: "Nome (2ª vez)", sampleText: "GREICE KELLY DA SILVA", x: 62, y: 1005, fontSize: 11 },
-  { id: "endereco", label: "Endereço", sampleText: "RUA DAS FLORES, 123", x: 163, y: 31, fontSize: 7.5 },
-  { id: "cepCidadeEstado", label: "CEP/Cidade/Estado", sampleText: "01234-567 SAO PAULO SP", x: 163, y: 47, fontSize: 8 },
+  { id: "endereco", label: "Endereço", sampleText: "RUA DAS FLORES, 123", x: 163, y: 24, fontSize: 7.5 },
+  { id: "cepCidadeEstado", label: "CEP/Cidade/Estado", sampleText: "01234-567 SAO PAULO SP", x: 163, y: 35, fontSize: 8 },
   { id: "cpf", label: "CPF (Negrito)", sampleText: "123.456.789-00", x: 380, y: 60, fontSize: 12, bold: true },
 ];
 
