@@ -26,6 +26,54 @@ const carteirinhas = [
     route: "/dashboard/documentos-fisicos/carteirinhas/agente-financeiro",
     credits: 1.5,
   },
+  {
+    id: "operador-maquinas",
+    name: "Carteira Nacional de Operador de Máquinas Pesadas",
+    description: "Carteira profissional de Operador de Máquinas Pesadas física",
+    icon: IdCard,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "operador-maquinas-digital",
+    name: "Carteira Nacional de Operador de Máquinas Pesadas (Digital)",
+    description: "Versão digital da carteira de Operador de Máquinas Pesadas",
+    icon: IdCard,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "bombeiro-militar",
+    name: "Carteira de Bombeiro Militar",
+    description: "Carteira funcional de Bombeiro Militar com dados completos",
+    icon: Shield,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "identidade-policial-pe",
+    name: "Cédula de Identidade Policial (Pernambuco)",
+    description: "Cédula de identidade policial do estado de Pernambuco",
+    icon: Shield,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "cnh-nautica-sp",
+    name: "Carteira de CNH Náutica Física (SP)",
+    description: "Carteira de habilitação náutica física do estado de São Paulo",
+    icon: IdCard,
+    route: "",
+    credits: 1.5,
+  },
+  {
+    id: "cpf-fisico",
+    name: "Carteira de CPF Físico",
+    description: "Carteira física do CPF com dados completos",
+    icon: IdCard,
+    route: "",
+    credits: 1,
+  },
 ];
 
 export default function CarteirinhasSelecaoPage() {
@@ -52,8 +100,9 @@ export default function CarteirinhasSelecaoPage() {
         {carteirinhas.map((item) => (
           <button
             key={item.id}
-            onClick={() => navigate(item.route)}
-            className="glass rounded-xl p-6 text-left hover:border-primary/40 transition-colors group"
+            onClick={() => item.route && navigate(item.route)}
+            className="glass rounded-xl p-6 text-left hover:border-primary/40 transition-colors group disabled:opacity-50"
+            disabled={!item.route}
           >
             <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
               <item.icon className="w-6 h-6 text-primary" />
@@ -61,8 +110,10 @@ export default function CarteirinhasSelecaoPage() {
             <h3 className="font-display font-semibold text-foreground mb-1">{item.name}</h3>
             <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-accent font-medium">{item.credits} Créditos</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">ATIVO</span>
+              <span className="text-sm text-accent font-medium">{item.credits} Crédito{item.credits !== 1 ? "s" : ""}</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${item.route ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}>
+                {item.route ? "ATIVO" : "EM BREVE"}
+              </span>
             </div>
           </button>
         ))}
