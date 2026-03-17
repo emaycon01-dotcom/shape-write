@@ -34,6 +34,7 @@ const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
 const CnhFisicaFormPage = lazy(() => import("./pages/CnhFisicaFormPage"));
 const CnhFisicaPreviewPage = lazy(() => import("./pages/CnhFisicaPreviewPage"));
 const CarteirinhasSelecaoPage = lazy(() => import("./pages/CarteirinhasSelecaoPage"));
+const RgFisicoSelecaoPage = lazy(() => import("./pages/RgFisicoSelecaoPage"));
 const CarteirinhaFormPage = lazy(() => import("./pages/CarteirinhaFormPage"));
 const CarteirinhaPreviewPage = lazy(() => import("./pages/CarteirinhaPreviewPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
