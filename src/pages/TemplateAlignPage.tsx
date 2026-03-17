@@ -521,25 +521,20 @@ const defaultCarteirinhaFields: FieldDef[] = [
   { id: "emergencia2", label: "Emergência 2", sampleText: "(11) 88888-0000", x: 150, y: 220, fontSize: 7 },
 ];
 
-function CarteirinhaAlignPlaceholder({ tipo, storageKey }: { tipo: string; storageKey: string }) {
+const CARTEIRINHA_TEMPLATES: Record<string, string> = {
+  bombeiro: templateBombeiroUrl,
+  porteiro: templatePorteiroUrl,
+  "agente-financeiro": templateAgenteUrl,
+};
+
+function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string; tipoLabel: string; storageKey: string }) {
   return (
-    <div className="space-y-4">
-      <div className="glass rounded-xl p-6 text-center">
-        <h3 className="font-display font-bold text-foreground mb-2">Alinhamento — Carteira de {tipo}</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Envie o PDF template para ativar o editor de alinhamento visual. Os campos do formulário serão posicionados sobre o template.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Campos disponíveis: Foto, Nº Registro, Nome, CPF, Nascimento, Cidade/UF, Formação, Contatos de Emergência
-        </p>
-      </div>
-      <GenericAlignContent
-        templateUrl=""
-        storageKey={storageKey}
-        title={`Alinhamento — Carteira de ${tipo}`}
-        fields={defaultCarteirinhaFields}
-      />
-    </div>
+    <GenericAlignContent
+      templateUrl={CARTEIRINHA_TEMPLATES[tipo] || ""}
+      storageKey={storageKey}
+      title={`Alinhamento — Carteira de ${tipoLabel}`}
+      fields={defaultCarteirinhaFields}
+    />
   );
 }
 
