@@ -78,7 +78,7 @@ serve(async (req) => {
     };
 
     // Default positions in alignment-page coordinates (top-left origin, 794x1123)
-    const rawPositions: Record<string, { x: number; y: number; fontSize: number }> = {
+    const defaultTextPositions: Record<string, { x: number; y: number; fontSize: number }> = {
       numero_registro: { x: 287, y: 124, fontSize: 25 },
       nome: { x: 76, y: 281, fontSize: 25 },
       cpf: { x: 80, y: 357, fontSize: 25 },
@@ -90,13 +90,27 @@ serve(async (req) => {
       emergencia2: { x: 429, y: 789, fontSize: 25 },
     };
 
+    const agenteTextPositions: Record<string, { x: number; y: number; fontSize: number }> = {
+      numero_registro: { x: 294, y: 112, fontSize: 25 },
+      nome: { x: 76, y: 281, fontSize: 25 },
+      cpf: { x: 125, y: 364, fontSize: 25 },
+      nascimento: { x: 77, y: 437, fontSize: 25 },
+      cidade_uf: { x: 210, y: 436, fontSize: 25 },
+      formacao: { x: 72, y: 630, fontSize: 25 },
+      validade: { x: 580, y: 202, fontSize: 25 },
+      emergencia1: { x: 78, y: 789, fontSize: 25 },
+      emergencia2: { x: 429, y: 789, fontSize: 25 },
+    };
+
+    const rawPositions = tipo === "agente-financeiro" ? { ...agenteTextPositions } : { ...defaultTextPositions };
+
     // Default photo position per tipo
     const photoDefaults: Record<string, { x: number; y: number; w: number; h: number }> = {
-      bombeiro: { x: 57, y: 60, w: 142, h: 189 },
-      porteiro: { x: 83, y: 49, w: 149, h: 189 },
-      "agente-financeiro": { x: 78, y: 48, w: 149, h: 189 },
+      bombeiro: { x: 54, y: 50, w: 142, h: 189 },
+      porteiro: { x: 73, y: 38, w: 159, h: 189 },
+      "agente-financeiro": { x: 68, y: 41, w: 159, h: 189 },
     };
-    let rawPhoto = photoDefaults[tipo] || { x: 55, y: 51, w: 149, h: 200 };
+    let rawPhoto = photoDefaults[tipo] || photoDefaults.bombeiro;
 
     // If alignment positions are provided in the body, use them
     if (body.field_positions) {
