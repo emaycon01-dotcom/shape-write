@@ -140,7 +140,7 @@ export default function CnhPreviewPage() {
       {/* PDF Preview area */}
       <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
         <iframe
-          src={pdfBase64}
+          src={blobUrl || ""}
           className="w-full h-full border-0"
           title="PDF Preview"
         />
