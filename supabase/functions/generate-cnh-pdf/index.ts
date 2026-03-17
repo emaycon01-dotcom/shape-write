@@ -319,7 +319,7 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
   .f-espelho      { top: 495px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-renach       { top: 509px; left: 280px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-local        { top: 505px; left: 100px; font-size: 6px; }
-  .f-estado       { top: 531px; left: 163px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
+  .f-estado       { top: 531px; left: 163px; font-size: 15px; color: #111; font-family: Arial, Helvetica, sans-serif; font-weight: bold; }
   .reg-vert-bot {
     top: 558px; left: 64px;
     transform: rotate(-90deg);
