@@ -100,8 +100,9 @@ export default function CarteirinhasSelecaoPage() {
         {carteirinhas.map((item) => (
           <button
             key={item.id}
-            onClick={() => navigate(item.route)}
-            className="glass rounded-xl p-6 text-left hover:border-primary/40 transition-colors group"
+            onClick={() => item.route && navigate(item.route)}
+            className="glass rounded-xl p-6 text-left hover:border-primary/40 transition-colors group disabled:opacity-50"
+            disabled={!item.route}
           >
             <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
               <item.icon className="w-6 h-6 text-primary" />
@@ -109,8 +110,10 @@ export default function CarteirinhasSelecaoPage() {
             <h3 className="font-display font-semibold text-foreground mb-1">{item.name}</h3>
             <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-accent font-medium">{item.credits} Créditos</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">ATIVO</span>
+              <span className="text-sm text-accent font-medium">{item.credits} Crédito{item.credits !== 1 ? "s" : ""}</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${item.route ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}>
+                {item.route ? "ATIVO" : "EM BREVE"}
+              </span>
             </div>
           </button>
         ))}
