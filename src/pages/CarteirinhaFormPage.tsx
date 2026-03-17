@@ -62,6 +62,18 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+const TEMPLATE_PDF_URLS: Record<string, string> = {
+  bombeiro: "/assets/template-carteira-bombeiro.pdf",
+  porteiro: "/assets/template-carteira-porteiro.pdf",
+  "agente-financeiro": "/assets/template-carteira-agente-financeiro.pdf",
+};
+
+const STORAGE_KEYS: Record<string, string> = {
+  bombeiro: "carteirinha-bombeiro-field-positions",
+  porteiro: "carteirinha-porteiro-field-positions",
+  "agente-financeiro": "carteirinha-agente-field-positions",
+};
+
 export default function CarteirinhaFormPage() {
   const { tipo } = useParams<{ tipo: string }>();
   const navigate = useNavigate();
@@ -71,6 +83,7 @@ export default function CarteirinhaFormPage() {
   const [form, setForm] = useState<CarteirinhaFormData>(initial);
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const fotoRef = useRef<HTMLInputElement>(null);
 
   const tipoLabel = TIPO_LABELS[tipo || ""] || "Carteirinha";
