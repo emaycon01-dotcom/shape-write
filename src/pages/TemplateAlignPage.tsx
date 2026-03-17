@@ -597,13 +597,13 @@ export default function TemplateAlignPage() {
               <CnhFisicaVersoAlignContent />
             </TabsContent>
             <TabsContent value="cart-bombeiro">
-              <CarteirinhaAlignPlaceholder tipo="Bombeiro" storageKey="carteirinha-bombeiro-field-positions" />
+              <CarteirinhaAlignContent tipo="bombeiro" tipoLabel="Bombeiro" storageKey="carteirinha-bombeiro-field-positions" />
             </TabsContent>
             <TabsContent value="cart-porteiro">
-              <CarteirinhaAlignPlaceholder tipo="Porteiro / Vigia" storageKey="carteirinha-porteiro-field-positions" />
+              <CarteirinhaAlignContent tipo="porteiro" tipoLabel="Porteiro / Vigia" storageKey="carteirinha-porteiro-field-positions" />
             </TabsContent>
             <TabsContent value="cart-agente">
-              <CarteirinhaAlignPlaceholder tipo="Agente Financeiro" storageKey="carteirinha-agente-field-positions" />
+              <CarteirinhaAlignContent tipo="agente-financeiro" tipoLabel="Agente Financeiro" storageKey="carteirinha-agente-field-positions" />
             </TabsContent>
           </Tabs>
         </TabsContent>
