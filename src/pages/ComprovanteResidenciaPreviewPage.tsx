@@ -20,8 +20,8 @@ interface FieldPos {
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   nome1: { x: 160, y: 6, fontSize: 12.5 },
   nome2: { x: 62, y: 1005, fontSize: 11 },
-  endereco: { x: 163, y: 31, fontSize: 7.5 },
-  cepCidadeEstado: { x: 163, y: 47, fontSize: 8 },
+  endereco: { x: 163, y: 24, fontSize: 7.5 },
+  cepCidadeEstado: { x: 163, y: 35, fontSize: 8 },
   cpf: { x: 380, y: 60, fontSize: 12 },
 };
 
