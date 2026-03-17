@@ -28,6 +28,7 @@ interface CarteirinhaFormData {
   cidade: string;
   uf: string;
   dataFormacao: string;
+  dataValidade: string;
   contatoEmergencia1: string;
   contatoEmergencia2: string;
 }
@@ -40,6 +41,7 @@ const initial: CarteirinhaFormData = {
   cidade: "",
   uf: "",
   dataFormacao: "",
+  dataValidade: "",
   contatoEmergencia1: "",
   contatoEmergencia2: "",
 };
