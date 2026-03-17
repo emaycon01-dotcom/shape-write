@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Smartphone, Phone, Home, FlaskConical, CreditCard, Stethoscope, FileCheck } from "lucide-react";
+import { FileText, Smartphone, Phone, Home, FlaskConical, CreditCard, Stethoscope, FileCheck, Wrench } from "lucide-react";
 
 interface DocItem {
   id: string;
@@ -92,13 +92,18 @@ export default function DocumentsPage() {
                   disabled={!dt.route}
                 >
                   <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <dt.icon className="w-6 h-6 text-primary" />
+                    {dt.route ? (
+                      <dt.icon className="w-6 h-6 text-primary" />
+                    ) : (
+                      <Wrench className="w-6 h-6 text-muted-foreground" />
+                    )}
                   </div>
                   <h3 className="font-display font-semibold text-foreground mb-1">{dt.name}</h3>
                   <p className="text-sm text-muted-foreground mb-3">{dt.description}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-accent font-medium">{dt.credits} Crédito{dt.credits !== 1 ? "s" : ""}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${dt.route ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${dt.route ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}>
+                      {!dt.route && <Wrench className="w-3 h-3" />}
                       {dt.route ? "ATIVO" : "EM BREVE"}
                     </span>
                   </div>
