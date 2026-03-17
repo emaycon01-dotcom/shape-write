@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Smartphone, Phone, Home } from "lucide-react";
+import { FileText, Smartphone, Phone, Home, FlaskConical } from "lucide-react";
 
 const docTypes = [
   { id: "cnh", name: "CNH Digital (2024)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh", icon: FileText },
