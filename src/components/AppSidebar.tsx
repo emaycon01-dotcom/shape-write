@@ -21,6 +21,7 @@ import {
   Headphones,
   Palette,
   ImageIcon,
+  IdCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -169,7 +170,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <Collapsible>
             <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
-              CNHs FÍSICAS
+              DOCUMENTOS FÍSICOS
               <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -184,6 +185,18 @@ export function AppSidebar() {
                       >
                         <MapPin className="mr-2 h-4 w-4" />
                         {!collapsed && <span>CNH Todos os Estados</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to="/dashboard/documentos-fisicos/carteirinhas"
+                        className="hover:bg-secondary/50"
+                        activeClassName="bg-secondary text-primary font-medium"
+                      >
+                        <IdCard className="mr-2 h-4 w-4" />
+                        {!collapsed && <span>Carteirinhas</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

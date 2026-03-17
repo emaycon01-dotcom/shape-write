@@ -33,6 +33,9 @@ const MesclagemRostoPage = lazy(() => import("./pages/MesclagemRostoPage"));
 const CnhFisicaEstadoPage = lazy(() => import("./pages/CnhFisicaEstadoPage"));
 const CnhFisicaFormPage = lazy(() => import("./pages/CnhFisicaFormPage"));
 const CnhFisicaPreviewPage = lazy(() => import("./pages/CnhFisicaPreviewPage"));
+const CarteirinhasSelecaoPage = lazy(() => import("./pages/CarteirinhasSelecaoPage"));
+const CarteirinhaFormPage = lazy(() => import("./pages/CarteirinhaFormPage"));
+const CarteirinhaPreviewPage = lazy(() => import("./pages/CarteirinhaPreviewPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const ComprovanteResidenciaFormPage = lazy(() => import("./pages/ComprovanteResidenciaFormPage"));
@@ -91,6 +94,9 @@ const App = () => (
                   <Route path="cnh-fisica/todos" element={<CnhFisicaFormPage />} />
                   <Route path="cnh-fisica/todos/preview" element={<CnhFisicaPreviewPage />} />
                   <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
+                  <Route path="documentos-fisicos/carteirinhas" element={<CarteirinhasSelecaoPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

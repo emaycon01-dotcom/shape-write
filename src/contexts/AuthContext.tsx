@@ -15,7 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  deductCredit: () => void;
+  deductCredit: (amount?: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -79,10 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("bellarus_user");
   }, []);
 
-  const deductCredit = useCallback(() => {
+  const deductCredit = useCallback((amount: number = 1) => {
     setUser((prev) => {
-      if (!prev || prev.credits < 1) return prev;
-      const updated = { ...prev, credits: prev.credits - 1 };
+      if (!prev || prev.credits < amount) return prev;
+      const updated = { ...prev, credits: prev.credits - amount };
       localStorage.setItem("bellarus_user", JSON.stringify(updated));
       return updated;
     });
