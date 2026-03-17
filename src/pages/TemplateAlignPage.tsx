@@ -547,10 +547,13 @@ export default function TemplateAlignPage() {
 
         <TabsContent value="fisicos">
           <Tabs defaultValue="cnh-fisica-completa" className="w-full">
-            <TabsList className="mb-4">
+            <TabsList className="mb-4 flex-wrap">
               <TabsTrigger value="cnh-fisica-completa">CNH FÍSICA (COMPLETA)</TabsTrigger>
               <TabsTrigger value="cnh-fisica-frente">FRENTE</TabsTrigger>
               <TabsTrigger value="cnh-fisica-verso">VERSO</TabsTrigger>
+              <TabsTrigger value="cart-bombeiro">BOMBEIRO</TabsTrigger>
+              <TabsTrigger value="cart-porteiro">PORTEIRO</TabsTrigger>
+              <TabsTrigger value="cart-agente">AGENTE FIN.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
@@ -560,6 +563,15 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="cnh-fisica-verso">
               <CnhFisicaVersoAlignContent />
+            </TabsContent>
+            <TabsContent value="cart-bombeiro">
+              <CarteirinhaAlignPlaceholder tipo="Bombeiro" storageKey="carteirinha-bombeiro-field-positions" />
+            </TabsContent>
+            <TabsContent value="cart-porteiro">
+              <CarteirinhaAlignPlaceholder tipo="Porteiro / Vigia" storageKey="carteirinha-porteiro-field-positions" />
+            </TabsContent>
+            <TabsContent value="cart-agente">
+              <CarteirinhaAlignPlaceholder tipo="Agente Financeiro" storageKey="carteirinha-agente-field-positions" />
             </TabsContent>
           </Tabs>
         </TabsContent>
