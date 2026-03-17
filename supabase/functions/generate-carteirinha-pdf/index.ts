@@ -135,7 +135,7 @@ serve(async (req) => {
           image = await pdfDoc.embedJpg(photoBytes);
         }
 
-        const photoPos = body.field_positions?.photo || { x: 30, y: 80, w: 82, h: 110 };
+        const photoPos = body.field_positions?.photo || { x: 51, y: 59, w: 155, h: 210 };
         page.drawImage(image, {
           x: photoPos.x,
           y: height - photoPos.y - (photoPos.h || 110),
