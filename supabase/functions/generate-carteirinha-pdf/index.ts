@@ -1,5 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+const uint8ArrayToBase64 = (bytes: Uint8Array) => {
+  const chunkSize = 0x8000;
+  let binary = "";
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+
+  return btoa(binary);
+};
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -137,7 +148,7 @@ serve(async (req) => {
     }
 
     const pdfResultBytes = await pdfDoc.save();
-    const resultBase64 = btoa(String.fromCharCode(...pdfResultBytes));
+    const resultBase64 = uint8ArrayToBase64(pdfResultBytes);
     const pdfDataUrl = `data:application/pdf;base64,${resultBase64}`;
 
     return new Response(
