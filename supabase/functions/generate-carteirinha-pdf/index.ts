@@ -33,6 +33,7 @@ serve(async (req) => {
       cidade,
       uf,
       data_formacao,
+      data_validade,
       contato_emergencia_1,
       contato_emergencia_2,
       foto_base64,
