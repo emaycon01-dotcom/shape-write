@@ -140,20 +140,75 @@ export default function CarteirinhaFormPage() {
     toast({ title: "Formulário limpo!" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    setLoading(true);
 
-    navigate(`/dashboard/documentos-fisicos/carteirinhas/${tipo}/preview`, {
-      state: {
-        formData: {
-          ...form,
-          tipo: tipo || "",
-          tipoLabel,
-          foto_base64: fotoPreview || "",
+    try {
+      // Load template PDF as base64
+      const templateRes = await fetch(TEMPLATE_PDF_URLS[tipo || "bombeiro"]);
+      const templateBlob = await templateRes.blob();
+      const templateBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(templateBlob);
+      });
+
+      // Load saved field positions
+      const storageKey = STORAGE_KEYS[tipo || "bombeiro"];
+      let fieldPositions = null;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try { fieldPositions = JSON.parse(saved); } catch { /* ignore */ }
+      }
+
+      const bodyData = {
+        tipo: tipo || "",
+        numero_registro: form.numeroRegistro,
+        nome_completo: form.nomeCompleto,
+        cpf: form.cpf,
+        data_nascimento: form.dataNascimento,
+        cidade: form.cidade,
+        uf: form.uf,
+        data_formacao: form.dataFormacao,
+        contato_emergencia_1: form.contatoEmergencia1,
+        contato_emergencia_2: form.contatoEmergencia2,
+        foto_base64: fotoPreview || "",
+        template_pdf_base64: templateBase64,
+        field_positions: fieldPositions,
+      };
+
+      const { data, error } = await supabase.functions.invoke("generate-carteirinha-pdf", {
+        body: bodyData,
+      });
+
+      if (error) throw error;
+
+      const pdfResult = data?.pdfBase64;
+      if (!pdfResult) throw new Error(data?.error || "Nenhum PDF retornado");
+
+      navigate(`/dashboard/documentos-fisicos/carteirinhas/${tipo}/preview`, {
+        state: {
+          pdfBase64: pdfResult,
+          formData: {
+            ...form,
+            tipo: tipo || "",
+            tipoLabel,
+            foto_base64: fotoPreview || "",
+          },
         },
-      },
-    });
+      });
+    } catch (err: any) {
+      console.error("Erro ao gerar PDF:", err);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: err?.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputCls = "bg-secondary border-border text-foreground placeholder:text-muted-foreground";
