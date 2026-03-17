@@ -91,12 +91,18 @@ export default function CnhPreviewPage() {
     }
   };
 
-  const handleView = () => {
-    const win = window.open();
-    if (win) {
-      win.document.write(
-        `<iframe src="${pdfBase64}" style="width:100%;height:100%;border:none;" title="PDF"></iframe>`
-      );
+  const handleDownload = async () => {
+    try {
+      const blob = await fetch(pdfBase64).then((r) => r.blob());
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "documento-cnh.pdf";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      toast({ title: "PDF baixado com sucesso!" });
+    } catch {
+      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
     }
   };
 
