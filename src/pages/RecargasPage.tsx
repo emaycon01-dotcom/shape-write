@@ -60,10 +60,12 @@ export default function RecargasPage() {
 
     toast({ title: "Compra realizada!", description: `${cost} crédito(s) descontado(s). Redirecionando...` });
 
-    setTimeout(() => {
-      setLoading(false);
-      window.open(`https://wa.me/5581960002805?text=${msg}`, "_blank");
-    }, 1000);
+    const url = `https://wa.me/5581960002805?text=${msg}`;
+    const win = window.open(url, "_blank");
+    if (!win) {
+      window.location.href = url;
+    }
+    setLoading(false);
   };
 
   if (!operadora) {
