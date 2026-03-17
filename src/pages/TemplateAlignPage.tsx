@@ -509,18 +509,44 @@ function CnhFisicaFullContent() {
   );
 }
 
-const defaultCarteirinhaFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 57, y: 62, fontSize: 4, w: 149, h: 200, color: "#999" },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "45.737.175/0001-14", x: 287, y: 124, fontSize: 25 },
-  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 76, y: 281, fontSize: 25 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 80, y: 357, fontSize: 25 },
-  { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 77, y: 437, fontSize: 25 },
-  { id: "cidade_uf", label: "Cidade/UF", sampleText: "SÃO PAULO, SP", x: 210, y: 436, fontSize: 25 },
-  { id: "formacao", label: "Formação", sampleText: "01/06/2020", x: 72, y: 630, fontSize: 25 },
-  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 580, y: 202, fontSize: 25 },
-  { id: "emergencia1", label: "Emergência 1", sampleText: "(11) 99999-0000", x: 78, y: 789, fontSize: 25 },
-  { id: "emergencia2", label: "Emergência 2", sampleText: "(11) 88888-0000", x: 429, y: 789, fontSize: 25 },
+const commonCarteirinhaFields: Omit<FieldDef, 'x' | 'y' | 'w' | 'h'>[] = [
+  { id: "numero_registro", label: "Nº Registro", sampleText: "45.737.175/0001-14", fontSize: 25 },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", fontSize: 25 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", fontSize: 25 },
+  { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", fontSize: 25 },
+  { id: "cidade_uf", label: "Cidade/UF", sampleText: "SÃO PAULO, SP", fontSize: 25 },
+  { id: "formacao", label: "Formação", sampleText: "01/06/2020", fontSize: 25 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", fontSize: 25 },
+  { id: "emergencia1", label: "Emergência 1", sampleText: "(11) 99999-0000", fontSize: 25 },
+  { id: "emergencia2", label: "Emergência 2", sampleText: "(11) 88888-0000", fontSize: 25 },
 ];
+
+const sharedTextPositions = {
+  numero_registro: { x: 287, y: 124 },
+  nome: { x: 76, y: 281 },
+  cpf: { x: 80, y: 357 },
+  nascimento: { x: 77, y: 437 },
+  cidade_uf: { x: 210, y: 436 },
+  formacao: { x: 72, y: 630 },
+  validade: { x: 580, y: 202 },
+  emergencia1: { x: 78, y: 789 },
+  emergencia2: { x: 429, y: 789 },
+};
+
+const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
+  bombeiro: [
+    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 55, y: 51, fontSize: 4, w: 149, h: 200, color: "#999" },
+    ...commonCarteirinhaFields.map(f => ({ ...f, ...sharedTextPositions[f.id as keyof typeof sharedTextPositions] }) as FieldDef),
+  ],
+  porteiro: [
+    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 53, fontSize: 4, w: 149, h: 200, color: "#999" },
+    ...commonCarteirinhaFields.map(f => ({ ...f, ...sharedTextPositions[f.id as keyof typeof sharedTextPositions] }) as FieldDef),
+  ],
+  "agente-financeiro": [
+    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 55, y: 51, fontSize: 4, w: 149, h: 200, color: "#999" },
+    ...commonCarteirinhaFields.map(f => ({ ...f, ...sharedTextPositions[f.id as keyof typeof sharedTextPositions] }) as FieldDef),
+  ],
+};
 
 const CARTEIRINHA_TEMPLATES: Record<string, string> = {
   bombeiro: templateBombeiroUrl,
@@ -534,7 +560,7 @@ function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string
       templateUrl={CARTEIRINHA_TEMPLATES[tipo] || ""}
       storageKey={storageKey}
       title={`Alinhamento — Carteira de ${tipoLabel}`}
-      fields={defaultCarteirinhaFields}
+      fields={carteirinhaFieldsByTipo[tipo] || carteirinhaFieldsByTipo["bombeiro"]}
     />
   );
 }

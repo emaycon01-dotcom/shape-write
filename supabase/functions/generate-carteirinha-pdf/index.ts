@@ -90,8 +90,13 @@ serve(async (req) => {
       emergencia2: { x: 429, y: 789, fontSize: 25 },
     };
 
-    // Default photo position in alignment-page coordinates
-    let rawPhoto = { x: 57, y: 62, w: 149, h: 200 };
+    // Default photo position per tipo
+    const photoDefaults: Record<string, { x: number; y: number; w: number; h: number }> = {
+      bombeiro: { x: 55, y: 51, w: 149, h: 200 },
+      porteiro: { x: 85, y: 53, w: 149, h: 200 },
+      "agente-financeiro": { x: 55, y: 51, w: 149, h: 200 },
+    };
+    let rawPhoto = photoDefaults[tipo] || { x: 55, y: 51, w: 149, h: 200 };
 
     // If alignment positions are provided in the body, use them
     if (body.field_positions) {
