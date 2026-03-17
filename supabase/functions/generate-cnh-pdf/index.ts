@@ -575,7 +575,8 @@ serve(async (req) => {
         : `data:image/png;base64,${body.assinatura_base64}`;
     }
 
-    const html = buildCnhHtml(data);
+    const isFisica = body.tipo === "fisica";
+    const html = isFisica ? buildCnhFisicaHtml(data) : buildCnhDigitalHtml(data);
 
     let pdfBuffer: Uint8Array | null = null;
 
