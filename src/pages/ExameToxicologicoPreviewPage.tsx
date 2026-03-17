@@ -18,7 +18,7 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  clienteEmpresa: { x: 107, y: 137, fontSize: 14 },
+  clienteEmpresa: { x: 109, y: 135, fontSize: 14 },
   nomeCompleto: { x: 86, y: 207, fontSize: 14 },
   laudo: { x: 109, y: 227, fontSize: 14 },
   cnpj: { x: 85, y: 248, fontSize: 14 },
