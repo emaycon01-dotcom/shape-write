@@ -535,15 +535,15 @@ const sharedTextPositions = {
 
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
   bombeiro: [
-    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 55, y: 51, fontSize: 4, w: 149, h: 200, color: "#999" },
+    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 57, y: 60, fontSize: 4, w: 142, h: 189, color: "#999" },
     ...commonCarteirinhaFields.map(f => ({ ...f, ...sharedTextPositions[f.id as keyof typeof sharedTextPositions] }) as FieldDef),
   ],
   porteiro: [
-    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 53, fontSize: 4, w: 149, h: 200, color: "#999" },
+    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 83, y: 49, fontSize: 4, w: 149, h: 189, color: "#999" },
     ...commonCarteirinhaFields.map(f => ({ ...f, ...sharedTextPositions[f.id as keyof typeof sharedTextPositions] }) as FieldDef),
   ],
   "agente-financeiro": [
-    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 55, y: 51, fontSize: 4, w: 149, h: 200, color: "#999" },
+    { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 78, y: 48, fontSize: 4, w: 149, h: 189, color: "#999" },
     ...commonCarteirinhaFields.map(f => ({ ...f, ...sharedTextPositions[f.id as keyof typeof sharedTextPositions] }) as FieldDef),
   ],
 };

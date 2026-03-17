@@ -92,9 +92,9 @@ serve(async (req) => {
 
     // Default photo position per tipo
     const photoDefaults: Record<string, { x: number; y: number; w: number; h: number }> = {
-      bombeiro: { x: 55, y: 51, w: 149, h: 200 },
-      porteiro: { x: 85, y: 53, w: 149, h: 200 },
-      "agente-financeiro": { x: 55, y: 51, w: 149, h: 200 },
+      bombeiro: { x: 57, y: 60, w: 142, h: 189 },
+      porteiro: { x: 83, y: 49, w: 149, h: 189 },
+      "agente-financeiro": { x: 78, y: 48, w: 149, h: 189 },
     };
     let rawPhoto = photoDefaults[tipo] || { x: 55, y: 51, w: 149, h: 200 };
 
