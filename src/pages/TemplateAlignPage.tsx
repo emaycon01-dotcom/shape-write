@@ -506,7 +506,40 @@ function CnhFisicaFullContent() {
   );
 }
 
-export default function TemplateAlignPage() {
+const defaultCarteirinhaFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 30, y: 80, fontSize: 8, w: 82, h: 110, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "45.737.175/0001-14", x: 150, y: 80, fontSize: 8 },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 150, y: 100, fontSize: 8 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 150, y: 120, fontSize: 8 },
+  { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 150, y: 140, fontSize: 8 },
+  { id: "cidade_uf", label: "Cidade/UF", sampleText: "SÃO PAULO, SP", x: 150, y: 160, fontSize: 8 },
+  { id: "formacao", label: "Formação", sampleText: "01/06/2020", x: 150, y: 180, fontSize: 8 },
+  { id: "emergencia1", label: "Emergência 1", sampleText: "(11) 99999-0000", x: 150, y: 200, fontSize: 7 },
+  { id: "emergencia2", label: "Emergência 2", sampleText: "(11) 88888-0000", x: 150, y: 220, fontSize: 7 },
+];
+
+function CarteirinhaAlignPlaceholder({ tipo, storageKey }: { tipo: string; storageKey: string }) {
+  return (
+    <div className="space-y-4">
+      <div className="glass rounded-xl p-6 text-center">
+        <h3 className="font-display font-bold text-foreground mb-2">Alinhamento — Carteira de {tipo}</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Envie o PDF template para ativar o editor de alinhamento visual. Os campos do formulário serão posicionados sobre o template.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Campos disponíveis: Foto, Nº Registro, Nome, CPF, Nascimento, Cidade/UF, Formação, Contatos de Emergência
+        </p>
+      </div>
+      <GenericAlignContent
+        templateUrl=""
+        storageKey={storageKey}
+        title={`Alinhamento — Carteira de ${tipo}`}
+        fields={defaultCarteirinhaFields}
+      />
+    </div>
+  );
+}
+
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
