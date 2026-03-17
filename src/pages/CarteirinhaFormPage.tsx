@@ -128,6 +128,7 @@ export default function CarteirinhaFormPage() {
       cidade: pick(CIDADES),
       uf,
       dataFormacao: randomDate(2015, 2024),
+      dataValidade: randomDate(2025, 2030),
       contatoEmergencia1: `(${generateRandom(2)}) ${generateRandom(5)}-${generateRandom(4)}`,
       contatoEmergencia2: `(${generateRandom(2)}) ${generateRandom(5)}-${generateRandom(4)}`,
     });
