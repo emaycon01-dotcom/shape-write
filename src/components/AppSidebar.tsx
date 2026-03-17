@@ -208,7 +208,7 @@ export function AppSidebar() {
                         className="hover:bg-secondary/50"
                         activeClassName="bg-secondary text-primary font-medium"
                       >
-                        <CreditCardIcon className="mr-2 h-4 w-4" />
+                        <IdCard className="mr-2 h-4 w-4" />
                         {!collapsed && <span>RG Físico Todos os Estados</span>}
                       </NavLink>
                     </SidebarMenuButton>
