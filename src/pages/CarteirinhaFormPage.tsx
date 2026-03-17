@@ -175,6 +175,7 @@ export default function CarteirinhaFormPage() {
         cidade: form.cidade,
         uf: form.uf,
         data_formacao: form.dataFormacao,
+        data_validade: form.dataValidade,
         contato_emergencia_1: form.contatoEmergencia1,
         contato_emergencia_2: form.contatoEmergencia2,
         foto_base64: fotoPreview || "",
