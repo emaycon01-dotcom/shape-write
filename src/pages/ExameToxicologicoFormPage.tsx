@@ -51,9 +51,11 @@ function generateCNPJ(): string {
 
 function generateLaudo(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = "CNJ";
-  for (let i = 0; i < 8; i++) result += chars[Math.floor(Math.random() * chars.length)];
-  return result;
+  const pick = () => chars[Math.floor(Math.random() * chars.length)];
+  // Format: 00X0XXXX000000000 (e.g. 04T2RMMG210999969)
+  const d = () => Math.floor(Math.random() * 10).toString();
+  const c = () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+  return `${d()}${d()}${c()}${d()}${c()}${c()}${c()}${c()}${d()}${d()}${d()}${d()}${d()}${d()}${d()}${d()}${d()}`;
 }
 
 function formatCPF(value: string): string {

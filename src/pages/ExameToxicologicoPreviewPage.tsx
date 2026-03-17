@@ -65,25 +65,29 @@ export default function ExameToxicologicoPreviewPage() {
       const scaleX = img.naturalWidth / PAGE_W;
       const scaleY = img.naturalHeight / PAGE_H;
 
-      ctx.fillStyle = "#000";
       ctx.textBaseline = "top";
 
-      const drawField = (key: string, text: string, bold = false) => {
+      const drawField = (key: string, text: string, color = "#000", bold = false) => {
         const pos = positions[key];
         if (!pos || !text) return;
+        ctx.fillStyle = color;
         ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px Arial`;
         ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
       };
 
-      drawField("clienteEmpresa", formData.clienteEmpresa);
-      drawField("nomeCompleto", formData.nomeCompleto);
-      drawField("laudo", formData.laudo);
-      drawField("cnpj", formData.cnpj);
-      drawField("cpf", formData.cpf, true);
-      drawField("dataColeta", formData.dataColeta);
-      drawField("dataRecebimento", formData.dataRecebimento);
-      drawField("dataResultado", formData.dataResultado);
-      drawField("dataValidade", formData.dataValidade);
+      const BLUE = "#0033AA";
+      const BLACK = "#000000";
+      const RED = "#CC0000";
+
+      drawField("clienteEmpresa", formData.clienteEmpresa, BLUE);
+      drawField("nomeCompleto", formData.nomeCompleto, BLUE, true);
+      drawField("laudo", formData.laudo, BLUE);
+      drawField("cnpj", formData.cnpj, BLUE);
+      drawField("cpf", formData.cpf, BLUE, true);
+      drawField("dataColeta", formData.dataColeta, BLACK);
+      drawField("dataRecebimento", formData.dataRecebimento, BLACK);
+      drawField("dataResultado", formData.dataResultado, BLACK);
+      drawField("dataValidade", formData.dataValidade, RED, true);
 
       setRendered(true);
     };
