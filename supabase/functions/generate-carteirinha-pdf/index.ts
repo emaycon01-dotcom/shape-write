@@ -59,6 +59,14 @@ serve(async (req) => {
     const page = pages[0];
     const { width, height } = page.getSize();
 
+    // Alignment page dimensions (source coordinate system)
+    const ALIGN_W = 794;
+    const ALIGN_H = 1123;
+    const scaleX = width / ALIGN_W;
+    const scaleY = height / ALIGN_H;
+
+    console.log(`PDF dimensions: ${width}x${height}, scale: ${scaleX}x${scaleY}`);
+
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
@@ -69,35 +77,49 @@ serve(async (req) => {
       "agente-financeiro": "carteirinha-agente-field-positions",
     };
 
-    // Default positions (will be overridden by alignment data if provided)
-    const positions: Record<string, { x: number; y: number; fontSize: number }> = {
-      numero_registro: { x: 291, y: height - 154 - 8, fontSize: 8 },
-      nome: { x: 80, y: height - 313 - 8, fontSize: 8 },
-      cpf: { x: 87, y: height - 395 - 8, fontSize: 8 },
-      nascimento: { x: 100, y: height - 468 - 8, fontSize: 8 },
-      cidade_uf: { x: 198, y: height - 468 - 8, fontSize: 8 },
-      formacao: { x: 109, y: height - 665 - 8, fontSize: 8 },
-      validade: { x: 109, y: height - 700 - 8, fontSize: 8 },
-      emergencia1: { x: 170, y: height - 828 - 7, fontSize: 7 },
-      emergencia2: { x: 539, y: height - 829 - 7, fontSize: 7 },
+    // Default positions in alignment-page coordinates (top-left origin, 794x1123)
+    const rawPositions: Record<string, { x: number; y: number; fontSize: number }> = {
+      numero_registro: { x: 291, y: 154, fontSize: 8 },
+      nome: { x: 80, y: 313, fontSize: 8 },
+      cpf: { x: 87, y: 395, fontSize: 8 },
+      nascimento: { x: 100, y: 468, fontSize: 8 },
+      cidade_uf: { x: 198, y: 468, fontSize: 8 },
+      formacao: { x: 109, y: 665, fontSize: 8 },
+      validade: { x: 109, y: 700, fontSize: 8 },
+      emergencia1: { x: 170, y: 828, fontSize: 7 },
+      emergencia2: { x: 539, y: 829, fontSize: 7 },
     };
+
+    // Default photo position in alignment-page coordinates
+    let rawPhoto = { x: 89, y: 113, w: 82, h: 110 };
 
     // If alignment positions are provided in the body, use them
     if (body.field_positions) {
       try {
         const fp = typeof body.field_positions === "string" ? JSON.parse(body.field_positions) : body.field_positions;
         for (const [key, val] of Object.entries(fp)) {
-          if (key === "photo") continue; // photo handled separately
+          if (key === "photo") {
+            const v = val as { x: number; y: number; w?: number; h?: number };
+            rawPhoto = { x: v.x, y: v.y, w: v.w || 82, h: v.h || 110 };
+            continue;
+          }
           const v = val as { x: number; y: number; fontSize: number };
-          positions[key] = {
-            x: v.x,
-            y: height - v.y - v.fontSize, // Convert from top-left to bottom-left coordinate
-            fontSize: v.fontSize,
-          };
+          rawPositions[key] = { x: v.x, y: v.y, fontSize: v.fontSize };
         }
       } catch {
         // ignore parse errors, use defaults
       }
+    }
+
+    // Convert from alignment-page coords (top-left) to PDF coords (bottom-left) with scaling
+    const positions: Record<string, { x: number; y: number; fontSize: number }> = {};
+    for (const [key, raw] of Object.entries(rawPositions)) {
+      const scaledFontSize = raw.fontSize * scaleY;
+      positions[key] = {
+        x: raw.x * scaleX,
+        y: height - (raw.y * scaleY) - scaledFontSize,
+        fontSize: scaledFontSize,
+      };
     }
 
     const black = rgb(0, 0, 0);
@@ -138,12 +160,16 @@ serve(async (req) => {
           image = await pdfDoc.embedJpg(photoBytes);
         }
 
-        const photoPos = body.field_positions?.photo || { x: 89, y: 113, w: 82, h: 110 };
+        const scaledPhotoW = rawPhoto.w * scaleX;
+        const scaledPhotoH = rawPhoto.h * scaleY;
+        const scaledPhotoX = rawPhoto.x * scaleX;
+        const scaledPhotoY = height - (rawPhoto.y * scaleY) - scaledPhotoH;
+
         page.drawImage(image, {
-          x: photoPos.x,
-          y: height - photoPos.y - (photoPos.h || 110),
-          width: photoPos.w || 82,
-          height: photoPos.h || 110,
+          x: scaledPhotoX,
+          y: scaledPhotoY,
+          width: scaledPhotoW,
+          height: scaledPhotoH,
         });
       } catch (e) {
         console.error("Error embedding photo:", e);
