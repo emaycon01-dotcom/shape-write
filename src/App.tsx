@@ -94,6 +94,9 @@ const App = () => (
                   <Route path="cnh-fisica/todos" element={<CnhFisicaFormPage />} />
                   <Route path="cnh-fisica/todos/preview" element={<CnhFisicaPreviewPage />} />
                   <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
+                  <Route path="documentos-fisicos/carteirinhas" element={<CarteirinhasSelecaoPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
