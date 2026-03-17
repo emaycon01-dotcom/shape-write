@@ -21,6 +21,7 @@ import {
   Headphones,
   Palette,
   ImageIcon,
+  IdCard,
 } from "lucide-react";
 import {
   Sidebar,
