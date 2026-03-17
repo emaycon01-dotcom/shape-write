@@ -536,7 +536,7 @@ const sharedTextPositions = {
 const agenteFinanceiroTextPositions = {
   numero_registro: { x: 294, y: 112 },
   nome: { x: 76, y: 281 },
-  cpf: { x: 125, y: 364 },
+  cpf: { x: 134, y: 351 },
   nascimento: { x: 77, y: 437 },
   cidade_uf: { x: 210, y: 436 },
   formacao: { x: 72, y: 630 },
