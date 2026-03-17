@@ -121,6 +121,7 @@ serve(async (req) => {
     drawText(data_nascimento || "", "nascimento");
     drawText(`${cidade || ""}, ${uf || ""}`, "cidade_uf");
     drawText(data_formacao || "", "formacao");
+    drawText(data_validade || "", "validade");
     drawText(contato_emergencia_1 || "", "emergencia1");
     drawText(contato_emergencia_2 || "", "emergencia2");
 
