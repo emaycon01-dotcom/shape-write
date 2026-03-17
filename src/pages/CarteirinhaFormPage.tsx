@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, X, User, FileText, FlaskConical, Trash2, IdCard } from "lucide-react";
+import { Upload, X, User, FileText, FlaskConical, Trash2, IdCard, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import testFotoUrl from "@/assets/test-foto.png";
 
