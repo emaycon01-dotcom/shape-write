@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { IdCard, Shield, Building2, Landmark } from "lucide-react";
+import { IdCard, Shield, Building2, Landmark, Wrench } from "lucide-react";
 
 const carteirinhas = [
   {
