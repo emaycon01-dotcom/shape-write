@@ -513,7 +513,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay f-nacionalidade">${d.nacionalidade || ""}</div>
   <div class="overlay f-pai">${d.nome_pai || ""}</div>
   <div class="overlay f-mae">${d.nome_mae || ""}</div>
-  ${buildCatDateOverlays(d.categoria || "", d)}
+  ${buildCatDateOverlays(d.categoria || "", d, "fisica")}
   <div class="overlay f-obs">${d.observacoes || ""}</div>
   <div class="overlay f-espelho">${espelhoClean}</div>
   <div class="overlay f-renach">${renachClean}</div>
