@@ -22,7 +22,7 @@ import {
   Palette,
   ImageIcon,
   IdCard,
-  CreditCard as CreditCardIcon,
+  IdCard,
 } from "lucide-react";
 import {
   Sidebar,
