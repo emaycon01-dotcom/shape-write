@@ -105,13 +105,18 @@ export default function CarteirinhasSelecaoPage() {
             disabled={!item.route}
           >
             <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-              <item.icon className="w-6 h-6 text-primary" />
+              {item.route ? (
+                <item.icon className="w-6 h-6 text-primary" />
+              ) : (
+                <Wrench className="w-6 h-6 text-muted-foreground" />
+              )}
             </div>
             <h3 className="font-display font-semibold text-foreground mb-1">{item.name}</h3>
             <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
             <div className="flex items-center gap-2">
               <span className="text-sm text-accent font-medium">{item.credits} Crédito{item.credits !== 1 ? "s" : ""}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${item.route ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${item.route ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}>
+                {!item.route && <Wrench className="w-3 h-3" />}
                 {item.route ? "ATIVO" : "EM BREVE"}
               </span>
             </div>

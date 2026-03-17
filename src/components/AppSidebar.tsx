@@ -201,15 +201,14 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/dashboard/documentos-fisicos/rg-fisico"
-                        className="hover:bg-secondary/50"
-                        activeClassName="bg-secondary text-primary font-medium"
-                      >
-                        <IdCard className="mr-2 h-4 w-4" />
-                        {!collapsed && <span>RG Físico Todos os Estados</span>}
-                      </NavLink>
+                    <SidebarMenuButton className="hover:bg-secondary/50 opacity-50 cursor-not-allowed">
+                      <Wrench className="mr-2 h-4 w-4 text-muted-foreground" />
+                      {!collapsed && (
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          RG Físico Todos os Estados
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">EM BREVE</span>
+                        </span>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
