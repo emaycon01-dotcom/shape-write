@@ -510,8 +510,8 @@ function CnhFisicaFullContent() {
 }
 
 const defaultCarteirinhaFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 55, y: 67, fontSize: 8, w: 150, h: 200, color: "#999" },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "45.737.175/0001-14", x: 284, y: 127, fontSize: 25 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 57, y: 62, fontSize: 4, w: 149, h: 200, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "45.737.175/0001-14", x: 287, y: 124, fontSize: 25 },
   { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 76, y: 281, fontSize: 25 },
   { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 80, y: 357, fontSize: 25 },
   { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 77, y: 437, fontSize: 25 },
