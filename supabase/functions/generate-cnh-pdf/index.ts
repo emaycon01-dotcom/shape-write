@@ -203,15 +203,24 @@ function getCatDate(cat: string, d: Record<string, string>): string {
   return d[key] || d.data_validade || "";
 }
 
-function buildCatDateOverlays(activeCategory: string, d: Record<string, string>) {
+function buildCatDateOverlays(activeCategory: string, d: Record<string, string>, tipo?: string) {
   const active = parseActiveCategories(activeCategory);
-  const catPositions: Record<string, { x: number; y: number; fontSize: number }> = {
-    A: { x: 169, y: 280, fontSize: 4.5 },
-    B: { x: 169, y: 302, fontSize: 4.5 },
-    C: { x: 169, y: 323, fontSize: 4.5 },
-    D: { x: 271, y: 268, fontSize: 4.5 },
-    E: { x: 271, y: 291, fontSize: 4.5 },
-  };
+  const isDigital = tipo !== "fisica";
+  const catPositions: Record<string, { x: number; y: number; fontSize: number }> = isDigital
+    ? {
+        A: { x: 171, y: 353, fontSize: 4.5 },
+        B: { x: 171, y: 375, fontSize: 4.5 },
+        C: { x: 171, y: 397, fontSize: 4.5 },
+        D: { x: 275, y: 342, fontSize: 4.5 },
+        E: { x: 274, y: 375, fontSize: 4.5 },
+      }
+    : {
+        A: { x: 169, y: 280, fontSize: 4.5 },
+        B: { x: 169, y: 302, fontSize: 4.5 },
+        C: { x: 169, y: 323, fontSize: 4.5 },
+        D: { x: 271, y: 268, fontSize: 4.5 },
+        E: { x: 271, y: 291, fontSize: 4.5 },
+      };
 
   let html = "";
   for (const [cat, pos] of Object.entries(catPositions)) {
