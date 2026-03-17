@@ -284,6 +284,11 @@ export default function CarteirinhaFormPage() {
             </div>
           </div>
 
+          <div className="space-y-1.5">
+            <FieldLabel>Data de Validade</FieldLabel>
+            <Input value={form.dataValidade} onChange={set("dataValidade")} placeholder="DD/MM/AAAA" className={inputCls} required />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel>Cidade</FieldLabel>
