@@ -21,15 +21,15 @@ interface FieldDef {
 }
 
 const defaultFields: FieldDef[] = [
-  { id: "clienteEmpresa", label: "Cliente/Empresa", sampleText: "TRANSPORTADORA NORTE LTDA", x: 109, y: 139, fontSize: 14 },
+  { id: "clienteEmpresa", label: "Cliente/Empresa", sampleText: "TRANSPORTADORA NORTE LTDA", x: 107, y: 137, fontSize: 14 },
   { id: "nomeCompleto", label: "Nome Completo", sampleText: "JOSE CARLOS DA SILVA", x: 86, y: 207, fontSize: 14 },
   { id: "laudo", label: "Laudo Nº", sampleText: "CNJ00494237", x: 109, y: 227, fontSize: 14 },
   { id: "cnpj", label: "CNPJ", sampleText: "08.075.074/0001-07", x: 85, y: 248, fontSize: 14 },
   { id: "cpf", label: "CPF", sampleText: "997.038.350-25", x: 75, y: 270, fontSize: 14, bold: true },
   { id: "dataColeta", label: "Data Coleta", sampleText: "12/03/2026", x: 404, y: 249, fontSize: 12 },
   { id: "dataRecebimento", label: "Data Recebimento", sampleText: "14/03/2026", x: 385, y: 270, fontSize: 12 },
-  { id: "dataResultado", label: "Data Resultado", sampleText: "17/03/2026", x: 377, y: 289, fontSize: 12 },
-  { id: "dataValidade", label: "Data Validade", sampleText: "17/09/2026", x: 363, y: 228, fontSize: 12 },
+  { id: "dataResultado", label: "Data Resultado", sampleText: "17/03/2026", x: 362, y: 228, fontSize: 12 },
+  { id: "dataValidade", label: "Data Validade", sampleText: "17/09/2026", x: 375, y: 289, fontSize: 12 },
 ];
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (u: Partial<FieldDef>) => void }) {
