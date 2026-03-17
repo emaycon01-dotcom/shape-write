@@ -560,7 +560,7 @@ function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string
       templateUrl={CARTEIRINHA_TEMPLATES[tipo] || ""}
       storageKey={storageKey}
       title={`Alinhamento — Carteira de ${tipoLabel}`}
-      fields={defaultCarteirinhaFields}
+      fields={carteirinhaFieldsByTipo[tipo] || carteirinhaFieldsByTipo["bombeiro"]}
     />
   );
 }
