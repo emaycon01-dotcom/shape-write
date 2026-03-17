@@ -18,15 +18,15 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  clienteEmpresa: { x: 165, y: 153, fontSize: 10 },
-  nomeCompleto: { x: 130, y: 205, fontSize: 10 },
-  laudo: { x: 130, y: 225, fontSize: 10 },
-  cnpj: { x: 380, y: 225, fontSize: 10 },
-  cpf: { x: 380, y: 245, fontSize: 10 },
-  dataColeta: { x: 130, y: 245, fontSize: 10 },
-  dataRecebimento: { x: 380, y: 205, fontSize: 10 },
-  dataResultado: { x: 380, y: 265, fontSize: 10 },
-  dataValidade: { x: 130, y: 285, fontSize: 10 },
+  clienteEmpresa: { x: 104, y: 135, fontSize: 14 },
+  nomeCompleto: { x: 83, y: 206, fontSize: 14 },
+  laudo: { x: 103, y: 226, fontSize: 14 },
+  cnpj: { x: 79, y: 247, fontSize: 14 },
+  cpf: { x: 70, y: 270, fontSize: 14 },
+  dataColeta: { x: 400, y: 249, fontSize: 12 },
+  dataRecebimento: { x: 381, y: 268, fontSize: 12 },
+  dataResultado: { x: 374, y: 289, fontSize: 12 },
+  dataValidade: { x: 362, y: 227, fontSize: 12 },
 };
 
 export default function ExameToxicologicoPreviewPage() {
