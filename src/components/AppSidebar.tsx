@@ -205,7 +205,7 @@ export function AppSidebar() {
                       <Wrench className="mr-2 h-4 w-4 text-muted-foreground" />
                       {!collapsed && (
                         <span className="flex items-center gap-2 text-muted-foreground">
-                          RG Físico Todos os Estados
+                          RG Todos os Estados
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">EM BREVE</span>
                         </span>
                       )}
