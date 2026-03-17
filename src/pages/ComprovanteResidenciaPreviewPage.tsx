@@ -172,13 +172,18 @@ export default function ComprovanteResidenciaPreviewPage() {
     }
   };
 
-  const handleView = () => {
+  const handleView = async () => {
     if (!pdfDataUrl) return;
-    const win = window.open();
-    if (win) {
-      win.document.write(
-        `<iframe src="${pdfDataUrl}" style="width:100%;height:100%;border:none;" title="PDF"></iframe>`
-      );
+    try {
+      const blob = await fetch(pdfDataUrl).then((r) => r.blob());
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "comprovante-residencia.pdf";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch {
+      toast({ title: "Erro ao abrir PDF", variant: "destructive" });
     }
   };
 
