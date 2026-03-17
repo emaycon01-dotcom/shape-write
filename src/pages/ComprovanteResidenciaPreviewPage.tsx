@@ -71,9 +71,9 @@ export default function ComprovanteResidenciaPreviewPage() {
         ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
       };
 
-      // Nome aparece duas vezes
-      drawField("nome1", formData.nomeCompleto);
-      drawField("nome2", formData.nomeCompleto);
+      // Nome aparece duas vezes em negrito
+      drawField("nome1", formData.nomeCompleto, true);
+      drawField("nome2", formData.nomeCompleto, true);
 
       // Endereço
       drawField("endereco", formData.endereco);
