@@ -510,16 +510,16 @@ function CnhFisicaFullContent() {
 }
 
 const defaultCarteirinhaFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 89, y: 113, fontSize: 8, w: 82, h: 110, color: "#999" },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "45.737.175/0001-14", x: 291, y: 154, fontSize: 8 },
-  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 80, y: 313, fontSize: 8 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 87, y: 395, fontSize: 8 },
-  { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 100, y: 468, fontSize: 8 },
-  { id: "cidade_uf", label: "Cidade/UF", sampleText: "SÃO PAULO, SP", x: 198, y: 468, fontSize: 8 },
-  { id: "formacao", label: "Formação", sampleText: "01/06/2020", x: 109, y: 665, fontSize: 8 },
-  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 109, y: 700, fontSize: 8 },
-  { id: "emergencia1", label: "Emergência 1", sampleText: "(11) 99999-0000", x: 170, y: 828, fontSize: 7 },
-  { id: "emergencia2", label: "Emergência 2", sampleText: "(11) 88888-0000", x: 539, y: 829, fontSize: 7 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 52, y: 62, fontSize: 8, w: 155, h: 211, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "45.737.175/0001-14", x: 297, y: 141, fontSize: 25 },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 72, y: 304, fontSize: 25 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 72, y: 382, fontSize: 25 },
+  { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 92, y: 455, fontSize: 25 },
+  { id: "cidade_uf", label: "Cidade/UF", sampleText: "SÃO PAULO, SP", x: 238, y: 453, fontSize: 25 },
+  { id: "formacao", label: "Formação", sampleText: "01/06/2020", x: 71, y: 649, fontSize: 25 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 586, y: 218, fontSize: 25 },
+  { id: "emergencia1", label: "Emergência 1", sampleText: "(11) 99999-0000", x: 123, y: 807, fontSize: 25 },
+  { id: "emergencia2", label: "Emergência 2", sampleText: "(11) 88888-0000", x: 467, y: 807, fontSize: 25 },
 ];
 
 const CARTEIRINHA_TEMPLATES: Record<string, string> = {
