@@ -148,7 +148,7 @@ serve(async (req) => {
     }
 
     const pdfResultBytes = await pdfDoc.save();
-    const resultBase64 = btoa(String.fromCharCode(...pdfResultBytes));
+    const resultBase64 = uint8ArrayToBase64(pdfResultBytes);
     const pdfDataUrl = `data:application/pdf;base64,${resultBase64}`;
 
     return new Response(
