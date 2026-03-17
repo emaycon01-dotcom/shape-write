@@ -351,8 +351,12 @@ export default function CarteirinhaFormPage() {
           </div>
         </div>
 
-        <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold">
-          <FileText className="w-5 h-5 mr-2" /> Gerar Documento
+        <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold" disabled={loading}>
+          {loading ? (
+            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Gerando PDF...</>
+          ) : (
+            <><FileText className="w-5 h-5 mr-2" /> Gerar Documento</>
+          )}
         </Button>
       </form>
     </div>
