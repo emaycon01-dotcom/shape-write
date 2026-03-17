@@ -522,6 +522,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cnh">CNH</TabsTrigger>
               <TabsTrigger value="certidao">CERT NASCIMENTO</TabsTrigger>
               <TabsTrigger value="comprovante">COMPROVANTE RES.</TabsTrigger>
+              <TabsTrigger value="exame-toxico">EXAME TOXICO.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh">
               <CnhAlignContent />
