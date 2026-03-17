@@ -12,6 +12,7 @@ import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
+const ExameToxicologicoAlignPage = lazy(() => import("./ExameToxicologicoAlignPage"));
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
