@@ -57,7 +57,7 @@ export default function CarteirinhaPreviewPage() {
     setLoading(true);
     try {
       // Deduct 1.5 credits (deductCredit is called once for 1, we handle 1.5)
-      deductCredit();
+      deductCredit(CREDIT_COST);
 
       addDocument({
         name: formData.nomeCompleto || "",
