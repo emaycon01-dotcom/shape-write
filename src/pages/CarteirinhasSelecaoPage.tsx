@@ -74,6 +74,46 @@ const carteirinhas = [
     route: "",
     credits: 1,
   },
+  {
+    id: "seguranca-escolar",
+    name: "Carteira de Segurança Escolar",
+    description: "Carteira profissional de Segurança Escolar com foto e dados",
+    icon: Shield,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "porte-federal",
+    name: "Carteira de Porte Federal",
+    description: "Carteira de Porte Federal com dados completos",
+    icon: Shield,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "policia-militar-rj",
+    name: "Carteira Polícia Militar (RJ)",
+    description: "Carteira funcional da Polícia Militar do estado do Rio de Janeiro",
+    icon: Shield,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "policial-penal",
+    name: "Carteira de Policial Penal",
+    description: "Carteira funcional de Policial Penal com dados completos",
+    icon: Shield,
+    route: "",
+    credits: 2,
+  },
+  {
+    id: "pericia-criminal",
+    name: "Carteira de Perícia Criminal",
+    description: "Carteira profissional de Perícia Criminal com registro e foto",
+    icon: Shield,
+    route: "",
+    credits: 2,
+  },
 ];
 
 export default function CarteirinhasSelecaoPage() {
