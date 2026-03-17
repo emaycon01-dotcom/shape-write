@@ -93,7 +93,7 @@ serve(async (req) => {
     const agenteTextPositions: Record<string, { x: number; y: number; fontSize: number }> = {
       numero_registro: { x: 294, y: 112, fontSize: 25 },
       nome: { x: 76, y: 281, fontSize: 25 },
-      cpf: { x: 125, y: 364, fontSize: 25 },
+      cpf: { x: 134, y: 351, fontSize: 25 },
       nascimento: { x: 77, y: 437, fontSize: 25 },
       cidade_uf: { x: 210, y: 436, fontSize: 25 },
       formacao: { x: 72, y: 630, fontSize: 25 },
