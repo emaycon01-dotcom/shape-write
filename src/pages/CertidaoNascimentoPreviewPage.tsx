@@ -169,6 +169,7 @@ export default function CertidaoNascimentoPreviewPage() {
         additionalInfo: JSON.stringify(formData),
         type: "certidao-nascimento",
         userId: user.id,
+        pdfDataUrl: pdfUrl,
       });
       setPaid(true);
       toast({ title: "Documento gerado com sucesso!", description: "1 crédito foi descontado." });
