@@ -130,7 +130,7 @@ export default function OperadorMaquinasDigitalFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documentos-fisicos/carteirinhas/operador-maquinas-digital/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
