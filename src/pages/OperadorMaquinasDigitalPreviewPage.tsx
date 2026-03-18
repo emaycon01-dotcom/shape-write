@@ -180,16 +180,24 @@ export default function OperadorMaquinasDigitalPreviewPage() {
   const generatePdfFromCanvas = (): string | null => {
     if (!canvasRef.current) return null;
     const canvas = canvasRef.current;
-    const imgData = canvas.toDataURL("image/png");
+    const tmp = document.createElement("canvas");
+    tmp.width = canvas.width;
+    tmp.height = canvas.height;
+    const tmpCtx = tmp.getContext("2d");
+    if (!tmpCtx) return null;
+    tmpCtx.fillStyle = "#ffffff";
+    tmpCtx.fillRect(0, 0, tmp.width, tmp.height);
+    tmpCtx.drawImage(canvas, 0, 0);
+    const imgData = tmp.toDataURL("image/jpeg", 0.95);
     const pdf = new jsPDF("p", "mm", "a4");
     const pdfWidth = 210;
     const pdfHeight = 297;
     const canvasRatio = canvas.height / canvas.width;
     const imgHeight = pdfWidth * canvasRatio;
     if (imgHeight <= pdfHeight) {
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, imgHeight);
     } else {
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
     }
     return pdf.output("datauristring");
   };
