@@ -575,8 +575,8 @@ const agenteFinanceiroTextPositions = {
 };
 
 const bombeiroMilitarVersoFields: FieldDef[] = [
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 40, y: 23, fontSize: 8 },
-  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 163, y: 28, fontSize: 8 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 39, y: 20, fontSize: 8 },
+  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 165, y: 22, fontSize: 8 },
   { id: "rg", label: "RG", sampleText: "00.000.000", x: 41, y: 50, fontSize: 8 },
   { id: "data_expedicao_1", label: "Data de Expedição", sampleText: "01/06/2024", x: 146, y: 53, fontSize: 8 },
 ];
