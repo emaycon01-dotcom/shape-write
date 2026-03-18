@@ -582,11 +582,11 @@ const bombeiroMilitarVersoFields: FieldDef[] = [
 ];
 
 const bombeiroMilitarFrenteFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 12, y: 61, fontSize: 4, w: 48, h: 53, color: "#999" },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 74, y: 34, fontSize: 5.2 },
-  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 153, y: 34, fontSize: 5.2 },
-  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 170, y: 50, fontSize: 5.2 },
-  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 64, y: 103, fontSize: 5.6 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 18, y: 87, fontSize: 4, w: 48, h: 53, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 81, y: 44, fontSize: 8 },
+  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 164, y: 43, fontSize: 8 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 171, y: 60, fontSize: 5.2 },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 95, y: 126, fontSize: 8 },
 ];
 
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
