@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           date: string
           description: string
+          expires_at: string
           id: string
           identification: string
           name: string
@@ -33,6 +34,7 @@ export type Database = {
           created_at?: string
           date?: string
           description?: string
+          expires_at?: string
           id: string
           identification?: string
           name?: string
@@ -46,6 +48,7 @@ export type Database = {
           created_at?: string
           date?: string
           description?: string
+          expires_at?: string
           id?: string
           identification?: string
           name?: string
