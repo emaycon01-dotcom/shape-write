@@ -31,6 +31,7 @@ interface DocumentContextType {
   addDocument: (doc: Omit<Document, "id" | "createdAt" | "status" | "expiresAt"> & { pdfDataUrl?: string }) => Promise<Document>;
   getDocument: (id: string) => Document | undefined;
   renewDocument: (id: string) => Promise<void>;
+  updateDocument: (id: string, updates: { additionalInfo?: string; pdfDataUrl?: string }) => Promise<void>;
   refreshDocuments: () => Promise<void>;
 }
 
@@ -157,6 +158,41 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const updateDocument = useCallback(async (id: string, updates: { additionalInfo?: string; pdfDataUrl?: string }) => {
+    let pdfUrl: string | null = null;
+    if (updates.pdfDataUrl) {
+      pdfUrl = await uploadPdfToStorage(updates.pdfDataUrl, id);
+    }
+
+    const dbUpdates: Record<string, unknown> = {};
+    if (updates.additionalInfo !== undefined) dbUpdates.additional_info = updates.additionalInfo;
+    if (pdfUrl) dbUpdates.pdf_url = pdfUrl;
+
+    if (Object.keys(dbUpdates).length > 0) {
+      const { error } = await supabase
+        .from("documents")
+        .update(dbUpdates)
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error updating document:", error);
+        throw error;
+      }
+    }
+
+    setDocuments((prev) =>
+      prev.map((d) =>
+        d.id === id
+          ? {
+              ...d,
+              ...(updates.additionalInfo !== undefined ? { additionalInfo: updates.additionalInfo } : {}),
+              ...(pdfUrl ? { pdfUrl } : {}),
+            }
+          : d
+      )
+    );
+  }, []);
+
   const renewDocument = useCallback(async (id: string) => {
     const newExpiresAt = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -181,7 +217,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <DocumentContext.Provider value={{ documents, loading, addDocument, getDocument, renewDocument, refreshDocuments: fetchDocuments }}>
+    <DocumentContext.Provider value={{ documents, loading, addDocument, getDocument, renewDocument, updateDocument, refreshDocuments: fetchDocuments }}>
       {children}
     </DocumentContext.Provider>
   );

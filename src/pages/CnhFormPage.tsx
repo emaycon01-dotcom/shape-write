@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, Trash2 } from "lucide-react";
+import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, Trash2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { mapCnhEditPayload } from "@/lib/cnh-history-edit";
 import testFotoUrl from "@/assets/test-foto.png";
@@ -100,7 +100,7 @@ function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length
 export default function CnhFormPage() {
   const location = useLocation();
   const editState = location.state as { editFormData?: Record<string, unknown>; editDocId?: string } | null;
-  const { getDocument } = useDocuments();
+  const { getDocument, updateDocument } = useDocuments();
 
   const getEditPayload = useCallback(() => {
     if (editState?.editFormData) {
@@ -285,6 +285,8 @@ export default function CnhFormPage() {
     if (ref.current) ref.current.value = "";
   };
 
+  const isEditMode = Boolean(editState?.editDocId);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -333,17 +335,28 @@ export default function CnhFormPage() {
       const pdfResult = data?.pdfBase64 || data?.pdfUrl;
       if (!pdfResult) throw new Error(data?.error || "Nenhuma URL de PDF retornada");
 
-      // Navigate to preview page with the PDF data
-      navigate("/dashboard/documents/cnh/preview", {
-        state: {
-          pdfBase64: pdfResult,
-          formData: bodyData,
-        },
-      });
+      if (isEditMode && editState?.editDocId) {
+        // Update mode: save directly without preview
+        await updateDocument(editState.editDocId, {
+          additionalInfo: JSON.stringify(bodyData),
+          pdfDataUrl: pdfResult.startsWith("data:") ? pdfResult : `data:application/pdf;base64,${pdfResult}`,
+        });
+
+        toast({ title: "Documento atualizado com sucesso!" });
+        navigate("/dashboard/history");
+      } else {
+        // Normal mode: navigate to preview
+        navigate("/dashboard/documents/cnh/preview", {
+          state: {
+            pdfBase64: pdfResult,
+            formData: bodyData,
+          },
+        });
+      }
     } catch (err: any) {
       console.error("Erro ao gerar PDF:", err);
       toast({
-        title: "Erro ao gerar PDF",
+        title: isEditMode ? "Erro ao atualizar documento" : "Erro ao gerar PDF",
         description: err?.message || "Tente novamente.",
         variant: "destructive",
       });
@@ -666,7 +679,9 @@ export default function CnhFormPage() {
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold" disabled={loading}>
           {loading ? (
-            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Gerando PDF...</>
+            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> {isEditMode ? "Atualizando..." : "Gerando PDF..."}</>
+          ) : isEditMode ? (
+            <><RefreshCw className="w-5 h-5 mr-2" /> Atualizar</>
           ) : (
             <><Eye className="w-5 h-5 mr-2" /> Gerar Preview</>
           )}
