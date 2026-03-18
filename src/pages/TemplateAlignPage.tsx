@@ -773,7 +773,7 @@ const segurancaEscolarFrenteFields: FieldDef[] = [
 ];
 
 const segurancaEscolarVersoFields: FieldDef[] = [
-  { id: "rg", label: "RG", sampleText: "00.000.000", x: 250, y: 200, fontSize: 12 },
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 100, y: 70, fontSize: 8 },
 ];
 
 function SegurancaEscolarAlignContent() {
