@@ -1148,6 +1148,9 @@ export default function TemplateAlignPage() {
             <TabsContent value="cart-cpf-fisico">
               <CpfFisicoAlignContent />
             </TabsContent>
+            <TabsContent value="cart-cnh-nautica">
+              <CnhNauticaAlignContent />
+            </TabsContent>
           </Tabs>
         </TabsContent>
       </Tabs>
