@@ -162,17 +162,14 @@ export default function OperadorMaquinasFormPage() {
       });
 
       const versoStorageKey = "carteirinha-operador-maquinas-verso-field-positions";
-      const frenteStorageKey = "carteirinha-operador-maquinas-frente-field-positions";
 
       let fieldPositions = null;
       const savedVerso = localStorage.getItem(versoStorageKey);
-      const savedFrente = localStorage.getItem(frenteStorageKey);
 
       try {
-        fieldPositions = {
-          verso: savedVerso ? JSON.parse(savedVerso) : null,
-          frente: savedFrente ? JSON.parse(savedFrente) : null,
-        };
+        fieldPositions = savedVerso
+          ? { verso: JSON.parse(savedVerso) }
+          : null;
       } catch {
         fieldPositions = null;
       }

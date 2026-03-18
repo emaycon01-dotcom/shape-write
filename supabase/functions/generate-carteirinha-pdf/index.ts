@@ -87,19 +87,17 @@ serve(async (req) => {
 
       // Default positions per tipo
       let defaultVersoPositions: Record<string, { x: number; y: number; fontSize: number }>;
-      let defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }>;
+      let defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }> = {};
       let rawPhoto = { x: 20, y: 79, w: 45, h: 50 };
 
       if (tipo === "operador-maquinas") {
-        defaultFrentePositions = {
+        defaultVersoPositions = {
           nome: { x: 80, y: 50, fontSize: 8 },
           rg_orgao_uf: { x: 80, y: 65, fontSize: 7 },
           cpf: { x: 80, y: 80, fontSize: 7 },
           nascimento: { x: 80, y: 95, fontSize: 7 },
           categoria: { x: 80, y: 110, fontSize: 8 },
           filiacao: { x: 80, y: 125, fontSize: 7 },
-        };
-        defaultVersoPositions = {
           equipamento: { x: 30, y: 30, fontSize: 7 },
           nivel: { x: 30, y: 50, fontSize: 7 },
           emissao: { x: 30, y: 70, fontSize: 7 },
@@ -153,7 +151,7 @@ serve(async (req) => {
       if (body.field_positions) {
         try {
           const parsed = typeof body.field_positions === "string" ? JSON.parse(body.field_positions) : body.field_positions;
-          applyPositions(parsed?.verso ?? null, rawVersoPositions);
+          applyPositions(parsed?.verso ?? parsed ?? null, rawVersoPositions);
           applyPositions(parsed?.frente ?? null, rawFrentePositions);
         } catch {
           // ignore parse errors
@@ -195,14 +193,12 @@ serve(async (req) => {
       };
 
       if (tipo === "operador-maquinas") {
-        // Frente fields
-        drawTextOnPage(frentePage, frentePositions, nome_completo || "", "nome");
-        drawTextOnPage(frentePage, frentePositions, rg_orgao_uf || "", "rg_orgao_uf");
-        drawTextOnPage(frentePage, frentePositions, cpf || "", "cpf");
-        drawTextOnPage(frentePage, frentePositions, data_nascimento || "", "nascimento");
-        drawTextOnPage(frentePage, frentePositions, categoria || "", "categoria");
-        drawTextOnPage(frentePage, frentePositions, filiacao || "", "filiacao");
-        // Verso fields
+        drawTextOnPage(versoPage, versoPositions, nome_completo || "", "nome");
+        drawTextOnPage(versoPage, versoPositions, rg_orgao_uf || "", "rg_orgao_uf");
+        drawTextOnPage(versoPage, versoPositions, cpf || "", "cpf");
+        drawTextOnPage(versoPage, versoPositions, data_nascimento || "", "nascimento");
+        drawTextOnPage(versoPage, versoPositions, categoria || "", "categoria");
+        drawTextOnPage(versoPage, versoPositions, filiacao || "", "filiacao");
         drawTextOnPage(versoPage, versoPositions, equipamento || "", "equipamento");
         drawTextOnPage(versoPage, versoPositions, nivel || "", "nivel");
         drawTextOnPage(versoPage, versoPositions, data_emissao || "", "emissao");
@@ -226,11 +222,12 @@ serve(async (req) => {
           const image = foto_base64.includes("image/png")
             ? await pdfDoc.embedPng(photoBytes)
             : await pdfDoc.embedJpg(photoBytes);
-          const { height: frontHeight } = frentePage.getSize();
+          const photoPage = tipo === "operador-maquinas" ? versoPage : frentePage;
+          const { height: photoPageHeight } = photoPage.getSize();
 
-          frentePage.drawImage(image, {
+          photoPage.drawImage(image, {
             x: rawPhoto.x,
-            y: frontHeight - rawPhoto.y - rawPhoto.h,
+            y: photoPageHeight - rawPhoto.y - rawPhoto.h,
             width: rawPhoto.w,
             height: rawPhoto.h,
           });
