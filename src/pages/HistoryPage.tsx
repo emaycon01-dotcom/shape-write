@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDocuments, Document } from "@/contexts/DocumentContext";
+import { useDocuments, Document, isDocumentExpired, daysUntilExpiry } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Share2, Download, QrCode, CreditCard, Loader2 } from "lucide-react";
+import { Eye, Pencil, Share2, Download, QrCode, CreditCard, Loader2, RefreshCw, Clock, AlertTriangle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DOCUMENT_FORM_ROUTES, DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
@@ -18,16 +18,19 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const EDIT_COST = 0.3;
+const RENEW_COST = 1;
 
 export default function HistoryPage() {
   const { user, deductCredit } = useAuth();
-  const { documents, loading } = useDocuments();
+  const { documents, loading, renewDocument } = useDocuments();
   const navigate = useNavigate();
   const { toast } = useToast();
   const userDocs = documents.filter((d) => d.userId === user?.id);
 
   const [editDoc, setEditDoc] = useState<Document | null>(null);
   const [editLoading, setEditLoading] = useState(false);
+  const [renewDoc, setRenewDoc] = useState<Document | null>(null);
+  const [renewLoading, setRenewLoading] = useState(false);
 
   const handleView = (doc: Document) => {
     if (doc.pdfUrl) {
@@ -62,7 +65,6 @@ export default function HistoryPage() {
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: DOCUMENT_TYPE_LABELS[doc.type] || doc.type });
       } else {
-        // Fallback to download
         handleDownload(doc);
       }
     } catch {
@@ -109,6 +111,34 @@ export default function HistoryPage() {
     navigate(route, { state: { editFormData: formData, editDocId: editDoc.id } });
   };
 
+  const confirmRenew = (doc: Document) => {
+    if (!user) return;
+    if (user.credits < RENEW_COST) {
+      toast({
+        title: "Créditos insuficientes",
+        description: `Você precisa de pelo menos ${RENEW_COST} crédito(s) para renovar. Saldo atual: ${user.credits}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    setRenewDoc(doc);
+  };
+
+  const handleRenew = async () => {
+    if (!renewDoc || !user) return;
+    setRenewLoading(true);
+    try {
+      await renewDocument(renewDoc.id);
+      deductCredit(RENEW_COST);
+      toast({ title: "Documento renovado!", description: `${RENEW_COST} crédito descontado. Válido por mais 45 dias.` });
+    } catch {
+      toast({ title: "Erro ao renovar documento", variant: "destructive" });
+    } finally {
+      setRenewLoading(false);
+      setRenewDoc(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -132,63 +162,93 @@ export default function HistoryPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {userDocs.map((doc) => (
-            <div key={doc.id} className="glass rounded-xl p-5 flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="font-display font-semibold text-foreground">
-                      {DOCUMENT_TYPE_LABELS[doc.type] || doc.type.toUpperCase()}
-                    </span>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        doc.status === "ativo"
-                          ? "bg-success/20 text-success"
-                          : "bg-destructive/20 text-destructive"
-                      }`}
-                    >
-                      {doc.status}
-                    </span>
+          {userDocs.map((doc) => {
+            const expired = isDocumentExpired(doc);
+            const daysLeft = daysUntilExpiry(doc);
+
+            return (
+              <div key={doc.id} className={`glass rounded-xl p-5 flex flex-col gap-4 ${expired ? "opacity-75 border border-destructive/30" : ""}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="font-display font-semibold text-foreground">
+                        {DOCUMENT_TYPE_LABELS[doc.type] || doc.type.toUpperCase()}
+                      </span>
+                      {expired ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/20 text-destructive flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3" /> Expirado
+                        </span>
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-success/20 text-success">
+                          ativo
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{doc.name} · ID: {doc.id}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(doc.createdAt).toLocaleString("pt-BR")}
+                    </p>
+                    {!expired && daysLeft <= 10 && (
+                      <p className="text-xs text-warning flex items-center gap-1 mt-1" style={{ color: "hsl(38, 92%, 50%)" }}>
+                        <Clock className="w-3 h-3" /> Expira em {daysLeft} dia(s)
+                      </p>
+                    )}
+                    {expired && (
+                      <p className="text-xs text-destructive flex items-center gap-1 mt-1">
+                        <Clock className="w-3 h-3" /> Expirou em {new Date(doc.expiresAt).toLocaleDateString("pt-BR")}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{doc.name} · ID: {doc.id}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(doc.createdAt).toLocaleString("pt-BR")}
-                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {expired ? (
+                    /* Documento expirado: só mostra botão de renovar */
+                    <Button
+                      variant="gradient"
+                      size="sm"
+                      onClick={() => confirmRenew(doc)}
+                      className="gap-1.5"
+                    >
+                      <RefreshCw className="w-4 h-4" /> Renovar ({RENEW_COST} créd.)
+                    </Button>
+                  ) : (
+                    /* Documento ativo */
+                    <>
+                      {doc.pdfUrl ? (
+                        <>
+                          <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
+                            <Eye className="w-4 h-4" /> Ver PDF
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleDownload(doc)} className="gap-1.5">
+                            <Download className="w-4 h-4" /> Baixar
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleShare(doc)} className="gap-1.5">
+                            <Share2 className="w-4 h-4" /> Compartilhar
+                          </Button>
+                        </>
+                      ) : (
+                        <Button variant="outline" size="sm" disabled className="gap-1.5">
+                          <Eye className="w-4 h-4" /> Sem PDF
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => confirmEdit(doc)}
+                        className="gap-1.5"
+                        disabled={!DOCUMENT_FORM_ROUTES[doc.type]}
+                      >
+                        <Pencil className="w-4 h-4" /> Editar
+                        <span className="text-xs text-muted-foreground">({EDIT_COST} créd.)</span>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                {doc.pdfUrl ? (
-                  <>
-                    <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
-                      <Eye className="w-4 h-4" /> Ver PDF
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDownload(doc)} className="gap-1.5">
-                      <Download className="w-4 h-4" /> Baixar
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleShare(doc)} className="gap-1.5">
-                      <Share2 className="w-4 h-4" /> Compartilhar
-                    </Button>
-                  </>
-                ) : (
-                  <Button variant="outline" size="sm" disabled className="gap-1.5">
-                    <Eye className="w-4 h-4" /> Sem PDF
-                  </Button>
-                )}
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => confirmEdit(doc)}
-                  className="gap-1.5"
-                  disabled={!DOCUMENT_FORM_ROUTES[doc.type]}
-                >
-                  <Pencil className="w-4 h-4" /> Editar
-                  <span className="text-xs text-muted-foreground">({EDIT_COST} créd.)</span>
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -214,6 +274,34 @@ export default function HistoryPage() {
                 <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Processando...</>
               ) : (
                 <>Confirmar Edição ({EDIT_COST} créd.)</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Renew confirmation dialog */}
+      <AlertDialog open={!!renewDoc} onOpenChange={(open) => !open && setRenewDoc(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-primary" /> Renovar Documento
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              A renovação deste documento custará <strong>{RENEW_COST} crédito(s)</strong> e estenderá a validade por mais <strong>45 dias</strong>.
+              <br />
+              Seu saldo atual: <strong>{user?.credits ?? 0} crédito(s)</strong>.
+              <br /><br />
+              Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRenew} disabled={renewLoading}>
+              {renewLoading ? (
+                <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Renovando...</>
+              ) : (
+                <>Renovar ({RENEW_COST} créd.)</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
