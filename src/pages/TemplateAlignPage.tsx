@@ -589,6 +589,23 @@ const bombeiroMilitarFrenteFields: FieldDef[] = [
   { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 97, y: 118, fontSize: 8 },
 ];
 
+const operadorMaquinasFrenteFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 15, y: 40, fontSize: 4, w: 50, h: 60, color: "#999" },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 80, y: 50, fontSize: 8 },
+  { id: "rg_orgao_uf", label: "RG/Órgão/UF", sampleText: "12.345.678 SSP SP", x: 80, y: 65, fontSize: 7 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 80, y: 80, fontSize: 7 },
+  { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 80, y: 95, fontSize: 7 },
+  { id: "categoria", label: "Categoria", sampleText: "D", x: 80, y: 110, fontSize: 8 },
+  { id: "filiacao", label: "Filiação", sampleText: "SOUZA E SOUZINHA", x: 80, y: 125, fontSize: 7 },
+];
+
+const operadorMaquinasVersoFields: FieldDef[] = [
+  { id: "equipamento", label: "Equipamento", sampleText: "Retroescavadeira", x: 30, y: 30, fontSize: 7 },
+  { id: "nivel", label: "Nível", sampleText: "2", x: 30, y: 50, fontSize: 7 },
+  { id: "emissao", label: "Emissão", sampleText: "01/06/2024", x: 30, y: 70, fontSize: 7 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 30, y: 90, fontSize: 7 },
+];
+
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
   bombeiro: [
     { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 54, y: 50, fontSize: 4, w: 142, h: 189, color: "#999" },
