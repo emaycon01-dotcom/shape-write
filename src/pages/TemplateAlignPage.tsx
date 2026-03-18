@@ -990,6 +990,9 @@ export default function TemplateAlignPage() {
             <TabsContent value="cart-operador-maquinas">
               <OperadorMaquinasAlignContent />
             </TabsContent>
+            <TabsContent value="cart-operador-maquinas-digital">
+              <OperadorMaquinasDigitalAlignContent />
+            </TabsContent>
             <TabsContent value="cart-seguranca-escolar">
               <SegurancaEscolarAlignContent />
             </TabsContent>
