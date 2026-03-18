@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Anchor, Trash2, Eye, Shuffle, Calendar as CalendarIcon, Upload } from "lucide-react";
+import { User, Anchor, Trash2, Eye, Shuffle, Calendar as CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,7 +17,6 @@ interface FormData {
   inscricao: string;
   localEmissao: string;
   validade: string;
-  fotoBase64: string;
 }
 
 const initial: FormData = {
@@ -28,7 +27,6 @@ const initial: FormData = {
   inscricao: "",
   localEmissao: "CAPITANIA DOS PORTOS DE SÃO PAULO",
   validade: "",
-  fotoBase64: "",
 };
 
 function formatCpf(value: string): string {
@@ -93,15 +91,6 @@ export default function CnhNauticaFormPage() {
   const setDate = (field: keyof FormData) => (v: string) =>
     setForm((p) => ({ ...p, [field]: v }));
 
-  const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setForm((p) => ({ ...p, fotoBase64: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
-  };
 
   const fillTest = () => {
     const now = new Date();
@@ -115,7 +104,6 @@ export default function CnhNauticaFormPage() {
       inscricao: generateInscricao(),
       localEmissao: "CAPITANIA DOS PORTOS DE SÃO PAULO",
       validade: format(validade, "dd/MM/yyyy"),
-      fotoBase64: form.fotoBase64,
     });
     toast({ title: "Formulário preenchido com dados de teste!" });
   };
@@ -215,19 +203,6 @@ export default function CnhNauticaFormPage() {
             <Input value={form.localEmissao} onChange={set("localEmissao")} placeholder="Ex: CAPITANIA DOS PORTOS DE SÃO PAULO" className={inputCls} required />
           </div>
           <DateField label="Validade" value={form.validade} onChange={setDate("validade")} />
-        </div>
-
-        <div className="glass rounded-xl p-6 space-y-4">
-          <SectionHeader icon={Upload} title="Foto 3x4" />
-          <div className="space-y-1.5">
-            <FieldLabel>Upload da Foto</FieldLabel>
-            <Input type="file" accept="image/*" onChange={handleFoto} className={inputCls} required />
-          </div>
-          {form.fotoBase64 && (
-            <div className="flex justify-center">
-              <img src={form.fotoBase64} alt="Preview" className="w-24 h-32 object-cover rounded-lg border border-border" />
-            </div>
-          )}
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">

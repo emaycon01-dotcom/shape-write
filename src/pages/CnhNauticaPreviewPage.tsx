@@ -19,7 +19,7 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  photo: { x: 725, y: 497, w: 170, h: 220, fontSize: 8 },
+  
   nomeCompleto: { x: 94, y: 221, fontSize: 28 },
   dataNascimento: { x: 90, y: 296, fontSize: 28 },
   rgOrgaoUf: { x: 259, y: 296, fontSize: 28 },
@@ -88,20 +88,6 @@ export default function CnhNauticaPreviewPage() {
           ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
         };
 
-        // Draw photo
-        const photoPos = positions.photo || DEFAULT_POSITIONS.photo;
-        if (formData.fotoBase64 && photoPos) {
-          const photoImg = new Image();
-          photoImg.crossOrigin = "anonymous";
-          photoImg.onload = () => {
-            const pw = (photoPos.w || 170) * scaleX;
-            const ph = (photoPos.h || 220) * scaleY;
-            ctx.drawImage(photoImg, photoPos.x * scaleX, photoPos.y * scaleY, pw, ph);
-            setRendered(true);
-          };
-          photoImg.src = formData.fotoBase64;
-        }
-
         drawField("nomeCompleto", formData.nomeCompleto, "#000", true);
         drawField("dataNascimento", formData.dataNascimento, "#000");
         drawField("rgOrgaoUf", formData.rgOrgaoUf, "#000");
@@ -110,9 +96,7 @@ export default function CnhNauticaPreviewPage() {
         drawField("localEmissao", formData.localEmissao, "#000");
         drawField("validade", formData.validade, "#000");
 
-        if (!formData.fotoBase64) {
-          setRendered(true);
-        }
+        setRendered(true);
       } catch {
         // Fallback: plain canvas
         const scale = 2;
