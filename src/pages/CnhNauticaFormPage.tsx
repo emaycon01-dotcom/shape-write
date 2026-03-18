@@ -139,7 +139,7 @@ export default function CnhNauticaFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documentos-fisicos/carteirinhas/cnh-nautica/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
