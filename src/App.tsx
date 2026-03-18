@@ -41,6 +41,8 @@ const OperadorMaquinasFormPage = lazy(() => import("./pages/OperadorMaquinasForm
 const OperadorMaquinasDigitalFormPage = lazy(() => import("./pages/OperadorMaquinasDigitalFormPage"));
 const OperadorMaquinasDigitalPreviewPage = lazy(() => import("./pages/OperadorMaquinasDigitalPreviewPage"));
 const SegurancaEscolarFormPage = lazy(() => import("./pages/SegurancaEscolarFormPage"));
+const CedulaPoliciaFormPage = lazy(() => import("./pages/CedulaPoliciaFormPage"));
+const CedulaPoliciaPreviewPage = lazy(() => import("./pages/CedulaPoliciaPreviewPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const ComprovanteResidenciaFormPage = lazy(() => import("./pages/ComprovanteResidenciaFormPage"));
