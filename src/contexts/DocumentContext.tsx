@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Document {
   id: string;
@@ -11,36 +12,135 @@ export interface Document {
   createdAt: string;
   status: "ativo" | "revogado" | "expirado";
   userId: string;
-  pdfDataUrl?: string;
+  pdfUrl?: string;
 }
 
 interface DocumentContextType {
   documents: Document[];
-  addDocument: (doc: Omit<Document, "id" | "createdAt" | "status">) => Document;
+  loading: boolean;
+  addDocument: (doc: Omit<Document, "id" | "createdAt" | "status"> & { pdfDataUrl?: string }) => Promise<Document>;
   getDocument: (id: string) => Document | undefined;
+  refreshDocuments: () => Promise<void>;
 }
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
+async function uploadPdfToStorage(pdfDataUrl: string, docId: string): Promise<string | null> {
+  try {
+    const res = await fetch(pdfDataUrl);
+    const blob = await res.blob();
+    const filePath = `${docId}.pdf`;
+
+    const { error } = await supabase.storage
+      .from("documents-pdf")
+      .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
+
+    if (error) {
+      console.error("Upload error:", error);
+      return null;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("documents-pdf")
+      .getPublicUrl(filePath);
+
+    return urlData.publicUrl;
+  } catch (err) {
+    console.error("Failed to upload PDF:", err);
+    return null;
+  }
+}
+
+function mapRow(row: any): Document {
+  return {
+    id: row.id,
+    type: row.type,
+    name: row.name,
+    identification: row.identification,
+    date: row.date,
+    description: row.description,
+    additionalInfo: row.additional_info,
+    createdAt: row.created_at,
+    status: row.status as Document["status"],
+    userId: row.user_id,
+    pdfUrl: row.pdf_url || undefined,
+  };
+}
+
 export function DocumentProvider({ children }: { children: React.ReactNode }) {
-  const [documents, setDocuments] = useState<Document[]>(() => {
-    const stored = localStorage.getItem("bellarus_docs");
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDocuments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching documents:", error);
+        return;
+      }
+
+      setDocuments((data || []).map(mapRow));
+    } catch (err) {
+      console.error("Failed to fetch documents:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   const addDocument = useCallback(
-    (doc: Omit<Document, "id" | "createdAt" | "status">) => {
-      const newDoc: Document = {
-        ...doc,
-        id: crypto.randomUUID().split("-")[0].toUpperCase(),
-        createdAt: new Date().toISOString(),
+    async (doc: Omit<Document, "id" | "createdAt" | "status"> & { pdfDataUrl?: string }): Promise<Document> => {
+      const docId = crypto.randomUUID().split("-")[0].toUpperCase();
+
+      // Upload PDF to storage if provided
+      let pdfUrl: string | null = null;
+      if (doc.pdfDataUrl) {
+        pdfUrl = await uploadPdfToStorage(doc.pdfDataUrl, docId);
+      }
+
+      const row = {
+        id: docId,
+        type: doc.type,
+        name: doc.name,
+        identification: doc.identification,
+        date: doc.date,
+        description: doc.description,
+        additional_info: doc.additionalInfo,
         status: "ativo",
+        user_id: doc.userId,
+        pdf_url: pdfUrl,
       };
-      setDocuments((prev) => {
-        const updated = [newDoc, ...prev];
-        localStorage.setItem("bellarus_docs", JSON.stringify(updated));
-        return updated;
-      });
+
+      const { data, error } = await supabase
+        .from("documents")
+        .insert(row)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error inserting document:", error);
+        // Fallback: return local doc
+        const fallback: Document = {
+          ...doc,
+          id: docId,
+          createdAt: new Date().toISOString(),
+          status: "ativo",
+          pdfUrl: pdfUrl || undefined,
+        };
+        setDocuments((prev) => [fallback, ...prev]);
+        return fallback;
+      }
+
+      const newDoc = mapRow(data);
+      setDocuments((prev) => [newDoc, ...prev]);
       return newDoc;
     },
     []
@@ -52,7 +152,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <DocumentContext.Provider value={{ documents, addDocument, getDocument }}>
+    <DocumentContext.Provider value={{ documents, loading, addDocument, getDocument, refreshDocuments: fetchDocuments }}>
       {children}
     </DocumentContext.Provider>
   );
