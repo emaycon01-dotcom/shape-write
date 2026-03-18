@@ -546,6 +546,19 @@ const agenteFinanceiroTextPositions = {
   emergencia2: { x: 429, y: 789 },
 };
 
+// Bombeiro Militar specific fields
+const bombeiroMilitarFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 300, y: 80, fontSize: 4, w: 120, h: 160, color: "#999" },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 100, y: 50, fontSize: 14 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 100, y: 120, fontSize: 14 },
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 100, y: 210, fontSize: 14 },
+  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 450, y: 120, fontSize: 14 },
+  { id: "data_expedicao_1", label: "Data Expedição 1", sampleText: "01/01/2024", x: 450, y: 210, fontSize: 14 },
+  { id: "data_expedicao_2", label: "Data Expedição 2", sampleText: "01/06/2024", x: 100, y: 350, fontSize: 14 },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 100, y: 300, fontSize: 14 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 450, y: 300, fontSize: 14 },
+];
+
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
   bombeiro: [
     { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 54, y: 50, fontSize: 4, w: 142, h: 189, color: "#999" },
@@ -559,12 +572,14 @@ const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
     { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 68, y: 41, fontSize: 4, w: 159, h: 189, color: "#999" },
     ...commonCarteirinhaFields.map(f => ({ ...f, ...agenteFinanceiroTextPositions[f.id as keyof typeof agenteFinanceiroTextPositions] }) as FieldDef),
   ],
+  "bombeiro-militar": bombeiroMilitarFields,
 };
 
 const CARTEIRINHA_TEMPLATES: Record<string, string> = {
   bombeiro: templateBombeiroUrl,
   porteiro: templatePorteiroUrl,
   "agente-financeiro": templateAgenteUrl,
+  "bombeiro-militar": templateBombeiroMilitarUrl,
 };
 
 function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string; tipoLabel: string; storageKey: string }) {
