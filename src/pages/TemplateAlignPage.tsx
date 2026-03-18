@@ -846,6 +846,9 @@ export default function TemplateAlignPage() {
             <TabsContent value="cart-bombeiro-militar">
               <BombeiroMilitarAlignContent />
             </TabsContent>
+            <TabsContent value="cart-operador-maquinas">
+              <OperadorMaquinasAlignContent />
+            </TabsContent>
           </Tabs>
         </TabsContent>
       </Tabs>
