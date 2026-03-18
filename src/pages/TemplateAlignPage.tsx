@@ -393,13 +393,22 @@ function GenericAlignContent({
           }}
           onClick={() => setSelected(null)}
         >
-          <img
-            src={templateUrl}
-            alt="Template"
-            className="absolute inset-0 w-full h-full"
-            style={{ objectFit: "fill" }}
-            draggable={false}
-          />
+          {templateIsPdf ? (
+            <embed
+              src={`${templateUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+              type="application/pdf"
+              className="absolute inset-0 w-full h-full"
+              style={{ border: "none" }}
+            />
+          ) : (
+            <img
+              src={templateUrl}
+              alt="Template"
+              className="absolute inset-0 w-full h-full"
+              style={{ objectFit: "fill" }}
+              draggable={false}
+            />
+          )}
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
