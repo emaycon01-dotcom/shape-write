@@ -21,7 +21,7 @@ async function splitPdfPages(pdfBase64: string): Promise<string[]> {
     const [copied] = await newDoc.copyPages(srcDoc, [i]);
     newDoc.addPage(copied);
     const newBytes = await newDoc.save();
-    const blob = new Blob([newBytes], { type: "application/pdf" });
+    const blob = new Blob([newBytes.buffer as ArrayBuffer], { type: "application/pdf" });
     urls.push(URL.createObjectURL(blob));
   }
   return urls;
