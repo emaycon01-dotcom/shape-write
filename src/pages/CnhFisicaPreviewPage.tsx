@@ -128,9 +128,9 @@ export default function CnhFisicaPreviewPage() {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     try {
-      await downloadPdf();
+      downloadPdf();
       toast({ title: "PDF baixado com sucesso!" });
     } catch {
       toast({ title: "Erro ao baixar PDF", variant: "destructive" });
