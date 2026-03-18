@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments, Document } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Share2, QrCode, CreditCard, Loader2, AlertTriangle } from "lucide-react";
+import { Eye, Pencil, Share2, Download, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DOCUMENT_FORM_ROUTES, DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
@@ -21,7 +21,7 @@ const EDIT_COST = 0.3;
 
 export default function HistoryPage() {
   const { user, deductCredit } = useAuth();
-  const { documents } = useDocuments();
+  const { documents, loading } = useDocuments();
   const navigate = useNavigate();
   const { toast } = useToast();
   const userDocs = documents.filter((d) => d.userId === user?.id);
@@ -30,31 +30,40 @@ export default function HistoryPage() {
   const [editLoading, setEditLoading] = useState(false);
 
   const handleView = (doc: Document) => {
-    if (doc.pdfDataUrl) {
-      const win = window.open();
-      if (win) {
-        win.document.write(
-          `<html><head><title>${DOCUMENT_TYPE_LABELS[doc.type] || doc.type}</title></head><body style="margin:0"><iframe src="${doc.pdfDataUrl}" style="width:100%;height:100%;border:none;" title="PDF"></iframe></body></html>`
-        );
-      }
+    if (doc.pdfUrl) {
+      window.open(doc.pdfUrl, "_blank");
+    }
+  };
+
+  const handleDownload = async (doc: Document) => {
+    if (!doc.pdfUrl) return;
+    try {
+      const res = await fetch(doc.pdfUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${doc.type}-${doc.id}.pdf`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      toast({ title: "PDF baixado com sucesso!" });
+    } catch {
+      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
     }
   };
 
   const handleShare = async (doc: Document) => {
-    if (!doc.pdfDataUrl) return;
+    if (!doc.pdfUrl) return;
     try {
-      const blob = await fetch(doc.pdfDataUrl).then((r) => r.blob());
+      const res = await fetch(doc.pdfUrl);
+      const blob = await res.blob();
       const fileName = `${doc.type}-${doc.id}.pdf`;
       const file = new File([blob], fileName, { type: "application/pdf" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: DOCUMENT_TYPE_LABELS[doc.type] || doc.type });
       } else {
-        const link = document.createElement("a");
-        link.download = fileName;
-        link.href = URL.createObjectURL(blob);
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href), 5000);
-        toast({ title: "PDF baixado com sucesso!" });
+        // Fallback to download
+        handleDownload(doc);
       }
     } catch {
       toast({ title: "Erro ao compartilhar", variant: "destructive" });
@@ -100,6 +109,14 @@ export default function HistoryPage() {
     navigate(route, { state: { editFormData: formData, editDocId: editDoc.id } });
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1 className="font-display text-3xl font-bold text-foreground mb-1">Histórico</h1>
@@ -141,10 +158,18 @@ export default function HistoryPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {doc.pdfDataUrl ? (
-                  <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
-                    <Eye className="w-4 h-4" /> Ver
-                  </Button>
+                {doc.pdfUrl ? (
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
+                      <Eye className="w-4 h-4" /> Ver PDF
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDownload(doc)} className="gap-1.5">
+                      <Download className="w-4 h-4" /> Baixar
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleShare(doc)} className="gap-1.5">
+                      <Share2 className="w-4 h-4" /> Compartilhar
+                    </Button>
+                  </>
                 ) : (
                   <Button variant="outline" size="sm" disabled className="gap-1.5">
                     <Eye className="w-4 h-4" /> Sem PDF
@@ -161,12 +186,6 @@ export default function HistoryPage() {
                   <Pencil className="w-4 h-4" /> Editar
                   <span className="text-xs text-muted-foreground">({EDIT_COST} créd.)</span>
                 </Button>
-
-                {doc.pdfDataUrl && (
-                  <Button variant="outline" size="sm" onClick={() => handleShare(doc)} className="gap-1.5">
-                    <Share2 className="w-4 h-4" /> Compartilhar
-                  </Button>
-                )}
               </div>
             </div>
           ))}

@@ -142,7 +142,7 @@ export default function ExameToxicologicoPreviewPage() {
       if (!pdfUrl) throw new Error("Falha ao gerar PDF");
       setPdfDataUrl(pdfUrl);
       deductCredit();
-      addDocument({
+      await addDocument({
         name: formData.nomeCompleto || "",
         identification: formData.cpf || "",
         date: new Date().toLocaleDateString("pt-BR"),

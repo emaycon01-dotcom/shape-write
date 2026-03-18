@@ -139,7 +139,7 @@ export default function ComprovanteResidenciaPreviewPage() {
       setPdfDataUrl(pdfUrl);
 
       deductCredit();
-      addDocument({
+      await addDocument({
         name: formData.nomeCompleto || "",
         identification: formData.cpf || "",
         date: new Date().toLocaleDateString("pt-BR"),

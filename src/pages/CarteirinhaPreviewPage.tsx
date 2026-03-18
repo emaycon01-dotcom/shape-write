@@ -120,7 +120,7 @@ export default function CarteirinhaPreviewPage() {
     try {
       deductCredit(CREDIT_COST);
 
-      addDocument({
+      await addDocument({
         name: formData.nomeCompleto || "",
         identification: formData.cpf || "",
         date: formData.dataFormacao || "",

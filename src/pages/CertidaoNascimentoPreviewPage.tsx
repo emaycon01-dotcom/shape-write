@@ -166,7 +166,7 @@ export default function CertidaoNascimentoPreviewPage() {
       setPdfDataUrl(pdfUrl);
 
       deductCredit();
-      addDocument({
+      await addDocument({
         name: formData.nomeCompleto || "",
         identification: formData.cpf || "",
         date: formData.dataNascimento || "",
