@@ -49,6 +49,8 @@ serve(async (req) => {
       equipamento,
       nivel,
       data_emissao,
+      // seguranca-escolar specific fields
+      termino_curso,
     } = body;
 
     if (!template_pdf_base64) {
