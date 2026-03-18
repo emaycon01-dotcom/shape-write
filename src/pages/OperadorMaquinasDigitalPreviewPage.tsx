@@ -36,9 +36,11 @@ export default function OperadorMaquinasDigitalPreviewPage() {
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { formData, fieldPositions } = (location.state as {
+  const { formData, fieldPositions, autoUpdate, editDocId } = (location.state as {
     formData: Record<string, string>;
     fieldPositions: Record<string, FieldPos> | null;
+    autoUpdate?: boolean;
+    editDocId?: string;
   }) || {};
 
   const [paid, setPaid] = useState(false);
