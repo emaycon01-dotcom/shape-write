@@ -36,6 +36,7 @@ const CnhFisicaPreviewPage = lazy(() => import("./pages/CnhFisicaPreviewPage"));
 const CarteirinhasSelecaoPage = lazy(() => import("./pages/CarteirinhasSelecaoPage"));
 const CarteirinhaFormPage = lazy(() => import("./pages/CarteirinhaFormPage"));
 const CarteirinhaPreviewPage = lazy(() => import("./pages/CarteirinhaPreviewPage"));
+const BombeiroMilitarFormPage = lazy(() => import("./pages/BombeiroMilitarFormPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const ComprovanteResidenciaFormPage = lazy(() => import("./pages/ComprovanteResidenciaFormPage"));
@@ -95,6 +96,8 @@ const App = () => (
                   <Route path="cnh-fisica/todos/preview" element={<CnhFisicaPreviewPage />} />
                   <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
                   <Route path="documentos-fisicos/carteirinhas" element={<CarteirinhasSelecaoPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/bombeiro-militar" element={<BombeiroMilitarFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/bombeiro-militar/preview" element={<CarteirinhaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>

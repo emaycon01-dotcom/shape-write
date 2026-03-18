@@ -47,7 +47,7 @@ const carteirinhas = [
     name: "Carteira de Bombeiro Militar",
     description: "Carteira funcional de Bombeiro Militar com dados completos",
     icon: Shield,
-    route: "",
+    route: "/dashboard/documentos-fisicos/carteirinhas/bombeiro-militar",
     credits: 2,
   },
   {

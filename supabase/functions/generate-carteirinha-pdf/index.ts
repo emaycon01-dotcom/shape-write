@@ -29,11 +29,15 @@ serve(async (req) => {
       numero_registro,
       nome_completo,
       cpf,
+      rg,
+      tipo_sanguineo,
       data_nascimento,
       cidade,
       uf,
       data_formacao,
       data_validade,
+      data_expedicao_1,
+      data_expedicao_2,
       contato_emergencia_1,
       contato_emergencia_2,
       foto_base64,
@@ -102,13 +106,32 @@ serve(async (req) => {
       emergencia2: { x: 429, y: 789, fontSize: 25 },
     };
 
-    const rawPositions = tipo === "agente-financeiro" ? { ...agenteTextPositions } : { ...defaultTextPositions };
+    const bombeiroMilitarTextPositions: Record<string, { x: number; y: number; fontSize: number }> = {
+      nome: { x: 100, y: 50, fontSize: 14 },
+      cpf: { x: 100, y: 120, fontSize: 14 },
+      rg: { x: 100, y: 210, fontSize: 14 },
+      tipo_sanguineo: { x: 450, y: 120, fontSize: 14 },
+      data_expedicao_1: { x: 450, y: 210, fontSize: 14 },
+      data_expedicao_2: { x: 100, y: 350, fontSize: 14 },
+      numero_registro: { x: 100, y: 300, fontSize: 14 },
+      validade: { x: 450, y: 300, fontSize: 14 },
+    };
+
+    let rawPositions: Record<string, { x: number; y: number; fontSize: number }>;
+    if (tipo === "bombeiro-militar") {
+      rawPositions = { ...bombeiroMilitarTextPositions };
+    } else if (tipo === "agente-financeiro") {
+      rawPositions = { ...agenteTextPositions };
+    } else {
+      rawPositions = { ...defaultTextPositions };
+    }
 
     // Default photo position per tipo
     const photoDefaults: Record<string, { x: number; y: number; w: number; h: number }> = {
       bombeiro: { x: 54, y: 50, w: 142, h: 189 },
       porteiro: { x: 73, y: 38, w: 159, h: 189 },
       "agente-financeiro": { x: 68, y: 41, w: 159, h: 189 },
+      "bombeiro-militar": { x: 300, y: 80, w: 120, h: 160 },
     };
     let rawPhoto = photoDefaults[tipo] || photoDefaults.bombeiro;
 
@@ -156,15 +179,26 @@ serve(async (req) => {
       });
     };
 
-    drawText(numero_registro || "", "numero_registro");
-    drawText(nome_completo || "", "nome");
-    drawText(cpf || "", "cpf");
-    drawText(data_nascimento || "", "nascimento");
-    drawText(`${cidade || ""}, ${uf || ""}`, "cidade_uf");
-    drawText(data_formacao || "", "formacao");
-    drawText(data_validade || "", "validade");
-    drawText(contato_emergencia_1 || "", "emergencia1");
-    drawText(contato_emergencia_2 || "", "emergencia2");
+    if (tipo === "bombeiro-militar") {
+      drawText(nome_completo || "", "nome");
+      drawText(cpf || "", "cpf");
+      drawText(rg || "", "rg");
+      drawText(tipo_sanguineo || "", "tipo_sanguineo");
+      drawText(data_expedicao_1 || "", "data_expedicao_1");
+      drawText(data_expedicao_2 || "", "data_expedicao_2");
+      drawText(numero_registro || "", "numero_registro");
+      drawText(data_validade || "", "validade");
+    } else {
+      drawText(numero_registro || "", "numero_registro");
+      drawText(nome_completo || "", "nome");
+      drawText(cpf || "", "cpf");
+      drawText(data_nascimento || "", "nascimento");
+      drawText(`${cidade || ""}, ${uf || ""}`, "cidade_uf");
+      drawText(data_formacao || "", "formacao");
+      drawText(data_validade || "", "validade");
+      drawText(contato_emergencia_1 || "", "emergencia1");
+      drawText(contato_emergencia_2 || "", "emergencia2");
+    }
 
     // Embed photo if provided
     if (foto_base64) {
