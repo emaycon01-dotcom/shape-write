@@ -122,6 +122,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe/preview" element={<CedulaPoliciaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/cpf-fisico" element={<CpfFisicoFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/cpf-fisico/preview" element={<CpfFisicoPreviewPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cnh-nautica" element={<CnhNauticaFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>
