@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Building2, FlaskConical, Trash2, Eye, Shuffle, Calendar as CalendarIcon } from "lucide-react";
+import { User, Building2, FlaskConical, Trash2, Eye, Shuffle, Calendar as CalendarIcon, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
