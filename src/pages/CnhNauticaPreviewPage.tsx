@@ -19,7 +19,7 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  photo: { x: 725, y: 497, w: 170, h: 220, fontSize: 8 },
+  
   nomeCompleto: { x: 94, y: 221, fontSize: 28 },
   dataNascimento: { x: 90, y: 296, fontSize: 28 },
   rgOrgaoUf: { x: 259, y: 296, fontSize: 28 },
