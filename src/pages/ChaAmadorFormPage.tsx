@@ -65,8 +65,16 @@ function DateField({ label, value, onChange, required = true }: { label: string;
 }
 
 export default function ChaAmadorFormPage() {
-  const [form, setForm] = useState<ChaFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<ChaFormData>(() => {
+    if (editState?.editFormData) {
+      return { ...initial, ...editState.editFormData };
+    }
+    return initial;
+  });
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { toast } = useToast();
 
   const set = (field: keyof ChaFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
