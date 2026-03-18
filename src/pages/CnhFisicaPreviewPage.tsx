@@ -52,8 +52,8 @@ export default function CnhFisicaPreviewPage() {
     return new Blob([arr], { type: mime });
   };
 
-  const downloadPdf = async () => {
-    const blob = await getPdfBlob();
+  const downloadPdf = () => {
+    const blob = getPdfBlob();
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;
@@ -64,8 +64,8 @@ export default function CnhFisicaPreviewPage() {
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   };
 
-  const openPdf = async () => {
-    const blob = await getPdfBlob();
+  const openPdf = () => {
+    const blob = getPdfBlob();
     const objectUrl = URL.createObjectURL(blob);
     window.open(objectUrl, "_blank", "noopener,noreferrer");
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
