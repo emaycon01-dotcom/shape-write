@@ -758,8 +758,9 @@ function OperadorMaquinasAlignContent() {
   );
 }
 
-const SEGURANCA_ESCOLAR_W = 595;
-const SEGURANCA_ESCOLAR_H = 842;
+// Actual PDF page dimensions from the template (landscape card)
+const SEGURANCA_ESCOLAR_W = 241;
+const SEGURANCA_ESCOLAR_H = 142;
 
 const segurancaEscolarFrenteFields: FieldDef[] = [
   { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 30, y: 120, fontSize: 4, w: 100, h: 130, color: "#999" },
