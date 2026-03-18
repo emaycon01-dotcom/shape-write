@@ -43,10 +43,17 @@ export default function CnhFisicaPreviewPage() {
     );
   }
 
-  const getPdfBlob = async () => fetch(pdfBase64).then((r) => r.blob());
+  const getPdfBlob = (): Blob => {
+    const parts = pdfBase64.split(",");
+    const mime = parts[0]?.match(/:(.*?);/)?.[1] || "application/pdf";
+    const raw = atob(parts[1]);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  };
 
-  const downloadPdf = async () => {
-    const blob = await getPdfBlob();
+  const downloadPdf = () => {
+    const blob = getPdfBlob();
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;
@@ -57,8 +64,8 @@ export default function CnhFisicaPreviewPage() {
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   };
 
-  const openPdf = async () => {
-    const blob = await getPdfBlob();
+  const openPdf = () => {
+    const blob = getPdfBlob();
     const objectUrl = URL.createObjectURL(blob);
     window.open(objectUrl, "_blank", "noopener,noreferrer");
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
@@ -108,12 +115,12 @@ export default function CnhFisicaPreviewPage() {
 
   const handleShare = async () => {
     try {
-      const blob = await getPdfBlob();
+      const blob = getPdfBlob();
       const file = new File([blob], fileName, { type: "application/pdf" });
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: "CNH Física" });
       } else {
-        await downloadPdf();
+        downloadPdf();
         toast({ title: "PDF baixado com sucesso!" });
       }
     } catch {
@@ -121,9 +128,9 @@ export default function CnhFisicaPreviewPage() {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     try {
-      await downloadPdf();
+      downloadPdf();
       toast({ title: "PDF baixado com sucesso!" });
     } catch {
       toast({ title: "Erro ao baixar PDF", variant: "destructive" });
