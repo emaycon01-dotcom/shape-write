@@ -100,7 +100,7 @@ function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length
 export default function CnhFormPage() {
   const location = useLocation();
   const editState = location.state as { editFormData?: Record<string, unknown>; editDocId?: string } | null;
-  const { getDocument } = useDocuments();
+  const { getDocument, updateDocument } = useDocuments();
 
   const getEditPayload = useCallback(() => {
     if (editState?.editFormData) {
