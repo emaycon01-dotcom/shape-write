@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,7 +65,14 @@ function DateField({ label, value, onChange, required = true }: { label: string;
 }
 
 export default function ChaAmadorFormPage() {
-  const [form, setForm] = useState<ChaFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<ChaFormData>(() => {
+    if (editState?.editFormData) {
+      return { ...initial, ...editState.editFormData };
+    }
+    return initial;
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
 

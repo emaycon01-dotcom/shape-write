@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,7 +139,12 @@ function generateCPF(): string {
 }
 
 export default function CertidaoNascimentoFormPage() {
-  const [form, setForm] = useState<CertidaoFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<CertidaoFormData>(() => {
+    if (editState?.editFormData) return { ...initial, ...editState.editFormData } as CertidaoFormData;
+    return initial;
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();

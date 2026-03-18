@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, Wrench, Trash2, Eye, Shuffle, Calendar as CalendarIcon, Upload } from "lucide-react";
@@ -67,7 +67,12 @@ function DateField({ label, value, onChange, required = true }: { label: string;
 }
 
 export default function OperadorMaquinasDigitalFormPage() {
-  const [form, setForm] = useState<FormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<FormData>(() => {
+    if (editState?.editFormData) return { ...initial, ...editState.editFormData } as FormData;
+    return initial;
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
 

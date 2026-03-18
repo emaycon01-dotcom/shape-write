@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, Wrench, Trash2, Eye, Upload, FileText, Clock } from "lucide-react";
@@ -47,7 +47,12 @@ function randomCpf(): string {
 }
 
 export default function CpfFisicoFormPage() {
-  const [form, setForm] = useState<FormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<FormData>(() => {
+    if (editState?.editFormData) return { ...initial, ...editState.editFormData } as FormData;
+    return initial;
+  });
   const [nascDate, setNascDate] = useState<Date>();
   const [dataDate, setDataDate] = useState<Date>();
   const navigate = useNavigate();

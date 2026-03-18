@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +47,12 @@ function generateCEP(): string {
 }
 
 export default function ComprovanteResidenciaFormPage() {
-  const [form, setForm] = useState<ComprovanteFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<ComprovanteFormData>(() => {
+    if (editState?.editFormData) return { ...initial, ...editState.editFormData } as ComprovanteFormData;
+    return initial;
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
