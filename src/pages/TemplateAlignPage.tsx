@@ -203,10 +203,28 @@ function GenericAlignContent({
   pageWidth?: number;
   pageHeight?: number;
 }) {
+  const sanitizeFields = useCallback((savedFields: FieldDef[]) => {
+    if (!Array.isArray(savedFields) || savedFields.length !== defaultFieldsProp.length) {
+      return defaultFieldsProp;
+    }
+
+    const valid = savedFields.every((field) => {
+      const withinBounds = field.x >= 0 && field.y >= 0 && field.x <= pageWidth && field.y <= pageHeight;
+      const validSize = (field.w === undefined || field.w <= pageWidth) && (field.h === undefined || field.h <= pageHeight);
+      return withinBounds && validSize;
+    });
+
+    return valid ? savedFields : defaultFieldsProp;
+  }, [defaultFieldsProp, pageHeight, pageWidth]);
+
   const [fields, setFields] = useState<FieldDef[]>(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        return sanitizeFields(JSON.parse(saved));
+      } catch {
+        return defaultFieldsProp;
+      }
     }
     return defaultFieldsProp;
   });
@@ -226,7 +244,11 @@ function GenericAlignContent({
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, []);
+  }, [pageWidth]);
+
+  useEffect(() => {
+    setFields((prev) => sanitizeFields(prev));
+  }, [sanitizeFields]);
 
   const updateField = useCallback((id: string, updates: Partial<FieldDef>) => {
     setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
@@ -266,7 +288,7 @@ function GenericAlignContent({
       const x = Math.round((clientX - rect.left) / scale - dragging.offsetX);
       const y = Math.round((clientY - rect.top) / scale - dragging.offsetY);
       setFields(prev => prev.map(f =>
-        f.id === dragging.id ? { ...f, x: Math.max(0, x), y: Math.max(0, y) } : f
+        f.id === dragging.id ? { ...f, x: Math.max(0, Math.min(pageWidth, x)), y: Math.max(0, Math.min(pageHeight, y)) } : f
       ));
     };
     const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
@@ -282,7 +304,7 @@ function GenericAlignContent({
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onEnd);
     };
-  }, [dragging, scale]);
+  }, [dragging, pageHeight, pageWidth, scale]);
 
   useEffect(() => {
     if (!selected) return;
@@ -296,12 +318,12 @@ function GenericAlignContent({
       if (dx === 0 && dy === 0) return;
       e.preventDefault();
       setFields(prev => prev.map(f =>
-        f.id === selected ? { ...f, x: Math.max(0, f.x + dx), y: Math.max(0, f.y + dy) } : f
+        f.id === selected ? { ...f, x: Math.max(0, Math.min(pageWidth, f.x + dx)), y: Math.max(0, Math.min(pageHeight, f.y + dy)) } : f
       ));
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [selected]);
+  }, [pageHeight, pageWidth, selected]);
 
   const savePositions = () => {
     localStorage.setItem(storageKey, JSON.stringify(fields));
@@ -321,7 +343,7 @@ function GenericAlignContent({
       return acc;
     }, {} as Record<string, any>);
     navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
-    toast({ title: "Coordenadas copiadas!", description: "Cole no chat para aplicar no edge function." });
+    toast({ title: "Coordenadas copiadas!", description: "Cole no chat para aplicar no PDF." });
   };
 
   const selectedField = fields.find(f => f.id === selected);
@@ -362,10 +384,9 @@ function GenericAlignContent({
       <div className="overflow-auto border border-border rounded-xl bg-white">
         <div
           ref={containerRef}
-          className="relative select-none"
+          className="relative select-none w-full"
           style={{
-            width: "100%",
-            aspectRatio: `${PAGE_W} / ${PAGE_H}`,
+            aspectRatio: `${pageWidth} / ${pageHeight}`,
             maxWidth: PAGE_W,
           }}
           onClick={() => setSelected(null)}
@@ -389,8 +410,8 @@ function GenericAlignContent({
                 onTouchStart={(e) => handleTouchStart(e, f.id)}
                 className="absolute cursor-move touch-none"
                 style={{
-                  top: `${(f.y / PAGE_H) * 100}%`,
-                  left: `${(f.x / PAGE_W) * 100}%`,
+                  top: `${(f.y / pageHeight) * 100}%`,
+                  left: `${(f.x / pageWidth) * 100}%`,
                   fontSize: `${f.fontSize * scale}px`,
                   fontWeight: "bold",
                   fontFamily: getCnhFont(f.id),
@@ -406,8 +427,8 @@ function GenericAlignContent({
                   letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : f.rotate ? `${1.2 * scale}px` : undefined,
                   lineHeight: f.id === "mrz" ? 1.6 : undefined,
                   ...(isBox ? {
-                    width: `${((f.w || 80) / PAGE_W) * 100}%`,
-                    height: `${((f.h || 80) / PAGE_H) * 100}%`,
+                    width: `${(((f.w || 80) / pageWidth) * 100).toFixed(4)}%`,
+                    height: `${(((f.h || 80) / pageHeight) * 100).toFixed(4)}%`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
