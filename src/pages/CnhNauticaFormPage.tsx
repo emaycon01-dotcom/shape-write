@@ -104,7 +104,6 @@ export default function CnhNauticaFormPage() {
       inscricao: generateInscricao(),
       localEmissao: "CAPITANIA DOS PORTOS DE SÃO PAULO",
       validade: format(validade, "dd/MM/yyyy"),
-      fotoBase64: form.fotoBase64,
     });
     toast({ title: "Formulário preenchido com dados de teste!" });
   };
