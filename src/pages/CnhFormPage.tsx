@@ -96,7 +96,14 @@ function addYears(dateStr: string, years: number) {
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 
 export default function CnhFormPage() {
-  const [form, setForm] = useState<CnhFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<CnhFormData>(() => {
+    if (editState?.editFormData) {
+      return { ...initial, ...editState.editFormData } as CnhFormData;
+    }
+    return initial;
+  });
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [assinatura, setAssinatura] = useState<File | null>(null);
