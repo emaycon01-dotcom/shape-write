@@ -92,18 +92,18 @@ serve(async (req) => {
 
       if (tipo === "operador-maquinas") {
         defaultVersoPositions = {
-          nome: { x: 99, y: 55, fontSize: 8 },
-          rg_orgao_uf: { x: 101, y: 69, fontSize: 7 },
-          cpf: { x: 100, y: 84, fontSize: 7 },
-          nascimento: { x: 168, y: 84, fontSize: 7 },
-          categoria: { x: 192, y: 131, fontSize: 8 },
+          nome: { x: 102, y: 47, fontSize: 8 },
+          rg_orgao_uf: { x: 119, y: 62, fontSize: 7 },
+          cpf: { x: 104, y: 76, fontSize: 7 },
+          nascimento: { x: 167, y: 77, fontSize: 7 },
+          categoria: { x: 197, y: 128, fontSize: 8 },
           filiacao: { x: 113, y: 102, fontSize: 7 },
           equipamento: { x: 105, y: 117, fontSize: 7 },
-          nivel: { x: 196, y: 117, fontSize: 7 },
+          nivel: { x: 200, y: 114, fontSize: 7 },
           emissao: { x: 96, y: 132, fontSize: 7 },
           validade: { x: 139, y: 132, fontSize: 7 },
         };
-        rawPhoto = { x: 36, y: 48, w: 50, h: 60 };
+        rawPhoto = { x: 32, y: 47, w: 50, h: 60 };
       } else {
         defaultVersoPositions = {
           cpf: { x: 42, y: 20, fontSize: 8 },
