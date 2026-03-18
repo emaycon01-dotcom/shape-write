@@ -170,7 +170,7 @@ export default function CedulaPoliciaPreviewPage() {
       setPdfDataUrl(pdfUrl);
       deductCredit();
       deductCredit();
-      addDocument({
+      await addDocument({
         name: formData.nomeCompleto || "",
         identification: formData.matricula || "",
         date: new Date().toLocaleDateString("pt-BR"),

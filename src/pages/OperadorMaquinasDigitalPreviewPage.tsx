@@ -215,7 +215,7 @@ export default function OperadorMaquinasDigitalPreviewPage() {
       setPdfDataUrl(pdfUrl);
       deductCredit();
       deductCredit();
-      addDocument({
+      await addDocument({
         name: formData.nomeCompleto || "",
         identification: formData.numeroRegistro || "",
         date: new Date().toLocaleDateString("pt-BR"),

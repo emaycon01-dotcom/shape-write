@@ -169,7 +169,7 @@ export default function CnhNauticaPreviewPage() {
       if (!pdfUrl) throw new Error("Falha ao gerar PDF");
       setPdfDataUrl(pdfUrl);
       deductCredit(1.5);
-      addDocument({
+      await addDocument({
         name: formData.nomeCompleto || "",
         identification: formData.inscricao || "",
         date: new Date().toLocaleDateString("pt-BR"),
