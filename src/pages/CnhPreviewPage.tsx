@@ -3,8 +3,22 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock } from "lucide-react";
+import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+function base64ToBlob(base64DataUrl: string): Blob | null {
+  try {
+    const parts = base64DataUrl.split(",");
+    const mime = parts[0]?.match(/:(.*?);/)?.[1] || "application/pdf";
+    const raw = atob(parts[1]);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  } catch (e) {
+    console.error("Failed to convert base64 to blob:", e);
+    return null;
+  }
+}
 
 export default function CnhPreviewPage() {
   const location = useLocation();
@@ -21,17 +35,32 @@ export default function CnhPreviewPage() {
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState(false);
 
   useEffect(() => {
     if (!pdfBase64) return;
-    let url: string;
-    fetch(pdfBase64)
-      .then((r) => r.blob())
-      .then((blob) => {
+    
+    let url: string | null = null;
+    
+    try {
+      // Convert base64 data URL directly to blob (more reliable than fetch)
+      const blob = base64ToBlob(pdfBase64);
+      if (blob && blob.size > 0) {
         url = URL.createObjectURL(blob);
         setBlobUrl(url);
-      });
-    return () => { if (url) URL.revokeObjectURL(url); };
+        setPdfError(false);
+      } else {
+        console.error("PDF blob is empty");
+        setPdfError(true);
+      }
+    } catch (e) {
+      console.error("Failed to create PDF blob URL:", e);
+      setPdfError(true);
+    }
+
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
   }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
@@ -87,37 +116,43 @@ export default function CnhPreviewPage() {
     }
   };
 
+  const getPdfBlob = (): Blob | null => {
+    return base64ToBlob(pdfBase64);
+  };
+
   const handleShare = async () => {
     try {
-      const blob = await fetch(pdfBase64).then((r) => r.blob());
+      const blob = getPdfBlob();
+      if (!blob) throw new Error("Failed to create PDF blob");
       const file = new File([blob], "documento-cnh.pdf", { type: "application/pdf" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: "Documento CNH" });
       } else {
-        const link = document.createElement("a");
-        link.href = pdfBase64;
-        link.download = "documento-cnh.pdf";
-        link.click();
-        toast({ title: "PDF baixado com sucesso!" });
+        handleDownload();
       }
     } catch {
       toast({ title: "Erro ao compartilhar", variant: "destructive" });
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     try {
-      const blob = await fetch(pdfBase64).then((r) => r.blob());
-      const blobUrl = URL.createObjectURL(blob);
+      const blob = getPdfBlob();
+      if (!blob) throw new Error("Failed to create PDF blob");
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = blobUrl;
+      link.href = url;
       link.download = "documento-cnh.pdf";
       link.click();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
       toast({ title: "PDF baixado com sucesso!" });
     } catch {
       toast({ title: "Erro ao baixar PDF", variant: "destructive" });
     }
+  };
+
+  const handleRetry = () => {
+    navigate("/dashboard/documents/cnh");
   };
 
   return (
@@ -140,14 +175,33 @@ export default function CnhPreviewPage() {
 
       {/* PDF Preview area */}
       <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
-        <iframe
-          src={blobUrl || ""}
-          className="w-full h-full border-0"
-          title="PDF Preview"
-        />
+        {pdfError ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
+            <AlertTriangle className="w-12 h-12 text-destructive" />
+            <p className="text-foreground font-semibold">Erro ao carregar o preview do PDF</p>
+            <p className="text-muted-foreground text-sm">
+              O PDF foi gerado mas não pôde ser exibido no navegador. 
+              Você ainda pode gerar e baixar o documento.
+            </p>
+            <Button variant="outline" onClick={handleRetry} className="gap-1.5">
+              <RefreshCw className="w-4 h-4" /> Tentar novamente
+            </Button>
+          </div>
+        ) : blobUrl ? (
+          <iframe
+            src={blobUrl}
+            className="w-full h-full border-0 bg-white"
+            title="PDF Preview"
+            style={{ backgroundColor: "#ffffff" }}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        )}
 
         {/* Watermark overlay - only when not paid */}
-        {!paid && (
+        {!paid && !pdfError && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden select-none flex items-center justify-center">
             <div className="absolute inset-0" style={{
               background: "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.06) 80px, hsl(var(--destructive) / 0.06) 82px)",
