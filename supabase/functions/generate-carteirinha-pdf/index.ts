@@ -79,22 +79,22 @@ serve(async (req) => {
       const frentePage = pages[1] ?? pages[0];
 
       const defaultVersoPositions: Record<string, { x: number; y: number; fontSize: number }> = {
-        cpf: { x: 39, y: 20, fontSize: 8 },
-        tipo_sanguineo: { x: 165, y: 22, fontSize: 8 },
+        cpf: { x: 42, y: 20, fontSize: 8 },
+        tipo_sanguineo: { x: 163, y: 25, fontSize: 8 },
         rg: { x: 42, y: 47, fontSize: 8 },
-        data_expedicao_1: { x: 148, y: 48, fontSize: 8 },
+        data_expedicao_1: { x: 147, y: 51, fontSize: 8 },
       };
 
       const defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }> = {
         numero_registro: { x: 81, y: 37, fontSize: 8 },
         data_expedicao_2: { x: 161, y: 37, fontSize: 8 },
         validade: { x: 169, y: 53, fontSize: 5.2 },
-        nome: { x: 94, y: 121, fontSize: 8 },
+        nome: { x: 97, y: 118, fontSize: 8 },
       };
 
       let rawVersoPositions = { ...defaultVersoPositions };
       let rawFrentePositions = { ...defaultFrentePositions };
-      let rawPhoto = { x: 20, y: 82, w: 45, h: 50 };
+      let rawPhoto = { x: 20, y: 79, w: 45, h: 50 };
 
       const applyPositions = (
         source: Record<string, any> | null | undefined,
