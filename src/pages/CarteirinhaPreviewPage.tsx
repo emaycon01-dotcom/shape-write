@@ -5,8 +5,27 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Share2, ArrowLeft, Loader2, CreditCard, Lock, Download, IdCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PDFDocument } from "pdf-lib";
 
 const CREDIT_COST = 1.5;
+
+async function splitPdfPages(pdfBase64: string): Promise<string[]> {
+  const raw = pdfBase64.replace(/^data:application\/pdf;base64,/, "");
+  const bytes = Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
+  const srcDoc = await PDFDocument.load(bytes);
+  const pageCount = srcDoc.getPageCount();
+  const urls: string[] = [];
+
+  for (let i = 0; i < pageCount; i++) {
+    const newDoc = await PDFDocument.create();
+    const [copied] = await newDoc.copyPages(srcDoc, [i]);
+    newDoc.addPage(copied);
+    const newBytes = await newDoc.save();
+    const blob = new Blob([newBytes], { type: "application/pdf" });
+    urls.push(URL.createObjectURL(blob));
+  }
+  return urls;
+}
 
 export default function CarteirinhaPreviewPage() {
   const location = useLocation();
@@ -23,9 +42,11 @@ export default function CarteirinhaPreviewPage() {
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [pageUrls, setPageUrls] = useState<string[]>([]);
 
   const tipo = formData?.tipo || "bombeiro";
   const tipoLabel = formData?.tipoLabel || "Carteirinha";
+  const isBombeiroMilitar = tipo === "bombeiro-militar";
 
   const fileName = useMemo(() => {
     const safeName = (formData?.nomeCompleto || tipo)
@@ -37,17 +58,25 @@ export default function CarteirinhaPreviewPage() {
     return `${safeName || "carteirinha"}.pdf`;
   }, [formData, tipo]);
 
-  // Convert base64 to blob URL for iframe
+  // Convert base64 to blob URL(s)
   useEffect(() => {
     if (!pdfBase64) return;
-    fetch(pdfBase64)
-      .then((r) => r.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        setBlobUrl(url);
+
+    if (isBombeiroMilitar) {
+      splitPdfPages(pdfBase64).then((urls) => {
+        setPageUrls(urls);
       });
+    } else {
+      fetch(pdfBase64)
+        .then((r) => r.blob())
+        .then((blob) => {
+          setBlobUrl(URL.createObjectURL(blob));
+        });
+    }
+
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl);
+      pageUrls.forEach((u) => URL.revokeObjectURL(u));
     };
   }, [pdfBase64]);
 
