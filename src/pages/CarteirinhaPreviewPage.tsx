@@ -189,8 +189,48 @@ export default function CarteirinhaPreviewPage() {
           : `Confira o preview abaixo. Para gerar o documento final, clique em Gerar (${CREDIT_COST} créditos).`}
       </p>
 
-      {/* PDF Preview */}
-      {blobUrl && (
+      {/* PDF Preview - Bombeiro Militar (frente + verso) */}
+      {isBombeiroMilitar && pageUrls.length > 0 && (
+        <div className="space-y-4 mb-6">
+          {pageUrls.map((url, idx) => (
+            <div key={idx} className="relative glass rounded-xl overflow-hidden" style={{ height: "35vh" }}>
+              <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-xs font-semibold text-foreground px-2 py-1 rounded">
+                {idx === 0 ? "Verso" : "Frente"}
+              </div>
+              <iframe
+                src={url}
+                className="w-full h-full border-0"
+                title={`PDF Preview - ${idx === 0 ? "Verso" : "Frente"}`}
+              />
+              {!paid && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden select-none flex items-center justify-center">
+                  <div className="absolute inset-0" style={{
+                    background: "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.06) 80px, hsl(var(--destructive) / 0.06) 82px)",
+                  }} />
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="absolute text-destructive/20 font-bold whitespace-nowrap select-none"
+                      style={{
+                        fontSize: "14px",
+                        transform: `rotate(-35deg)`,
+                        top: `${10 + (i % 3) * 30}%`,
+                        left: `${-10 + Math.floor(i / 3) * 50}%`,
+                        letterSpacing: "2px",
+                      }}
+                    >
+                      PROPRIEDADE BELLARUS NÃO COPIE
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* PDF Preview - outros tipos */}
+      {!isBombeiroMilitar && blobUrl && (
         <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
           <iframe
             src={blobUrl}
