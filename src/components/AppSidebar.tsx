@@ -6,14 +6,10 @@ import {
   FileText,
   History,
   LogOut,
-  Settings,
   Users,
   CreditCard,
-  Send,
-  BarChart3,
   Crown,
   Wrench,
-  Download,
   PenTool,
   MapPin,
   Blend,
@@ -22,6 +18,12 @@ import {
   Palette,
   ImageIcon,
   IdCard,
+  Eye,
+  CheckCircle,
+  AlertTriangle,
+  DollarSign,
+  Calculator,
+  ShieldBan,
 } from "lucide-react";
 import {
   Sidebar,
@@ -53,15 +55,25 @@ const toolItems = [
   { title: "Mesclagem de Rosto", url: "/dashboard/ferramentas/mesclagem-rosto", icon: Blend },
 ];
 
-const adminItems = [
-  { title: "Revendedores", url: "/dashboard/revendedores", icon: Users },
-  { title: "Transferir", url: "/dashboard/transferir", icon: Send },
-  { title: "Métricas", url: "/dashboard/metricas", icon: BarChart3 },
-  { title: "Alinhamento", url: "/dashboard/template-align", icon: Wrench },
-  { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
+const gerenciamentoItems = [
+  { title: "Usuários", url: "/dashboard/admin/usuarios", icon: Users },
+  { title: "Gerações (Prévias)", url: "/dashboard/admin/geracoes", icon: Eye },
+  { title: "Concluídos", url: "/dashboard/admin/concluidos", icon: CheckCircle },
+  { title: "Cancelados / Falhas", url: "/dashboard/admin/cancelados", icon: AlertTriangle },
 ];
 
+const financeiroItems = [
+  { title: "Visão Geral & Depósitos", url: "/dashboard/admin/financeiro", icon: DollarSign },
+];
 
+const reparticaoItems = [
+  { title: "Repartição de Equipe", url: "/dashboard/admin/reparticao", icon: Calculator },
+];
+
+const adminExtras = [
+  { title: "Alinhamento", url: "/dashboard/template-align", icon: Wrench },
+  { title: "Revendedores", url: "/dashboard/revendedores", icon: Users },
+];
 
 type ThemeMode = "default" | "dark-blue" | "light";
 
@@ -89,12 +101,30 @@ export function AppSidebar() {
     }
   };
 
-  // Apply saved theme on mount
   useState(() => {
     if (theme !== "default") {
       document.documentElement.classList.add(`theme-${theme}`);
     }
   });
+
+  const isAdmin = user?.role === "admin";
+
+  const renderMenuItems = (items: typeof commonItems) =>
+    items.map((item) => (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild>
+          <NavLink
+            to={item.url}
+            end={item.url === "/dashboard"}
+            className="hover:bg-secondary/50"
+            activeClassName="bg-secondary text-primary font-medium"
+          >
+            <item.icon className="mr-2 h-4 w-4" />
+            {!collapsed && <span>{item.title}</span>}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    ));
 
   return (
     <Sidebar collapsible="icon">
@@ -110,31 +140,12 @@ export function AppSidebar() {
         )}
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
-            MENU PRINCIPAL
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">MENU PRINCIPAL</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commonItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className="hover:bg-secondary/50"
-                      activeClassName="bg-secondary text-primary font-medium"
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {renderMenuItems(commonItems)}
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setSupportOpen(true)}
-                  className="hover:bg-secondary/50 cursor-pointer"
-                >
+                <SidebarMenuButton onClick={() => setSupportOpen(true)} className="hover:bg-secondary/50 cursor-pointer">
                   <Headphones className="mr-2 h-4 w-4" />
                   {!collapsed && <span>Suporte</span>}
                 </SidebarMenuButton>
@@ -144,26 +155,9 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
-            FERRAMENTAS
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">FERRAMENTAS</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {toolItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className="hover:bg-secondary/50"
-                      activeClassName="bg-secondary text-primary font-medium"
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <SidebarMenu>{renderMenuItems(toolItems)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -178,11 +172,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/dashboard/cnh-fisica/todos"
-                        className="hover:bg-secondary/50"
-                        activeClassName="bg-secondary text-primary font-medium"
-                      >
+                      <NavLink to="/dashboard/cnh-fisica/todos" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
                         <MapPin className="mr-2 h-4 w-4" />
                         {!collapsed && <span>CNH Todos os Estados</span>}
                       </NavLink>
@@ -190,11 +180,7 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/dashboard/documentos-fisicos/carteirinhas"
-                        className="hover:bg-secondary/50"
-                        activeClassName="bg-secondary text-primary font-medium"
-                      >
+                      <NavLink to="/dashboard/documentos-fisicos/carteirinhas" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
                         <IdCard className="mr-2 h-4 w-4" />
                         {!collapsed && <span>Carteirinhas</span>}
                       </NavLink>
@@ -217,30 +203,65 @@ export function AppSidebar() {
           </Collapsible>
         </SidebarGroup>
 
-        {user?.role === "admin" && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">
-              ADMINISTRAÇÃO
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
+        {/* Admin sections */}
+        {isAdmin && (
+          <>
+            <SidebarGroup>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
+                  GERENCIAMENTO
+                  <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>{renderMenuItems(gerenciamentoItems)}</SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
+                  FINANCEIRO
+                  <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>{renderMenuItems(financeiroItems)}</SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>{renderMenuItems(reparticaoItems)}</SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>{renderMenuItems(adminExtras)}</SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Bloqueados - near footer */}
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        className="hover:bg-secondary/50"
-                        activeClassName="bg-secondary text-primary font-medium"
-                      >
-                        <item.icon className="mr-2 h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
+                      <NavLink to="/dashboard/admin/bloqueados" className="hover:bg-destructive/10" activeClassName="bg-destructive/10 text-destructive font-medium">
+                        <ShieldBan className="mr-2 h-4 w-4 text-destructive" />
+                        {!collapsed && <span className="text-destructive">Bloqueados</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         )}
 
         <div className="mt-auto p-4 space-y-3">
@@ -257,13 +278,9 @@ export function AppSidebar() {
                     onClick={() => applyTheme(opt.value)}
                     title={opt.label}
                     className={`w-7 h-7 rounded-full border-2 transition-all ${
-                      theme === opt.value
-                        ? "border-primary scale-110"
-                        : "border-border hover:border-muted-foreground"
+                      theme === opt.value ? "border-primary scale-110" : "border-border hover:border-muted-foreground"
                     }`}
-                    style={{
-                      background: `linear-gradient(135deg, ${opt.colors[0]} 50%, ${opt.colors[1]} 50%)`,
-                    }}
+                    style={{ background: `linear-gradient(135deg, ${opt.colors[0]} 50%, ${opt.colors[1]} 50%)` }}
                   />
                 ))}
               </div>
@@ -272,10 +289,7 @@ export function AppSidebar() {
           {!collapsed && user && (
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           )}
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 text-sm text-destructive hover:text-destructive/80 transition-colors"
-          >
+          <button onClick={logout} className="flex items-center gap-2 text-sm text-destructive hover:text-destructive/80 transition-colors">
             <LogOut className="w-4 h-4" />
             {!collapsed && "Sair"}
           </button>
