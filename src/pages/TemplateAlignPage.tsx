@@ -712,7 +712,7 @@ function OperadorMaquinasAlignContent() {
           const [copied] = await newDoc.copyPages(srcDoc, [i]);
           newDoc.addPage(copied);
           const pdfBytes = await newDoc.save();
-          const blob = new Blob([pdfBytes], { type: "application/pdf" });
+          const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
           const url = URL.createObjectURL(blob);
           if (i === 0) setVersoImgUrl(url);
           else setFrenteImgUrl(url);
