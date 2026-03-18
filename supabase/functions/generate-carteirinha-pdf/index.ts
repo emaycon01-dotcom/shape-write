@@ -96,17 +96,17 @@ serve(async (req) => {
 
       if (tipo === "seguranca-escolar") {
         defaultFrentePositions = {
-          nome: { x: 70, y: 55, fontSize: 6 },
-          cpf: { x: 70, y: 68, fontSize: 5 },
-          numero_registro: { x: 70, y: 30, fontSize: 6 },
-          data_expedicao: { x: 160, y: 30, fontSize: 5 },
-          nascimento: { x: 70, y: 110, fontSize: 5 },
-          termino_curso: { x: 160, y: 110, fontSize: 5 },
+          nome: { x: 12, y: 64, fontSize: 6 },
+          cpf: { x: 11, y: 88, fontSize: 5 },
+          numero_registro: { x: 61, y: 32, fontSize: 6 },
+          data_expedicao: { x: 182, y: 33, fontSize: 5 },
+          nascimento: { x: 19, y: 114, fontSize: 5 },
+          termino_curso: { x: 113, y: 114, fontSize: 5 },
         };
         defaultVersoPositions = {
-          rg: { x: 100, y: 70, fontSize: 8 },
+          rg: { x: 178, y: 20, fontSize: 6 },
         };
-        rawPhoto = { x: 20, y: 30, w: 40, h: 50 };
+        rawPhoto = { x: 12, y: 9, w: 40, h: 50 };
       } else if (tipo === "operador-maquinas") {
         defaultVersoPositions = {
           nome: { x: 109, y: 46, fontSize: 8 },
