@@ -10,16 +10,27 @@ export interface Document {
   description: string;
   additionalInfo: string;
   createdAt: string;
+  expiresAt: string;
   status: "ativo" | "revogado" | "expirado";
   userId: string;
   pdfUrl?: string;
 }
 
+export function isDocumentExpired(doc: Document): boolean {
+  return new Date(doc.expiresAt) <= new Date();
+}
+
+export function daysUntilExpiry(doc: Document): number {
+  const diff = new Date(doc.expiresAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
 interface DocumentContextType {
   documents: Document[];
   loading: boolean;
-  addDocument: (doc: Omit<Document, "id" | "createdAt" | "status"> & { pdfDataUrl?: string }) => Promise<Document>;
+  addDocument: (doc: Omit<Document, "id" | "createdAt" | "status" | "expiresAt"> & { pdfDataUrl?: string }) => Promise<Document>;
   getDocument: (id: string) => Document | undefined;
+  renewDocument: (id: string) => Promise<void>;
   refreshDocuments: () => Promise<void>;
 }
 
@@ -61,6 +72,7 @@ function mapRow(row: any): Document {
     description: row.description,
     additionalInfo: row.additional_info,
     createdAt: row.created_at,
+    expiresAt: row.expires_at,
     status: row.status as Document["status"],
     userId: row.user_id,
     pdfUrl: row.pdf_url || undefined,
@@ -97,10 +109,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   }, [fetchDocuments]);
 
   const addDocument = useCallback(
-    async (doc: Omit<Document, "id" | "createdAt" | "status"> & { pdfDataUrl?: string }): Promise<Document> => {
+    async (doc: Omit<Document, "id" | "createdAt" | "status" | "expiresAt"> & { pdfDataUrl?: string }): Promise<Document> => {
       const docId = crypto.randomUUID().split("-")[0].toUpperCase();
 
-      // Upload PDF to storage if provided
       let pdfUrl: string | null = null;
       if (doc.pdfDataUrl) {
         pdfUrl = await uploadPdfToStorage(doc.pdfDataUrl, docId);
@@ -127,11 +138,11 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("Error inserting document:", error);
-        // Fallback: return local doc
         const fallback: Document = {
           ...doc,
           id: docId,
           createdAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
           status: "ativo",
           pdfUrl: pdfUrl || undefined,
         };
@@ -146,13 +157,31 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const renewDocument = useCallback(async (id: string) => {
+    const newExpiresAt = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { error } = await supabase
+      .from("documents")
+      .update({ expires_at: newExpiresAt, status: "ativo" })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error renewing document:", error);
+      throw error;
+    }
+
+    setDocuments((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, expiresAt: newExpiresAt, status: "ativo" as const } : d))
+    );
+  }, []);
+
   const getDocument = useCallback(
     (id: string) => documents.find((d) => d.id === id),
     [documents]
   );
 
   return (
-    <DocumentContext.Provider value={{ documents, loading, addDocument, getDocument, refreshDocuments: fetchDocuments }}>
+    <DocumentContext.Provider value={{ documents, loading, addDocument, getDocument, renewDocument, refreshDocuments: fetchDocuments }}>
       {children}
     </DocumentContext.Provider>
   );
