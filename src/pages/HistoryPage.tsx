@@ -19,6 +19,7 @@ import {
 
 const EDIT_COST = 0.3;
 const RENEW_COST = 1;
+const HISTORY_EDIT_DOC_TYPES_WITH_LARGE_PAYLOAD = new Set(["cnh"]);
 
 export default function HistoryPage() {
   const { user, deductCredit } = useAuth();
