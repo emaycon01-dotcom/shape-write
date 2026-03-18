@@ -600,7 +600,7 @@ const bombeiroMilitarFrenteFields: FieldDef[] = [
   { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 97, y: 118, fontSize: 8 },
 ];
 
-const operadorMaquinasFrenteFields: FieldDef[] = [
+const operadorMaquinasVersoFields: FieldDef[] = [
   { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 15, y: 40, fontSize: 4, w: 50, h: 60, color: "#999" },
   { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 80, y: 50, fontSize: 8 },
   { id: "rg_orgao_uf", label: "RG/Órgão/UF", sampleText: "12.345.678 SSP SP", x: 80, y: 65, fontSize: 7 },
@@ -608,9 +608,6 @@ const operadorMaquinasFrenteFields: FieldDef[] = [
   { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 80, y: 95, fontSize: 7 },
   { id: "categoria", label: "Categoria", sampleText: "D", x: 80, y: 110, fontSize: 8 },
   { id: "filiacao", label: "Filiação", sampleText: "SOUZA E SOUZINHA", x: 80, y: 125, fontSize: 7 },
-];
-
-const operadorMaquinasVersoFields: FieldDef[] = [
   { id: "equipamento", label: "Equipamento", sampleText: "Retroescavadeira", x: 30, y: 30, fontSize: 7 },
   { id: "nivel", label: "Nível", sampleText: "2", x: 30, y: 50, fontSize: 7 },
   { id: "emissao", label: "Emissão", sampleText: "01/06/2024", x: 30, y: 70, fontSize: 7 },
@@ -704,103 +701,57 @@ const OPERADOR_MAQUINAS_W = 595;
 const OPERADOR_MAQUINAS_H = 842;
 
 function OperadorMaquinasAlignContent() {
-  const { toast } = useToast();
-  const [frenteUrl, setFrenteUrl] = useState<string | null>(null);
   const [versoUrl, setVersoUrl] = useState<string | null>(null);
   const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: OPERADOR_MAQUINAS_W, h: OPERADOR_MAQUINAS_H });
 
   useEffect(() => {
+    let objectUrl: string | null = null;
+
     (async () => {
       try {
         const res = await fetch("/assets/template-carteira-operador-maquinas.pdf");
         const arrayBuffer = await res.arrayBuffer();
         const { PDFDocument } = await import("pdf-lib");
         const srcDoc = await PDFDocument.load(arrayBuffer);
-        const pageCount = srcDoc.getPageCount();
+        const page = srcDoc.getPage(0);
+        const { width, height } = page.getSize();
 
-        for (let i = 0; i < Math.min(pageCount, 2); i++) {
-          const newDoc = await PDFDocument.create();
-          const [copied] = await newDoc.copyPages(srcDoc, [i]);
-          newDoc.addPage(copied);
-          const pdfBytes = await newDoc.save();
-          const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
-          const url = URL.createObjectURL(blob);
+        setPdfPageSize({ w: Math.round(width), h: Math.round(height) });
 
-          // Get page dimensions
-          const page = srcDoc.getPage(i);
-          const { width, height } = page.getSize();
-
-          if (i === 0) {
-            setVersoUrl(url);
-          } else {
-            setFrenteUrl(url);
-            setPdfPageSize({ w: Math.round(width), h: Math.round(height) });
-          }
-        }
+        const newDoc = await PDFDocument.create();
+        const [copied] = await newDoc.copyPages(srcDoc, [0]);
+        newDoc.addPage(copied);
+        const pdfBytes = await newDoc.save();
+        const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
+        objectUrl = URL.createObjectURL(blob);
+        setVersoUrl(objectUrl);
       } catch (e) {
         console.error("Error loading operador maquinas template:", e);
       }
     })();
-  }, []);
 
-  const handleCopyBoth = () => {
-    const frenteRaw = localStorage.getItem("carteirinha-operador-maquinas-frente-field-positions");
-    const versoRaw = localStorage.getItem("carteirinha-operador-maquinas-verso-field-positions");
-    const combined = {
-      frente: frenteRaw ? JSON.parse(frenteRaw) : null,
-      verso: versoRaw ? JSON.parse(versoRaw) : null,
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-    navigator.clipboard.writeText(JSON.stringify(combined, null, 2));
-    toast({ title: "Coordenadas copiadas", description: "Frente e verso copiados para a área de transferência." });
-  };
+  }, []);
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={handleCopyBoth}>
-          <Copy className="w-4 h-4 mr-2" /> Copiar Frente + Verso
-        </Button>
-      </div>
-      <Tabs defaultValue="frente" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="frente">FRENTE</TabsTrigger>
-          <TabsTrigger value="verso">VERSO</TabsTrigger>
-        </TabsList>
-        <TabsContent value="frente">
-          {frenteUrl ? (
-            <GenericAlignContent
-              templateUrl={frenteUrl}
-              templateIsPdf
-              storageKey="carteirinha-operador-maquinas-frente-field-positions"
-              title="Alinhamento — Operador de Máquinas (Frente)"
-              fields={operadorMaquinasFrenteFields}
-              pageWidth={pdfPageSize.w}
-              pageHeight={pdfPageSize.h}
-            />
-          ) : (
-            <div className="flex items-center justify-center py-10">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-        </TabsContent>
-        <TabsContent value="verso">
-          {versoUrl ? (
-            <GenericAlignContent
-              templateUrl={versoUrl}
-              templateIsPdf
-              storageKey="carteirinha-operador-maquinas-verso-field-positions"
-              title="Alinhamento — Operador de Máquinas (Verso)"
-              fields={operadorMaquinasVersoFields}
-              pageWidth={pdfPageSize.w}
-              pageHeight={pdfPageSize.h}
-            />
-          ) : (
-            <div className="flex items-center justify-center py-10">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      {versoUrl ? (
+        <GenericAlignContent
+          templateUrl={versoUrl}
+          templateIsPdf
+          storageKey="carteirinha-operador-maquinas-verso-field-positions"
+          title="Alinhamento — Operador de Máquinas (Verso)"
+          fields={operadorMaquinasVersoFields}
+          pageWidth={pdfPageSize.w}
+          pageHeight={pdfPageSize.h}
+        />
+      ) : (
+        <div className="flex items-center justify-center py-10">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
     </div>
   );
 }
