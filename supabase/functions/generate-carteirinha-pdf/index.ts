@@ -83,7 +83,7 @@ serve(async (req) => {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    if (tipo === "bombeiro-militar" || tipo === "operador-maquinas") {
+    if (tipo === "bombeiro-militar" || tipo === "operador-maquinas" || tipo === "seguranca-escolar") {
       const versoPage = pages[0];
       const frentePage = pages[1] ?? pages[0];
 
