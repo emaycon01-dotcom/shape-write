@@ -166,7 +166,7 @@ export default function ExameToxicologicoFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documents/exame-toxicologico/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
