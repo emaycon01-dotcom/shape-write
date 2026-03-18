@@ -109,7 +109,7 @@ export default function CpfFisicoFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documentos-fisicos/carteirinhas/cpf-fisico/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
