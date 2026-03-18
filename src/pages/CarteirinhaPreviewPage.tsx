@@ -230,7 +230,7 @@ export default function CarteirinhaPreviewPage() {
       )}
 
       {/* PDF Preview - outros tipos */}
-      {!isBombeiroMilitar && blobUrl && (
+      {!isMultiPage && blobUrl && (
         <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
           <iframe
             src={blobUrl}

@@ -31,7 +31,7 @@ const carteirinhas = [
     name: "Carteira Nacional de Operador de Máquinas Pesadas",
     description: "Carteira profissional de Operador de Máquinas Pesadas física",
     icon: IdCard,
-    route: "",
+    route: "/dashboard/documentos-fisicos/carteirinhas/operador-maquinas",
     credits: 2,
   },
   {
