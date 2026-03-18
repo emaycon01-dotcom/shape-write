@@ -75,7 +75,6 @@ export default function ChaAmadorFormPage() {
   });
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { toast } = useToast();
 
   const set = (field: keyof ChaFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((p) => ({ ...p, [field]: e.target.value }));
