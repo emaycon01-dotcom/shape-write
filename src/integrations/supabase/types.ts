@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_users: {
+        Row: {
+          blocked_at: string
+          id: string
+          reason: string
+          status: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          blocked_at?: string
+          id?: string
+          reason?: string
+          status?: string
+          user_email?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          blocked_at?: string
+          id?: string
+          reason?: string
+          status?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      deposits: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string
+          status: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          status?: string
+          user_email?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          status?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           additional_info: string
@@ -59,6 +122,120 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_logs: {
+        Row: {
+          created_at: string
+          document_type: string
+          error_message: string | null
+          id: string
+          stage: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          error_message?: string | null
+          id?: string
+          stage?: string
+          user_email?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          error_message?: string | null
+          id?: string
+          stage?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          credits: number
+          email: string
+          id: string
+          name: string
+          plano: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          email?: string
+          id?: string
+          name?: string
+          plano?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          email?: string
+          id?: string
+          name?: string
+          plano?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recharge_logs: {
+        Row: {
+          amount: number
+          created_at: string
+          credits_used: number
+          id: string
+          phone_number: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          credits_used?: number
+          id?: string
+          phone_number?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          credits_used?: number
+          id?: string
+          phone_number?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          cargo: Database["public"]["Enums"]["app_cargo"]
+          id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          cargo: Database["public"]["Enums"]["app_cargo"]
+          id?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          cargo?: Database["public"]["Enums"]["app_cargo"]
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -67,7 +244,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_cargo:
+        | "dealer"
+        | "master"
+        | "diamond"
+        | "sub_gerente"
+        | "gerente"
+        | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -194,6 +377,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_cargo: [
+        "dealer",
+        "master",
+        "diamond",
+        "sub_gerente",
+        "gerente",
+        "admin",
+      ],
+    },
   },
 } as const
