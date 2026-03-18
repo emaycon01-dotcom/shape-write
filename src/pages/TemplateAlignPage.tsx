@@ -574,17 +574,19 @@ const agenteFinanceiroTextPositions = {
   emergencia2: { x: 429, y: 789 },
 };
 
-// Bombeiro Militar specific fields
-const bombeiroMilitarFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 300, y: 80, fontSize: 4, w: 120, h: 160, color: "#999" },
-  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 100, y: 50, fontSize: 14 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 100, y: 120, fontSize: 14 },
-  { id: "rg", label: "RG", sampleText: "00.000.000", x: 100, y: 210, fontSize: 14 },
-  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 450, y: 120, fontSize: 14 },
-  { id: "data_expedicao_1", label: "Data Expedição 1", sampleText: "01/01/2024", x: 450, y: 210, fontSize: 14 },
-  { id: "data_expedicao_2", label: "Data Expedição 2", sampleText: "01/06/2024", x: 100, y: 350, fontSize: 14 },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 100, y: 300, fontSize: 14 },
-  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 450, y: 300, fontSize: 14 },
+const bombeiroMilitarVersoFields: FieldDef[] = [
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 22, y: 17, fontSize: 5.2 },
+  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 137, y: 17, fontSize: 5.2 },
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 22, y: 43, fontSize: 5.2 },
+  { id: "data_expedicao_1", label: "Data de Expedição", sampleText: "01/06/2024", x: 139, y: 43, fontSize: 5.2 },
+];
+
+const bombeiroMilitarFrenteFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 12, y: 61, fontSize: 4, w: 48, h: 53, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 74, y: 34, fontSize: 5.2 },
+  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 153, y: 34, fontSize: 5.2 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 170, y: 50, fontSize: 5.2 },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 64, y: 103, fontSize: 5.6 },
 ];
 
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
@@ -600,14 +602,12 @@ const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
     { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 68, y: 41, fontSize: 4, w: 159, h: 189, color: "#999" },
     ...commonCarteirinhaFields.map(f => ({ ...f, ...agenteFinanceiroTextPositions[f.id as keyof typeof agenteFinanceiroTextPositions] }) as FieldDef),
   ],
-  "bombeiro-militar": bombeiroMilitarFields,
 };
 
 const CARTEIRINHA_TEMPLATES: Record<string, string> = {
   bombeiro: templateBombeiroUrl,
   porteiro: templatePorteiroUrl,
   "agente-financeiro": templateAgenteUrl,
-  "bombeiro-militar": templateBombeiroMilitarUrl,
 };
 
 function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string; tipoLabel: string; storageKey: string }) {
@@ -618,6 +618,37 @@ function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string
       title={`Alinhamento — Carteira de ${tipoLabel}`}
       fields={carteirinhaFieldsByTipo[tipo] || carteirinhaFieldsByTipo["bombeiro"]}
     />
+  );
+}
+
+function BombeiroMilitarAlignContent() {
+  return (
+    <Tabs defaultValue="frente" className="w-full">
+      <TabsList className="mb-4">
+        <TabsTrigger value="frente">FRENTE</TabsTrigger>
+        <TabsTrigger value="verso">VERSO</TabsTrigger>
+      </TabsList>
+      <TabsContent value="frente">
+        <GenericAlignContent
+          templateUrl={templateBombeiroMilitarFrenteUrl}
+          storageKey="carteirinha-bombeiro-militar-frente-field-positions"
+          title="Alinhamento — Carteira de Bombeiro Militar (Frente)"
+          fields={bombeiroMilitarFrenteFields}
+          pageWidth={BOMBEIRO_MILITAR_W}
+          pageHeight={BOMBEIRO_MILITAR_H}
+        />
+      </TabsContent>
+      <TabsContent value="verso">
+        <GenericAlignContent
+          templateUrl={templateBombeiroMilitarVersoUrl}
+          storageKey="carteirinha-bombeiro-militar-verso-field-positions"
+          title="Alinhamento — Carteira de Bombeiro Militar (Verso)"
+          fields={bombeiroMilitarVersoFields}
+          pageWidth={BOMBEIRO_MILITAR_W}
+          pageHeight={BOMBEIRO_MILITAR_H}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }
 
