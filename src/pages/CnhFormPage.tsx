@@ -285,6 +285,8 @@ export default function CnhFormPage() {
     if (ref.current) ref.current.value = "";
   };
 
+  const isEditMode = Boolean(editState?.editDocId);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -333,17 +335,28 @@ export default function CnhFormPage() {
       const pdfResult = data?.pdfBase64 || data?.pdfUrl;
       if (!pdfResult) throw new Error(data?.error || "Nenhuma URL de PDF retornada");
 
-      // Navigate to preview page with the PDF data
-      navigate("/dashboard/documents/cnh/preview", {
-        state: {
-          pdfBase64: pdfResult,
-          formData: bodyData,
-        },
-      });
+      if (isEditMode && editState?.editDocId) {
+        // Update mode: save directly without preview
+        await updateDocument(editState.editDocId, {
+          additionalInfo: JSON.stringify(bodyData),
+          pdfDataUrl: pdfResult.startsWith("data:") ? pdfResult : `data:application/pdf;base64,${pdfResult}`,
+        });
+
+        toast({ title: "Documento atualizado com sucesso!" });
+        navigate("/dashboard/history");
+      } else {
+        // Normal mode: navigate to preview
+        navigate("/dashboard/documents/cnh/preview", {
+          state: {
+            pdfBase64: pdfResult,
+            formData: bodyData,
+          },
+        });
+      }
     } catch (err: any) {
       console.error("Erro ao gerar PDF:", err);
       toast({
-        title: "Erro ao gerar PDF",
+        title: isEditMode ? "Erro ao atualizar documento" : "Erro ao gerar PDF",
         description: err?.message || "Tente novamente.",
         variant: "destructive",
       });
