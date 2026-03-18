@@ -27,7 +27,6 @@ const initial: FormData = {
   inscricao: "",
   localEmissao: "CAPITANIA DOS PORTOS DE SÃO PAULO",
   validade: "",
-  fotoBase64: "",
 };
 
 function formatCpf(value: string): string {
