@@ -575,18 +575,18 @@ const agenteFinanceiroTextPositions = {
 };
 
 const bombeiroMilitarVersoFields: FieldDef[] = [
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 40, y: 23, fontSize: 8 },
-  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 163, y: 28, fontSize: 8 },
-  { id: "rg", label: "RG", sampleText: "00.000.000", x: 41, y: 50, fontSize: 8 },
-  { id: "data_expedicao_1", label: "Data de Expedição", sampleText: "01/06/2024", x: 146, y: 53, fontSize: 8 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 39, y: 20, fontSize: 8 },
+  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 165, y: 22, fontSize: 8 },
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 42, y: 47, fontSize: 8 },
+  { id: "data_expedicao_1", label: "Data de Expedição", sampleText: "01/06/2024", x: 148, y: 48, fontSize: 8 },
 ];
 
 const bombeiroMilitarFrenteFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 18, y: 79, fontSize: 4, w: 48, h: 53, color: "#999" },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 79, y: 40, fontSize: 8 },
-  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 160, y: 40, fontSize: 8 },
-  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 169, y: 57, fontSize: 5.2 },
-  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 95, y: 126, fontSize: 8 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 20, y: 82, fontSize: 4, w: 45, h: 50, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 81, y: 37, fontSize: 8 },
+  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 161, y: 37, fontSize: 8 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 169, y: 53, fontSize: 5.2 },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 94, y: 121, fontSize: 8 },
 ];
 
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
