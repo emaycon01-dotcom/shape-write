@@ -190,6 +190,7 @@ function FieldPropertiesPanel({
 
 function GenericAlignContent({
   templateUrl,
+  templateIsPdf = false,
   storageKey,
   title,
   fields: defaultFieldsProp,
@@ -197,6 +198,7 @@ function GenericAlignContent({
   pageHeight = PAGE_H,
 }: {
   templateUrl: string;
+  templateIsPdf?: boolean;
   storageKey: string;
   title: string;
   fields: FieldDef[];
@@ -391,13 +393,22 @@ function GenericAlignContent({
           }}
           onClick={() => setSelected(null)}
         >
-          <img
-            src={templateUrl}
-            alt="Template"
-            className="absolute inset-0 w-full h-full"
-            style={{ objectFit: "fill" }}
-            draggable={false}
-          />
+          {templateIsPdf ? (
+            <embed
+              src={`${templateUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+              type="application/pdf"
+              className="absolute inset-0 w-full h-full"
+              style={{ border: "none" }}
+            />
+          ) : (
+            <img
+              src={templateUrl}
+              alt="Template"
+              className="absolute inset-0 w-full h-full"
+              style={{ objectFit: "fill" }}
+              draggable={false}
+            />
+          )}
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
@@ -694,11 +705,11 @@ const OPERADOR_MAQUINAS_H = 842;
 
 function OperadorMaquinasAlignContent() {
   const { toast } = useToast();
-  const [frenteImgUrl, setFrenteImgUrl] = useState<string | null>(null);
-  const [versoImgUrl, setVersoImgUrl] = useState<string | null>(null);
+  const [frenteUrl, setFrenteUrl] = useState<string | null>(null);
+  const [versoUrl, setVersoUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: OPERADOR_MAQUINAS_W, h: OPERADOR_MAQUINAS_H });
 
   useEffect(() => {
-    // Convert PDF pages to images for alignment preview
     (async () => {
       try {
         const res = await fetch("/assets/template-carteira-operador-maquinas.pdf");
@@ -714,8 +725,17 @@ function OperadorMaquinasAlignContent() {
           const pdfBytes = await newDoc.save();
           const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
           const url = URL.createObjectURL(blob);
-          if (i === 0) setVersoImgUrl(url);
-          else setFrenteImgUrl(url);
+
+          // Get page dimensions
+          const page = srcDoc.getPage(i);
+          const { width, height } = page.getSize();
+
+          if (i === 0) {
+            setVersoUrl(url);
+          } else {
+            setFrenteUrl(url);
+            setPdfPageSize({ w: Math.round(width), h: Math.round(height) });
+          }
         }
       } catch (e) {
         console.error("Error loading operador maquinas template:", e);
@@ -741,33 +761,44 @@ function OperadorMaquinasAlignContent() {
           <Copy className="w-4 h-4 mr-2" /> Copiar Frente + Verso
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">
-        ⚠️ Para o alinhamento visual, gere o documento com dados de teste e use o preview para ajustar as posições. As coordenadas podem ser editadas manualmente abaixo.
-      </p>
       <Tabs defaultValue="frente" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="frente">FRENTE</TabsTrigger>
           <TabsTrigger value="verso">VERSO</TabsTrigger>
         </TabsList>
         <TabsContent value="frente">
-          <GenericAlignContent
-            templateUrl=""
-            storageKey="carteirinha-operador-maquinas-frente-field-positions"
-            title="Alinhamento — Operador de Máquinas (Frente)"
-            fields={operadorMaquinasFrenteFields}
-            pageWidth={OPERADOR_MAQUINAS_W}
-            pageHeight={OPERADOR_MAQUINAS_H}
-          />
+          {frenteUrl ? (
+            <GenericAlignContent
+              templateUrl={frenteUrl}
+              templateIsPdf
+              storageKey="carteirinha-operador-maquinas-frente-field-positions"
+              title="Alinhamento — Operador de Máquinas (Frente)"
+              fields={operadorMaquinasFrenteFields}
+              pageWidth={pdfPageSize.w}
+              pageHeight={pdfPageSize.h}
+            />
+          ) : (
+            <div className="flex items-center justify-center py-10">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="verso">
-          <GenericAlignContent
-            templateUrl=""
-            storageKey="carteirinha-operador-maquinas-verso-field-positions"
-            title="Alinhamento — Operador de Máquinas (Verso)"
-            fields={operadorMaquinasVersoFields}
-            pageWidth={OPERADOR_MAQUINAS_W}
-            pageHeight={OPERADOR_MAQUINAS_H}
-          />
+          {versoUrl ? (
+            <GenericAlignContent
+              templateUrl={versoUrl}
+              templateIsPdf
+              storageKey="carteirinha-operador-maquinas-verso-field-positions"
+              title="Alinhamento — Operador de Máquinas (Verso)"
+              fields={operadorMaquinasVersoFields}
+              pageWidth={pdfPageSize.w}
+              pageHeight={pdfPageSize.h}
+            />
+          ) : (
+            <div className="flex items-center justify-center py-10">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
