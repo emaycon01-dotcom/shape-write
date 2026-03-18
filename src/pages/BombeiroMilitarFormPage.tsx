@@ -152,11 +152,20 @@ export default function BombeiroMilitarFormPage() {
         reader.readAsDataURL(templateBlob);
       });
 
-      const storageKey = "carteirinha-bombeiro-militar-field-positions";
+      const versoStorageKey = "carteirinha-bombeiro-militar-verso-field-positions";
+      const frenteStorageKey = "carteirinha-bombeiro-militar-frente-field-positions";
+
       let fieldPositions = null;
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        try { fieldPositions = JSON.parse(saved); } catch { /* ignore */ }
+      const savedVerso = localStorage.getItem(versoStorageKey);
+      const savedFrente = localStorage.getItem(frenteStorageKey);
+
+      try {
+        fieldPositions = {
+          verso: savedVerso ? JSON.parse(savedVerso) : null,
+          frente: savedFrente ? JSON.parse(savedFrente) : null,
+        };
+      } catch {
+        fieldPositions = null;
       }
 
       const bodyData = {

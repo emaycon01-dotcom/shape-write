@@ -219,7 +219,7 @@ function GenericAlignContent({
   useEffect(() => {
     const updateScale = () => {
       if (containerRef.current) {
-        setScale(containerRef.current.clientWidth / PAGE_W);
+        setScale(containerRef.current.clientWidth / pageWidth);
       }
     };
     updateScale();
