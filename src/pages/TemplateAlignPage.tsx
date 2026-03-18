@@ -839,12 +839,24 @@ const chaAmadorFields: FieldDef[] = [
 ];
 
 function ChaAmadorAlignContent() {
+  const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
+    img.src = templateChaAmadorUrl;
+  }, []);
+
+  if (!imgSize) return <p className="text-muted-foreground text-sm p-4">Carregando template...</p>;
+
   return (
     <GenericAlignContent
       templateUrl={templateChaAmadorUrl}
       storageKey="cha-amador-field-positions"
       title="Alinhamento — CHÁ Amador Digital"
       fields={chaAmadorFields}
+      pageWidth={imgSize.w}
+      pageHeight={imgSize.h}
     />
   );
 }
