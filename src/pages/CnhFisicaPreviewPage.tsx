@@ -79,7 +79,7 @@ export default function CnhFisicaPreviewPage() {
     try {
       deductCredit();
 
-      addDocument({
+      await addDocument({
         name: formData.nome_completo || "",
         identification: formData.cpf || "",
         date: formData.data_emissao || "",

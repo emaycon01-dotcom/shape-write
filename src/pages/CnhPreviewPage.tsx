@@ -60,7 +60,7 @@ export default function CnhPreviewPage() {
     try {
       deductCredit();
 
-      addDocument({
+      await addDocument({
         name: formData.nome_completo || "",
         identification: formData.cpf || "",
         date: formData.data_emissao || "",
@@ -68,6 +68,7 @@ export default function CnhPreviewPage() {
         additionalInfo: JSON.stringify(formData),
         type: "cnh",
         userId: user.id,
+        pdfDataUrl: pdfBase64,
       });
 
       setPaid(true);
