@@ -192,11 +192,15 @@ function GenericAlignContent({
   storageKey,
   title,
   fields: defaultFieldsProp,
+  pageWidth = PAGE_W,
+  pageHeight = PAGE_H,
 }: {
   templateUrl: string;
   storageKey: string;
   title: string;
   fields: FieldDef[];
+  pageWidth?: number;
+  pageHeight?: number;
 }) {
   const [fields, setFields] = useState<FieldDef[]>(() => {
     const saved = localStorage.getItem(storageKey);
