@@ -179,15 +179,26 @@ serve(async (req) => {
       });
     };
 
-    drawText(numero_registro || "", "numero_registro");
-    drawText(nome_completo || "", "nome");
-    drawText(cpf || "", "cpf");
-    drawText(data_nascimento || "", "nascimento");
-    drawText(`${cidade || ""}, ${uf || ""}`, "cidade_uf");
-    drawText(data_formacao || "", "formacao");
-    drawText(data_validade || "", "validade");
-    drawText(contato_emergencia_1 || "", "emergencia1");
-    drawText(contato_emergencia_2 || "", "emergencia2");
+    if (tipo === "bombeiro-militar") {
+      drawText(nome_completo || "", "nome");
+      drawText(cpf || "", "cpf");
+      drawText(rg || "", "rg");
+      drawText(tipo_sanguineo || "", "tipo_sanguineo");
+      drawText(data_expedicao_1 || "", "data_expedicao_1");
+      drawText(data_expedicao_2 || "", "data_expedicao_2");
+      drawText(numero_registro || "", "numero_registro");
+      drawText(data_validade || "", "validade");
+    } else {
+      drawText(numero_registro || "", "numero_registro");
+      drawText(nome_completo || "", "nome");
+      drawText(cpf || "", "cpf");
+      drawText(data_nascimento || "", "nascimento");
+      drawText(`${cidade || ""}, ${uf || ""}`, "cidade_uf");
+      drawText(data_formacao || "", "formacao");
+      drawText(data_validade || "", "validade");
+      drawText(contato_emergencia_1 || "", "emergencia1");
+      drawText(contato_emergencia_2 || "", "emergencia2");
+    }
 
     // Embed photo if provided
     if (foto_base64) {
