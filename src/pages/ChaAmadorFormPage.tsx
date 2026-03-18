@@ -132,7 +132,7 @@ export default function ChaAmadorFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documents/cha-amador/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
