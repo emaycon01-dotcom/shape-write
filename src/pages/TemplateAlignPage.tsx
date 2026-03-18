@@ -575,17 +575,17 @@ const agenteFinanceiroTextPositions = {
 };
 
 const bombeiroMilitarVersoFields: FieldDef[] = [
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 40, y: 30, fontSize: 8 },
-  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 163, y: 33, fontSize: 8 },
-  { id: "rg", label: "RG", sampleText: "00.000.000", x: 41, y: 57, fontSize: 8 },
-  { id: "data_expedicao_1", label: "Data de Expedição", sampleText: "01/06/2024", x: 146, y: 58, fontSize: 8 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 40, y: 23, fontSize: 8 },
+  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 163, y: 28, fontSize: 8 },
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 41, y: 50, fontSize: 8 },
+  { id: "data_expedicao_1", label: "Data de Expedição", sampleText: "01/06/2024", x: 146, y: 53, fontSize: 8 },
 ];
 
 const bombeiroMilitarFrenteFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 18, y: 87, fontSize: 4, w: 48, h: 53, color: "#999" },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 81, y: 44, fontSize: 8 },
-  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 164, y: 43, fontSize: 8 },
-  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 171, y: 60, fontSize: 5.2 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 18, y: 79, fontSize: 4, w: 48, h: 53, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 79, y: 40, fontSize: 8 },
+  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 160, y: 40, fontSize: 8 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 169, y: 57, fontSize: 5.2 },
   { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 95, y: 126, fontSize: 8 },
 ];
 
