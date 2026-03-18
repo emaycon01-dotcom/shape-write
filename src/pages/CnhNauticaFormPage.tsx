@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Anchor, Trash2, Eye, Shuffle, Calendar as CalendarIcon, Upload } from "lucide-react";
+import { User, Anchor, Trash2, Eye, Shuffle, Calendar as CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
