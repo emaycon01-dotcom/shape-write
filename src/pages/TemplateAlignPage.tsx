@@ -190,6 +190,7 @@ function FieldPropertiesPanel({
 
 function GenericAlignContent({
   templateUrl,
+  templateIsPdf = false,
   storageKey,
   title,
   fields: defaultFieldsProp,
@@ -197,6 +198,7 @@ function GenericAlignContent({
   pageHeight = PAGE_H,
 }: {
   templateUrl: string;
+  templateIsPdf?: boolean;
   storageKey: string;
   title: string;
   fields: FieldDef[];
