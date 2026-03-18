@@ -622,33 +622,53 @@ function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string
 }
 
 function BombeiroMilitarAlignContent() {
+  const { toast } = useToast();
+
+  const handleCopyBoth = () => {
+    const frenteRaw = localStorage.getItem("carteirinha-bombeiro-militar-frente-field-positions");
+    const versoRaw = localStorage.getItem("carteirinha-bombeiro-militar-verso-field-positions");
+    const combined = {
+      frente: frenteRaw ? JSON.parse(frenteRaw) : null,
+      verso: versoRaw ? JSON.parse(versoRaw) : null,
+    };
+    navigator.clipboard.writeText(JSON.stringify(combined, null, 2));
+    toast({ title: "Coordenadas copiadas", description: "Frente e verso copiados para a área de transferência." });
+  };
+
   return (
-    <Tabs defaultValue="frente" className="w-full">
-      <TabsList className="mb-4">
-        <TabsTrigger value="frente">FRENTE</TabsTrigger>
-        <TabsTrigger value="verso">VERSO</TabsTrigger>
-      </TabsList>
-      <TabsContent value="frente">
-        <GenericAlignContent
-          templateUrl={templateBombeiroMilitarFrenteUrl}
-          storageKey="carteirinha-bombeiro-militar-frente-field-positions"
-          title="Alinhamento — Carteira de Bombeiro Militar (Frente)"
-          fields={bombeiroMilitarFrenteFields}
-          pageWidth={BOMBEIRO_MILITAR_W}
-          pageHeight={BOMBEIRO_MILITAR_H}
-        />
-      </TabsContent>
-      <TabsContent value="verso">
-        <GenericAlignContent
-          templateUrl={templateBombeiroMilitarVersoUrl}
-          storageKey="carteirinha-bombeiro-militar-verso-field-positions"
-          title="Alinhamento — Carteira de Bombeiro Militar (Verso)"
-          fields={bombeiroMilitarVersoFields}
-          pageWidth={BOMBEIRO_MILITAR_W}
-          pageHeight={BOMBEIRO_MILITAR_H}
-        />
-      </TabsContent>
-    </Tabs>
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleCopyBoth}>
+          <Copy className="w-4 h-4 mr-2" /> Copiar Frente + Verso
+        </Button>
+      </div>
+      <Tabs defaultValue="frente" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="frente">FRENTE</TabsTrigger>
+          <TabsTrigger value="verso">VERSO</TabsTrigger>
+        </TabsList>
+        <TabsContent value="frente">
+          <GenericAlignContent
+            templateUrl={templateBombeiroMilitarFrenteUrl}
+            storageKey="carteirinha-bombeiro-militar-frente-field-positions"
+            title="Alinhamento — Carteira de Bombeiro Militar (Frente)"
+            fields={bombeiroMilitarFrenteFields}
+            pageWidth={BOMBEIRO_MILITAR_W}
+            pageHeight={BOMBEIRO_MILITAR_H}
+          />
+        </TabsContent>
+        <TabsContent value="verso">
+          <GenericAlignContent
+            templateUrl={templateBombeiroMilitarVersoUrl}
+            storageKey="carteirinha-bombeiro-militar-verso-field-positions"
+            title="Alinhamento — Carteira de Bombeiro Militar (Verso)"
+            fields={bombeiroMilitarVersoFields}
+            pageWidth={BOMBEIRO_MILITAR_W}
+            pageHeight={BOMBEIRO_MILITAR_H}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
 
