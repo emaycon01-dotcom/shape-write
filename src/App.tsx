@@ -38,6 +38,8 @@ const CarteirinhaFormPage = lazy(() => import("./pages/CarteirinhaFormPage"));
 const CarteirinhaPreviewPage = lazy(() => import("./pages/CarteirinhaPreviewPage"));
 const BombeiroMilitarFormPage = lazy(() => import("./pages/BombeiroMilitarFormPage"));
 const OperadorMaquinasFormPage = lazy(() => import("./pages/OperadorMaquinasFormPage"));
+const OperadorMaquinasDigitalFormPage = lazy(() => import("./pages/OperadorMaquinasDigitalFormPage"));
+const OperadorMaquinasDigitalPreviewPage = lazy(() => import("./pages/OperadorMaquinasDigitalPreviewPage"));
 const SegurancaEscolarFormPage = lazy(() => import("./pages/SegurancaEscolarFormPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
