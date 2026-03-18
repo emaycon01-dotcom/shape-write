@@ -876,6 +876,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-agente">AGENTE FIN.</TabsTrigger>
               <TabsTrigger value="cart-bombeiro-militar">BOMB. MILITAR</TabsTrigger>
               <TabsTrigger value="cart-operador-maquinas">OPER. MÁQ.</TabsTrigger>
+              <TabsTrigger value="cart-seguranca-escolar">SEG. ESCOLAR</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
@@ -900,6 +901,9 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="cart-operador-maquinas">
               <OperadorMaquinasAlignContent />
+            </TabsContent>
+            <TabsContent value="cart-seguranca-escolar">
+              <SegurancaEscolarAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>
