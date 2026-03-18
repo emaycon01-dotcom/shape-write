@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, MapPin, FlaskConical, Trash2, Eye } from "lucide-react";
+import { User, MapPin, FlaskConical, Trash2, Eye, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const UF_LIST = [
