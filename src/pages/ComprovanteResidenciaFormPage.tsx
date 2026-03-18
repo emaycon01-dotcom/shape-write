@@ -100,7 +100,7 @@ export default function ComprovanteResidenciaFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documents/comprovante-residencia/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
