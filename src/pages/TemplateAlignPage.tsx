@@ -868,16 +868,16 @@ export default function TemplateAlignPage() {
 
         <TabsContent value="fisicos">
           <Tabs defaultValue="cnh-fisica-completa" className="w-full">
-            <TabsList className="mb-4 flex-wrap">
-              <TabsTrigger value="cnh-fisica-completa">CNH FÍSICA (COMPLETA)</TabsTrigger>
-              <TabsTrigger value="cnh-fisica-frente">FRENTE</TabsTrigger>
-              <TabsTrigger value="cnh-fisica-verso">VERSO</TabsTrigger>
-              <TabsTrigger value="cart-bombeiro">BOMBEIRO</TabsTrigger>
-              <TabsTrigger value="cart-porteiro">PORTEIRO</TabsTrigger>
-              <TabsTrigger value="cart-agente">AGENTE FIN.</TabsTrigger>
-              <TabsTrigger value="cart-bombeiro-militar">BOMB. MILITAR</TabsTrigger>
-              <TabsTrigger value="cart-operador-maquinas">OPER. MÁQ.</TabsTrigger>
-              <TabsTrigger value="cart-seguranca-escolar">SEG. ESCOLAR</TabsTrigger>
+            <TabsList className="mb-4 flex-wrap h-auto gap-1">
+              <TabsTrigger value="cnh-fisica-completa" className="text-xs">CNH COMPLETA</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-frente" className="text-xs">FRENTE</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-verso" className="text-xs">VERSO</TabsTrigger>
+              <TabsTrigger value="cart-bombeiro" className="text-xs">BOMBEIRO</TabsTrigger>
+              <TabsTrigger value="cart-porteiro" className="text-xs">PORTEIRO</TabsTrigger>
+              <TabsTrigger value="cart-agente" className="text-xs">AGENTE</TabsTrigger>
+              <TabsTrigger value="cart-bombeiro-militar" className="text-xs">BOMB. MIL.</TabsTrigger>
+              <TabsTrigger value="cart-operador-maquinas" className="text-xs">OPER. MÁQ.</TabsTrigger>
+              <TabsTrigger value="cart-seguranca-escolar" className="text-xs">SEG. ESC.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
