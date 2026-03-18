@@ -963,6 +963,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-agente" className="text-xs">AGENTE</TabsTrigger>
               <TabsTrigger value="cart-bombeiro-militar" className="text-xs">BOMB. MIL.</TabsTrigger>
               <TabsTrigger value="cart-operador-maquinas" className="text-xs">OPER. MÁQ.</TabsTrigger>
+              <TabsTrigger value="cart-operador-maquinas-digital" className="text-xs">OPER. MÁQ. DIG.</TabsTrigger>
               <TabsTrigger value="cart-seguranca-escolar" className="text-xs">SEG. ESC.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
