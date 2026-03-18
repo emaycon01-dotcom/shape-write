@@ -42,6 +42,13 @@ serve(async (req) => {
       contato_emergencia_2,
       foto_base64,
       template_pdf_base64,
+      // operador-maquinas specific fields
+      rg_orgao_uf,
+      categoria,
+      filiacao,
+      equipamento,
+      nivel,
+      data_emissao,
     } = body;
 
     if (!template_pdf_base64) {
