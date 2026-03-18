@@ -91,15 +91,6 @@ export default function CnhNauticaFormPage() {
   const setDate = (field: keyof FormData) => (v: string) =>
     setForm((p) => ({ ...p, [field]: v }));
 
-  const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setForm((p) => ({ ...p, fotoBase64: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
-  };
 
   const fillTest = () => {
     const now = new Date();
