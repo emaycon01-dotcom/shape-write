@@ -971,6 +971,25 @@ function OperadorMaquinasDigitalAlignContent() {
   );
 }
 
+const cpfFisicoFields: FieldDef[] = [
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 200, y: 300, fontSize: 18 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "EMILY BARBOSA DO NASCIMENTO", x: 200, y: 400, fontSize: 16 },
+  { id: "dataNascimento", label: "Data de Nascimento", sampleText: "15/01/1990", x: 200, y: 480, fontSize: 14 },
+  { id: "data", label: "Data", sampleText: "24/02/2026", x: 400, y: 700, fontSize: 12 },
+  { id: "hora", label: "Hora", sampleText: "14:35", x: 300, y: 700, fontSize: 12 },
+];
+
+function CpfFisicoAlignContent() {
+  return (
+    <GenericAlignContent
+      templateUrl={templateCpfFisicoUrl}
+      storageKey="cpf-fisico-field-positions"
+      title="Alinhamento — CPF Físico"
+      fields={cpfFisicoFields}
+    />
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
