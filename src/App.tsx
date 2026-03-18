@@ -114,6 +114,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/operador-maquinas-digital/preview" element={<OperadorMaquinasDigitalPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/seguranca-escolar" element={<SegurancaEscolarFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/seguranca-escolar/preview" element={<CarteirinhaPreviewPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe" element={<CedulaPoliciaFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe/preview" element={<CedulaPoliciaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>

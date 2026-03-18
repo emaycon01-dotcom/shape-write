@@ -51,11 +51,11 @@ const carteirinhas = [
     credits: 2,
   },
   {
-    id: "identidade-policial-pe",
-    name: "Cédula de Identidade Policial (Pernambuco)",
+    id: "cedula-policia-pe",
+    name: "Cédula de Polícia Militar (Pernambuco)",
     description: "Cédula de identidade policial do estado de Pernambuco",
     icon: Shield,
-    route: "",
+    route: "/dashboard/documentos-fisicos/carteirinhas/cedula-policia-pe",
     credits: 2,
   },
   {
