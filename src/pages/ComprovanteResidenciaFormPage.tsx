@@ -193,7 +193,7 @@ export default function ComprovanteResidenciaFormPage() {
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
-          <Eye className="w-5 h-5" /> Gerar Preview
+          {isEditMode ? <><RefreshCw className="w-5 h-5" /> Atualizar</> : <><Eye className="w-5 h-5" /> Gerar Preview</>}
         </Button>
       </form>
     </div>
