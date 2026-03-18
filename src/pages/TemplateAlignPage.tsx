@@ -885,6 +885,9 @@ export default function TemplateAlignPage() {
                 <ExameToxicologicoAlignPage />
               </Suspense>
             </TabsContent>
+            <TabsContent value="cha-amador">
+              <ChaAmadorAlignContent />
+            </TabsContent>
           </Tabs>
         </TabsContent>
 
