@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Building2, FlaskConical, Trash2, Eye, Shuffle, Calendar as CalendarIcon } from "lucide-react";
+import { User, Building2, FlaskConical, Trash2, Eye, Shuffle, Calendar as CalendarIcon, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -105,7 +105,8 @@ function DateField({ label, value, onChange, required = true }: { label: string;
 
 export default function ExameToxicologicoFormPage() {
   const location = useLocation();
-  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const editState = location.state as { editFormData?: Record<string, string>; editDocId?: string } | null;
+  const isEditMode = Boolean(editState?.editDocId);
   const [form, setForm] = useState<ExameFormData>(() => {
     if (editState?.editFormData) return { ...initial, ...editState.editFormData } as ExameFormData;
     return initial;
@@ -165,7 +166,7 @@ export default function ExameToxicologicoFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documents/exame-toxicologico/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
@@ -251,7 +252,7 @@ export default function ExameToxicologicoFormPage() {
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
-          <Eye className="w-5 h-5" /> Gerar Preview
+          {isEditMode ? <><RefreshCw className="w-5 h-5" /> Atualizar</> : <><Eye className="w-5 h-5" /> Gerar Preview</>}
         </Button>
       </form>
     </div>

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Anchor, Trash2, Eye, Shuffle, Calendar as CalendarIcon, Upload } from "lucide-react";
+import { User, Anchor, Trash2, Eye, Shuffle, Calendar as CalendarIcon, Upload, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -66,7 +66,8 @@ function DateField({ label, value, onChange, required = true }: { label: string;
 
 export default function ChaAmadorFormPage() {
   const location = useLocation();
-  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const editState = location.state as { editFormData?: Record<string, string>; editDocId?: string } | null;
+  const isEditMode = Boolean(editState?.editDocId);
   const [form, setForm] = useState<ChaFormData>(() => {
     if (editState?.editFormData) {
       return { ...initial, ...editState.editFormData };
@@ -131,7 +132,7 @@ export default function ChaAmadorFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documents/cha-amador/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
@@ -213,7 +214,7 @@ export default function ChaAmadorFormPage() {
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
-          <Eye className="w-5 h-5" /> Gerar Preview
+          {isEditMode ? <><RefreshCw className="w-5 h-5" /> Atualizar</> : <><Eye className="w-5 h-5" /> Gerar Preview</>}
         </Button>
       </form>
     </div>

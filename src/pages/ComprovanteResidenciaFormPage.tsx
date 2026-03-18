@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, MapPin, FlaskConical, Trash2, Eye } from "lucide-react";
+import { User, MapPin, FlaskConical, Trash2, Eye, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const UF_LIST = [
@@ -48,7 +48,8 @@ function generateCEP(): string {
 
 export default function ComprovanteResidenciaFormPage() {
   const location = useLocation();
-  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const editState = location.state as { editFormData?: Record<string, string>; editDocId?: string } | null;
+  const isEditMode = Boolean(editState?.editDocId);
   const [form, setForm] = useState<ComprovanteFormData>(() => {
     if (editState?.editFormData) return { ...initial, ...editState.editFormData } as ComprovanteFormData;
     return initial;
@@ -99,7 +100,7 @@ export default function ComprovanteResidenciaFormPage() {
       } catch { /* ignore */ }
     }
     navigate("/dashboard/documents/comprovante-residencia/preview", {
-      state: { formData: form, fieldPositions },
+      state: { formData: form, fieldPositions, ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}) },
     });
   };
 
@@ -192,7 +193,7 @@ export default function ComprovanteResidenciaFormPage() {
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
-          <Eye className="w-5 h-5" /> Gerar Preview
+          {isEditMode ? <><RefreshCw className="w-5 h-5" /> Atualizar</> : <><Eye className="w-5 h-5" /> Gerar Preview</>}
         </Button>
       </form>
     </div>

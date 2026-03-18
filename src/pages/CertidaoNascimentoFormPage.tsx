@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, FileText, Sparkles, Trash2, FlaskConical, Users, Baby, Calendar, Eye } from "lucide-react";
+import { User, FileText, Sparkles, Trash2, FlaskConical, Users, Baby, Calendar, Eye, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateUrl from "@/assets/template-certidao-nascimento.jpg";
 
@@ -140,7 +140,8 @@ function generateCPF(): string {
 
 export default function CertidaoNascimentoFormPage() {
   const location = useLocation();
-  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const editState = location.state as { editFormData?: Record<string, string>; editDocId?: string } | null;
+  const isEditMode = Boolean(editState?.editDocId);
   const [form, setForm] = useState<CertidaoFormData>(() => {
     if (editState?.editFormData) return { ...initial, ...editState.editFormData } as CertidaoFormData;
     return initial;
@@ -245,6 +246,7 @@ export default function CertidaoNascimentoFormPage() {
         formData: form,
         templateUrl,
         fieldPositions,
+        ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}),
       },
     });
   };
@@ -453,7 +455,7 @@ export default function CertidaoNascimentoFormPage() {
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
-          <Eye className="w-5 h-5" /> Pré-visualizar Certidão
+          {isEditMode ? <><RefreshCw className="w-5 h-5" /> Atualizar</> : <><Eye className="w-5 h-5" /> Pré-visualizar Certidão</>}
         </Button>
       </form>
     </div>
