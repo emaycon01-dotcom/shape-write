@@ -679,7 +679,9 @@ export default function CnhFormPage() {
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold" disabled={loading}>
           {loading ? (
-            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Gerando PDF...</>
+            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> {isEditMode ? "Atualizando..." : "Gerando PDF..."}</>
+          ) : isEditMode ? (
+            <><RefreshCw className="w-5 h-5 mr-2" /> Atualizar</>
           ) : (
             <><Eye className="w-5 h-5 mr-2" /> Gerar Preview</>
           )}
