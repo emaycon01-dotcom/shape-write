@@ -62,7 +62,7 @@ export default function CarteirinhaPreviewPage() {
   useEffect(() => {
     if (!pdfBase64) return;
 
-    if (isBombeiroMilitar) {
+    if (isMultiPage) {
       splitPdfPages(pdfBase64).then((urls) => {
         setPageUrls(urls);
       });
