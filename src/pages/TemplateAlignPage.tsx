@@ -721,7 +721,7 @@ export default function TemplateAlignPage() {
               <CarteirinhaAlignContent tipo="agente-financeiro" tipoLabel="Agente Financeiro" storageKey="carteirinha-agente-field-positions" />
             </TabsContent>
             <TabsContent value="cart-bombeiro-militar">
-              <CarteirinhaAlignContent tipo="bombeiro-militar" tipoLabel="Bombeiro Militar" storageKey="carteirinha-bombeiro-militar-field-positions" />
+              <BombeiroMilitarAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>
