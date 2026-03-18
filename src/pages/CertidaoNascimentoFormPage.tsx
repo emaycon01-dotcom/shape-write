@@ -246,6 +246,7 @@ export default function CertidaoNascimentoFormPage() {
         formData: form,
         templateUrl,
         fieldPositions,
+        ...(isEditMode ? { autoUpdate: true, editDocId: editState?.editDocId } : {}),
       },
     });
   };
