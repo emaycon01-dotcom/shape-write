@@ -17,7 +17,6 @@ interface FormData {
   inscricao: string;
   localEmissao: string;
   validade: string;
-  fotoBase64: string;
 }
 
 const initial: FormData = {
