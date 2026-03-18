@@ -115,12 +115,12 @@ export default function CnhFisicaPreviewPage() {
 
   const handleShare = async () => {
     try {
-      const blob = await getPdfBlob();
+      const blob = getPdfBlob();
       const file = new File([blob], fileName, { type: "application/pdf" });
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: "CNH Física" });
       } else {
-        await downloadPdf();
+        downloadPdf();
         toast({ title: "PDF baixado com sucesso!" });
       }
     } catch {
