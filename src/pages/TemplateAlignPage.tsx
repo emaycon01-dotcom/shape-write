@@ -1047,6 +1047,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-operador-maquinas-digital" className="text-xs">OPER. MÁQ. DIG.</TabsTrigger>
               <TabsTrigger value="cart-seguranca-escolar" className="text-xs">SEG. ESC.</TabsTrigger>
               <TabsTrigger value="cart-cedula-policia-pe" className="text-xs">CÉD. POL. PE</TabsTrigger>
+              <TabsTrigger value="cart-cpf-fisico" className="text-xs">CPF FÍSICO</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
