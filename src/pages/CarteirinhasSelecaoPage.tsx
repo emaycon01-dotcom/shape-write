@@ -69,9 +69,9 @@ const carteirinhas = [
   {
     id: "cpf-fisico",
     name: "Carteira de CPF Físico",
-    description: "Carteira física do CPF com dados completos",
+    description: "Comprovante de inscrição no CPF com dados completos",
     icon: IdCard,
-    route: "",
+    route: "/dashboard/documentos-fisicos/carteirinhas/cpf-fisico",
     credits: 1,
   },
   {

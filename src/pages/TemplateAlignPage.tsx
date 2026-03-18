@@ -17,6 +17,7 @@ import templateBombeiroMilitarVersoUrl from "@/assets/template-carteira-bombeiro
 import templateSegurancaEscolarFrenteUrl from "@/assets/template-carteira-seguranca-escolar-frente.jpg";
 import templateSegurancaEscolarVersoUrl from "@/assets/template-carteira-seguranca-escolar-verso.jpg";
 import templateChaAmadorUrl from "@/assets/template-cha-amador.jpg";
+import templateCpfFisicoUrl from "@/assets/template-cpf-fisico.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
