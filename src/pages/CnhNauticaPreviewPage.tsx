@@ -33,7 +33,7 @@ export default function CnhNauticaPreviewPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, deductCredit } = useAuth();
-  const { addDocument } = useDocuments();
+  const { addDocument, updateDocument } = useDocuments();
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
