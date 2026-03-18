@@ -102,6 +102,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/bombeiro-militar/preview" element={<CarteirinhaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/operador-maquinas" element={<OperadorMaquinasFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/operador-maquinas/preview" element={<CarteirinhaPreviewPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/seguranca-escolar" element={<SegurancaEscolarFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/seguranca-escolar/preview" element={<CarteirinhaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>
