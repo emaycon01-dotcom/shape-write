@@ -205,8 +205,6 @@ export default function CnhNauticaFormPage() {
           <DateField label="Validade" value={form.validade} onChange={setDate("validade")} />
         </div>
 
-        </div>
-
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
           <Eye className="w-5 h-5" /> Gerar Preview
         </Button>
