@@ -65,19 +65,22 @@ export default function CpfFisicoPreviewPage() {
 
       ctx.textBaseline = "top";
 
-      const drawField = (key: string, text: string, color = "#000", bold = false) => {
+      const BLUE = "#1a1a6e";
+      const FONT = "'Times New Roman', 'Georgia', serif";
+
+      const drawField = (key: string, text: string, color = BLUE, bold = false) => {
         const pos = positions[key];
         if (!pos || !text) return;
         ctx.fillStyle = color;
-        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px Arial`;
+        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px ${FONT}`;
         ctx.fillText(text.toUpperCase(), pos.x, pos.y);
       };
 
-      drawField("cpf", formData.cpf, "#000", true);
-      drawField("nomeCompleto", formData.nomeCompleto, "#000", true);
-      drawField("dataNascimento", formData.dataNascimento, "#000");
-      drawField("data", formData.data, "#000");
-      drawField("hora", formData.hora, "#000");
+      drawField("cpf", formData.cpf, BLUE, true);
+      drawField("nomeCompleto", formData.nomeCompleto, BLUE, true);
+      drawField("dataNascimento", formData.dataNascimento, BLUE);
+      drawField("data", formData.data, BLUE);
+      drawField("hora", formData.hora, BLUE);
 
       setRendered(true);
     };
@@ -95,19 +98,22 @@ export default function CpfFisicoPreviewPage() {
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
 
-      const drawField = (key: string, text: string, color = "#000", bold = false) => {
+      const BLUE = "#1a1a6e";
+      const FONT = "'Times New Roman', 'Georgia', serif";
+
+      const drawField = (key: string, text: string, color = BLUE, bold = false) => {
         const pos = positions[key];
         if (!pos || !text) return;
         ctx.fillStyle = color;
-        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px Arial`;
+        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px ${FONT}`;
         ctx.fillText(text.toUpperCase(), pos.x, pos.y);
       };
 
-      drawField("cpf", formData.cpf, "#000", true);
-      drawField("nomeCompleto", formData.nomeCompleto, "#000", true);
-      drawField("dataNascimento", formData.dataNascimento, "#000");
-      drawField("data", formData.data, "#000");
-      drawField("hora", formData.hora, "#000");
+      drawField("cpf", formData.cpf, BLUE, true);
+      drawField("nomeCompleto", formData.nomeCompleto, BLUE, true);
+      drawField("dataNascimento", formData.dataNascimento, BLUE);
+      drawField("data", formData.data, BLUE);
+      drawField("hora", formData.hora, BLUE);
 
       setRendered(true);
     };
