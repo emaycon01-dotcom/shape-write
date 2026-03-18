@@ -49,6 +49,8 @@ serve(async (req) => {
       equipamento,
       nivel,
       data_emissao,
+      // seguranca-escolar specific fields
+      termino_curso,
     } = body;
 
     if (!template_pdf_base64) {
@@ -81,16 +83,32 @@ serve(async (req) => {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    if (tipo === "bombeiro-militar" || tipo === "operador-maquinas") {
-      const versoPage = pages[0];
-      const frentePage = pages[1] ?? pages[0];
+    if (tipo === "bombeiro-militar" || tipo === "operador-maquinas" || tipo === "seguranca-escolar") {
+      // For seguranca-escolar: page 0 = frente, page 1 = verso
+      // For others: page 0 = verso, page 1 = frente
+      const versoPage = tipo === "seguranca-escolar" ? (pages[1] ?? pages[0]) : pages[0];
+      const frentePage = tipo === "seguranca-escolar" ? pages[0] : (pages[1] ?? pages[0]);
 
       // Default positions per tipo
       let defaultVersoPositions: Record<string, { x: number; y: number; fontSize: number }>;
       let defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }> = {};
       let rawPhoto = { x: 20, y: 79, w: 45, h: 50 };
 
-      if (tipo === "operador-maquinas") {
+      if (tipo === "seguranca-escolar") {
+        defaultFrentePositions = {
+          photo: { x: 30, y: 120, fontSize: 4 },
+          nome: { x: 150, y: 180, fontSize: 10 },
+          cpf: { x: 150, y: 220, fontSize: 9 },
+          numero_registro: { x: 150, y: 100, fontSize: 10 },
+          data_expedicao: { x: 350, y: 100, fontSize: 9 },
+          nascimento: { x: 150, y: 300, fontSize: 9 },
+          termino_curso: { x: 350, y: 300, fontSize: 9 },
+        };
+        defaultVersoPositions = {
+          rg: { x: 250, y: 200, fontSize: 12 },
+        };
+        rawPhoto = { x: 30, y: 120, w: 100, h: 130 };
+      } else if (tipo === "operador-maquinas") {
         defaultVersoPositions = {
           nome: { x: 109, y: 46, fontSize: 8 },
           rg_orgao_uf: { x: 119, y: 62, fontSize: 7 },
@@ -192,7 +210,17 @@ serve(async (req) => {
         });
       };
 
-      if (tipo === "operador-maquinas") {
+      if (tipo === "seguranca-escolar") {
+        // Frente: all fields except RG
+        drawTextOnPage(frentePage, frentePositions, nome_completo || "", "nome");
+        drawTextOnPage(frentePage, frentePositions, cpf || "", "cpf");
+        drawTextOnPage(frentePage, frentePositions, numero_registro || "", "numero_registro");
+        drawTextOnPage(frentePage, frentePositions, data_expedicao_1 || "", "data_expedicao");
+        drawTextOnPage(frentePage, frentePositions, data_nascimento || "", "nascimento");
+        drawTextOnPage(frentePage, frentePositions, termino_curso || "", "termino_curso");
+        // Verso: only RG
+        drawTextOnPage(versoPage, versoPositions, rg || "", "rg");
+      } else if (tipo === "operador-maquinas") {
         drawTextOnPage(versoPage, versoPositions, nome_completo || "", "nome");
         drawTextOnPage(versoPage, versoPositions, rg_orgao_uf || "", "rg_orgao_uf");
         drawTextOnPage(versoPage, versoPositions, cpf || "", "cpf");

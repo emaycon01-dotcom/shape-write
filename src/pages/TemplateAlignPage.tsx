@@ -14,6 +14,8 @@ import templatePorteiroUrl from "@/assets/template-carteira-porteiro.jpg";
 import templateAgenteUrl from "@/assets/template-carteira-agente-financeiro.jpg";
 import templateBombeiroMilitarFrenteUrl from "@/assets/template-carteira-bombeiro-militar-frente.jpg";
 import templateBombeiroMilitarVersoUrl from "@/assets/template-carteira-bombeiro-militar-verso.jpg";
+import templateSegurancaEscolarFrenteUrl from "@/assets/template-carteira-seguranca-escolar-frente.jpg";
+import templateSegurancaEscolarVersoUrl from "@/assets/template-carteira-seguranca-escolar-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
@@ -756,6 +758,74 @@ function OperadorMaquinasAlignContent() {
   );
 }
 
+const SEGURANCA_ESCOLAR_W = 595;
+const SEGURANCA_ESCOLAR_H = 842;
+
+const segurancaEscolarFrenteFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 30, y: 120, fontSize: 4, w: 100, h: 130, color: "#999" },
+  { id: "nome", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 150, y: 180, fontSize: 10 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 150, y: 220, fontSize: 9 },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "1031/26", x: 150, y: 100, fontSize: 10 },
+  { id: "data_expedicao", label: "Data de Expedição", sampleText: "01/06/2024", x: 350, y: 100, fontSize: 9 },
+  { id: "nascimento", label: "Data de Nascimento", sampleText: "01/01/1990", x: 150, y: 300, fontSize: 9 },
+  { id: "termino_curso", label: "Término do Curso", sampleText: "01/06/2024", x: 350, y: 300, fontSize: 9 },
+];
+
+const segurancaEscolarVersoFields: FieldDef[] = [
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 250, y: 200, fontSize: 12 },
+];
+
+function SegurancaEscolarAlignContent() {
+  const { toast } = useToast();
+
+  const handleCopyBoth = () => {
+    const frenteRaw = localStorage.getItem("carteirinha-seguranca-escolar-frente-field-positions");
+    const versoRaw = localStorage.getItem("carteirinha-seguranca-escolar-verso-field-positions");
+    const combined = {
+      frente: frenteRaw ? JSON.parse(frenteRaw) : null,
+      verso: versoRaw ? JSON.parse(versoRaw) : null,
+    };
+    navigator.clipboard.writeText(JSON.stringify(combined, null, 2));
+    toast({ title: "Coordenadas copiadas", description: "Frente e verso copiados para a área de transferência." });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleCopyBoth}>
+          <Copy className="w-4 h-4 mr-2" /> Copiar Frente + Verso
+        </Button>
+      </div>
+      <Tabs defaultValue="frente" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="frente">FRENTE</TabsTrigger>
+          <TabsTrigger value="verso">VERSO</TabsTrigger>
+        </TabsList>
+        <TabsContent value="frente">
+          <GenericAlignContent
+            templateUrl={templateSegurancaEscolarFrenteUrl}
+            storageKey="carteirinha-seguranca-escolar-frente-field-positions"
+            title="Alinhamento — Segurança Escolar (Frente)"
+            fields={segurancaEscolarFrenteFields}
+            pageWidth={SEGURANCA_ESCOLAR_W}
+            pageHeight={SEGURANCA_ESCOLAR_H}
+          />
+        </TabsContent>
+        <TabsContent value="verso">
+          <GenericAlignContent
+            templateUrl={templateSegurancaEscolarVersoUrl}
+            storageKey="carteirinha-seguranca-escolar-verso-field-positions"
+            title="Alinhamento — Segurança Escolar (Verso)"
+            fields={segurancaEscolarVersoFields}
+            pageWidth={SEGURANCA_ESCOLAR_W}
+            pageHeight={SEGURANCA_ESCOLAR_H}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -806,6 +876,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-agente">AGENTE FIN.</TabsTrigger>
               <TabsTrigger value="cart-bombeiro-militar">BOMB. MILITAR</TabsTrigger>
               <TabsTrigger value="cart-operador-maquinas">OPER. MÁQ.</TabsTrigger>
+              <TabsTrigger value="cart-seguranca-escolar">SEG. ESCOLAR</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
@@ -830,6 +901,9 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="cart-operador-maquinas">
               <OperadorMaquinasAlignContent />
+            </TabsContent>
+            <TabsContent value="cart-seguranca-escolar">
+              <SegurancaEscolarAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>

@@ -79,7 +79,7 @@ const carteirinhas = [
     name: "Carteira de Segurança Escolar",
     description: "Carteira profissional de Segurança Escolar com foto e dados",
     icon: Shield,
-    route: "",
+    route: "/dashboard/documentos-fisicos/carteirinhas/seguranca-escolar",
     credits: 2,
   },
   {
