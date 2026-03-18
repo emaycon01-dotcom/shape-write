@@ -848,6 +848,67 @@ function ChaAmadorAlignContent() {
   );
 }
 
+const cedulaPoliciaFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 350, fontSize: 8, w: 150, h: 190, color: "#999" },
+  { id: "matricula", label: "Matrícula", sampleText: "7.878.786", x: 400, y: 200, fontSize: 14 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 200, y: 420, fontSize: 14 },
+  { id: "rgEstado", label: "RG e Estado", sampleText: "1234567 SDS/PE", x: 200, y: 480, fontSize: 14 },
+  { id: "registroData", label: "Nº Registro e Data", sampleText: "8976. 24/02/2026", x: 200, y: 580, fontSize: 14 },
+  { id: "tipoSanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 500, y: 480, fontSize: 14 },
+  { id: "cmCategoria", label: "CM / Categoria", sampleText: "NÚMERO, XXXXXXXXXXXX / A, B", x: 200, y: 640, fontSize: 12 },
+];
+
+function CedulaPoliciaAlignContent() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: PAGE_W, h: PAGE_H });
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-cedula-policia-pe.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const { PDFDocument } = await import("pdf-lib");
+        const srcDoc = await PDFDocument.load(arrayBuffer);
+        const page = srcDoc.getPage(0);
+        const { width, height } = page.getSize();
+        setPdfPageSize({ w: Math.round(width), h: Math.round(height) });
+
+        const newDoc = await PDFDocument.create();
+        const [copied] = await newDoc.copyPages(srcDoc, [0]);
+        newDoc.addPage(copied);
+        const pdfBytes = await newDoc.save();
+        const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
+        objectUrl = URL.createObjectURL(blob);
+        setPdfUrl(objectUrl);
+      } catch (e) {
+        console.error("Error loading cedula policia template:", e);
+      }
+    })();
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      {pdfUrl ? (
+        <GenericAlignContent
+          templateUrl={pdfUrl}
+          templateIsPdf
+          storageKey="cedula-policia-pe-field-positions"
+          title="Alinhamento — Cédula de Polícia Militar PE"
+          fields={cedulaPoliciaFields}
+          pageWidth={pdfPageSize.w}
+          pageHeight={pdfPageSize.h}
+        />
+      ) : (
+        <div className="flex items-center justify-center py-10">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 const operadorMaquinasDigitalFields: FieldDef[] = [
   { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 280, fontSize: 8, w: 150, h: 190, color: "#999" },
   { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 300, y: 310, fontSize: 14 },
@@ -965,6 +1026,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-operador-maquinas" className="text-xs">OPER. MÁQ.</TabsTrigger>
               <TabsTrigger value="cart-operador-maquinas-digital" className="text-xs">OPER. MÁQ. DIG.</TabsTrigger>
               <TabsTrigger value="cart-seguranca-escolar" className="text-xs">SEG. ESC.</TabsTrigger>
+              <TabsTrigger value="cart-cedula-policia-pe" className="text-xs">CÉD. POL. PE</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
@@ -995,6 +1057,9 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="cart-seguranca-escolar">
               <SegurancaEscolarAlignContent />
+            </TabsContent>
+            <TabsContent value="cart-cedula-policia-pe">
+              <CedulaPoliciaAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>

@@ -41,6 +41,8 @@ const OperadorMaquinasFormPage = lazy(() => import("./pages/OperadorMaquinasForm
 const OperadorMaquinasDigitalFormPage = lazy(() => import("./pages/OperadorMaquinasDigitalFormPage"));
 const OperadorMaquinasDigitalPreviewPage = lazy(() => import("./pages/OperadorMaquinasDigitalPreviewPage"));
 const SegurancaEscolarFormPage = lazy(() => import("./pages/SegurancaEscolarFormPage"));
+const CedulaPoliciaFormPage = lazy(() => import("./pages/CedulaPoliciaFormPage"));
+const CedulaPoliciaPreviewPage = lazy(() => import("./pages/CedulaPoliciaPreviewPage"));
 const CertidaoNascimentoFormPage = lazy(() => import("./pages/CertidaoNascimentoFormPage"));
 const CertidaoNascimentoPreviewPage = lazy(() => import("./pages/CertidaoNascimentoPreviewPage"));
 const ComprovanteResidenciaFormPage = lazy(() => import("./pages/ComprovanteResidenciaFormPage"));
@@ -112,6 +114,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/operador-maquinas-digital/preview" element={<OperadorMaquinasDigitalPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/seguranca-escolar" element={<SegurancaEscolarFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/seguranca-escolar/preview" element={<CarteirinhaPreviewPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe" element={<CedulaPoliciaFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe/preview" element={<CedulaPoliciaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>
