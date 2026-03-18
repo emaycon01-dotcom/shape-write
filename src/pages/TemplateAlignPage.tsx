@@ -12,7 +12,8 @@ import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
 import templateBombeiroUrl from "@/assets/template-carteira-bombeiro.jpg";
 import templatePorteiroUrl from "@/assets/template-carteira-porteiro.jpg";
 import templateAgenteUrl from "@/assets/template-carteira-agente-financeiro.jpg";
-import templateBombeiroMilitarUrl from "@/assets/template-carteira-bombeiro-militar.jpg";
+import templateBombeiroMilitarFrenteUrl from "@/assets/template-carteira-bombeiro-militar-frente.jpg";
+import templateBombeiroMilitarVersoUrl from "@/assets/template-carteira-bombeiro-militar-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
