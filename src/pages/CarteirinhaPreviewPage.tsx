@@ -46,7 +46,7 @@ export default function CarteirinhaPreviewPage() {
 
   const tipo = formData?.tipo || "bombeiro";
   const tipoLabel = formData?.tipoLabel || "Carteirinha";
-  const isBombeiroMilitar = tipo === "bombeiro-militar";
+  const isMultiPage = tipo === "bombeiro-militar" || tipo === "operador-maquinas";
 
   const fileName = useMemo(() => {
     const safeName = (formData?.nomeCompleto || tipo)
