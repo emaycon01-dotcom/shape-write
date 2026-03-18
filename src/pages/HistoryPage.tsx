@@ -19,6 +19,7 @@ import {
 
 const EDIT_COST = 0.3;
 const RENEW_COST = 1;
+const HISTORY_EDIT_DOC_TYPES_WITH_LARGE_PAYLOAD = new Set(["cnh"]);
 
 export default function HistoryPage() {
   const { user, deductCredit } = useAuth();
@@ -105,10 +106,16 @@ export default function HistoryPage() {
       formData = JSON.parse(editDoc.additionalInfo || "{}");
     } catch { /* ignore */ }
 
+    const shouldLoadEditDataFromDocument = HISTORY_EDIT_DOC_TYPES_WITH_LARGE_PAYLOAD.has(editDoc.type);
+
     setEditLoading(false);
     setEditDoc(null);
 
-    navigate(route, { state: { editFormData: formData, editDocId: editDoc.id } });
+    navigate(route, {
+      state: shouldLoadEditDataFromDocument
+        ? { editDocId: editDoc.id }
+        : { editFormData: formData, editDocId: editDoc.id },
+    });
   };
 
   const confirmRenew = (doc: Document) => {

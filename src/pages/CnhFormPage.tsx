@@ -1,12 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDocuments } from "@/contexts/DocumentContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { mapCnhEditPayload } from "@/lib/cnh-history-edit";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateCnhUrl from "@/assets/template-cnh-bg.jpeg";
@@ -97,26 +99,59 @@ function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length
 
 export default function CnhFormPage() {
   const location = useLocation();
-  const editState = location.state as { editFormData?: Record<string, string> } | null;
-  const [form, setForm] = useState<CnhFormData>(() => {
+  const editState = location.state as { editFormData?: Record<string, unknown>; editDocId?: string } | null;
+  const { getDocument } = useDocuments();
+
+  const getEditPayload = useCallback(() => {
     if (editState?.editFormData) {
-      return { ...initial, ...editState.editFormData } as CnhFormData;
+      return mapCnhEditPayload(editState.editFormData);
     }
-    return initial;
-  });
+
+    if (!editState?.editDocId) {
+      return null;
+    }
+
+    const editDocument = getDocument(editState.editDocId);
+    if (!editDocument?.additionalInfo) {
+      return null;
+    }
+
+    try {
+      return mapCnhEditPayload(JSON.parse(editDocument.additionalInfo) as Record<string, unknown>);
+    } catch {
+      return null;
+    }
+  }, [editState?.editDocId, editState?.editFormData, getDocument]);
+
+  const initialEditPayload = getEditPayload();
+  const [form, setForm] = useState<CnhFormData>(() => initialEditPayload?.formData ?? initial);
   const [foto, setFoto] = useState<File | null>(null);
-  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(initialEditPayload?.fotoPreview ?? null);
   const [assinatura, setAssinatura] = useState<File | null>(null);
-  const [assPreview, setAssPreview] = useState<string | null>(null);
+  const [assPreview, setAssPreview] = useState<string | null>(initialEditPayload?.assPreview ?? null);
   const [loading, setLoading] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
-  const [autoFillDates, setAutoFillDates] = useState(true);
+  const [autoFillDates, setAutoFillDates] = useState(!initialEditPayload);
+  const [editHydrated, setEditHydrated] = useState(Boolean(initialEditPayload));
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (editHydrated || editState?.editFormData || !editState?.editDocId) return;
+
+    const payload = getEditPayload();
+    if (!payload) return;
+
+    setForm(payload.formData);
+    setFotoPreview(payload.fotoPreview);
+    setAssPreview(payload.assPreview);
+    setAutoFillDates(false);
+    setEditHydrated(true);
+  }, [editHydrated, editState?.editDocId, editState?.editFormData, getEditPayload]);
 
   // Auto-fill emissão e validade quando preencher 1ª Habilitação
   useEffect(() => {
