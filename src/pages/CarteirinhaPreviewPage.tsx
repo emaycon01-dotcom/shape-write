@@ -5,8 +5,27 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Share2, ArrowLeft, Loader2, CreditCard, Lock, Download, IdCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PDFDocument } from "pdf-lib";
 
 const CREDIT_COST = 1.5;
+
+async function splitPdfPages(pdfBase64: string): Promise<string[]> {
+  const raw = pdfBase64.replace(/^data:application\/pdf;base64,/, "");
+  const bytes = Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
+  const srcDoc = await PDFDocument.load(bytes);
+  const pageCount = srcDoc.getPageCount();
+  const urls: string[] = [];
+
+  for (let i = 0; i < pageCount; i++) {
+    const newDoc = await PDFDocument.create();
+    const [copied] = await newDoc.copyPages(srcDoc, [i]);
+    newDoc.addPage(copied);
+    const newBytes = await newDoc.save();
+    const blob = new Blob([newBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+    urls.push(URL.createObjectURL(blob));
+  }
+  return urls;
+}
 
 export default function CarteirinhaPreviewPage() {
   const location = useLocation();
@@ -23,9 +42,11 @@ export default function CarteirinhaPreviewPage() {
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [pageUrls, setPageUrls] = useState<string[]>([]);
 
   const tipo = formData?.tipo || "bombeiro";
   const tipoLabel = formData?.tipoLabel || "Carteirinha";
+  const isBombeiroMilitar = tipo === "bombeiro-militar";
 
   const fileName = useMemo(() => {
     const safeName = (formData?.nomeCompleto || tipo)
@@ -37,17 +58,25 @@ export default function CarteirinhaPreviewPage() {
     return `${safeName || "carteirinha"}.pdf`;
   }, [formData, tipo]);
 
-  // Convert base64 to blob URL for iframe
+  // Convert base64 to blob URL(s)
   useEffect(() => {
     if (!pdfBase64) return;
-    fetch(pdfBase64)
-      .then((r) => r.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        setBlobUrl(url);
+
+    if (isBombeiroMilitar) {
+      splitPdfPages(pdfBase64).then((urls) => {
+        setPageUrls(urls);
       });
+    } else {
+      fetch(pdfBase64)
+        .then((r) => r.blob())
+        .then((blob) => {
+          setBlobUrl(URL.createObjectURL(blob));
+        });
+    }
+
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl);
+      pageUrls.forEach((u) => URL.revokeObjectURL(u));
     };
   }, [pdfBase64]);
 
@@ -160,8 +189,48 @@ export default function CarteirinhaPreviewPage() {
           : `Confira o preview abaixo. Para gerar o documento final, clique em Gerar (${CREDIT_COST} créditos).`}
       </p>
 
-      {/* PDF Preview */}
-      {blobUrl && (
+      {/* PDF Preview - Bombeiro Militar (frente + verso) */}
+      {isBombeiroMilitar && pageUrls.length > 0 && (
+        <div className="space-y-4 mb-6">
+          {pageUrls.map((url, idx) => (
+            <div key={idx} className="relative glass rounded-xl overflow-hidden" style={{ height: "35vh" }}>
+              <div className="absolute top-2 left-2 z-10 bg-background/80 backdrop-blur-sm text-xs font-semibold text-foreground px-2 py-1 rounded">
+                {idx === 0 ? "Verso" : "Frente"}
+              </div>
+              <iframe
+                src={url}
+                className="w-full h-full border-0"
+                title={`PDF Preview - ${idx === 0 ? "Verso" : "Frente"}`}
+              />
+              {!paid && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden select-none flex items-center justify-center">
+                  <div className="absolute inset-0" style={{
+                    background: "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.06) 80px, hsl(var(--destructive) / 0.06) 82px)",
+                  }} />
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="absolute text-destructive/20 font-bold whitespace-nowrap select-none"
+                      style={{
+                        fontSize: "14px",
+                        transform: `rotate(-35deg)`,
+                        top: `${10 + (i % 3) * 30}%`,
+                        left: `${-10 + Math.floor(i / 3) * 50}%`,
+                        letterSpacing: "2px",
+                      }}
+                    >
+                      PROPRIEDADE BELLARUS NÃO COPIE
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* PDF Preview - outros tipos */}
+      {!isBombeiroMilitar && blobUrl && (
         <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
           <iframe
             src={blobUrl}
