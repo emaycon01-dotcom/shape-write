@@ -38,8 +38,8 @@ export default function DashboardHome() {
         { title: "Serviços", desc: "Gerar documentos", icon: FileText, url: "/dashboard/documents", color: "text-primary" },
         { title: "Histórico", desc: "Serviços gerados", icon: History, url: "/dashboard/history", color: "text-yellow-400" },
         { title: "Revendedores", desc: "Gerenciar equipe", icon: Users, url: "/dashboard/revendedores", color: "text-success" },
-        { title: "Transferir", desc: "Enviar créditos", icon: Send, url: "/dashboard/transferir", color: "text-primary" },
-        { title: "Métricas", desc: "Histórico & ranking", icon: BarChart3, url: "/dashboard/metricas", color: "text-success" },
+        { title: "Usuários", desc: "Gerenciar usuários", icon: Users, url: "/dashboard/admin/usuarios", color: "text-accent" },
+        { title: "Financeiro", desc: "Depósitos e lucro", icon: CreditCard, url: "/dashboard/admin/financeiro", color: "text-success" },
         { title: "Recarregar", desc: "Comprar créditos", icon: CreditCard, url: "/dashboard/recarregar", color: "text-primary" },
       ]
     : [

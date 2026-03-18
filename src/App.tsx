@@ -23,10 +23,7 @@ const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
 const VerifyPage = lazy(() => import("./pages/VerifyPage"));
 const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
 const PlanosPage = lazy(() => import("./pages/PlanosPage"));
-const TransferirPage = lazy(() => import("./pages/TransferirPage"));
 const RevendedoresPage = lazy(() => import("./pages/RevendedoresPage"));
-const MetricasPage = lazy(() => import("./pages/MetricasPage"));
-const ConfiguracoesPage = lazy(() => import("./pages/ConfiguracoesPage"));
 const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
 const RemovedorFundoPage = lazy(() => import("./pages/RemovedorFundoPage"));
 const MesclagemRostoPage = lazy(() => import("./pages/MesclagemRostoPage"));
@@ -56,6 +53,15 @@ const ChaAmadorPreviewPage = lazy(() => import("./pages/ChaAmadorPreviewPage"));
 const CnhNauticaFormPage = lazy(() => import("./pages/CnhNauticaFormPage"));
 const CnhNauticaPreviewPage = lazy(() => import("./pages/CnhNauticaPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Admin pages
+const AdminUsuariosPage = lazy(() => import("./pages/admin/AdminUsuariosPage"));
+const AdminGeracoesPage = lazy(() => import("./pages/admin/AdminGeracoesPage"));
+const AdminConcluidosPage = lazy(() => import("./pages/admin/AdminConcluidosPage"));
+const AdminCanceladosPage = lazy(() => import("./pages/admin/AdminCanceladosPage"));
+const AdminFinanceiroPage = lazy(() => import("./pages/admin/AdminFinanceiroPage"));
+const AdminReparticaoPage = lazy(() => import("./pages/admin/AdminReparticaoPage"));
+const AdminBloqueadosPage = lazy(() => import("./pages/admin/AdminBloqueadosPage"));
 
 const queryClient = new QueryClient();
 
@@ -97,10 +103,7 @@ const App = () => (
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
                   <Route path="planos" element={<PlanosPage />} />
-                  <Route path="transferir" element={<TransferirPage />} />
                   <Route path="revendedores" element={<RevendedoresPage />} />
-                  <Route path="metricas" element={<MetricasPage />} />
-                  <Route path="configuracoes" element={<ConfiguracoesPage />} />
                   <Route path="template-cnh" element={<TemplateCnhPage />} />
                   <Route path="template-align" element={<TemplateAlignPage />} />
                   <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
@@ -126,6 +129,14 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
+                  {/* Admin routes */}
+                  <Route path="admin/usuarios" element={<AdminUsuariosPage />} />
+                  <Route path="admin/geracoes" element={<AdminGeracoesPage />} />
+                  <Route path="admin/concluidos" element={<AdminConcluidosPage />} />
+                  <Route path="admin/cancelados" element={<AdminCanceladosPage />} />
+                  <Route path="admin/financeiro" element={<AdminFinanceiroPage />} />
+                  <Route path="admin/reparticao" element={<AdminReparticaoPage />} />
+                  <Route path="admin/bloqueados" element={<AdminBloqueadosPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
