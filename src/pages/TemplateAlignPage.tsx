@@ -589,6 +589,23 @@ const bombeiroMilitarFrenteFields: FieldDef[] = [
   { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 97, y: 118, fontSize: 8 },
 ];
 
+const operadorMaquinasFrenteFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 15, y: 40, fontSize: 4, w: 50, h: 60, color: "#999" },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 80, y: 50, fontSize: 8 },
+  { id: "rg_orgao_uf", label: "RG/Órgão/UF", sampleText: "12.345.678 SSP SP", x: 80, y: 65, fontSize: 7 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 80, y: 80, fontSize: 7 },
+  { id: "nascimento", label: "Nascimento", sampleText: "01/01/1990", x: 80, y: 95, fontSize: 7 },
+  { id: "categoria", label: "Categoria", sampleText: "D", x: 80, y: 110, fontSize: 8 },
+  { id: "filiacao", label: "Filiação", sampleText: "SOUZA E SOUZINHA", x: 80, y: 125, fontSize: 7 },
+];
+
+const operadorMaquinasVersoFields: FieldDef[] = [
+  { id: "equipamento", label: "Equipamento", sampleText: "Retroescavadeira", x: 30, y: 30, fontSize: 7 },
+  { id: "nivel", label: "Nível", sampleText: "2", x: 30, y: 50, fontSize: 7 },
+  { id: "emissao", label: "Emissão", sampleText: "01/06/2024", x: 30, y: 70, fontSize: 7 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 30, y: 90, fontSize: 7 },
+];
+
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
   bombeiro: [
     { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 54, y: 50, fontSize: 4, w: 142, h: 189, color: "#999" },
@@ -672,6 +689,91 @@ function BombeiroMilitarAlignContent() {
   );
 }
 
+const OPERADOR_MAQUINAS_W = 595;
+const OPERADOR_MAQUINAS_H = 842;
+
+function OperadorMaquinasAlignContent() {
+  const { toast } = useToast();
+  const [frenteImgUrl, setFrenteImgUrl] = useState<string | null>(null);
+  const [versoImgUrl, setVersoImgUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Convert PDF pages to images for alignment preview
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-carteira-operador-maquinas.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const { PDFDocument } = await import("pdf-lib");
+        const srcDoc = await PDFDocument.load(arrayBuffer);
+        const pageCount = srcDoc.getPageCount();
+
+        for (let i = 0; i < Math.min(pageCount, 2); i++) {
+          const newDoc = await PDFDocument.create();
+          const [copied] = await newDoc.copyPages(srcDoc, [i]);
+          newDoc.addPage(copied);
+          const pdfBytes = await newDoc.save();
+          const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          if (i === 0) setVersoImgUrl(url);
+          else setFrenteImgUrl(url);
+        }
+      } catch (e) {
+        console.error("Error loading operador maquinas template:", e);
+      }
+    })();
+  }, []);
+
+  const handleCopyBoth = () => {
+    const frenteRaw = localStorage.getItem("carteirinha-operador-maquinas-frente-field-positions");
+    const versoRaw = localStorage.getItem("carteirinha-operador-maquinas-verso-field-positions");
+    const combined = {
+      frente: frenteRaw ? JSON.parse(frenteRaw) : null,
+      verso: versoRaw ? JSON.parse(versoRaw) : null,
+    };
+    navigator.clipboard.writeText(JSON.stringify(combined, null, 2));
+    toast({ title: "Coordenadas copiadas", description: "Frente e verso copiados para a área de transferência." });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleCopyBoth}>
+          <Copy className="w-4 h-4 mr-2" /> Copiar Frente + Verso
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        ⚠️ Para o alinhamento visual, gere o documento com dados de teste e use o preview para ajustar as posições. As coordenadas podem ser editadas manualmente abaixo.
+      </p>
+      <Tabs defaultValue="frente" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="frente">FRENTE</TabsTrigger>
+          <TabsTrigger value="verso">VERSO</TabsTrigger>
+        </TabsList>
+        <TabsContent value="frente">
+          <GenericAlignContent
+            templateUrl=""
+            storageKey="carteirinha-operador-maquinas-frente-field-positions"
+            title="Alinhamento — Operador de Máquinas (Frente)"
+            fields={operadorMaquinasFrenteFields}
+            pageWidth={OPERADOR_MAQUINAS_W}
+            pageHeight={OPERADOR_MAQUINAS_H}
+          />
+        </TabsContent>
+        <TabsContent value="verso">
+          <GenericAlignContent
+            templateUrl=""
+            storageKey="carteirinha-operador-maquinas-verso-field-positions"
+            title="Alinhamento — Operador de Máquinas (Verso)"
+            fields={operadorMaquinasVersoFields}
+            pageWidth={OPERADOR_MAQUINAS_W}
+            pageHeight={OPERADOR_MAQUINAS_H}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -721,6 +823,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-porteiro">PORTEIRO</TabsTrigger>
               <TabsTrigger value="cart-agente">AGENTE FIN.</TabsTrigger>
               <TabsTrigger value="cart-bombeiro-militar">BOMB. MILITAR</TabsTrigger>
+              <TabsTrigger value="cart-operador-maquinas">OPER. MÁQ.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
@@ -742,6 +845,9 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="cart-bombeiro-militar">
               <BombeiroMilitarAlignContent />
+            </TabsContent>
+            <TabsContent value="cart-operador-maquinas">
+              <OperadorMaquinasAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>

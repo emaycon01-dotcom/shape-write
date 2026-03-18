@@ -42,6 +42,13 @@ serve(async (req) => {
       contato_emergencia_2,
       foto_base64,
       template_pdf_base64,
+      // operador-maquinas specific fields
+      rg_orgao_uf,
+      categoria,
+      filiacao,
+      equipamento,
+      nivel,
+      data_emissao,
     } = body;
 
     if (!template_pdf_base64) {
@@ -74,27 +81,48 @@ serve(async (req) => {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    if (tipo === "bombeiro-militar") {
+    if (tipo === "bombeiro-militar" || tipo === "operador-maquinas") {
       const versoPage = pages[0];
       const frentePage = pages[1] ?? pages[0];
 
-      const defaultVersoPositions: Record<string, { x: number; y: number; fontSize: number }> = {
-        cpf: { x: 42, y: 20, fontSize: 8 },
-        tipo_sanguineo: { x: 163, y: 25, fontSize: 8 },
-        rg: { x: 42, y: 47, fontSize: 8 },
-        data_expedicao_1: { x: 147, y: 51, fontSize: 8 },
-      };
+      // Default positions per tipo
+      let defaultVersoPositions: Record<string, { x: number; y: number; fontSize: number }>;
+      let defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }>;
+      let rawPhoto = { x: 20, y: 79, w: 45, h: 50 };
 
-      const defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }> = {
-        numero_registro: { x: 81, y: 37, fontSize: 8 },
-        data_expedicao_2: { x: 161, y: 37, fontSize: 8 },
-        validade: { x: 169, y: 53, fontSize: 5.2 },
-        nome: { x: 97, y: 118, fontSize: 8 },
-      };
+      if (tipo === "operador-maquinas") {
+        defaultFrentePositions = {
+          nome: { x: 80, y: 50, fontSize: 8 },
+          rg_orgao_uf: { x: 80, y: 65, fontSize: 7 },
+          cpf: { x: 80, y: 80, fontSize: 7 },
+          nascimento: { x: 80, y: 95, fontSize: 7 },
+          categoria: { x: 80, y: 110, fontSize: 8 },
+          filiacao: { x: 80, y: 125, fontSize: 7 },
+        };
+        defaultVersoPositions = {
+          equipamento: { x: 30, y: 30, fontSize: 7 },
+          nivel: { x: 30, y: 50, fontSize: 7 },
+          emissao: { x: 30, y: 70, fontSize: 7 },
+          validade: { x: 30, y: 90, fontSize: 7 },
+        };
+        rawPhoto = { x: 15, y: 40, w: 50, h: 60 };
+      } else {
+        defaultVersoPositions = {
+          cpf: { x: 42, y: 20, fontSize: 8 },
+          tipo_sanguineo: { x: 163, y: 25, fontSize: 8 },
+          rg: { x: 42, y: 47, fontSize: 8 },
+          data_expedicao_1: { x: 147, y: 51, fontSize: 8 },
+        };
+        defaultFrentePositions = {
+          numero_registro: { x: 81, y: 37, fontSize: 8 },
+          data_expedicao_2: { x: 161, y: 37, fontSize: 8 },
+          validade: { x: 169, y: 53, fontSize: 5.2 },
+          nome: { x: 97, y: 118, fontSize: 8 },
+        };
+      }
 
       let rawVersoPositions = { ...defaultVersoPositions };
       let rawFrentePositions = { ...defaultFrentePositions };
-      let rawPhoto = { x: 20, y: 79, w: 45, h: 50 };
 
       const applyPositions = (
         source: Record<string, any> | null | undefined,
@@ -166,15 +194,30 @@ serve(async (req) => {
         });
       };
 
-      drawTextOnPage(versoPage, versoPositions, cpf || "", "cpf");
-      drawTextOnPage(versoPage, versoPositions, tipo_sanguineo || "", "tipo_sanguineo");
-      drawTextOnPage(versoPage, versoPositions, rg || "", "rg");
-      drawTextOnPage(versoPage, versoPositions, data_expedicao_1 || "", "data_expedicao_1");
-
-      drawTextOnPage(frentePage, frentePositions, numero_registro || "", "numero_registro");
-      drawTextOnPage(frentePage, frentePositions, data_expedicao_2 || "", "data_expedicao_2");
-      drawTextOnPage(frentePage, frentePositions, data_validade || "", "validade");
-      drawTextOnPage(frentePage, frentePositions, nome_completo || "", "nome");
+      if (tipo === "operador-maquinas") {
+        // Frente fields
+        drawTextOnPage(frentePage, frentePositions, nome_completo || "", "nome");
+        drawTextOnPage(frentePage, frentePositions, rg_orgao_uf || "", "rg_orgao_uf");
+        drawTextOnPage(frentePage, frentePositions, cpf || "", "cpf");
+        drawTextOnPage(frentePage, frentePositions, data_nascimento || "", "nascimento");
+        drawTextOnPage(frentePage, frentePositions, categoria || "", "categoria");
+        drawTextOnPage(frentePage, frentePositions, filiacao || "", "filiacao");
+        // Verso fields
+        drawTextOnPage(versoPage, versoPositions, equipamento || "", "equipamento");
+        drawTextOnPage(versoPage, versoPositions, nivel || "", "nivel");
+        drawTextOnPage(versoPage, versoPositions, data_emissao || "", "emissao");
+        drawTextOnPage(versoPage, versoPositions, data_validade || "", "validade");
+      } else {
+        // Bombeiro militar fields
+        drawTextOnPage(versoPage, versoPositions, cpf || "", "cpf");
+        drawTextOnPage(versoPage, versoPositions, tipo_sanguineo || "", "tipo_sanguineo");
+        drawTextOnPage(versoPage, versoPositions, rg || "", "rg");
+        drawTextOnPage(versoPage, versoPositions, data_expedicao_1 || "", "data_expedicao_1");
+        drawTextOnPage(frentePage, frentePositions, numero_registro || "", "numero_registro");
+        drawTextOnPage(frentePage, frentePositions, data_expedicao_2 || "", "data_expedicao_2");
+        drawTextOnPage(frentePage, frentePositions, data_validade || "", "validade");
+        drawTextOnPage(frentePage, frentePositions, nome_completo || "", "nome");
+      }
 
       if (foto_base64) {
         try {
@@ -192,7 +235,7 @@ serve(async (req) => {
             height: rawPhoto.h,
           });
         } catch (e) {
-          console.error("Error embedding Bombeiro Militar photo:", e);
+          console.error("Error embedding photo:", e);
         }
       }
 

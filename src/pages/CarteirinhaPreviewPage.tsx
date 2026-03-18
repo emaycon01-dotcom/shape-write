@@ -46,7 +46,7 @@ export default function CarteirinhaPreviewPage() {
 
   const tipo = formData?.tipo || "bombeiro";
   const tipoLabel = formData?.tipoLabel || "Carteirinha";
-  const isBombeiroMilitar = tipo === "bombeiro-militar";
+  const isMultiPage = tipo === "bombeiro-militar" || tipo === "operador-maquinas";
 
   const fileName = useMemo(() => {
     const safeName = (formData?.nomeCompleto || tipo)
@@ -62,7 +62,7 @@ export default function CarteirinhaPreviewPage() {
   useEffect(() => {
     if (!pdfBase64) return;
 
-    if (isBombeiroMilitar) {
+    if (isMultiPage) {
       splitPdfPages(pdfBase64).then((urls) => {
         setPageUrls(urls);
       });
@@ -190,7 +190,7 @@ export default function CarteirinhaPreviewPage() {
       </p>
 
       {/* PDF Preview - Bombeiro Militar (frente + verso) */}
-      {isBombeiroMilitar && pageUrls.length > 0 && (
+      {isMultiPage && pageUrls.length > 0 && (
         <div className="space-y-4 mb-6">
           {pageUrls.map((url, idx) => (
             <div key={idx} className="relative glass rounded-xl overflow-hidden" style={{ height: "35vh" }}>
@@ -230,7 +230,7 @@ export default function CarteirinhaPreviewPage() {
       )}
 
       {/* PDF Preview - outros tipos */}
-      {!isBombeiroMilitar && blobUrl && (
+      {!isMultiPage && blobUrl && (
         <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
           <iframe
             src={blobUrl}
