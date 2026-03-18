@@ -84,8 +84,10 @@ serve(async (req) => {
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
     if (tipo === "bombeiro-militar" || tipo === "operador-maquinas" || tipo === "seguranca-escolar") {
-      const versoPage = pages[0];
-      const frentePage = pages[1] ?? pages[0];
+      // For seguranca-escolar: page 0 = frente, page 1 = verso
+      // For others: page 0 = verso, page 1 = frente
+      const versoPage = tipo === "seguranca-escolar" ? (pages[1] ?? pages[0]) : pages[0];
+      const frentePage = tipo === "seguranca-escolar" ? pages[0] : (pages[1] ?? pages[0]);
 
       // Default positions per tipo
       let defaultVersoPositions: Record<string, { x: number; y: number; fontSize: number }>;
