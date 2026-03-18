@@ -190,7 +190,7 @@ export default function CarteirinhaPreviewPage() {
       </p>
 
       {/* PDF Preview - Bombeiro Militar (frente + verso) */}
-      {isBombeiroMilitar && pageUrls.length > 0 && (
+      {isMultiPage && pageUrls.length > 0 && (
         <div className="space-y-4 mb-6">
           {pageUrls.map((url, idx) => (
             <div key={idx} className="relative glass rounded-xl overflow-hidden" style={{ height: "35vh" }}>
