@@ -848,6 +848,67 @@ function ChaAmadorAlignContent() {
   );
 }
 
+const operadorMaquinasDigitalFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 280, fontSize: 8, w: 150, h: 190, color: "#999" },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 300, y: 310, fontSize: 14 },
+  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 300, y: 370, fontSize: 14 },
+  { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 300, y: 430, fontSize: 14 },
+  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 300, y: 490, fontSize: 14 },
+  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 300, y: 550, fontSize: 14 },
+  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 300, y: 610, fontSize: 14 },
+];
+
+function OperadorMaquinasDigitalAlignContent() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: PAGE_W, h: PAGE_H });
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-carteira-operador-maquinas-digital.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const { PDFDocument } = await import("pdf-lib");
+        const srcDoc = await PDFDocument.load(arrayBuffer);
+        const page = srcDoc.getPage(0);
+        const { width, height } = page.getSize();
+        setPdfPageSize({ w: Math.round(width), h: Math.round(height) });
+
+        const newDoc = await PDFDocument.create();
+        const [copied] = await newDoc.copyPages(srcDoc, [0]);
+        newDoc.addPage(copied);
+        const pdfBytes = await newDoc.save();
+        const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
+        objectUrl = URL.createObjectURL(blob);
+        setPdfUrl(objectUrl);
+      } catch (e) {
+        console.error("Error loading operador maquinas digital template:", e);
+      }
+    })();
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      {pdfUrl ? (
+        <GenericAlignContent
+          templateUrl={pdfUrl}
+          templateIsPdf
+          storageKey="operador-maquinas-digital-field-positions"
+          title="Alinhamento — Operador de Máquinas Digital"
+          fields={operadorMaquinasDigitalFields}
+          pageWidth={pdfPageSize.w}
+          pageHeight={pdfPageSize.h}
+        />
+      ) : (
+        <div className="flex items-center justify-center py-10">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
