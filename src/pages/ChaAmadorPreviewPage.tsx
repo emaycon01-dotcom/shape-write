@@ -151,7 +151,7 @@ export default function ChaAmadorPreviewPage() {
       if (!pdfUrl) throw new Error("Falha ao gerar PDF");
       setPdfDataUrl(pdfUrl);
       deductCredit();
-      addDocument({
+      await addDocument({
         name: formData.nome || "",
         identification: formData.inscricao || "",
         date: new Date().toLocaleDateString("pt-BR"),
