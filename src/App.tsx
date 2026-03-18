@@ -53,6 +53,8 @@ const ExameToxicologicoFormPage = lazy(() => import("./pages/ExameToxicologicoFo
 const ExameToxicologicoPreviewPage = lazy(() => import("./pages/ExameToxicologicoPreviewPage"));
 const ChaAmadorFormPage = lazy(() => import("./pages/ChaAmadorFormPage"));
 const ChaAmadorPreviewPage = lazy(() => import("./pages/ChaAmadorPreviewPage"));
+const CnhNauticaFormPage = lazy(() => import("./pages/CnhNauticaFormPage"));
+const CnhNauticaPreviewPage = lazy(() => import("./pages/CnhNauticaPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
