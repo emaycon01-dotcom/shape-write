@@ -689,6 +689,91 @@ function BombeiroMilitarAlignContent() {
   );
 }
 
+const OPERADOR_MAQUINAS_W = 595;
+const OPERADOR_MAQUINAS_H = 842;
+
+function OperadorMaquinasAlignContent() {
+  const { toast } = useToast();
+  const [frenteImgUrl, setFrenteImgUrl] = useState<string | null>(null);
+  const [versoImgUrl, setVersoImgUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Convert PDF pages to images for alignment preview
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-carteira-operador-maquinas.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const { PDFDocument } = await import("pdf-lib");
+        const srcDoc = await PDFDocument.load(arrayBuffer);
+        const pageCount = srcDoc.getPageCount();
+
+        for (let i = 0; i < Math.min(pageCount, 2); i++) {
+          const newDoc = await PDFDocument.create();
+          const [copied] = await newDoc.copyPages(srcDoc, [i]);
+          newDoc.addPage(copied);
+          const pdfBytes = await newDoc.save();
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          if (i === 0) setVersoImgUrl(url);
+          else setFrenteImgUrl(url);
+        }
+      } catch (e) {
+        console.error("Error loading operador maquinas template:", e);
+      }
+    })();
+  }, []);
+
+  const handleCopyBoth = () => {
+    const frenteRaw = localStorage.getItem("carteirinha-operador-maquinas-frente-field-positions");
+    const versoRaw = localStorage.getItem("carteirinha-operador-maquinas-verso-field-positions");
+    const combined = {
+      frente: frenteRaw ? JSON.parse(frenteRaw) : null,
+      verso: versoRaw ? JSON.parse(versoRaw) : null,
+    };
+    navigator.clipboard.writeText(JSON.stringify(combined, null, 2));
+    toast({ title: "Coordenadas copiadas", description: "Frente e verso copiados para a área de transferência." });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleCopyBoth}>
+          <Copy className="w-4 h-4 mr-2" /> Copiar Frente + Verso
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        ⚠️ Para o alinhamento visual, gere o documento com dados de teste e use o preview para ajustar as posições. As coordenadas podem ser editadas manualmente abaixo.
+      </p>
+      <Tabs defaultValue="frente" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="frente">FRENTE</TabsTrigger>
+          <TabsTrigger value="verso">VERSO</TabsTrigger>
+        </TabsList>
+        <TabsContent value="frente">
+          <GenericAlignContent
+            templateUrl=""
+            storageKey="carteirinha-operador-maquinas-frente-field-positions"
+            title="Alinhamento — Operador de Máquinas (Frente)"
+            fields={operadorMaquinasFrenteFields}
+            pageWidth={OPERADOR_MAQUINAS_W}
+            pageHeight={OPERADOR_MAQUINAS_H}
+          />
+        </TabsContent>
+        <TabsContent value="verso">
+          <GenericAlignContent
+            templateUrl=""
+            storageKey="carteirinha-operador-maquinas-verso-field-positions"
+            title="Alinhamento — Operador de Máquinas (Verso)"
+            fields={operadorMaquinasVersoFields}
+            pageWidth={OPERADOR_MAQUINAS_W}
+            pageHeight={OPERADOR_MAQUINAS_H}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
