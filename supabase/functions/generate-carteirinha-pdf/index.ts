@@ -94,7 +94,21 @@ serve(async (req) => {
       let defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }> = {};
       let rawPhoto = { x: 20, y: 79, w: 45, h: 50 };
 
-      if (tipo === "operador-maquinas") {
+      if (tipo === "seguranca-escolar") {
+        defaultFrentePositions = {
+          photo: { x: 30, y: 120, fontSize: 4 },
+          nome: { x: 150, y: 180, fontSize: 10 },
+          cpf: { x: 150, y: 220, fontSize: 9 },
+          numero_registro: { x: 150, y: 100, fontSize: 10 },
+          data_expedicao: { x: 350, y: 100, fontSize: 9 },
+          nascimento: { x: 150, y: 300, fontSize: 9 },
+          termino_curso: { x: 350, y: 300, fontSize: 9 },
+        };
+        defaultVersoPositions = {
+          rg: { x: 250, y: 200, fontSize: 12 },
+        };
+        rawPhoto = { x: 30, y: 120, w: 100, h: 130 };
+      } else if (tipo === "operador-maquinas") {
         defaultVersoPositions = {
           nome: { x: 109, y: 46, fontSize: 8 },
           rg_orgao_uf: { x: 119, y: 62, fontSize: 7 },
