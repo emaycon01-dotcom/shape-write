@@ -1082,6 +1082,9 @@ export default function TemplateAlignPage() {
             <TabsContent value="cart-cedula-policia-pe">
               <CedulaPoliciaAlignContent />
             </TabsContent>
+            <TabsContent value="cart-cpf-fisico">
+              <CpfFisicoAlignContent />
+            </TabsContent>
           </Tabs>
         </TabsContent>
       </Tabs>
