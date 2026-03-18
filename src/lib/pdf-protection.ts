@@ -25,7 +25,7 @@ export async function protectPdf(pdfDataUrl: string): Promise<string> {
     pdfDoc.setCreator("Bellarus");
     
     const savedBytes = await pdfDoc.save();
-    const blob = new Blob([savedBytes], { type: "application/pdf" });
+    const blob = new Blob([savedBytes.buffer as ArrayBuffer], { type: "application/pdf" });
     
     return new Promise((resolve) => {
       const reader = new FileReader();
