@@ -991,14 +991,14 @@ function CpfFisicoAlignContent() {
 }
 
 const cnhNauticaFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 490, y: 170, fontSize: 8, w: 170, h: 220, color: "#999" },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "CARLOS EDUARDO DA SILVA", x: 75, y: 260, fontSize: 14 },
-  { id: "dataNascimento", label: "Nascimento", sampleText: "15/01/1990", x: 75, y: 320, fontSize: 14 },
-  { id: "rgOrgaoUf", label: "RG/Órgão/UF", sampleText: "12345678 SSP/SP", x: 75, y: 380, fontSize: 14 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 75, y: 440, fontSize: 14 },
-  { id: "inscricao", label: "Inscrição", sampleText: "215A2023852176", x: 75, y: 500, fontSize: 14 },
-  { id: "localEmissao", label: "Local da Emissão", sampleText: "CAPITANIA DOS PORTOS DE SÃO PAULO", x: 75, y: 560, fontSize: 12 },
-  { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 75, y: 620, fontSize: 14 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 725, y: 497, fontSize: 8, w: 170, h: 220, color: "#999" },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "CARLOS EDUARDO DA SILVA", x: 94, y: 221, fontSize: 28 },
+  { id: "dataNascimento", label: "Nascimento", sampleText: "15/01/1990", x: 90, y: 296, fontSize: 28 },
+  { id: "rgOrgaoUf", label: "RG/Órgão/UF", sampleText: "12345678 SSP/SP", x: 259, y: 296, fontSize: 28 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 518, y: 297, fontSize: 26 },
+  { id: "inscricao", label: "Inscrição", sampleText: "215A2023852176", x: 95, y: 434, fontSize: 28 },
+  { id: "localEmissao", label: "Local da Emissão", sampleText: "CAPITANIA DOS PORTOS DE SÃO PAULO", x: 94, y: 717, fontSize: 20 },
+  { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 542, y: 715, fontSize: 27 },
 ];
 
 function CnhNauticaAlignContent() {

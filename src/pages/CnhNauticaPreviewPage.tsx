@@ -19,14 +19,14 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  photo: { x: 490, y: 170, w: 170, h: 220, fontSize: 8 },
-  nomeCompleto: { x: 75, y: 260, fontSize: 14 },
-  dataNascimento: { x: 75, y: 320, fontSize: 14 },
-  rgOrgaoUf: { x: 75, y: 380, fontSize: 14 },
-  cpf: { x: 75, y: 440, fontSize: 14 },
-  inscricao: { x: 75, y: 500, fontSize: 14 },
-  localEmissao: { x: 75, y: 560, fontSize: 12 },
-  validade: { x: 75, y: 620, fontSize: 14 },
+  photo: { x: 725, y: 497, w: 170, h: 220, fontSize: 8 },
+  nomeCompleto: { x: 94, y: 221, fontSize: 28 },
+  dataNascimento: { x: 90, y: 296, fontSize: 28 },
+  rgOrgaoUf: { x: 259, y: 296, fontSize: 28 },
+  cpf: { x: 518, y: 297, fontSize: 26 },
+  inscricao: { x: 95, y: 434, fontSize: 28 },
+  localEmissao: { x: 94, y: 717, fontSize: 20 },
+  validade: { x: 542, y: 715, fontSize: 27 },
 };
 
 export default function CnhNauticaPreviewPage() {
