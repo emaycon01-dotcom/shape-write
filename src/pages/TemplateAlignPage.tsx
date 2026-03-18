@@ -17,6 +17,7 @@ import templateBombeiroMilitarVersoUrl from "@/assets/template-carteira-bombeiro
 import templateSegurancaEscolarFrenteUrl from "@/assets/template-carteira-seguranca-escolar-frente.jpg";
 import templateSegurancaEscolarVersoUrl from "@/assets/template-carteira-seguranca-escolar-verso.jpg";
 import templateChaAmadorUrl from "@/assets/template-cha-amador.jpg";
+import templateCpfFisicoUrl from "@/assets/template-cpf-fisico.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
@@ -970,6 +971,25 @@ function OperadorMaquinasDigitalAlignContent() {
   );
 }
 
+const cpfFisicoFields: FieldDef[] = [
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 200, y: 300, fontSize: 18 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "EMILY BARBOSA DO NASCIMENTO", x: 200, y: 400, fontSize: 16 },
+  { id: "dataNascimento", label: "Data de Nascimento", sampleText: "15/01/1990", x: 200, y: 480, fontSize: 14 },
+  { id: "data", label: "Data", sampleText: "24/02/2026", x: 400, y: 700, fontSize: 12 },
+  { id: "hora", label: "Hora", sampleText: "14:35", x: 300, y: 700, fontSize: 12 },
+];
+
+function CpfFisicoAlignContent() {
+  return (
+    <GenericAlignContent
+      templateUrl={templateCpfFisicoUrl}
+      storageKey="cpf-fisico-field-positions"
+      title="Alinhamento — CPF Físico"
+      fields={cpfFisicoFields}
+    />
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -1027,6 +1047,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-operador-maquinas-digital" className="text-xs">OPER. MÁQ. DIG.</TabsTrigger>
               <TabsTrigger value="cart-seguranca-escolar" className="text-xs">SEG. ESC.</TabsTrigger>
               <TabsTrigger value="cart-cedula-policia-pe" className="text-xs">CÉD. POL. PE</TabsTrigger>
+              <TabsTrigger value="cart-cpf-fisico" className="text-xs">CPF FÍSICO</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
@@ -1060,6 +1081,9 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="cart-cedula-policia-pe">
               <CedulaPoliciaAlignContent />
+            </TabsContent>
+            <TabsContent value="cart-cpf-fisico">
+              <CpfFisicoAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>
