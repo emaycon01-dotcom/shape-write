@@ -210,7 +210,17 @@ serve(async (req) => {
         });
       };
 
-      if (tipo === "operador-maquinas") {
+      if (tipo === "seguranca-escolar") {
+        // Frente: all fields except RG
+        drawTextOnPage(frentePage, frentePositions, nome_completo || "", "nome");
+        drawTextOnPage(frentePage, frentePositions, cpf || "", "cpf");
+        drawTextOnPage(frentePage, frentePositions, numero_registro || "", "numero_registro");
+        drawTextOnPage(frentePage, frentePositions, data_expedicao_1 || "", "data_expedicao");
+        drawTextOnPage(frentePage, frentePositions, data_nascimento || "", "nascimento");
+        drawTextOnPage(frentePage, frentePositions, termino_curso || "", "termino_curso");
+        // Verso: only RG
+        drawTextOnPage(versoPage, versoPositions, rg || "", "rg");
+      } else if (tipo === "operador-maquinas") {
         drawTextOnPage(versoPage, versoPositions, nome_completo || "", "nome");
         drawTextOnPage(versoPage, versoPositions, rg_orgao_uf || "", "rg_orgao_uf");
         drawTextOnPage(versoPage, versoPositions, cpf || "", "cpf");
