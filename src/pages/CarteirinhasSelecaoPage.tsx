@@ -60,10 +60,10 @@ const carteirinhas = [
   },
   {
     id: "cnh-nautica-sp",
-    name: "Carteira de CNH Náutica Física (SP)",
-    description: "Carteira de habilitação náutica física do estado de São Paulo",
+    name: "Arrais Amador Físico",
+    description: "Carteira de Arrais Amador com foto e dados completos",
     icon: IdCard,
-    route: "",
+    route: "/dashboard/documentos-fisicos/carteirinhas/cnh-nautica",
     credits: 1.5,
   },
   {

@@ -53,6 +53,8 @@ const ExameToxicologicoFormPage = lazy(() => import("./pages/ExameToxicologicoFo
 const ExameToxicologicoPreviewPage = lazy(() => import("./pages/ExameToxicologicoPreviewPage"));
 const ChaAmadorFormPage = lazy(() => import("./pages/ChaAmadorFormPage"));
 const ChaAmadorPreviewPage = lazy(() => import("./pages/ChaAmadorPreviewPage"));
+const CnhNauticaFormPage = lazy(() => import("./pages/CnhNauticaFormPage"));
+const CnhNauticaPreviewPage = lazy(() => import("./pages/CnhNauticaPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -120,6 +122,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe/preview" element={<CedulaPoliciaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/cpf-fisico" element={<CpfFisicoFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/cpf-fisico/preview" element={<CpfFisicoPreviewPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cnh-nautica" element={<CnhNauticaFormPage />} />
+                  <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
                 </Route>

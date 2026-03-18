@@ -990,6 +990,68 @@ function CpfFisicoAlignContent() {
   );
 }
 
+const cnhNauticaFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 490, y: 170, fontSize: 8, w: 170, h: 220, color: "#999" },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "CARLOS EDUARDO DA SILVA", x: 75, y: 260, fontSize: 14 },
+  { id: "dataNascimento", label: "Nascimento", sampleText: "15/01/1990", x: 75, y: 320, fontSize: 14 },
+  { id: "rgOrgaoUf", label: "RG/Órgão/UF", sampleText: "12345678 SSP/SP", x: 75, y: 380, fontSize: 14 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 75, y: 440, fontSize: 14 },
+  { id: "inscricao", label: "Inscrição", sampleText: "215A2023852176", x: 75, y: 500, fontSize: 14 },
+  { id: "localEmissao", label: "Local da Emissão", sampleText: "CAPITANIA DOS PORTOS DE SÃO PAULO", x: 75, y: 560, fontSize: 12 },
+  { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 75, y: 620, fontSize: 14 },
+];
+
+function CnhNauticaAlignContent() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: PAGE_W, h: PAGE_H });
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-cha-amador.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const { PDFDocument } = await import("pdf-lib");
+        const srcDoc = await PDFDocument.load(arrayBuffer);
+        const page = srcDoc.getPage(0);
+        const { width, height } = page.getSize();
+        setPdfPageSize({ w: Math.round(width), h: Math.round(height) });
+
+        const newDoc = await PDFDocument.create();
+        const [copied] = await newDoc.copyPages(srcDoc, [0]);
+        newDoc.addPage(copied);
+        const pdfBytes = await newDoc.save();
+        const blob = new Blob([(pdfBytes as Uint8Array).buffer as ArrayBuffer], { type: "application/pdf" });
+        objectUrl = URL.createObjectURL(blob);
+        setPdfUrl(objectUrl);
+      } catch (e) {
+        console.error("Error loading cnh nautica template:", e);
+      }
+    })();
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      {pdfUrl ? (
+        <GenericAlignContent
+          templateUrl={pdfUrl}
+          templateIsPdf
+          storageKey="cnh-nautica-field-positions"
+          title="Alinhamento — Arrais Amador Físico"
+          fields={cnhNauticaFields}
+          pageWidth={pdfPageSize.w}
+          pageHeight={pdfPageSize.h}
+        />
+      ) : (
+        <div className="flex items-center justify-center py-10">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -1048,6 +1110,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cart-seguranca-escolar" className="text-xs">SEG. ESC.</TabsTrigger>
               <TabsTrigger value="cart-cedula-policia-pe" className="text-xs">CÉD. POL. PE</TabsTrigger>
               <TabsTrigger value="cart-cpf-fisico" className="text-xs">CPF FÍSICO</TabsTrigger>
+              <TabsTrigger value="cart-cnh-nautica" className="text-xs">ARRAIS AMADOR</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
@@ -1084,6 +1147,9 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="cart-cpf-fisico">
               <CpfFisicoAlignContent />
+            </TabsContent>
+            <TabsContent value="cart-cnh-nautica">
+              <CnhNauticaAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>
