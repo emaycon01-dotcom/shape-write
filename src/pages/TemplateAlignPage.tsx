@@ -12,7 +12,8 @@ import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
 import templateBombeiroUrl from "@/assets/template-carteira-bombeiro.jpg";
 import templatePorteiroUrl from "@/assets/template-carteira-porteiro.jpg";
 import templateAgenteUrl from "@/assets/template-carteira-agente-financeiro.jpg";
-import templateBombeiroMilitarUrl from "@/assets/template-carteira-bombeiro-militar.jpg";
+import templateBombeiroMilitarFrenteUrl from "@/assets/template-carteira-bombeiro-militar-frente.jpg";
+import templateBombeiroMilitarVersoUrl from "@/assets/template-carteira-bombeiro-militar-verso.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
@@ -20,6 +21,8 @@ const ExameToxicologicoAlignPage = lazy(() => import("./ExameToxicologicoAlignPa
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
+const BOMBEIRO_MILITAR_W = 242.88;
+const BOMBEIRO_MILITAR_H = 153;
 
 interface FieldDef {
   id: string;
@@ -190,16 +193,38 @@ function GenericAlignContent({
   storageKey,
   title,
   fields: defaultFieldsProp,
+  pageWidth = PAGE_W,
+  pageHeight = PAGE_H,
 }: {
   templateUrl: string;
   storageKey: string;
   title: string;
   fields: FieldDef[];
+  pageWidth?: number;
+  pageHeight?: number;
 }) {
+  const sanitizeFields = useCallback((savedFields: FieldDef[]) => {
+    if (!Array.isArray(savedFields) || savedFields.length !== defaultFieldsProp.length) {
+      return defaultFieldsProp;
+    }
+
+    const valid = savedFields.every((field) => {
+      const withinBounds = field.x >= 0 && field.y >= 0 && field.x <= pageWidth && field.y <= pageHeight;
+      const validSize = (field.w === undefined || field.w <= pageWidth) && (field.h === undefined || field.h <= pageHeight);
+      return withinBounds && validSize;
+    });
+
+    return valid ? savedFields : defaultFieldsProp;
+  }, [defaultFieldsProp, pageHeight, pageWidth]);
+
   const [fields, setFields] = useState<FieldDef[]>(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        return sanitizeFields(JSON.parse(saved));
+      } catch {
+        return defaultFieldsProp;
+      }
     }
     return defaultFieldsProp;
   });
@@ -213,13 +238,17 @@ function GenericAlignContent({
   useEffect(() => {
     const updateScale = () => {
       if (containerRef.current) {
-        setScale(containerRef.current.clientWidth / PAGE_W);
+        setScale(containerRef.current.clientWidth / pageWidth);
       }
     };
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, []);
+  }, [pageWidth]);
+
+  useEffect(() => {
+    setFields((prev) => sanitizeFields(prev));
+  }, [sanitizeFields]);
 
   const updateField = useCallback((id: string, updates: Partial<FieldDef>) => {
     setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
@@ -259,7 +288,7 @@ function GenericAlignContent({
       const x = Math.round((clientX - rect.left) / scale - dragging.offsetX);
       const y = Math.round((clientY - rect.top) / scale - dragging.offsetY);
       setFields(prev => prev.map(f =>
-        f.id === dragging.id ? { ...f, x: Math.max(0, x), y: Math.max(0, y) } : f
+        f.id === dragging.id ? { ...f, x: Math.max(0, Math.min(pageWidth, x)), y: Math.max(0, Math.min(pageHeight, y)) } : f
       ));
     };
     const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
@@ -275,7 +304,7 @@ function GenericAlignContent({
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onEnd);
     };
-  }, [dragging, scale]);
+  }, [dragging, pageHeight, pageWidth, scale]);
 
   useEffect(() => {
     if (!selected) return;
@@ -289,12 +318,12 @@ function GenericAlignContent({
       if (dx === 0 && dy === 0) return;
       e.preventDefault();
       setFields(prev => prev.map(f =>
-        f.id === selected ? { ...f, x: Math.max(0, f.x + dx), y: Math.max(0, f.y + dy) } : f
+        f.id === selected ? { ...f, x: Math.max(0, Math.min(pageWidth, f.x + dx)), y: Math.max(0, Math.min(pageHeight, f.y + dy)) } : f
       ));
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [selected]);
+  }, [pageHeight, pageWidth, selected]);
 
   const savePositions = () => {
     localStorage.setItem(storageKey, JSON.stringify(fields));
@@ -314,7 +343,7 @@ function GenericAlignContent({
       return acc;
     }, {} as Record<string, any>);
     navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
-    toast({ title: "Coordenadas copiadas!", description: "Cole no chat para aplicar no edge function." });
+    toast({ title: "Coordenadas copiadas!", description: "Cole no chat para aplicar no PDF." });
   };
 
   const selectedField = fields.find(f => f.id === selected);
@@ -355,10 +384,9 @@ function GenericAlignContent({
       <div className="overflow-auto border border-border rounded-xl bg-white">
         <div
           ref={containerRef}
-          className="relative select-none"
+          className="relative select-none w-full"
           style={{
-            width: "100%",
-            aspectRatio: `${PAGE_W} / ${PAGE_H}`,
+            aspectRatio: `${pageWidth} / ${pageHeight}`,
             maxWidth: PAGE_W,
           }}
           onClick={() => setSelected(null)}
@@ -382,8 +410,8 @@ function GenericAlignContent({
                 onTouchStart={(e) => handleTouchStart(e, f.id)}
                 className="absolute cursor-move touch-none"
                 style={{
-                  top: `${(f.y / PAGE_H) * 100}%`,
-                  left: `${(f.x / PAGE_W) * 100}%`,
+                  top: `${(f.y / pageHeight) * 100}%`,
+                  left: `${(f.x / pageWidth) * 100}%`,
                   fontSize: `${f.fontSize * scale}px`,
                   fontWeight: "bold",
                   fontFamily: getCnhFont(f.id),
@@ -399,8 +427,8 @@ function GenericAlignContent({
                   letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : f.rotate ? `${1.2 * scale}px` : undefined,
                   lineHeight: f.id === "mrz" ? 1.6 : undefined,
                   ...(isBox ? {
-                    width: `${((f.w || 80) / PAGE_W) * 100}%`,
-                    height: `${((f.h || 80) / PAGE_H) * 100}%`,
+                    width: `${(((f.w || 80) / pageWidth) * 100).toFixed(4)}%`,
+                    height: `${(((f.h || 80) / pageHeight) * 100).toFixed(4)}%`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -546,17 +574,19 @@ const agenteFinanceiroTextPositions = {
   emergencia2: { x: 429, y: 789 },
 };
 
-// Bombeiro Militar specific fields
-const bombeiroMilitarFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 300, y: 80, fontSize: 4, w: 120, h: 160, color: "#999" },
-  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 100, y: 50, fontSize: 14 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 100, y: 120, fontSize: 14 },
-  { id: "rg", label: "RG", sampleText: "00.000.000", x: 100, y: 210, fontSize: 14 },
-  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 450, y: 120, fontSize: 14 },
-  { id: "data_expedicao_1", label: "Data Expedição 1", sampleText: "01/01/2024", x: 450, y: 210, fontSize: 14 },
-  { id: "data_expedicao_2", label: "Data Expedição 2", sampleText: "01/06/2024", x: 100, y: 350, fontSize: 14 },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 100, y: 300, fontSize: 14 },
-  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 450, y: 300, fontSize: 14 },
+const bombeiroMilitarVersoFields: FieldDef[] = [
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 22, y: 17, fontSize: 5.2 },
+  { id: "tipo_sanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 137, y: 17, fontSize: 5.2 },
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 22, y: 43, fontSize: 5.2 },
+  { id: "data_expedicao_1", label: "Data de Expedição", sampleText: "01/06/2024", x: 139, y: 43, fontSize: 5.2 },
+];
+
+const bombeiroMilitarFrenteFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 12, y: 61, fontSize: 4, w: 48, h: 53, color: "#999" },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "000.000.000", x: 74, y: 34, fontSize: 5.2 },
+  { id: "data_expedicao_2", label: "Data de Expedição", sampleText: "01/06/2024", x: 153, y: 34, fontSize: 5.2 },
+  { id: "validade", label: "Validade", sampleText: "01/06/2030", x: 170, y: 50, fontSize: 5.2 },
+  { id: "nome", label: "Nome", sampleText: "PEDRO DA SILVA GOMES", x: 64, y: 103, fontSize: 5.6 },
 ];
 
 const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
@@ -572,14 +602,12 @@ const carteirinhaFieldsByTipo: Record<string, FieldDef[]> = {
     { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 68, y: 41, fontSize: 4, w: 159, h: 189, color: "#999" },
     ...commonCarteirinhaFields.map(f => ({ ...f, ...agenteFinanceiroTextPositions[f.id as keyof typeof agenteFinanceiroTextPositions] }) as FieldDef),
   ],
-  "bombeiro-militar": bombeiroMilitarFields,
 };
 
 const CARTEIRINHA_TEMPLATES: Record<string, string> = {
   bombeiro: templateBombeiroUrl,
   porteiro: templatePorteiroUrl,
   "agente-financeiro": templateAgenteUrl,
-  "bombeiro-militar": templateBombeiroMilitarUrl,
 };
 
 function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string; tipoLabel: string; storageKey: string }) {
@@ -590,6 +618,37 @@ function CarteirinhaAlignContent({ tipo, tipoLabel, storageKey }: { tipo: string
       title={`Alinhamento — Carteira de ${tipoLabel}`}
       fields={carteirinhaFieldsByTipo[tipo] || carteirinhaFieldsByTipo["bombeiro"]}
     />
+  );
+}
+
+function BombeiroMilitarAlignContent() {
+  return (
+    <Tabs defaultValue="frente" className="w-full">
+      <TabsList className="mb-4">
+        <TabsTrigger value="frente">FRENTE</TabsTrigger>
+        <TabsTrigger value="verso">VERSO</TabsTrigger>
+      </TabsList>
+      <TabsContent value="frente">
+        <GenericAlignContent
+          templateUrl={templateBombeiroMilitarFrenteUrl}
+          storageKey="carteirinha-bombeiro-militar-frente-field-positions"
+          title="Alinhamento — Carteira de Bombeiro Militar (Frente)"
+          fields={bombeiroMilitarFrenteFields}
+          pageWidth={BOMBEIRO_MILITAR_W}
+          pageHeight={BOMBEIRO_MILITAR_H}
+        />
+      </TabsContent>
+      <TabsContent value="verso">
+        <GenericAlignContent
+          templateUrl={templateBombeiroMilitarVersoUrl}
+          storageKey="carteirinha-bombeiro-militar-verso-field-positions"
+          title="Alinhamento — Carteira de Bombeiro Militar (Verso)"
+          fields={bombeiroMilitarVersoFields}
+          pageWidth={BOMBEIRO_MILITAR_W}
+          pageHeight={BOMBEIRO_MILITAR_H}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }
 
@@ -662,7 +721,7 @@ export default function TemplateAlignPage() {
               <CarteirinhaAlignContent tipo="agente-financeiro" tipoLabel="Agente Financeiro" storageKey="carteirinha-agente-field-positions" />
             </TabsContent>
             <TabsContent value="cart-bombeiro-militar">
-              <CarteirinhaAlignContent tipo="bombeiro-militar" tipoLabel="Bombeiro Militar" storageKey="carteirinha-bombeiro-militar-field-positions" />
+              <BombeiroMilitarAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>

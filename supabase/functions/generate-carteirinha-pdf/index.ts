@@ -74,6 +74,137 @@ serve(async (req) => {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+    if (tipo === "bombeiro-militar") {
+      const versoPage = pages[0];
+      const frentePage = pages[1] ?? pages[0];
+
+      const defaultVersoPositions: Record<string, { x: number; y: number; fontSize: number }> = {
+        cpf: { x: 22, y: 17, fontSize: 5.2 },
+        tipo_sanguineo: { x: 137, y: 17, fontSize: 5.2 },
+        rg: { x: 22, y: 43, fontSize: 5.2 },
+        data_expedicao_1: { x: 139, y: 43, fontSize: 5.2 },
+      };
+
+      const defaultFrentePositions: Record<string, { x: number; y: number; fontSize: number }> = {
+        numero_registro: { x: 74, y: 34, fontSize: 5.2 },
+        data_expedicao_2: { x: 153, y: 34, fontSize: 5.2 },
+        validade: { x: 170, y: 50, fontSize: 5.2 },
+        nome: { x: 64, y: 103, fontSize: 5.6 },
+      };
+
+      let rawVersoPositions = { ...defaultVersoPositions };
+      let rawFrentePositions = { ...defaultFrentePositions };
+      let rawPhoto = { x: 12, y: 61, w: 48, h: 53 };
+
+      const applyPositions = (
+        source: Record<string, any> | null | undefined,
+        target: Record<string, { x: number; y: number; fontSize: number }>,
+      ) => {
+        if (!source || typeof source !== "object") return;
+
+        for (const [key, val] of Object.entries(source)) {
+          if (key === "photo") {
+            const photo = val as { x: number; y: number; w?: number; h?: number };
+            if (typeof photo?.x === "number" && typeof photo?.y === "number") {
+              rawPhoto = { x: photo.x, y: photo.y, w: photo.w || rawPhoto.w, h: photo.h || rawPhoto.h };
+            }
+            continue;
+          }
+
+          const field = val as { x: number; y: number; fontSize?: number };
+          if (typeof field?.x === "number" && typeof field?.y === "number") {
+            target[key] = {
+              x: field.x,
+              y: field.y,
+              fontSize: typeof field.fontSize === "number" ? field.fontSize : target[key]?.fontSize || 5,
+            };
+          }
+        }
+      };
+
+      if (body.field_positions) {
+        try {
+          const parsed = typeof body.field_positions === "string" ? JSON.parse(body.field_positions) : body.field_positions;
+          applyPositions(parsed?.verso ?? null, rawVersoPositions);
+          applyPositions(parsed?.frente ?? null, rawFrentePositions);
+        } catch {
+          // ignore parse errors
+        }
+      }
+
+      const getPdfPositions = (
+        targetPage: any,
+        rawMap: Record<string, { x: number; y: number; fontSize: number }>,
+      ) => {
+        const { height: pageHeight } = targetPage.getSize();
+        return Object.fromEntries(
+          Object.entries(rawMap).map(([key, raw]) => [
+            key,
+            { x: raw.x, y: pageHeight - raw.y - raw.fontSize, fontSize: raw.fontSize },
+          ]),
+        ) as Record<string, { x: number; y: number; fontSize: number }>;
+      };
+
+      const versoPositions = getPdfPositions(versoPage, rawVersoPositions);
+      const frentePositions = getPdfPositions(frentePage, rawFrentePositions);
+      const black = rgb(0, 0, 0);
+
+      const drawTextOnPage = (
+        targetPage: any,
+        pagePositions: Record<string, { x: number; y: number; fontSize: number }>,
+        text: string,
+        key: string,
+      ) => {
+        const pos = pagePositions[key];
+        if (!pos || !text) return;
+        targetPage.drawText(text, {
+          x: pos.x,
+          y: pos.y,
+          size: pos.fontSize,
+          font: fontBold,
+          color: black,
+        });
+      };
+
+      drawTextOnPage(versoPage, versoPositions, cpf || "", "cpf");
+      drawTextOnPage(versoPage, versoPositions, tipo_sanguineo || "", "tipo_sanguineo");
+      drawTextOnPage(versoPage, versoPositions, rg || "", "rg");
+      drawTextOnPage(versoPage, versoPositions, data_expedicao_1 || "", "data_expedicao_1");
+
+      drawTextOnPage(frentePage, frentePositions, numero_registro || "", "numero_registro");
+      drawTextOnPage(frentePage, frentePositions, data_expedicao_2 || "", "data_expedicao_2");
+      drawTextOnPage(frentePage, frentePositions, data_validade || "", "validade");
+      drawTextOnPage(frentePage, frentePositions, nome_completo || "", "nome");
+
+      if (foto_base64) {
+        try {
+          const photoClean = foto_base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+          const photoBytes = Uint8Array.from(atob(photoClean), (c) => c.charCodeAt(0));
+          const image = foto_base64.includes("image/png")
+            ? await pdfDoc.embedPng(photoBytes)
+            : await pdfDoc.embedJpg(photoBytes);
+          const { height: frontHeight } = frentePage.getSize();
+
+          frentePage.drawImage(image, {
+            x: rawPhoto.x,
+            y: frontHeight - rawPhoto.y - rawPhoto.h,
+            width: rawPhoto.w,
+            height: rawPhoto.h,
+          });
+        } catch (e) {
+          console.error("Error embedding Bombeiro Militar photo:", e);
+        }
+      }
+
+      const pdfResultBytes = await pdfDoc.save();
+      const resultBase64 = uint8ArrayToBase64(pdfResultBytes);
+      const pdfDataUrl = `data:application/pdf;base64,${resultBase64}`;
+
+      return new Response(JSON.stringify({ pdfBase64: pdfDataUrl }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Load saved field positions or use defaults
     const storageKeys: Record<string, string> = {
       bombeiro: "carteirinha-bombeiro-field-positions",
