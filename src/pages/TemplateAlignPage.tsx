@@ -758,21 +758,22 @@ function OperadorMaquinasAlignContent() {
   );
 }
 
-const SEGURANCA_ESCOLAR_W = 595;
-const SEGURANCA_ESCOLAR_H = 842;
+// Actual PDF page dimensions from the template (landscape card)
+const SEGURANCA_ESCOLAR_W = 241;
+const SEGURANCA_ESCOLAR_H = 142;
 
 const segurancaEscolarFrenteFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 30, y: 120, fontSize: 4, w: 100, h: 130, color: "#999" },
-  { id: "nome", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 150, y: 180, fontSize: 10 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 150, y: 220, fontSize: 9 },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "1031/26", x: 150, y: 100, fontSize: 10 },
-  { id: "data_expedicao", label: "Data de Expedição", sampleText: "01/06/2024", x: 350, y: 100, fontSize: 9 },
-  { id: "nascimento", label: "Data de Nascimento", sampleText: "01/01/1990", x: 150, y: 300, fontSize: 9 },
-  { id: "termino_curso", label: "Término do Curso", sampleText: "01/06/2024", x: 350, y: 300, fontSize: 9 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 20, y: 30, fontSize: 4, w: 40, h: 50, color: "#999" },
+  { id: "nome", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 70, y: 55, fontSize: 6 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 70, y: 68, fontSize: 5 },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "1031/26", x: 70, y: 30, fontSize: 6 },
+  { id: "data_expedicao", label: "Data de Expedição", sampleText: "01/06/2024", x: 160, y: 30, fontSize: 5 },
+  { id: "nascimento", label: "Data de Nascimento", sampleText: "01/01/1990", x: 70, y: 110, fontSize: 5 },
+  { id: "termino_curso", label: "Término do Curso", sampleText: "01/06/2024", x: 160, y: 110, fontSize: 5 },
 ];
 
 const segurancaEscolarVersoFields: FieldDef[] = [
-  { id: "rg", label: "RG", sampleText: "00.000.000", x: 250, y: 200, fontSize: 12 },
+  { id: "rg", label: "RG", sampleText: "00.000.000", x: 100, y: 70, fontSize: 8 },
 ];
 
 function SegurancaEscolarAlignContent() {
@@ -867,16 +868,16 @@ export default function TemplateAlignPage() {
 
         <TabsContent value="fisicos">
           <Tabs defaultValue="cnh-fisica-completa" className="w-full">
-            <TabsList className="mb-4 flex-wrap">
-              <TabsTrigger value="cnh-fisica-completa">CNH FÍSICA (COMPLETA)</TabsTrigger>
-              <TabsTrigger value="cnh-fisica-frente">FRENTE</TabsTrigger>
-              <TabsTrigger value="cnh-fisica-verso">VERSO</TabsTrigger>
-              <TabsTrigger value="cart-bombeiro">BOMBEIRO</TabsTrigger>
-              <TabsTrigger value="cart-porteiro">PORTEIRO</TabsTrigger>
-              <TabsTrigger value="cart-agente">AGENTE FIN.</TabsTrigger>
-              <TabsTrigger value="cart-bombeiro-militar">BOMB. MILITAR</TabsTrigger>
-              <TabsTrigger value="cart-operador-maquinas">OPER. MÁQ.</TabsTrigger>
-              <TabsTrigger value="cart-seguranca-escolar">SEG. ESCOLAR</TabsTrigger>
+            <TabsList className="mb-4 flex-wrap h-auto gap-1">
+              <TabsTrigger value="cnh-fisica-completa" className="text-xs">CNH COMPLETA</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-frente" className="text-xs">FRENTE</TabsTrigger>
+              <TabsTrigger value="cnh-fisica-verso" className="text-xs">VERSO</TabsTrigger>
+              <TabsTrigger value="cart-bombeiro" className="text-xs">BOMBEIRO</TabsTrigger>
+              <TabsTrigger value="cart-porteiro" className="text-xs">PORTEIRO</TabsTrigger>
+              <TabsTrigger value="cart-agente" className="text-xs">AGENTE</TabsTrigger>
+              <TabsTrigger value="cart-bombeiro-militar" className="text-xs">BOMB. MIL.</TabsTrigger>
+              <TabsTrigger value="cart-operador-maquinas" className="text-xs">OPER. MÁQ.</TabsTrigger>
+              <TabsTrigger value="cart-seguranca-escolar" className="text-xs">SEG. ESC.</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh-fisica-completa">
               <CnhFisicaFullContent />
