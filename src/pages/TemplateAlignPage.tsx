@@ -20,6 +20,8 @@ const ExameToxicologicoAlignPage = lazy(() => import("./ExameToxicologicoAlignPa
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
+const BOMBEIRO_MILITAR_W = 242.88;
+const BOMBEIRO_MILITAR_H = 153;
 
 interface FieldDef {
   id: string;
