@@ -43,7 +43,14 @@ export default function CnhFisicaPreviewPage() {
     );
   }
 
-  const getPdfBlob = async () => fetch(pdfBase64).then((r) => r.blob());
+  const getPdfBlob = (): Blob => {
+    const parts = pdfBase64.split(",");
+    const mime = parts[0]?.match(/:(.*?);/)?.[1] || "application/pdf";
+    const raw = atob(parts[1]);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  };
 
   const downloadPdf = async () => {
     const blob = await getPdfBlob();
