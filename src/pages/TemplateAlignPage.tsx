@@ -763,13 +763,13 @@ const SEGURANCA_ESCOLAR_W = 241;
 const SEGURANCA_ESCOLAR_H = 142;
 
 const segurancaEscolarFrenteFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 30, y: 120, fontSize: 4, w: 100, h: 130, color: "#999" },
-  { id: "nome", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 150, y: 180, fontSize: 10 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 150, y: 220, fontSize: 9 },
-  { id: "numero_registro", label: "Nº Registro", sampleText: "1031/26", x: 150, y: 100, fontSize: 10 },
-  { id: "data_expedicao", label: "Data de Expedição", sampleText: "01/06/2024", x: 350, y: 100, fontSize: 9 },
-  { id: "nascimento", label: "Data de Nascimento", sampleText: "01/01/1990", x: 150, y: 300, fontSize: 9 },
-  { id: "termino_curso", label: "Término do Curso", sampleText: "01/06/2024", x: 350, y: 300, fontSize: 9 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 20, y: 30, fontSize: 4, w: 40, h: 50, color: "#999" },
+  { id: "nome", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 70, y: 55, fontSize: 6 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 70, y: 68, fontSize: 5 },
+  { id: "numero_registro", label: "Nº Registro", sampleText: "1031/26", x: 70, y: 30, fontSize: 6 },
+  { id: "data_expedicao", label: "Data de Expedição", sampleText: "01/06/2024", x: 160, y: 30, fontSize: 5 },
+  { id: "nascimento", label: "Data de Nascimento", sampleText: "01/01/1990", x: 70, y: 110, fontSize: 5 },
+  { id: "termino_curso", label: "Término do Curso", sampleText: "01/06/2024", x: 160, y: 110, fontSize: 5 },
 ];
 
 const segurancaEscolarVersoFields: FieldDef[] = [
