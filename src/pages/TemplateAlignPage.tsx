@@ -16,6 +16,7 @@ import templateBombeiroMilitarFrenteUrl from "@/assets/template-carteira-bombeir
 import templateBombeiroMilitarVersoUrl from "@/assets/template-carteira-bombeiro-militar-verso.jpg";
 import templateSegurancaEscolarFrenteUrl from "@/assets/template-carteira-seguranca-escolar-frente.jpg";
 import templateSegurancaEscolarVersoUrl from "@/assets/template-carteira-seguranca-escolar-verso.jpg";
+import templateChaAmadorUrl from "@/assets/template-cha-amador.jpg";
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
@@ -827,6 +828,26 @@ function SegurancaEscolarAlignContent() {
   );
 }
 
+const chaAmadorFields: FieldDef[] = [
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 490, y: 170, fontSize: 8, w: 170, h: 220, color: "#999" },
+  { id: "nome", label: "Nome", sampleText: "CARLOS EDUARDO DA SILVA", x: 75, y: 260, fontSize: 14 },
+  { id: "nascimento", label: "Nascimento", sampleText: "15/01/1990", x: 75, y: 340, fontSize: 14 },
+  { id: "validade", label: "Validade", sampleText: "15/01/2031", x: 75, y: 480, fontSize: 14 },
+  { id: "inscricao", label: "Nº Inscrição", sampleText: "937W5283046218", x: 330, y: 480, fontSize: 14 },
+  { id: "emissao", label: "Data de Emissão", sampleText: "18/03/2026", x: 380, y: 870, fontSize: 14 },
+];
+
+function ChaAmadorAlignContent() {
+  return (
+    <GenericAlignContent
+      templateUrl={templateChaAmadorUrl}
+      storageKey="cha-amador-field-positions"
+      title="Alinhamento — CHÁ Amador Digital"
+      fields={chaAmadorFields}
+    />
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -844,6 +865,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="certidao">CERT NASCIMENTO</TabsTrigger>
               <TabsTrigger value="comprovante">COMPROVANTE RES.</TabsTrigger>
               <TabsTrigger value="exame-toxico">EXAME TOXICO.</TabsTrigger>
+              <TabsTrigger value="cha-amador">CHÁ AMADOR</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh">
               <CnhAlignContent />
@@ -862,6 +884,9 @@ export default function TemplateAlignPage() {
               <Suspense fallback={<div className="flex items-center justify-center py-10"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
                 <ExameToxicologicoAlignPage />
               </Suspense>
+            </TabsContent>
+            <TabsContent value="cha-amador">
+              <ChaAmadorAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>

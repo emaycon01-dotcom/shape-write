@@ -36,6 +36,7 @@ const categories: DocCategory[] = [
     icon: FileText,
     items: [
       { id: "cnh", name: "CNH Digital (2026)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh", icon: FileText },
+      { id: "cha-amador", name: "CHÁ Amador Digital", description: "Carteira de Habilitação de Amador com foto e dados", credits: 1, route: "/dashboard/documents/cha-amador", icon: FileText },
       { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "", icon: FileText },
     ],
   },

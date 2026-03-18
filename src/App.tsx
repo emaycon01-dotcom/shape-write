@@ -45,6 +45,8 @@ const ComprovanteResidenciaFormPage = lazy(() => import("./pages/ComprovanteResi
 const ComprovanteResidenciaPreviewPage = lazy(() => import("./pages/ComprovanteResidenciaPreviewPage"));
 const ExameToxicologicoFormPage = lazy(() => import("./pages/ExameToxicologicoFormPage"));
 const ExameToxicologicoPreviewPage = lazy(() => import("./pages/ExameToxicologicoPreviewPage"));
+const ChaAmadorFormPage = lazy(() => import("./pages/ChaAmadorFormPage"));
+const ChaAmadorPreviewPage = lazy(() => import("./pages/ChaAmadorPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -82,6 +84,8 @@ const App = () => (
                   <Route path="documents/comprovante-residencia/preview" element={<ComprovanteResidenciaPreviewPage />} />
                   <Route path="documents/exame-toxicologico" element={<ExameToxicologicoFormPage />} />
                   <Route path="documents/exame-toxicologico/preview" element={<ExameToxicologicoPreviewPage />} />
+                  <Route path="documents/cha-amador" element={<ChaAmadorFormPage />} />
+                  <Route path="documents/cha-amador/preview" element={<ChaAmadorPreviewPage />} />
                   <Route path="history" element={<HistoryPage />} />
                   <Route path="recarregar" element={<RecarregarPage />} />
                   <Route path="planos" element={<PlanosPage />} />
