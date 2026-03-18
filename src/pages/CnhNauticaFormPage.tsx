@@ -205,17 +205,6 @@ export default function CnhNauticaFormPage() {
           <DateField label="Validade" value={form.validade} onChange={setDate("validade")} />
         </div>
 
-        <div className="glass rounded-xl p-6 space-y-4">
-          <SectionHeader icon={Upload} title="Foto 3x4" />
-          <div className="space-y-1.5">
-            <FieldLabel>Upload da Foto</FieldLabel>
-            <Input type="file" accept="image/*" onChange={handleFoto} className={inputCls} required />
-          </div>
-          {form.fotoBase64 && (
-            <div className="flex justify-center">
-              <img src={form.fotoBase64} alt="Preview" className="w-24 h-32 object-cover rounded-lg border border-border" />
-            </div>
-          )}
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
