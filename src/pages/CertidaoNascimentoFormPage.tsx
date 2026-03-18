@@ -139,7 +139,12 @@ function generateCPF(): string {
 }
 
 export default function CertidaoNascimentoFormPage() {
-  const [form, setForm] = useState<CertidaoFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<CertidaoFormData>(() => {
+    if (editState?.editFormData) return { ...initial, ...editState.editFormData } as CertidaoFormData;
+    return initial;
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();

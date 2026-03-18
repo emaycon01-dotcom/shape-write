@@ -47,7 +47,12 @@ function generateCEP(): string {
 }
 
 export default function ComprovanteResidenciaFormPage() {
-  const [form, setForm] = useState<ComprovanteFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<ComprovanteFormData>(() => {
+    if (editState?.editFormData) return { ...initial, ...editState.editFormData } as ComprovanteFormData;
+    return initial;
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();

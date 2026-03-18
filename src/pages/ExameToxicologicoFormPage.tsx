@@ -104,7 +104,12 @@ function DateField({ label, value, onChange, required = true }: { label: string;
 }
 
 export default function ExameToxicologicoFormPage() {
-  const [form, setForm] = useState<ExameFormData>(initial);
+  const location = useLocation();
+  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const [form, setForm] = useState<ExameFormData>(() => {
+    if (editState?.editFormData) return { ...initial, ...editState.editFormData } as ExameFormData;
+    return initial;
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
 
