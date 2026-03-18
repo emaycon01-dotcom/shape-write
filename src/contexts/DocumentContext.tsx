@@ -31,6 +31,7 @@ interface DocumentContextType {
   addDocument: (doc: Omit<Document, "id" | "createdAt" | "status" | "expiresAt"> & { pdfDataUrl?: string }) => Promise<Document>;
   getDocument: (id: string) => Document | undefined;
   renewDocument: (id: string) => Promise<void>;
+  updateDocument: (id: string, updates: { additionalInfo?: string; pdfDataUrl?: string }) => Promise<void>;
   refreshDocuments: () => Promise<void>;
 }
 
