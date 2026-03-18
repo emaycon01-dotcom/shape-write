@@ -52,6 +52,35 @@ export default function CnhNauticaPreviewPage() {
   const positions = fieldPositions || DEFAULT_POSITIONS;
 
   useEffect(() => {
+    if (!autoUpdate || !editDocId || !rendered || !canvasRef.current) return;
+    const doUpdate = async () => {
+      setLoading(true);
+      try {
+        const canvas = canvasRef.current!;
+        const tmp = document.createElement("canvas");
+        tmp.width = canvas.width; tmp.height = canvas.height;
+        const tmpCtx = tmp.getContext("2d")!;
+        tmpCtx.fillStyle = "#ffffff";
+        tmpCtx.fillRect(0, 0, tmp.width, tmp.height);
+        tmpCtx.drawImage(canvas, 0, 0);
+        const imgData = tmp.toDataURL("image/jpeg", 0.95);
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfW = 210; const pdfH = 297;
+        const ratio = canvas.height / canvas.width;
+        const imgH = pdfW * ratio;
+        pdf.addImage(imgData, "JPEG", 0, 0, pdfW, imgH <= pdfH ? imgH : pdfH);
+        const pdfUrl = pdf.output("datauristring");
+        await updateDocument(editDocId, { additionalInfo: JSON.stringify(formData), pdfDataUrl: pdfUrl });
+        toast({ title: "Documento atualizado com sucesso!" });
+        navigate("/dashboard/history");
+      } catch {
+        toast({ title: "Erro ao atualizar documento", variant: "destructive" });
+      } finally { setLoading(false); }
+    };
+    doUpdate();
+  }, [autoUpdate, editDocId, rendered]);
+
+  useEffect(() => {
     if (!formData || !canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
