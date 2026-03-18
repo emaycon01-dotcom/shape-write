@@ -48,7 +48,8 @@ function randomCpf(): string {
 
 export default function CpfFisicoFormPage() {
   const location = useLocation();
-  const editState = location.state as { editFormData?: Record<string, string> } | null;
+  const editState = location.state as { editFormData?: Record<string, string>; editDocId?: string } | null;
+  const isEditMode = Boolean(editState?.editDocId);
   const [form, setForm] = useState<FormData>(() => {
     if (editState?.editFormData) return { ...initial, ...editState.editFormData } as FormData;
     return initial;
