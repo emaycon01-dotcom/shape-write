@@ -1,11 +1,18 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DocumentProvider } from "@/contexts/DocumentContext";
 import { lazy, Suspense } from "react";
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user || user.role !== "admin") return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -127,8 +134,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
-                  {/* Admin */}
-                  <Route path="admin" element={<AdminPanelPage />} />
+                  {/* Admin — guarded by AdminRoute */}
+                  <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -24,6 +24,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
+  // Check if user is blocked
+  const { data: blocked } = await supabase
+    .from("blocked_users")
+    .select("id")
+    .eq("user_id", supabaseUser.id)
+    .eq("status", "bloqueado")
+    .maybeSingle();
+
+  if (blocked) {
+    await supabase.auth.signOut();
+    throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
+  }
+
   // Fetch profile
   const { data: profile } = await supabase
     .from("profiles")
