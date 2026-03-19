@@ -21,9 +21,9 @@ const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   photo: { x: 595, y: 269, w: 170, h: 220, fontSize: 8 },
   nome: { x: 94, y: 221, fontSize: 28 },
   nascimento: { x: 90, y: 296, fontSize: 28 },
-  cpf: { x: 544, y: 294, fontSize: 26 },
+  cpf: { x: 529, y: 297, fontSize: 26 },
   inscricao: { x: 95, y: 434, fontSize: 28 },
-  validade: { x: 544, y: 722, fontSize: 27 },
+  validade: { x: 552, y: 437, fontSize: 24.5 },
   emissao: { x: 100, y: 730, fontSize: 20 },
 };
 

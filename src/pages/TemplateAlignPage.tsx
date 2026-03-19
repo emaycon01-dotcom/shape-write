@@ -905,13 +905,13 @@ function ChaAmadorAlignContent() {
 }
 
 const cedulaPoliciaFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 77, y: 213, fontSize: 8, w: 180, h: 220, color: "#999" },
-  { id: "matricula", label: "Matrícula", sampleText: "7.878.786", x: 330, y: 485, fontSize: 14 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 70, y: 207, fontSize: 8, w: 180, h: 220, color: "#999" },
+  { id: "matricula", label: "Matrícula", sampleText: "7.878.786", x: 336, y: 483, fontSize: 14 },
   { id: "nomeCompleto", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 74, y: 548, fontSize: 14 },
-  { id: "rgEstado", label: "RG e Estado", sampleText: "1234567 SDS/PE", x: 85, y: 614, fontSize: 14 },
-  { id: "registroData", label: "Nº Registro e Data", sampleText: "8976. 24/02/2026", x: 98, y: 678, fontSize: 14 },
+  { id: "rgEstado", label: "RG e Estado", sampleText: "1234567 SDS/PE", x: 76, y: 618, fontSize: 14 },
+  { id: "registroData", label: "Nº Registro e Data", sampleText: "8976. 24/02/2026", x: 81, y: 686, fontSize: 14 },
   { id: "tipoSanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 352, y: 617, fontSize: 14 },
-  { id: "cmCategoria", label: "CM / Categoria", sampleText: "NÚMERO, XXXXXXXXXXXX / A, B", x: 265, y: 678, fontSize: 12 },
+  { id: "cmCategoria", label: "CM / Categoria", sampleText: "NÚMERO, XXXXXXXXXXXX / A, B", x: 267, y: 688, fontSize: 12 },
 ];
 
 function CedulaPoliciaAlignContent() {
@@ -966,13 +966,13 @@ function CedulaPoliciaAlignContent() {
 }
 
 const operadorMaquinasDigitalFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 51, y: 73, fontSize: 8, w: 70, h: 85, color: "#999" },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 53, y: 72, fontSize: 8, w: 70, h: 85, color: "#999" },
   { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 53, y: 58, fontSize: 7.5 },
   { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 131, y: 77, fontSize: 7.5 },
   { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 130, y: 96, fontSize: 7.5 },
-  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 52, y: 164, fontSize: 6.5 },
-  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 134, y: 165, fontSize: 5.5 },
-  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 190, y: 164, fontSize: 5.5 },
+  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 58, y: 162, fontSize: 6 },
+  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 138, y: 163, fontSize: 5.5 },
+  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 191, y: 163, fontSize: 5.5 },
 ];
 
 function OperadorMaquinasDigitalAlignContent() {
