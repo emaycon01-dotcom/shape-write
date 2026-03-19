@@ -873,12 +873,12 @@ function SegurancaEscolarAlignContent() {
 
 const chaAmadorFields: FieldDef[] = [
   { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 595, y: 269, fontSize: 8, w: 170, h: 220, color: "#999" },
-  { id: "nome", label: "Nome", sampleText: "CARLOS EDUARDO DA SILVA", x: 144, y: 276, fontSize: 21 },
-  { id: "cpf", label: "CPF", sampleText: "123.456.789-00", x: 176, y: 310, fontSize: 18 },
-  { id: "nascimento", label: "Nascimento", sampleText: "15/01/1990", x: 176, y: 337, fontSize: 21 },
-  { id: "validade", label: "Validade", sampleText: "15/01/2031", x: 173, y: 458, fontSize: 20 },
-  { id: "inscricao", label: "Nº Inscrição", sampleText: "937W5283046218", x: 367, y: 456, fontSize: 21 },
-  { id: "emissao", label: "Data de Emissão", sampleText: "18/03/2026", x: 583, y: 785, fontSize: 21 },
+  { id: "nome", label: "Nome", sampleText: "CARLOS EDUARDO DA SILVA", x: 94, y: 221, fontSize: 28 },
+  { id: "nascimento", label: "Nascimento", sampleText: "15/01/1990", x: 90, y: 296, fontSize: 28 },
+  { id: "cpf", label: "CPF", sampleText: "123.456.789-00", x: 544, y: 294, fontSize: 26 },
+  { id: "inscricao", label: "Nº Inscrição", sampleText: "937W5283046218", x: 95, y: 434, fontSize: 28 },
+  { id: "validade", label: "Validade", sampleText: "15/01/2031", x: 544, y: 722, fontSize: 27 },
+  { id: "emissao", label: "Data de Emissão", sampleText: "18/03/2026", x: 100, y: 730, fontSize: 20 },
 ];
 
 function ChaAmadorAlignContent() {
