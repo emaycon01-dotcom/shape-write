@@ -296,7 +296,7 @@ export default function HistoricoEscolarFormPage() {
                 </div>
                 <div className="space-y-1.5">
                   <FieldLabel>Nome da Escola</FieldLabel>
-                  <Input value={entry.escola} onChange={(e) => updateMedio(idx, "escola", e.target.value)} placeholder="Ex: Escola Estadual Prof. João Reis" className={inputCls} required />
+                  <Input value={entry.escola} onChange={(e) => updateMedio(idx, "escola", e.target.value)} placeholder="Ex: PROF. JOÃO REIS" className={inputCls} required />
                 </div>
                 <div className="space-y-1.5">
                   <FieldLabel>UF / Município</FieldLabel>
