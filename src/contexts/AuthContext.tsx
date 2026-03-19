@@ -120,15 +120,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const deductCredit = useCallback(async (amount: number = 1) => {
     if (!user || user.credits < amount) return;
-    const newCredits = user.credits - amount;
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ credits: newCredits })
-      .eq("user_id", user.id);
+    const { data, error } = await supabase.functions.invoke("deduct-credit", {
+      body: { amount },
+    });
 
-    if (!error) {
-      setUser((prev) => prev ? { ...prev, credits: newCredits } : prev);
+    if (!error && data?.credits !== undefined) {
+      setUser((prev) => prev ? { ...prev, credits: data.credits } : prev);
     }
   }, [user]);
 
