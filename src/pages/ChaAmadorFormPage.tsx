@@ -93,7 +93,8 @@ export default function ChaAmadorFormPage() {
   const { toast } = useToast();
 
   const set = (field: keyof ChaFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((p) => ({ ...p, [field]: e.target.value }));
+    const value = field === "cpf" ? formatCpf(e.target.value) : e.target.value;
+    setForm((p) => ({ ...p, [field]: value }));
   };
 
   const setDate = (field: keyof ChaFormData) => (v: string) =>
