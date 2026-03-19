@@ -4,8 +4,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
+
+const MAX_ATTEMPTS = 10;
+const LOCKOUT_MINUTES = 15;
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,18 +17,55 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (isLocked) {
+      const remaining = Math.ceil(((lockedUntil ?? 0) - Date.now()) / 60000);
+      setError(`Muitas tentativas. Aguarde ${remaining} minuto(s).`);
+      return;
+    }
+
     setLoading(true);
+
     try {
+      // Check rate limit server-side
+      const { data: rateCheck } = await supabase.functions.invoke("rate-limit", {
+        body: { action: "check", identifier: `login:${email}` },
+      });
+
+      if (rateCheck && !rateCheck.allowed) {
+        setLockedUntil(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
+        setError(`Muitas tentativas. Aguarde ${LOCKOUT_MINUTES} minutos.`);
+        setLoading(false);
+        return;
+      }
+
+      // Record the attempt
+      await supabase.functions.invoke("rate-limit", {
+        body: { action: "record", identifier: `login:${email}` },
+      });
+
       await login(email, password);
       navigate("/dashboard");
     } catch {
-      setError("E-mail ou senha inválidos");
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+
+      if (newAttempts >= MAX_ATTEMPTS) {
+        setLockedUntil(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
+        setError(`Conta bloqueada temporariamente. Aguarde ${LOCKOUT_MINUTES} minutos.`);
+      } else {
+        setError(`E-mail ou senha inválidos (${MAX_ATTEMPTS - newAttempts} tentativas restantes)`);
+      }
     } finally {
       setLoading(false);
     }
@@ -64,6 +105,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-secondary border-border"
                 required
+                autoComplete="email"
               />
             </div>
 
@@ -78,6 +120,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-secondary border-border pr-10"
                   required
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -96,9 +139,9 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full h-12 rounded-lg text-base bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-              disabled={loading}
+              disabled={loading || isLocked}
             >
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? "Entrando..." : isLocked ? "Bloqueado temporariamente" : "Entrar"}
             </Button>
           </form>
 
@@ -115,7 +158,12 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          <p className="text-center text-xs text-muted-foreground mt-8">
+          <div className="flex items-center justify-center gap-1.5 mt-6 text-xs text-muted-foreground">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Protegido por Bellarus Security</span>
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-4">
             © 2026 Bellarus Sistemas. Todos os direitos reservados.
           </p>
         </div>
