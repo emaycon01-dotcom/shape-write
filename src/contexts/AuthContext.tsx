@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface User {
   id: string;
@@ -12,6 +14,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -20,77 +23,118 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Demo users for frontend prototype
-const DEMO_USERS: (User & { password: string })[] = [
-  {
-    id: "1",
-    name: "Admin",
-    email: "admin@bellarus.com",
-    password: "Erika.2004",
-    role: "admin",
-    credits: 999,
-    createdAt: "2026-03-01",
-  },
-  {
-    id: "2",
-    name: "Usuário Demo",
-    email: "demo@bellarus.com",
-    password: "demo123",
-    role: "cliente",
-    credits: 10,
-    createdAt: "2026-03-10",
-  },
-];
+async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
+  // Fetch profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", supabaseUser.id)
+    .single();
+
+  // Fetch role
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("cargo")
+    .eq("user_id", supabaseUser.id);
+
+  const isAdmin = roles?.some((r) => r.cargo === "admin") ?? false;
+
+  return {
+    id: supabaseUser.id,
+    name: profile?.name || supabaseUser.user_metadata?.name || "",
+    email: supabaseUser.email || "",
+    role: isAdmin ? "admin" : "cliente",
+    credits: profile?.credits ?? 0,
+    createdAt: profile?.created_at || supabaseUser.created_at,
+  };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem("bellarus_user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Listen to auth state changes FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          // Use setTimeout to avoid potential deadlock with Supabase client
+          setTimeout(async () => {
+            try {
+              const userData = await fetchUserProfile(session.user);
+              setUser(userData);
+            } catch (err) {
+              console.error("Error fetching profile:", err);
+              setUser(null);
+            }
+            setLoading(false);
+          }, 0);
+        } else {
+          setUser(null);
+          setLoading(false);
+        }
+      }
+    );
+
+    // Then check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserProfile(session.user).then(setUser).catch(() => setUser(null)).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const found = DEMO_USERS.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (!found) throw new Error("Credenciais inválidas");
-    const { password: _, ...userData } = found;
-    setUser(userData);
-    localStorage.setItem("bellarus_user", JSON.stringify(userData));
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw new Error(error.message);
   }, []);
 
-  const register = useCallback(
-    async (name: string, email: string, _password: string) => {
-      const newUser: User = {
-        id: crypto.randomUUID(),
-        name,
-        email,
-        role: "cliente",
-        credits: 5,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      setUser(newUser);
-      localStorage.setItem("bellarus_user", JSON.stringify(newUser));
-    },
-    []
-  );
-
-  const logout = useCallback(() => {
-    setUser(null);
-    localStorage.removeItem("bellarus_user");
-  }, []);
-
-  const deductCredit = useCallback((amount: number = 1) => {
-    setUser((prev) => {
-      if (!prev || prev.credits < amount) return prev;
-      const updated = { ...prev, credits: prev.credits - amount };
-      localStorage.setItem("bellarus_user", JSON.stringify(updated));
-      return updated;
+  const register = useCallback(async (name: string, email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name }, emailRedirectTo: window.location.origin },
     });
+    if (error) throw new Error(error.message);
+
+    // Create profile for the new user
+    if (data.user) {
+      await supabase.from("profiles").insert({
+        user_id: data.user.id,
+        email,
+        name,
+        credits: 5,
+        plano: "free",
+      });
+    }
   }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  }, []);
+
+  const deductCredit = useCallback(async (amount: number = 1) => {
+    if (!user || user.credits < amount) return;
+    const newCredits = user.credits - amount;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ credits: newCredits })
+      .eq("user_id", user.id);
+
+    if (!error) {
+      setUser((prev) => prev ? { ...prev, credits: newCredits } : prev);
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, login, register, logout, deductCredit }}
+      value={{ user, isAuthenticated: !!user, loading, login, register, logout, deductCredit }}
     >
       {children}
     </AuthContext.Provider>

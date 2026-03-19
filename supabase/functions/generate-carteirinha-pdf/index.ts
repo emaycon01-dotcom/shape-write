@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { authenticateRequest } from "../_shared/auth.ts";
 
 const uint8ArrayToBase64 = (bytes: Uint8Array) => {
   const chunkSize = 0x8000;
@@ -21,6 +22,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Authenticate
+  const authResult = await authenticateRequest(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const body = await req.json();

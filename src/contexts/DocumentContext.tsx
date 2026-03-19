@@ -52,11 +52,11 @@ async function uploadPdfToStorage(pdfDataUrl: string, docId: string): Promise<st
       return null;
     }
 
-    const { data: urlData } = supabase.storage
+    const { data: urlData, error: urlError } = await supabase.storage
       .from("documents-pdf")
-      .getPublicUrl(filePath);
+      .createSignedUrl(filePath, 3600); // 1 hour expiry
 
-    return urlData.publicUrl;
+    return urlError ? null : urlData.signedUrl;
   } catch (err) {
     console.error("Failed to upload PDF:", err);
     return null;
