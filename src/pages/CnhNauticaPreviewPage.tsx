@@ -123,6 +123,7 @@ export default function CnhNauticaPreviewPage() {
         drawField("rgOrgaoUf", formData.rgOrgaoUf, "#000");
         drawField("cpf", formData.cpf, "#000");
         drawField("inscricao", formData.inscricao, "#000");
+        drawField("dataEmissao", formData.dataEmissao, "#000");
         drawField("localEmissao", formData.localEmissao, "#000");
         drawField("validade", formData.validade, "#000");
 
