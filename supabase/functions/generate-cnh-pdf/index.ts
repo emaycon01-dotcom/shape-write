@@ -489,7 +489,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
     font-weight: bold;
   }
   .f-estado {
-    top: 443px; left: 95px;
+    top: 442px; left: 90px;
     width: 280px; height: 20px;
     display: flex; align-items: center; justify-content: center;
     color: #1a5c2a;
