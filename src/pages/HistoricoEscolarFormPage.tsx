@@ -263,7 +263,7 @@ export default function HistoricoEscolarFormPage() {
           </div>
           <div className="space-y-1.5">
             <FieldLabel>Nome da Escola</FieldLabel>
-            <Input value={form.escolaEnsinoFundamental} onChange={set("escolaEnsinoFundamental")} placeholder="Ex: Escola Municipal São José" className={inputCls} required />
+            <Input value={form.escolaEnsinoFundamental} onChange={set("escolaEnsinoFundamental")} placeholder="Ex: ERNESTO FILHO" className={inputCls} required />
           </div>
           <div className="space-y-1.5">
             <FieldLabel>UF / Município</FieldLabel>
@@ -296,7 +296,7 @@ export default function HistoricoEscolarFormPage() {
                 </div>
                 <div className="space-y-1.5">
                   <FieldLabel>Nome da Escola</FieldLabel>
-                  <Input value={entry.escola} onChange={(e) => updateMedio(idx, "escola", e.target.value)} placeholder="Ex: Escola Estadual Prof. João Reis" className={inputCls} required />
+                  <Input value={entry.escola} onChange={(e) => updateMedio(idx, "escola", e.target.value)} placeholder="Ex: PROF. JOÃO REIS" className={inputCls} required />
                 </div>
                 <div className="space-y-1.5">
                   <FieldLabel>UF / Município</FieldLabel>
@@ -312,7 +312,7 @@ export default function HistoricoEscolarFormPage() {
           <SectionHeader icon={Award} title="Conclusão" />
           <div className="space-y-1.5">
             <FieldLabel>Escola de Conclusão do Ensino Médio</FieldLabel>
-            <Input value={form.escolaConclusao} onChange={set("escolaConclusao")} placeholder="Ex: Escola Estadual Prof. João Reis" className={inputCls} required />
+            <Input value={form.escolaConclusao} onChange={set("escolaConclusao")} placeholder="Ex: PROF. JOÃO REIS" className={inputCls} required />
           </div>
           <div className="space-y-1.5">
             <FieldLabel>Nome Completo do Concludente</FieldLabel>
