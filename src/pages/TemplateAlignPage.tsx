@@ -538,7 +538,7 @@ const defaultFisicaFrenteFields: FieldDef[] = [
   { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 281, y: 419, fontSize: 6.5 },
   { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 281, y: 428, fontSize: 6.5 },
   { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 91, y: 434, fontSize: 6 },
-  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 166, y: 446, fontSize: 15, color: "#1a5c2a" },
+  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 187, y: 447, fontSize: 11.5, color: "#1a5c2a" },
   { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 60, y: 243, fontSize: 15, rotate: -90 },
   { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 66, y: 468, fontSize: 15, rotate: -90 },
 ];
