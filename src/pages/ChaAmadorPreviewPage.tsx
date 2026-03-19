@@ -19,12 +19,12 @@ interface FieldPos {
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   photo: { x: 595, y: 269, w: 170, h: 220, fontSize: 8 },
-  nome: { x: 144, y: 276, fontSize: 21 },
-  cpf: { x: 367, y: 336, fontSize: 21 },
-  nascimento: { x: 176, y: 337, fontSize: 21 },
-  validade: { x: 173, y: 458, fontSize: 20 },
-  inscricao: { x: 367, y: 456, fontSize: 21 },
-  emissao: { x: 583, y: 785, fontSize: 21 },
+  nome: { x: 94, y: 221, fontSize: 28 },
+  nascimento: { x: 92, y: 298, fontSize: 28 },
+  cpf: { x: 525, y: 302, fontSize: 26 },
+  inscricao: { x: 97, y: 437, fontSize: 28 },
+  validade: { x: 541, y: 716, fontSize: 27 },
+  emissao: { x: 104, y: 726, fontSize: 20 },
 };
 
 export default function ChaAmadorPreviewPage() {
