@@ -479,7 +479,18 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
     color: #111;
     font-weight: bold;
   }
-  .f-estado       { top: 450px; left: 175px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
+  .f-estado {
+    top: 441px; left: 95px;
+    width: 280px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1a5c2a;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+  }
   .mrz-overlay {
     top: 624px; left: 126px;
     width: 420px;
