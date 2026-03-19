@@ -195,6 +195,10 @@ export default function ChaAmadorFormPage() {
             <FieldLabel>Nome</FieldLabel>
             <Input value={form.nome} onChange={set("nome")} placeholder="Ex: CARLOS EDUARDO DA SILVA" className={inputCls} required />
           </div>
+          <div className="space-y-1.5">
+            <FieldLabel>CPF</FieldLabel>
+            <Input value={form.cpf} onChange={set("cpf")} placeholder="000.000.000-00" className={inputCls} required maxLength={14} />
+          </div>
           <DateField label="Data de Nascimento" value={form.nascimento} onChange={setDate("nascimento")} />
         </div>
 
