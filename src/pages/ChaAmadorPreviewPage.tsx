@@ -20,6 +20,7 @@ interface FieldPos {
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   photo: { x: 595, y: 269, w: 170, h: 220, fontSize: 8 },
   nome: { x: 144, y: 276, fontSize: 21 },
+  cpf: { x: 176, y: 310, fontSize: 18 },
   nascimento: { x: 176, y: 337, fontSize: 21 },
   validade: { x: 173, y: 458, fontSize: 20 },
   inscricao: { x: 367, y: 456, fontSize: 21 },
@@ -125,6 +126,7 @@ export default function ChaAmadorPreviewPage() {
 
       const BLACK = "#000000";
       drawField("nome", formData.nome, BLACK, true);
+      drawField("cpf", formData.cpf, BLACK);
       drawField("nascimento", formData.nascimento, BLACK);
       drawField("validade", formData.validade, BLACK);
       drawField("inscricao", formData.inscricao, BLACK);

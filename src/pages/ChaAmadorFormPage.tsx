@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 interface ChaFormData {
   nome: string;
+  cpf: string;
   nascimento: string;
   validade: string;
   inscricao: string;
@@ -21,12 +22,26 @@ interface ChaFormData {
 
 const initial: ChaFormData = {
   nome: "",
+  cpf: "",
   nascimento: "",
   validade: "",
   inscricao: "",
   emissao: "",
   fotoBase64: "",
 };
+
+function formatCpf(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
+function randomCpf(): string {
+  const d = () => Math.floor(Math.random() * 10);
+  return formatCpf(Array.from({ length: 11 }, d).join(""));
+}
 
 function generateInscricao(): string {
   const d = () => Math.floor(Math.random() * 10);
@@ -78,7 +93,8 @@ export default function ChaAmadorFormPage() {
   const { toast } = useToast();
 
   const set = (field: keyof ChaFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((p) => ({ ...p, [field]: e.target.value }));
+    const value = field === "cpf" ? formatCpf(e.target.value) : e.target.value;
+    setForm((p) => ({ ...p, [field]: value }));
   };
 
   const setDate = (field: keyof ChaFormData) => (v: string) =>
@@ -100,6 +116,7 @@ export default function ChaAmadorFormPage() {
     const validade = new Date(now.getTime() + 365 * 5 * 86400000);
     setForm({
       nome: "CARLOS EDUARDO DA SILVA",
+      cpf: randomCpf(),
       nascimento: format(nasc, "dd/MM/yyyy"),
       validade: format(validade, "dd/MM/yyyy"),
       inscricao: generateInscricao(),
@@ -177,6 +194,10 @@ export default function ChaAmadorFormPage() {
           <div className="space-y-1.5">
             <FieldLabel>Nome</FieldLabel>
             <Input value={form.nome} onChange={set("nome")} placeholder="Ex: CARLOS EDUARDO DA SILVA" className={inputCls} required />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>CPF</FieldLabel>
+            <Input value={form.cpf} onChange={set("cpf")} placeholder="000.000.000-00" className={inputCls} required maxLength={14} />
           </div>
           <DateField label="Data de Nascimento" value={form.nascimento} onChange={setDate("nascimento")} />
         </div>
