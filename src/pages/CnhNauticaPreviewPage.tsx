@@ -25,10 +25,10 @@ const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   nomeCompleto: { x: 94, y: 221, fontSize: 28 },
   dataNascimento: { x: 90, y: 296, fontSize: 28 },
   rgOrgaoUf: { x: 259, y: 296, fontSize: 28 },
-  cpf: { x: 518, y: 297, fontSize: 26 },
+  cpf: { x: 544, y: 294, fontSize: 26 },
   inscricao: { x: 95, y: 434, fontSize: 28 },
-  localEmissao: { x: 94, y: 717, fontSize: 20 },
-  validade: { x: 542, y: 715, fontSize: 27 },
+  localEmissao: { x: 100, y: 730, fontSize: 20 },
+  validade: { x: 544, y: 722, fontSize: 27 },
 };
 
 export default function CnhNauticaPreviewPage() {
