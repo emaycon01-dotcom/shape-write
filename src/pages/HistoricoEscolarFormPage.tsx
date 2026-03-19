@@ -312,7 +312,7 @@ export default function HistoricoEscolarFormPage() {
           <SectionHeader icon={Award} title="Conclusão" />
           <div className="space-y-1.5">
             <FieldLabel>Escola de Conclusão do Ensino Médio</FieldLabel>
-            <Input value={form.escolaConclusao} onChange={set("escolaConclusao")} placeholder="Ex: Escola Estadual Prof. João Reis" className={inputCls} required />
+            <Input value={form.escolaConclusao} onChange={set("escolaConclusao")} placeholder="Ex: PROF. JOÃO REIS" className={inputCls} required />
           </div>
           <div className="space-y-1.5">
             <FieldLabel>Nome Completo do Concludente</FieldLabel>
