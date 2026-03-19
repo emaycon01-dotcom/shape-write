@@ -22,11 +22,11 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  cpf: { x: 120, y: 109, fontSize: 13 },
-  nomeCompleto: { x: 82, y: 146, fontSize: 11 },
+  cpf: { x: 117, y: 109, fontSize: 13 },
+  nomeCompleto: { x: 85, y: 146, fontSize: 11 },
   dataNascimento: { x: 134, y: 190, fontSize: 12 },
-  data: { x: 120, y: 346, fontSize: 4.5 },
-  hora: { x: 67, y: 347, fontSize: 5 },
+  data: { x: 121, y: 345, fontSize: 5 },
+  hora: { x: 68, y: 345, fontSize: 7 },
 };
 
 export default function CpfFisicoPreviewPage() {
