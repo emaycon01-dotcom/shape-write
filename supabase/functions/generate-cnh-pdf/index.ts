@@ -557,6 +557,10 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Authenticate
+  const authResult = await authenticateRequest(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const PDFSHIFT_API_KEY = Deno.env.get("PDFSHIFT_API_KEY");
     const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY");

@@ -7,6 +7,10 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Authenticate
+  const authResult = await authenticateRequest(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const { imageBase64 } = await req.json();
 
