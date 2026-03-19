@@ -1179,6 +1179,9 @@ export default function TemplateAlignPage() {
             <TabsContent value="cha-amador">
               <ChaAmadorAlignContent />
             </TabsContent>
+            <TabsContent value="historico-escolar">
+              <HistoricoEscolarAlignContent />
+            </TabsContent>
           </Tabs>
         </TabsContent>
 
