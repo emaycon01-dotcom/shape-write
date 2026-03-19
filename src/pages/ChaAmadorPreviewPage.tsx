@@ -8,8 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
 import templateUrl from "@/assets/template-cha-amador.jpg";
 
-const PAGE_W = 794;
-const PAGE_H = 1123;
 
 interface FieldPos {
   x: number;
