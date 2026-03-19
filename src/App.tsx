@@ -5,12 +5,30 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DocumentProvider } from "@/contexts/DocumentContext";
+import { DeviceSecurityProvider, useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
+import DeviceBannedScreen from "@/components/DeviceBannedScreen";
 import { lazy, Suspense } from "react";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user || user.role !== "admin") return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
+function SecurityGate({ children }: { children: React.ReactNode }) {
+  const { isBanned, checkingDevice } = useDeviceSecurity();
+
+  if (checkingDevice) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (isBanned) return <DeviceBannedScreen />;
+
   return <>{children}</>;
 }
 
@@ -77,72 +95,76 @@ const Loading = () => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <DocumentProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Suspense fallback={<Loading />}>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/verify/:id" element={<VerifyPage />} />
-                <Route path="/dashboard" element={<DashboardLayout />}>
-                  <Route index element={<DashboardHome />} />
-                  <Route path="documents" element={<DocumentsPage />} />
-                  <Route path="documents/cnh" element={<CnhFormPage />} />
-                  <Route path="documents/esim" element={<EsimDigitalPage />} />
-                  <Route path="documents/recargas" element={<RecargasPage />} />
-                  <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
-                  <Route path="documents/certidao-nascimento" element={<CertidaoNascimentoFormPage />} />
-                  <Route path="documents/certidao-nascimento/preview" element={<CertidaoNascimentoPreviewPage />} />
-                  <Route path="documents/comprovante-residencia" element={<ComprovanteResidenciaFormPage />} />
-                  <Route path="documents/comprovante-residencia/preview" element={<ComprovanteResidenciaPreviewPage />} />
-                  <Route path="documents/exame-toxicologico" element={<ExameToxicologicoFormPage />} />
-                  <Route path="documents/exame-toxicologico/preview" element={<ExameToxicologicoPreviewPage />} />
-                  <Route path="documents/cha-amador" element={<ChaAmadorFormPage />} />
-                  <Route path="documents/cha-amador/preview" element={<ChaAmadorPreviewPage />} />
-                  <Route path="documents/historico-escolar" element={<HistoricoEscolarFormPage />} />
-                  <Route path="documents/historico-escolar/preview" element={<HistoricoEscolarPreviewPage />} />
-                  <Route path="history" element={<HistoryPage />} />
-                  <Route path="recarregar" element={<RecarregarPage />} />
-                  <Route path="planos" element={<PlanosPage />} />
-                  <Route path="revendedores" element={<RevendedoresPage />} />
-                  <Route path="template-cnh" element={<TemplateCnhPage />} />
-                  <Route path="template-align" element={<TemplateAlignPage />} />
-                  <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
-                  <Route path="ferramentas/remover-fundo" element={<RemovedorFundoPage />} />
-                  <Route path="ferramentas/mesclagem-rosto" element={<MesclagemRostoPage />} />
-                  <Route path="cnh-fisica/todos" element={<CnhFisicaFormPage />} />
-                  <Route path="cnh-fisica/todos/preview" element={<CnhFisicaPreviewPage />} />
-                  <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
-                  <Route path="documentos-fisicos/carteirinhas" element={<CarteirinhasSelecaoPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/bombeiro-militar" element={<BombeiroMilitarFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/bombeiro-militar/preview" element={<CarteirinhaPreviewPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/operador-maquinas" element={<OperadorMaquinasFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/operador-maquinas/preview" element={<CarteirinhaPreviewPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/operador-maquinas-digital" element={<OperadorMaquinasDigitalFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/operador-maquinas-digital/preview" element={<OperadorMaquinasDigitalPreviewPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/seguranca-escolar" element={<SegurancaEscolarFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/seguranca-escolar/preview" element={<CarteirinhaPreviewPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe" element={<CedulaPoliciaFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe/preview" element={<CedulaPoliciaPreviewPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/cpf-fisico" element={<CpfFisicoFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/cpf-fisico/preview" element={<CpfFisicoPreviewPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/cnh-nautica" element={<CnhNauticaFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
-                  <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
-                  {/* Admin — guarded by AdminRoute */}
-                  <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
-                </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </DocumentProvider>
-      </AuthProvider>
+      <DeviceSecurityProvider>
+        <SecurityGate>
+          <AuthProvider>
+            <DocumentProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Suspense fallback={<Loading />}>
+                  <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/verify/:id" element={<VerifyPage />} />
+                    <Route path="/dashboard" element={<DashboardLayout />}>
+                      <Route index element={<DashboardHome />} />
+                      <Route path="documents" element={<DocumentsPage />} />
+                      <Route path="documents/cnh" element={<CnhFormPage />} />
+                      <Route path="documents/esim" element={<EsimDigitalPage />} />
+                      <Route path="documents/recargas" element={<RecargasPage />} />
+                      <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
+                      <Route path="documents/certidao-nascimento" element={<CertidaoNascimentoFormPage />} />
+                      <Route path="documents/certidao-nascimento/preview" element={<CertidaoNascimentoPreviewPage />} />
+                      <Route path="documents/comprovante-residencia" element={<ComprovanteResidenciaFormPage />} />
+                      <Route path="documents/comprovante-residencia/preview" element={<ComprovanteResidenciaPreviewPage />} />
+                      <Route path="documents/exame-toxicologico" element={<ExameToxicologicoFormPage />} />
+                      <Route path="documents/exame-toxicologico/preview" element={<ExameToxicologicoPreviewPage />} />
+                      <Route path="documents/cha-amador" element={<ChaAmadorFormPage />} />
+                      <Route path="documents/cha-amador/preview" element={<ChaAmadorPreviewPage />} />
+                      <Route path="documents/historico-escolar" element={<HistoricoEscolarFormPage />} />
+                      <Route path="documents/historico-escolar/preview" element={<HistoricoEscolarPreviewPage />} />
+                      <Route path="history" element={<HistoryPage />} />
+                      <Route path="recarregar" element={<RecarregarPage />} />
+                      <Route path="planos" element={<PlanosPage />} />
+                      <Route path="revendedores" element={<RevendedoresPage />} />
+                      <Route path="template-cnh" element={<TemplateCnhPage />} />
+                      <Route path="template-align" element={<TemplateAlignPage />} />
+                      <Route path="ferramentas/assinatura" element={<SignatureGeneratorPage />} />
+                      <Route path="ferramentas/remover-fundo" element={<RemovedorFundoPage />} />
+                      <Route path="ferramentas/mesclagem-rosto" element={<MesclagemRostoPage />} />
+                      <Route path="cnh-fisica/todos" element={<CnhFisicaFormPage />} />
+                      <Route path="cnh-fisica/todos/preview" element={<CnhFisicaPreviewPage />} />
+                      <Route path="cnh-fisica/:uf" element={<CnhFisicaEstadoPage />} />
+                      <Route path="documentos-fisicos/carteirinhas" element={<CarteirinhasSelecaoPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/bombeiro-militar" element={<BombeiroMilitarFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/bombeiro-militar/preview" element={<CarteirinhaPreviewPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/operador-maquinas" element={<OperadorMaquinasFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/operador-maquinas/preview" element={<CarteirinhaPreviewPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/operador-maquinas-digital" element={<OperadorMaquinasDigitalFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/operador-maquinas-digital/preview" element={<OperadorMaquinasDigitalPreviewPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/seguranca-escolar" element={<SegurancaEscolarFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/seguranca-escolar/preview" element={<CarteirinhaPreviewPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe" element={<CedulaPoliciaFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/cedula-policia-pe/preview" element={<CedulaPoliciaPreviewPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/cpf-fisico" element={<CpfFisicoFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/cpf-fisico/preview" element={<CpfFisicoPreviewPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/cnh-nautica" element={<CnhNauticaFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
+                      <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
+                      {/* Admin — guarded by AdminRoute */}
+                      <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
+                    </Route>
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </DocumentProvider>
+          </AuthProvider>
+        </SecurityGate>
+      </DeviceSecurityProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

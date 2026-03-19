@@ -18,24 +18,19 @@ export default function DashboardLayout() {
       return;
     }
 
-    // Check if PIN was recently verified in this session
     const lastVerified = sessionStorage.getItem("pin_verified");
     if (lastVerified && Date.now() - Number(lastVerified) < PIN_SESSION_DURATION) {
       setPinState("verified");
       return;
     }
 
-    // Check if user has a PIN set via edge function
     const checkPin = async () => {
       try {
         const { data } = await supabase.functions.invoke("manage-pin", {
-          body: { action: "check", pin: "0000" }, // pin is required by validation but check ignores it
+          body: { action: "check" },
         });
-        // The check action doesn't validate the pin value, but the edge function requires it
-        // Let's handle this differently - we'll check if pin_hash exists on profile
         setPinState(data?.hasPin ? "needs_verify" : "needs_setup");
       } catch {
-        // If we can't check, default to needs_setup
         setPinState("needs_setup");
       }
     };
@@ -62,11 +57,11 @@ export default function DashboardLayout() {
   }
 
   if (pinState === "needs_setup") {
-    return <PinGate mode="setup" onSuccess={() => setPinState("verified")} />;
+    return <PinGate mode="setup" onSuccess={() => setPinState("verified")} userId={user?.id} userEmail={user?.email} />;
   }
 
   if (pinState === "needs_verify") {
-    return <PinGate mode="verify" onSuccess={() => setPinState("verified")} />;
+    return <PinGate mode="verify" onSuccess={() => setPinState("verified")} userId={user?.id} userEmail={user?.email} />;
   }
 
   return (
