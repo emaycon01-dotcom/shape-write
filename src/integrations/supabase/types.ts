@@ -241,7 +241,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _cargo: Database["public"]["Enums"]["app_cargo"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_cargo:
