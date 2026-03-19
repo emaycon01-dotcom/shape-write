@@ -46,7 +46,8 @@ Deno.serve(async (req) => {
 
     const { action, pin } = await req.json();
 
-    if (!pin || typeof pin !== "string" || !/^\d{4}$/.test(pin)) {
+    // For "check" action, PIN validation is not needed
+    if (action !== "check" && (!pin || typeof pin !== "string" || !/^\d{4}$/.test(pin))) {
       return new Response(JSON.stringify({ error: "PIN deve ter exatamente 4 dígitos numéricos" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
