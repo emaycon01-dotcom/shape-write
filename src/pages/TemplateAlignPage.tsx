@@ -967,12 +967,12 @@ function CedulaPoliciaAlignContent() {
 
 const operadorMaquinasDigitalFields: FieldDef[] = [
   { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 55, y: 72, fontSize: 8, w: 70, h: 85, color: "#999" },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 56, y: 57, fontSize: 7.5 },
-  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 133, y: 77, fontSize: 7.5 },
-  { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 130, y: 96, fontSize: 7.5 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 58, y: 58, fontSize: 7.5 },
+  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 134, y: 78, fontSize: 7.5 },
+  { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 131, y: 98, fontSize: 7.5 },
   { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 64, y: 163, fontSize: 6 },
-  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 141, y: 164, fontSize: 5 },
-  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 197, y: 164, fontSize: 6 },
+  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 140, y: 164, fontSize: 5 },
+  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 195, y: 165, fontSize: 6 },
 ];
 
 function OperadorMaquinasDigitalAlignContent() {
@@ -1051,7 +1051,7 @@ const cnhNauticaFields: FieldDef[] = [
   { id: "rgOrgaoUf", label: "RG/Órgão/UF", sampleText: "12345678 SSP/SP", x: 259, y: 296, fontSize: 28 },
   { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 529, y: 297, fontSize: 26 },
   { id: "inscricao", label: "Inscrição", sampleText: "215A2023852176", x: 95, y: 434, fontSize: 28 },
-  { id: "dataEmissao", label: "Data de Emissão", sampleText: "15/03/2026", x: 100, y: 480, fontSize: 20 },
+  { id: "dataEmissao", label: "Data de Emissão", sampleText: "15/03/2026", x: 558, y: 731, fontSize: 23.5 },
   { id: "localEmissao", label: "Local da Emissão", sampleText: "CAPITANIA DOS PORTOS DE SÃO PAULO", x: 100, y: 730, fontSize: 20 },
   { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 552, y: 437, fontSize: 24.5 },
 ];
