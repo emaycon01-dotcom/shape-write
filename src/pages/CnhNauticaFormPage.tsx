@@ -16,6 +16,7 @@ interface FormData {
   cpf: string;
   inscricao: string;
   localEmissao: string;
+  dataEmissao: string;
   validade: string;
 }
 
@@ -26,6 +27,7 @@ const initial: FormData = {
   cpf: "",
   inscricao: "",
   localEmissao: "CAPITANIA DOS PORTOS DE SÃO PAULO",
+  dataEmissao: "",
   validade: "",
 };
 
