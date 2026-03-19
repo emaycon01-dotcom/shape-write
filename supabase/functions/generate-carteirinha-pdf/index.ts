@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { authenticateRequest } from "../_shared/auth.ts";
 
 const uint8ArrayToBase64 = (bytes: Uint8Array) => {
   const chunkSize = 0x8000;
