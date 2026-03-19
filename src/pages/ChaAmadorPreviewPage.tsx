@@ -100,17 +100,15 @@ export default function ChaAmadorPreviewPage() {
       canvas.height = img.naturalHeight;
       ctx.drawImage(img, 0, 0);
 
-      const scaleX = img.naturalWidth / PAGE_W;
-      const scaleY = img.naturalHeight / PAGE_H;
-
+      // Alignment page uses actual image pixel coordinates, so no scaling needed
       ctx.textBaseline = "top";
 
       const drawField = (key: string, text: string, color = "#000", bold = false) => {
         const pos = positions[key];
         if (!pos || !text) return;
         ctx.fillStyle = color;
-        ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px Arial`;
-        ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
+        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px Arial`;
+        ctx.fillText(text.toUpperCase(), pos.x, pos.y);
       };
 
       // Draw photo
@@ -119,9 +117,9 @@ export default function ChaAmadorPreviewPage() {
         const photoImg = new Image();
         photoImg.crossOrigin = "anonymous";
         photoImg.onload = () => {
-          const pw = (photoPos.w || 170) * scaleX;
-          const ph = (photoPos.h || 220) * scaleY;
-          ctx.drawImage(photoImg, photoPos.x * scaleX, photoPos.y * scaleY, pw, ph);
+          const pw = photoPos.w || 170;
+          const ph = photoPos.h || 220;
+          ctx.drawImage(photoImg, photoPos.x, photoPos.y, pw, ph);
           setRendered(true);
         };
         photoImg.src = formData.fotoBase64;
