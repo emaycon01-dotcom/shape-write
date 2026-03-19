@@ -22,13 +22,13 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  photo: { x: 86, y: 209, w: 160, h: 220, fontSize: 11.5 },
-  matricula: { x: 328, y: 471, fontSize: 17 },
-  nomeCompleto: { x: 76, y: 537, fontSize: 18 },
-  rgEstado: { x: 74, y: 608, fontSize: 18 },
-  registroData: { x: 80, y: 671, fontSize: 18 },
-  tipoSanguineo: { x: 346, y: 608, fontSize: 18 },
-  cmCategoria: { x: 250, y: 670, fontSize: 15 },
+  photo: { x: 77, y: 213, w: 180, h: 220, fontSize: 8 },
+  matricula: { x: 330, y: 485, fontSize: 14 },
+  nomeCompleto: { x: 74, y: 548, fontSize: 14 },
+  rgEstado: { x: 85, y: 614, fontSize: 14 },
+  registroData: { x: 98, y: 678, fontSize: 14 },
+  tipoSanguineo: { x: 352, y: 617, fontSize: 14 },
+  cmCategoria: { x: 265, y: 678, fontSize: 12 },
 };
 
 export default function CedulaPoliciaPreviewPage() {
