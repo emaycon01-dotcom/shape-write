@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import * as pdfjsLib from "pdfjs-dist";
 import templateBgUrl from "@/assets/template-cnh-bg.jpeg";
 import templateFisicaBgUrl from "@/assets/template-cnh-fisica-bg.jpg";
 import templateFisicaVersoBgUrl from "@/assets/template-cnh-fisica-verso.jpg";
@@ -18,6 +19,8 @@ import templateSegurancaEscolarFrenteUrl from "@/assets/template-carteira-segura
 import templateSegurancaEscolarVersoUrl from "@/assets/template-carteira-seguranca-escolar-verso.jpg";
 import templateChaAmadorUrl from "@/assets/template-cha-amador.jpg";
 import templateCpfFisicoUrl from "@/assets/template-cpf-fisico.jpg";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
