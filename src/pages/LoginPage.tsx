@@ -60,9 +60,12 @@ export default function LoginPage() {
 
       await login(email, password);
       navigate("/dashboard");
-    } catch {
+    } catch (err: any) {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
+
+      const msg = err?.message || "";
+      const isEmailNotConfirmed = msg.toLowerCase().includes("email not confirmed") || msg.toLowerCase().includes("email_not_confirmed");
 
       // Report violation after excessive attempts
       if (newAttempts >= 8) {
@@ -72,6 +75,8 @@ export default function LoginPage() {
       if (newAttempts >= MAX_ATTEMPTS) {
         setLockedUntil(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
         setError(`Conta bloqueada temporariamente. Aguarde ${LOCKOUT_MINUTES} minutos.`);
+      } else if (isEmailNotConfirmed) {
+        setError("📧 Seu e-mail ainda não foi verificado. Verifique sua caixa de entrada (e a pasta de spam) e clique no link de confirmação para ativar sua conta.");
       } else {
         setError(`E-mail ou senha inválidos (${MAX_ATTEMPTS - newAttempts} tentativas restantes)`);
       }
