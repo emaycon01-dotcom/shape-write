@@ -496,7 +496,11 @@ function GenericAlignContent({
                 title={`${f.label}: x=${f.x}, y=${f.y}, font=${f.fontSize}`}
               >
                 {isBox ? (
-                  <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
+                  f.imageUrl ? (
+                    <img src={f.imageUrl} alt={f.label} className="w-full h-full object-contain" draggable={false} />
+                  ) : (
+                    <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
+                  )
                 ) : (
                   f.sampleText
                 )}
