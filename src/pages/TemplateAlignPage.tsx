@@ -20,7 +20,7 @@ import templateSegurancaEscolarVersoUrl from "@/assets/template-carteira-seguran
 import templateChaAmadorUrl from "@/assets/template-cha-amador.jpg";
 import templateCpfFisicoUrl from "@/assets/template-cpf-fisico.jpg";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs`;
 
 const CertidaoAlignPage = lazy(() => import("./CertidaoAlignPage"));
 const ComprovanteResidenciaAlignPage = lazy(() => import("./ComprovanteResidenciaAlignPage"));
