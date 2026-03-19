@@ -242,6 +242,7 @@ function GenericAlignContent({
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [renderedPdfUrl, setRenderedPdfUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -258,6 +259,45 @@ function GenericAlignContent({
   useEffect(() => {
     setFields((prev) => sanitizeFields(prev));
   }, [sanitizeFields]);
+
+  useEffect(() => {
+    if (!templateIsPdf) {
+      setRenderedPdfUrl(null);
+      return;
+    }
+
+    let active = true;
+    let objectUrl: string | null = null;
+
+    (async () => {
+      try {
+        const pdf = await pdfjsLib.getDocument(templateUrl).promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: context, viewport }).promise;
+
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+        if (!blob || !active) return;
+
+        objectUrl = URL.createObjectURL(blob);
+        setRenderedPdfUrl(objectUrl);
+      } catch (error) {
+        console.error("Error rendering PDF background for alignment:", error);
+        if (active) setRenderedPdfUrl(null);
+      }
+    })();
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [templateIsPdf, templateUrl]);
 
   const updateField = useCallback((id: string, updates: Partial<FieldDef>) => {
     setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
@@ -362,6 +402,8 @@ function GenericAlignContent({
     return "'Arial', 'Helvetica Neue', 'Helvetica', sans-serif";
   };
 
+  const backgroundUrl = templateIsPdf ? renderedPdfUrl : templateUrl;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -400,21 +442,18 @@ function GenericAlignContent({
           }}
           onClick={() => setSelected(null)}
         >
-          {templateIsPdf ? (
-            <embed
-              src={`${templateUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-              type="application/pdf"
-              className="absolute inset-0 w-full h-full"
-              style={{ border: "none" }}
-            />
-          ) : (
+          {backgroundUrl ? (
             <img
-              src={templateUrl}
+              src={backgroundUrl}
               alt="Template"
               className="absolute inset-0 w-full h-full"
               style={{ objectFit: "fill" }}
               draggable={false}
             />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground text-sm">
+              Carregando template...
+            </div>
           )}
 
           {fields.map((f) => {
