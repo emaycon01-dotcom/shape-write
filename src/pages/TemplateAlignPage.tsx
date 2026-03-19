@@ -873,12 +873,12 @@ function SegurancaEscolarAlignContent() {
 
 const chaAmadorFields: FieldDef[] = [
   { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 595, y: 269, fontSize: 8, w: 170, h: 220, color: "#999" },
-  { id: "nome", label: "Nome", sampleText: "CARLOS EDUARDO DA SILVA", x: 144, y: 276, fontSize: 21 },
-  { id: "cpf", label: "CPF", sampleText: "123.456.789-00", x: 176, y: 310, fontSize: 18 },
-  { id: "nascimento", label: "Nascimento", sampleText: "15/01/1990", x: 176, y: 337, fontSize: 21 },
-  { id: "validade", label: "Validade", sampleText: "15/01/2031", x: 173, y: 458, fontSize: 20 },
-  { id: "inscricao", label: "Nº Inscrição", sampleText: "937W5283046218", x: 367, y: 456, fontSize: 21 },
-  { id: "emissao", label: "Data de Emissão", sampleText: "18/03/2026", x: 583, y: 785, fontSize: 21 },
+  { id: "nome", label: "Nome", sampleText: "CARLOS EDUARDO DA SILVA", x: 94, y: 221, fontSize: 28 },
+  { id: "nascimento", label: "Nascimento", sampleText: "15/01/1990", x: 90, y: 296, fontSize: 28 },
+  { id: "cpf", label: "CPF", sampleText: "123.456.789-00", x: 544, y: 294, fontSize: 26 },
+  { id: "inscricao", label: "Nº Inscrição", sampleText: "937W5283046218", x: 95, y: 434, fontSize: 28 },
+  { id: "validade", label: "Validade", sampleText: "15/01/2031", x: 544, y: 722, fontSize: 27 },
+  { id: "emissao", label: "Data de Emissão", sampleText: "18/03/2026", x: 100, y: 730, fontSize: 20 },
 ];
 
 function ChaAmadorAlignContent() {
@@ -905,13 +905,13 @@ function ChaAmadorAlignContent() {
 }
 
 const cedulaPoliciaFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 350, fontSize: 8, w: 150, h: 190, color: "#999" },
-  { id: "matricula", label: "Matrícula", sampleText: "7.878.786", x: 400, y: 200, fontSize: 14 },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 200, y: 420, fontSize: 14 },
-  { id: "rgEstado", label: "RG e Estado", sampleText: "1234567 SDS/PE", x: 200, y: 480, fontSize: 14 },
-  { id: "registroData", label: "Nº Registro e Data", sampleText: "8976. 24/02/2026", x: 200, y: 580, fontSize: 14 },
-  { id: "tipoSanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 500, y: 480, fontSize: 14 },
-  { id: "cmCategoria", label: "CM / Categoria", sampleText: "NÚMERO, XXXXXXXXXXXX / A, B", x: 200, y: 640, fontSize: 12 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 77, y: 213, fontSize: 8, w: 180, h: 220, color: "#999" },
+  { id: "matricula", label: "Matrícula", sampleText: "7.878.786", x: 330, y: 485, fontSize: 14 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "PEDRO DA SILVA GOMES", x: 74, y: 548, fontSize: 14 },
+  { id: "rgEstado", label: "RG e Estado", sampleText: "1234567 SDS/PE", x: 85, y: 614, fontSize: 14 },
+  { id: "registroData", label: "Nº Registro e Data", sampleText: "8976. 24/02/2026", x: 98, y: 678, fontSize: 14 },
+  { id: "tipoSanguineo", label: "Tipo Sanguíneo", sampleText: "O+", x: 352, y: 617, fontSize: 14 },
+  { id: "cmCategoria", label: "CM / Categoria", sampleText: "NÚMERO, XXXXXXXXXXXX / A, B", x: 265, y: 678, fontSize: 12 },
 ];
 
 function CedulaPoliciaAlignContent() {
@@ -966,13 +966,13 @@ function CedulaPoliciaAlignContent() {
 }
 
 const operadorMaquinasDigitalFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 280, fontSize: 8, w: 150, h: 190, color: "#999" },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 300, y: 310, fontSize: 14 },
-  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 300, y: 370, fontSize: 14 },
-  { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 300, y: 430, fontSize: 14 },
-  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 300, y: 490, fontSize: 14 },
-  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 300, y: 550, fontSize: 14 },
-  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 300, y: 610, fontSize: 14 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 51, y: 73, fontSize: 8, w: 70, h: 85, color: "#999" },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 53, y: 58, fontSize: 7.5 },
+  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 131, y: 77, fontSize: 7.5 },
+  { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 130, y: 96, fontSize: 7.5 },
+  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 52, y: 164, fontSize: 6.5 },
+  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 134, y: 165, fontSize: 5.5 },
+  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 190, y: 164, fontSize: 5.5 },
 ];
 
 function OperadorMaquinasDigitalAlignContent() {
@@ -1046,14 +1046,13 @@ function CpfFisicoAlignContent() {
 }
 
 const cnhNauticaFields: FieldDef[] = [
-  
   { id: "nomeCompleto", label: "Nome Completo", sampleText: "CARLOS EDUARDO DA SILVA", x: 94, y: 221, fontSize: 28 },
   { id: "dataNascimento", label: "Nascimento", sampleText: "15/01/1990", x: 90, y: 296, fontSize: 28 },
   { id: "rgOrgaoUf", label: "RG/Órgão/UF", sampleText: "12345678 SSP/SP", x: 259, y: 296, fontSize: 28 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 518, y: 297, fontSize: 26 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 544, y: 294, fontSize: 26 },
   { id: "inscricao", label: "Inscrição", sampleText: "215A2023852176", x: 95, y: 434, fontSize: 28 },
-  { id: "localEmissao", label: "Local da Emissão", sampleText: "CAPITANIA DOS PORTOS DE SÃO PAULO", x: 94, y: 717, fontSize: 20 },
-  { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 542, y: 715, fontSize: 27 },
+  { id: "localEmissao", label: "Local da Emissão", sampleText: "CAPITANIA DOS PORTOS DE SÃO PAULO", x: 100, y: 730, fontSize: 20 },
+  { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 544, y: 722, fontSize: 27 },
 ];
 
 function CnhNauticaAlignContent() {
