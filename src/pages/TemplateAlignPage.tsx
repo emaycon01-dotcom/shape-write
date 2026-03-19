@@ -966,13 +966,13 @@ function CedulaPoliciaAlignContent() {
 }
 
 const operadorMaquinasDigitalFields: FieldDef[] = [
-  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 85, y: 280, fontSize: 8, w: 150, h: 190, color: "#999" },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 300, y: 310, fontSize: 14 },
-  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 300, y: 370, fontSize: 14 },
-  { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 300, y: 430, fontSize: 14 },
-  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 300, y: 490, fontSize: 14 },
-  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 300, y: 550, fontSize: 14 },
-  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 300, y: 610, fontSize: 14 },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 51, y: 73, fontSize: 8, w: 70, h: 85, color: "#999" },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 53, y: 58, fontSize: 7.5 },
+  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 131, y: 77, fontSize: 7.5 },
+  { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 130, y: 96, fontSize: 7.5 },
+  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 52, y: 164, fontSize: 6.5 },
+  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 134, y: 165, fontSize: 5.5 },
+  { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 190, y: 164, fontSize: 5.5 },
 ];
 
 function OperadorMaquinasDigitalAlignContent() {
