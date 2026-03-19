@@ -458,7 +458,7 @@ function GenericAlignContent({
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
-            const isBox = f.id === "photo" || f.id === "signature";
+            const isBox = f.id === "photo" || f.id === "signature" || f.id === "brasao";
 
             return (
               <div
