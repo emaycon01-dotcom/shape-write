@@ -6,7 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Simple hash using Web Crypto API (SHA-256 + salt)
 async function hashPin(pin: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(salt + pin);
@@ -21,7 +20,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -44,26 +42,39 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { action, pin } = await req.json();
-
-    // For "check" action, PIN validation is not needed
-    if (action !== "check" && (!pin || typeof pin !== "string" || !/^\d{4}$/.test(pin))) {
-      return new Response(JSON.stringify({ error: "PIN deve ter exatamente 4 dígitos numéricos" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const body = await req.json();
+    const { action, pin } = body;
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Rate limit: max 5 PIN attempts per 15 minutes
+    // "check" doesn't need PIN or rate limiting
+    if (action === "check") {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("pin_hash")
+        .eq("user_id", user.id)
+        .single();
+
+      return new Response(JSON.stringify({ hasPin: !!profile?.pin_hash }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // All other actions require a valid 4-digit PIN
+    if (!pin || typeof pin !== "string" || !/^\d{4}$/.test(pin)) {
+      return new Response(JSON.stringify({ error: "PIN deve ter exatamente 4 dígitos numéricos" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate limit: max 5 attempts per 15 minutes
     const clientIp = req.headers.get("x-forwarded-for") || "unknown";
     const rateLimitId = `pin:${user.id}:${clientIp}`;
 
-    // Cleanup old attempts
     await supabaseAdmin.rpc("cleanup_old_login_attempts");
 
     const { count } = await supabaseAdmin
@@ -80,7 +91,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Record attempt
     await supabaseAdmin.from("login_attempts").insert({
       identifier: rateLimitId,
       attempt_type: "pin",
@@ -90,7 +100,6 @@ Deno.serve(async (req) => {
     const pinHash = await hashPin(pin, salt);
 
     if (action === "set") {
-      // Set/update PIN
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({ pin_hash: pinHash })
@@ -135,24 +144,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (action === "check") {
-      // Check if user has a PIN set
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("pin_hash")
-        .eq("user_id", user.id)
-        .single();
-
-      return new Response(JSON.stringify({ hasPin: !!profile?.pin_hash }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     return new Response(JSON.stringify({ error: "Ação inválida" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
+  } catch {
     return new Response(JSON.stringify({ error: "Erro interno" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
