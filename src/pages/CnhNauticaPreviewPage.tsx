@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
-import templateBg from "@/assets/template-cha-amador.jpg";
+import { PDFDocument } from "pdf-lib";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
