@@ -535,10 +535,10 @@ const defaultFisicaFrenteFields: FieldDef[] = [
   { id: "validade_cat_d", label: "Validade Cat. D", sampleText: "14/03/2036", x: 271, y: 268, fontSize: 4.5 },
   { id: "validade_cat_e", label: "Validade Cat. E", sampleText: "14/03/2036", x: 271, y: 291, fontSize: 4.5 },
   { id: "obs", label: "Observações", sampleText: "EAR", x: 95, y: 359, fontSize: 5.5 },
-  { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 281, y: 419, fontSize: 6.5 },
+  { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 279, y: 416, fontSize: 6.5 },
   { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 281, y: 428, fontSize: 6.5 },
   { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 91, y: 434, fontSize: 6 },
-  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 187, y: 447, fontSize: 11.5, color: "#1a5c2a" },
+  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 190, y: 450, fontSize: 9, color: "#1a5c2a" },
   { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 60, y: 243, fontSize: 15, rotate: -90 },
   { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 66, y: 468, fontSize: 15, rotate: -90 },
 ];
