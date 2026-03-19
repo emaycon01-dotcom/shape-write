@@ -22,13 +22,13 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  photo: { x: 51, y: 73, w: 70, h: 85, fontSize: 8 },
+  photo: { x: 53, y: 72, w: 70, h: 85, fontSize: 8 },
   nomeCompleto: { x: 53, y: 58, fontSize: 7.5 },
   rg: { x: 131, y: 77, fontSize: 7.5 },
   ferramenta: { x: 130, y: 96, fontSize: 7.5 },
-  numeroRegistro: { x: 52, y: 164, fontSize: 6.5 },
-  validade: { x: 134, y: 165, fontSize: 5.5 },
-  exameMedico: { x: 190, y: 164, fontSize: 5.5 },
+  numeroRegistro: { x: 58, y: 162, fontSize: 6 },
+  validade: { x: 138, y: 163, fontSize: 5.5 },
+  exameMedico: { x: 191, y: 163, fontSize: 5.5 },
 };
 
 export default function OperadorMaquinasDigitalPreviewPage() {
