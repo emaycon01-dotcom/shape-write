@@ -206,6 +206,36 @@ export type Database = {
         }
         Relationships: []
       }
+      pix_warnings: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          qr_code_id: string
+          resolved_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          qr_code_id?: string
+          resolved_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          qr_code_id?: string
+          resolved_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
