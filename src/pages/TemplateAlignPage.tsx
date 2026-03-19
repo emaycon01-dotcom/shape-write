@@ -1139,7 +1139,7 @@ function CnhNauticaAlignContent() {
 }
 
 const historicoEscolarFields: FieldDef[] = [
-  { id: "brasao", label: "Brasão do Estado", sampleText: "[BRASÃO]", x: 250, y: 10, fontSize: 8, w: 40, h: 45, color: "#999" },
+  { id: "brasao", label: "Brasão do Estado", sampleText: "[BRASÃO]", x: 55, y: 18, fontSize: 8, w: 55, h: 65, color: "#999" },
   { id: "estadoEscola1", label: "Estado Extenso (cabeçalho)", sampleText: "ALAGOAS", x: 260, y: 58, fontSize: 8 },
   { id: "estadoEscola2", label: "Estado (rodapé)", sampleText: "AL", x: 410, y: 705, fontSize: 8 },
   { id: "endereco", label: "Endereço", sampleText: "Rua José Maria", x: 90, y: 710, fontSize: 7 },
