@@ -376,6 +376,15 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
 </html>`;
 }
 
+function getEstadoFontSize(estado: string): number {
+  const len = estado.length;
+  if (len <= 4) return 18;
+  if (len <= 7) return 15;
+  if (len <= 12) return 12;
+  if (len <= 16) return 10;
+  return 8;
+}
+
 function buildCnhFisicaHtml(d: Record<string, string>) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
