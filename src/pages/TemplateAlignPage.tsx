@@ -1027,11 +1027,11 @@ function OperadorMaquinasDigitalAlignContent() {
 }
 
 const cpfFisicoFields: FieldDef[] = [
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 200, y: 300, fontSize: 18 },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "EMILY BARBOSA DO NASCIMENTO", x: 200, y: 400, fontSize: 16 },
-  { id: "dataNascimento", label: "Data de Nascimento", sampleText: "15/01/1990", x: 200, y: 480, fontSize: 14 },
-  { id: "data", label: "Data", sampleText: "24/02/2026", x: 400, y: 700, fontSize: 12 },
-  { id: "hora", label: "Hora", sampleText: "14:35", x: 300, y: 700, fontSize: 12 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 120, y: 109, fontSize: 13 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "EMILY BARBOSA DO NASCIMENTO", x: 82, y: 146, fontSize: 11 },
+  { id: "dataNascimento", label: "Data de Nascimento", sampleText: "15/01/1990", x: 134, y: 190, fontSize: 12 },
+  { id: "data", label: "Data", sampleText: "24/02/2026", x: 120, y: 346, fontSize: 4.5 },
+  { id: "hora", label: "Hora", sampleText: "14:35", x: 67, y: 347, fontSize: 5 },
 ];
 
 function CpfFisicoAlignContent() {
