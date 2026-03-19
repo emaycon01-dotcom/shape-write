@@ -393,7 +393,7 @@ function GenericAlignContent({
           className="relative select-none w-full"
           style={{
             aspectRatio: `${pageWidth} / ${pageHeight}`,
-            maxWidth: PAGE_W,
+            maxWidth: pageWidth,
           }}
           onClick={() => setSelected(null)}
         >
