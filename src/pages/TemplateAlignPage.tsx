@@ -967,11 +967,11 @@ function CedulaPoliciaAlignContent() {
 
 const operadorMaquinasDigitalFields: FieldDef[] = [
   { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 55, y: 72, fontSize: 8, w: 70, h: 85, color: "#999" },
-  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 58, y: 58, fontSize: 7.5 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "AGEU PEREIRA DA SILVA", x: 56, y: 59, fontSize: 7.5 },
   { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 134, y: 78, fontSize: 7.5 },
   { id: "ferramenta", label: "Ferramenta", sampleText: "Retroescavadeira", x: 131, y: 98, fontSize: 7.5 },
-  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 64, y: 163, fontSize: 6 },
-  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 140, y: 164, fontSize: 5 },
+  { id: "numeroRegistro", label: "Nº Registro", sampleText: "12345678901AB", x: 63, y: 164, fontSize: 6 },
+  { id: "validade", label: "Validade", sampleText: "FEVEREIRO/2027", x: 141, y: 165, fontSize: 5 },
   { id: "exameMedico", label: "Exame Médico", sampleText: "XR-11.1.6.1-ASO ANUAL", x: 195, y: 165, fontSize: 6 },
 ];
 
