@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -56,22 +59,23 @@ export default function CedulaPoliciaPreviewPage() {
 
     (async () => {
       try {
+        // Load and render the PDF template
+        const res = await fetch("/assets/template-cedula-policia-pe.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
         const scale = 2;
-        canvas.width = PAGE_W * scale;
-        canvas.height = PAGE_H * scale;
-        ctx.scale(scale, scale);
+        const viewport = page.getViewport({ scale });
 
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-        ctx.fillStyle = "#f0f0f0";
-        ctx.fillRect(0, 0, PAGE_W, PAGE_H);
-        ctx.fillStyle = "#999";
-        ctx.font = "16px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Template: Cédula de Identidade Policial - PE", PAGE_W / 2, 100);
-        ctx.fillText("(Preview sobre o template PDF)", PAGE_W / 2, 130);
-        ctx.textAlign = "left";
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const pdfW = viewport.width / scale;
+        const pdfH = viewport.height / scale;
+        const scaleX = canvas.width / pdfW;
+        const scaleY = canvas.height / pdfH;
 
         ctx.textBaseline = "top";
 
@@ -79,18 +83,19 @@ export default function CedulaPoliciaPreviewPage() {
           const pos = positions[key];
           if (!pos || !text) return;
           ctx.fillStyle = color;
-          ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px Arial`;
-          ctx.fillText(text.toUpperCase(), pos.x, pos.y);
+          ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px Arial`;
+          ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
         };
 
+        // Draw photo
         const photoPos = positions.photo || DEFAULT_POSITIONS.photo;
         if (formData.fotoBase64 && photoPos) {
           const photoImg = new Image();
           photoImg.crossOrigin = "anonymous";
           photoImg.onload = () => {
-            const pw = photoPos.w || 150;
-            const ph = photoPos.h || 190;
-            ctx.drawImage(photoImg, photoPos.x, photoPos.y, pw, ph);
+            const pw = (photoPos.w || 150) * scaleX;
+            const ph = (photoPos.h || 190) * scaleY;
+            ctx.drawImage(photoImg, photoPos.x * scaleX, photoPos.y * scaleY, pw, ph);
             setRendered(true);
           };
           photoImg.src = formData.fotoBase64;
@@ -108,9 +113,10 @@ export default function CedulaPoliciaPreviewPage() {
         }
       } catch (err) {
         console.error("Error rendering preview:", err);
-        canvas.width = PAGE_W * 2;
-        canvas.height = PAGE_H * 2;
-        ctx.scale(2, 2);
+        const scale = 2;
+        canvas.width = PAGE_W * scale;
+        canvas.height = PAGE_H * scale;
+        ctx.scale(scale, scale);
         ctx.fillStyle = "#fff";
         ctx.fillRect(0, 0, PAGE_W, PAGE_H);
         ctx.fillStyle = "#333";
