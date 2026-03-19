@@ -42,6 +42,7 @@ interface FieldDef {
   h?: number;
   color?: string;
   rotate?: number;
+  imageUrl?: string;
 }
 
 const defaultFields: FieldDef[] = [
