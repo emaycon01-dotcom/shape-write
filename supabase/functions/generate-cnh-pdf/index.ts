@@ -453,7 +453,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; }
   .reg-vert-top {
-    top: 250px; left: 62px;
+    top: 243px; left: 60px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -476,11 +476,11 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
-  .f-espelho      { top: 419px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-espelho      { top: 416px; left: 279px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-renach       { top: 428px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-local        { top: 434px; left: 91px; font-size: 6px; }
   .reg-vert-bot {
-    top: 477px; left: 68px;
+    top: 468px; left: 66px;
     transform: rotate(-90deg);
     transform-origin: left top;
     font-size: 15px;
@@ -490,8 +490,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
     font-weight: bold;
   }
   .f-estado {
-    top: 442px; left: 90px;
-    width: 280px; height: 20px;
+    top: 451px; left: 154px;
     display: flex; align-items: center; justify-content: center;
     color: #1a5c2a;
     font-family: 'Times New Roman', 'Georgia', serif;
