@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const { login } = useAuth();
+  const { reportViolation } = useDeviceSecurity();
   const navigate = useNavigate();
 
   const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
@@ -45,6 +47,8 @@ export default function LoginPage() {
       if (rateCheck && !rateCheck.allowed) {
         setLockedUntil(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
         setError(`Muitas tentativas. Aguarde ${LOCKOUT_MINUTES} minutos.`);
+        // Report as violation
+        await reportViolation(undefined, email, "Excesso de tentativas de login");
         setLoading(false);
         return;
       }
@@ -60,6 +64,11 @@ export default function LoginPage() {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
 
+      // Report violation after excessive attempts
+      if (newAttempts >= 8) {
+        await reportViolation(undefined, email, `Brute force login: ${newAttempts} tentativas`);
+      }
+
       if (newAttempts >= MAX_ATTEMPTS) {
         setLockedUntil(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
         setError(`Conta bloqueada temporariamente. Aguarde ${LOCKOUT_MINUTES} minutos.`);
@@ -73,7 +82,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Left brand panel */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-background">
         <div className="text-center">
           <img src={logo} alt="Bellarus" className="w-40 h-40 mx-auto mb-6" />
@@ -84,7 +92,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">
