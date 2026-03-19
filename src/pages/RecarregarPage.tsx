@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Tag, Sparkles, Gem, Star } from "lucide-react";
+import { useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Tag, Sparkles, Gem, Star, AlertTriangle, Clock, QrCode, CheckCircle, XCircle, Loader2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
+import { QRCodeSVG } from "qrcode.react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Pacote {
   credits: number;
@@ -67,20 +74,253 @@ function PacoteCard({ p, selected, onSelect }: { p: Pacote; selected: boolean; o
   );
 }
 
+const PIX_COOLDOWN_MS = 60_000; // 1 minute
+const MAX_WARNINGS = 4;
+
 export default function RecarregarPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { reportViolation } = useDeviceSecurity();
   const [selectedPacote, setSelectedPacote] = useState<Pacote | null>(null);
   const [sliderValue, setSliderValue] = useState([5]);
 
+  // PIX QR state
+  const [showQr, setShowQr] = useState(false);
+  const [qrId, setQrId] = useState("");
+  const [qrAmount, setQrAmount] = useState(0);
+  const [generating, setGenerating] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
+
+  // Cooldown state
+  const [cooldownUntil, setCooldownUntil] = useState<number>(0);
+  const [cooldownLeft, setCooldownLeft] = useState(0);
+
+  // Warnings state
+  const [warningCount, setWarningCount] = useState(0);
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [loadingWarnings, setLoadingWarnings] = useState(true);
+
   const sliderPrice = sliderValue[0] * 20;
 
-  const handleBuy = () => {
+  // Load warning count on mount
+  useEffect(() => {
+    if (!user) return;
+    const loadWarnings = async () => {
+      const { count } = await supabase
+        .from("pix_warnings")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "warning");
+      setWarningCount(count ?? 0);
+      setLoadingWarnings(false);
+    };
+    loadWarnings();
+  }, [user]);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) {
+      setCooldownLeft(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+      setCooldownLeft(remaining);
+      if (remaining <= 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [cooldownUntil]);
+
+  // Check stored cooldown
+  useEffect(() => {
+    const stored = localStorage.getItem("pix_cooldown_until");
+    if (stored) {
+      const ts = parseInt(stored, 10);
+      if (ts > Date.now()) {
+        setCooldownUntil(ts);
+        setCooldownLeft(Math.ceil((ts - Date.now()) / 1000));
+      }
+    }
+  }, []);
+
+  const generateQrCode = useCallback(async () => {
+    if (!user) return;
+
+    // Check if banned (4+ warnings)
+    if (warningCount >= MAX_WARNINGS) {
+      toast({ title: "Conta suspensa", description: "Você atingiu o limite de advertências. Acesso revogado.", variant: "destructive" });
+      reportViolation(user.id, user.email, "Tentou gerar PIX com 4+ advertências");
+      return;
+    }
+
+    // Check cooldown
+    if (cooldownUntil > Date.now()) {
+      toast({ title: "Aguarde", description: `Você pode gerar outro QR Code em ${cooldownLeft}s.`, variant: "destructive" });
+      return;
+    }
+
     const credits = selectedPacote?.credits ?? sliderValue[0];
-    toast({
-      title: "Recarga solicitada",
-      description: `Solicitação de ${credits} créditos enviada com sucesso.`,
+    const amount = selectedPacote?.total ?? sliderPrice;
+
+    setGenerating(true);
+
+    // Create a unique QR code ID
+    const newQrId = crypto.randomUUID();
+
+    // Insert pending warning record
+    await supabase.from("pix_warnings").insert({
+      user_id: user.id,
+      qr_code_id: newQrId,
+      amount,
+      status: "pending",
     });
-  };
+
+    // Set cooldown
+    const until = Date.now() + PIX_COOLDOWN_MS;
+    setCooldownUntil(until);
+    setCooldownLeft(60);
+    localStorage.setItem("pix_cooldown_until", String(until));
+
+    setQrId(newQrId);
+    setQrAmount(amount);
+    setShowQr(true);
+    setGenerating(false);
+
+    toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Pague em até 15 minutos.` });
+  }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
+
+  const handleConfirmPayment = useCallback(async () => {
+    if (!user || !qrId) return;
+    setConfirmingPayment(true);
+
+    // Mark as paid
+    await supabase
+      .from("pix_warnings")
+      .update({ status: "paid", resolved_at: new Date().toISOString() })
+      .eq("qr_code_id", qrId)
+      .eq("user_id", user.id);
+
+    setShowQr(false);
+    setConfirmingPayment(false);
+
+    // Send WhatsApp message for admin to confirm
+    const credits = selectedPacote?.credits ?? sliderValue[0];
+    const msg = encodeURIComponent(
+      `Olá 👋, vim do painel Bellarus e realizei um pagamento PIX.\n\n` +
+      `Usuário: ${user.name}\nEmail: ${user.email}\n\n` +
+      `Créditos: ${credits}\nValor: ${formatBRL(qrAmount)}\nID: ${qrId}`
+    );
+    const url = `https://wa.me/5581960002805?text=${msg}`;
+    window.open(url, "_blank") || (window.location.href = url);
+
+    toast({ title: "Pagamento registrado!", description: "Seus créditos serão adicionados após confirmação." });
+  }, [user, qrId, qrAmount, selectedPacote, sliderValue, toast]);
+
+  const handleCancelQr = useCallback(async () => {
+    if (!user || !qrId) return;
+
+    // Mark as warning (unpaid)
+    await supabase
+      .from("pix_warnings")
+      .update({ status: "warning", resolved_at: new Date().toISOString() })
+      .eq("qr_code_id", qrId)
+      .eq("user_id", user.id);
+
+    const newCount = warningCount + 1;
+    setWarningCount(newCount);
+    setShowQr(false);
+    setShowWarningDialog(true);
+
+    // If reached limit, auto-ban
+    if (newCount >= MAX_WARNINGS) {
+      await reportViolation(user.id, user.email, `Auto-ban: ${MAX_WARNINGS} QR codes PIX não pagos`);
+      toast({ title: "Conta banida", description: "Você atingiu o limite de advertências.", variant: "destructive" });
+    }
+  }, [user, qrId, warningCount, reportViolation, toast]);
+
+  const pixPayload = `00020126580014br.gov.bcb.pix0136bellarus-pix-${qrId.slice(0, 8)}5204000053039865404${qrAmount.toFixed(2)}5802BR6009SAO PAULO62070503***6304`;
+
+  if (loadingWarnings) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If user hit max warnings — show blocked message
+  if (warningCount >= MAX_WARNINGS) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+          <ShieldAlert className="w-8 h-8 text-destructive" />
+        </div>
+        <h2 className="font-display text-xl font-bold text-foreground">Acesso Suspenso</h2>
+        <p className="text-muted-foreground text-sm max-w-md">
+          Você atingiu {MAX_WARNINGS} advertências por QR Codes PIX não pagos. 
+          Seu acesso à recarga foi permanentemente revogado.
+        </p>
+      </div>
+    );
+  }
+
+  // Show QR Code payment screen
+  if (showQr) {
+    return (
+      <div className="max-w-md mx-auto space-y-6">
+        <div className="text-center">
+          <QrCode className="w-8 h-8 text-primary mx-auto mb-2" />
+          <h1 className="font-display text-2xl font-bold text-foreground">Pagamento PIX</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Escaneie o QR Code abaixo para pagar
+          </p>
+        </div>
+
+        <div className="glass rounded-xl p-6 flex flex-col items-center gap-4">
+          <div className="bg-white rounded-xl p-4">
+            <QRCodeSVG value={pixPayload} size={200} />
+          </div>
+          <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
+          <p className="text-xs text-muted-foreground">ID: {qrId.slice(0, 8).toUpperCase()}</p>
+        </div>
+
+        {/* Warning notice */}
+        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-semibold text-foreground mb-1">Atenção!</p>
+            <p className="text-muted-foreground">
+              Cancelar sem pagar gera uma <span className="text-yellow-500 font-semibold">advertência</span>.
+              Você possui <span className="text-foreground font-bold">{warningCount}/{MAX_WARNINGS}</span> advertências.
+              Com {MAX_WARNINGS} advertências sua conta será <span className="text-destructive font-semibold">banida permanentemente</span>.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            variant="gradient"
+            className="flex-1 h-12 font-semibold"
+            onClick={handleConfirmPayment}
+            disabled={confirmingPayment}
+          >
+            {confirmingPayment ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Confirmando...</>
+            ) : (
+              <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1 h-12 font-semibold border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={handleCancelQr}
+          >
+            <XCircle className="w-4 h-4 mr-2" /> Cancelar
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -91,6 +331,17 @@ export default function RecarregarPage() {
         </div>
         <p className="text-sm text-muted-foreground">Selecione um pacote para recarregar</p>
       </div>
+
+      {/* Warning banner */}
+      {warningCount > 0 && (
+        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            Você possui <span className="text-yellow-500 font-bold">{warningCount}/{MAX_WARNINGS}</span> advertência(s).
+            Gerar QR Code e não pagar resulta em advertência. Com {MAX_WARNINGS}, sua conta será banida.
+          </p>
+        </div>
+      )}
 
       {/* Populares */}
       <div>
@@ -154,11 +405,60 @@ export default function RecarregarPage() {
         </div>
       </div>
 
-      <Button variant="gradient" className="w-full" onClick={handleBuy}>
-        {selectedPacote
-          ? `Comprar ${selectedPacote.credits} créditos por ${formatBRL(selectedPacote.total)}`
-          : `Comprar ${sliderValue[0]} créditos por ${formatBRL(sliderPrice)}`}
+      {/* Cooldown indicator */}
+      {cooldownLeft > 0 && (
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-center gap-3">
+          <Clock className="w-5 h-5 text-primary shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            Próximo QR Code disponível em <span className="text-foreground font-bold">{cooldownLeft}s</span>
+          </p>
+        </div>
+      )}
+
+      <Button
+        variant="gradient"
+        className="w-full h-14 text-base font-semibold"
+        onClick={generateQrCode}
+        disabled={generating || cooldownLeft > 0}
+      >
+        {generating ? (
+          <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Gerando QR Code...</>
+        ) : cooldownLeft > 0 ? (
+          <><Clock className="w-5 h-5 mr-2" /> Aguarde {cooldownLeft}s</>
+        ) : (
+          selectedPacote
+            ? `Gerar PIX — ${selectedPacote.credits} créditos por ${formatBRL(selectedPacote.total)}`
+            : `Gerar PIX — ${sliderValue[0]} créditos por ${formatBRL(sliderPrice)}`
+        )}
       </Button>
+
+      {/* Warning dialog */}
+      <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              Advertência Registrada
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Você cancelou um QR Code PIX sem pagar. Isso gerou uma advertência.
+              <br /><br />
+              <span className="font-semibold text-foreground">
+                Advertências: {warningCount}/{MAX_WARNINGS}
+              </span>
+              <br />
+              {warningCount >= MAX_WARNINGS - 1 && (
+                <span className="text-destructive font-semibold">
+                  ⚠️ Próxima advertência resultará em banimento permanente!
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Entendi</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
