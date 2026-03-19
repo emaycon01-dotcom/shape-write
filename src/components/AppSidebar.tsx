@@ -18,11 +18,6 @@ import {
   Palette,
   ImageIcon,
   IdCard,
-  Eye,
-  CheckCircle,
-  AlertTriangle,
-  DollarSign,
-  Calculator,
   ShieldBan,
 } from "lucide-react";
 import {
@@ -53,26 +48,6 @@ const toolItems = [
   { title: "Gerador de Assinatura", url: "/dashboard/ferramentas/assinatura", icon: PenTool },
   { title: "Removedor de Fundo", url: "/dashboard/ferramentas/remover-fundo", icon: ImageIcon },
   { title: "Mesclagem de Rosto", url: "/dashboard/ferramentas/mesclagem-rosto", icon: Blend },
-];
-
-const gerenciamentoItems = [
-  { title: "Usuários", url: "/dashboard/admin/usuarios", icon: Users },
-  { title: "Gerações (Prévias)", url: "/dashboard/admin/geracoes", icon: Eye },
-  { title: "Concluídos", url: "/dashboard/admin/concluidos", icon: CheckCircle },
-  { title: "Cancelados / Falhas", url: "/dashboard/admin/cancelados", icon: AlertTriangle },
-];
-
-const financeiroItems = [
-  { title: "Visão Geral & Depósitos", url: "/dashboard/admin/financeiro", icon: DollarSign },
-];
-
-const reparticaoItems = [
-  { title: "Repartição de Equipe", url: "/dashboard/admin/reparticao", icon: Calculator },
-];
-
-const adminExtras = [
-  { title: "Alinhamento", url: "/dashboard/template-align", icon: Wrench },
-  { title: "Revendedores", url: "/dashboard/revendedores", icon: Users },
 ];
 
 type ThemeMode = "default" | "dark-blue" | "light";
@@ -203,65 +178,31 @@ export function AppSidebar() {
           </Collapsible>
         </SidebarGroup>
 
-        {/* Admin sections */}
+        {/* Admin: only Menu Admin + Alinhamento */}
         {isAdmin && (
-          <>
-            <SidebarGroup>
-              <Collapsible defaultOpen>
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
-                  GERENCIAMENTO
-                  <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarGroupContent>
-                    <SidebarMenu>{renderMenuItems(gerenciamentoItems)}</SidebarMenu>
-                  </SidebarGroupContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <Collapsible defaultOpen>
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
-                  FINANCEIRO
-                  <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarGroupContent>
-                    <SidebarMenu>{renderMenuItems(financeiroItems)}</SidebarMenu>
-                  </SidebarGroupContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>{renderMenuItems(reparticaoItems)}</SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>{renderMenuItems(adminExtras)}</SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            {/* Bloqueados - near footer */}
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink to="/dashboard/admin/bloqueados" className="hover:bg-destructive/10" activeClassName="bg-destructive/10 text-destructive font-medium">
-                        <ShieldBan className="mr-2 h-4 w-4 text-destructive" />
-                        {!collapsed && <span className="text-destructive">Bloqueados</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">ADMINISTRAÇÃO</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard/admin" end className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                      <ShieldBan className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Menu Admin</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard/template-align" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                      <Wrench className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Menu de Alinhamento</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
 
         <div className="mt-auto p-4 space-y-3">

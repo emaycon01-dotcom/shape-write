@@ -127,14 +127,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
-                  {/* Admin routes */}
-                  <Route path="admin/usuarios" element={<AdminUsuariosPage />} />
-                  <Route path="admin/geracoes" element={<AdminGeracoesPage />} />
-                  <Route path="admin/concluidos" element={<AdminConcluidosPage />} />
-                  <Route path="admin/cancelados" element={<AdminCanceladosPage />} />
-                  <Route path="admin/financeiro" element={<AdminFinanceiroPage />} />
-                  <Route path="admin/reparticao" element={<AdminReparticaoPage />} />
-                  <Route path="admin/bloqueados" element={<AdminBloqueadosPage />} />
+                  {/* Admin */}
+                  <Route path="admin" element={<AdminPanelPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
