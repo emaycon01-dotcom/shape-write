@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
-import templateBg from "@/assets/template-cha-amador.jpg";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -86,70 +88,76 @@ export default function CnhNauticaPreviewPage() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const bg = new Image();
-    bg.crossOrigin = "anonymous";
-    bg.onload = () => {
-      canvas.width = bg.width;
-      canvas.height = bg.height;
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-cha-amador.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        const scale = 2;
+        const viewport = page.getViewport({ scale });
 
-      const scaleX = bg.width / PAGE_W;
-      const scaleY = bg.height / PAGE_H;
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-      // Draw template background
-      ctx.drawImage(bg, 0, 0, bg.width, bg.height);
+        await page.render({ canvasContext: ctx, viewport }).promise;
 
-      ctx.textBaseline = "top";
+        const pdfW = viewport.width / scale;
+        const pdfH = viewport.height / scale;
+        const scaleX = canvas.width / pdfW;
+        const scaleY = canvas.height / pdfH;
 
-      const drawField = (key: string, text: string, color = "#000", bold = false) => {
-        const pos = positions[key];
-        if (!pos || !text) return;
-        ctx.fillStyle = color;
-        ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px Arial`;
-        ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
-      };
+        ctx.textBaseline = "top";
 
-      drawField("nomeCompleto", formData.nomeCompleto, "#000", true);
-      drawField("dataNascimento", formData.dataNascimento, "#000");
-      drawField("rgOrgaoUf", formData.rgOrgaoUf, "#000");
-      drawField("cpf", formData.cpf, "#000");
-      drawField("inscricao", formData.inscricao, "#000");
-      drawField("localEmissao", formData.localEmissao, "#000");
-      drawField("validade", formData.validade, "#000");
+        const drawField = (key: string, text: string, color = "#000", bold = false) => {
+          const pos = positions[key];
+          if (!pos || !text) return;
+          ctx.fillStyle = color;
+          ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px Arial`;
+          ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
+        };
 
-      setRendered(true);
-    };
-    bg.onerror = () => {
-      // Fallback: plain canvas
-      canvas.width = PAGE_W;
-      canvas.height = PAGE_H;
-      ctx.fillStyle = "#f0f0f0";
-      ctx.fillRect(0, 0, PAGE_W, PAGE_H);
-      ctx.fillStyle = "#999";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("Template: Arrais Amador Físico", PAGE_W / 2, 100);
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
+        drawField("nomeCompleto", formData.nomeCompleto, "#000", true);
+        drawField("dataNascimento", formData.dataNascimento, "#000");
+        drawField("rgOrgaoUf", formData.rgOrgaoUf, "#000");
+        drawField("cpf", formData.cpf, "#000");
+        drawField("inscricao", formData.inscricao, "#000");
+        drawField("localEmissao", formData.localEmissao, "#000");
+        drawField("validade", formData.validade, "#000");
 
-      const drawField = (key: string, text: string, color = "#000", bold = false) => {
-        const pos = positions[key];
-        if (!pos || !text) return;
-        ctx.fillStyle = color;
-        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px Arial`;
-        ctx.fillText(text.toUpperCase(), pos.x, pos.y);
-      };
+        setRendered(true);
+      } catch (e) {
+        console.error("Error rendering PDF template:", e);
+        canvas.width = PAGE_W;
+        canvas.height = PAGE_H;
+        ctx.fillStyle = "#f0f0f0";
+        ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+        ctx.fillStyle = "#999";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Template: Arrais Amador Físico", PAGE_W / 2, 100);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
 
-      drawField("nomeCompleto", formData.nomeCompleto, "#000", true);
-      drawField("dataNascimento", formData.dataNascimento, "#000");
-      drawField("rgOrgaoUf", formData.rgOrgaoUf, "#000");
-      drawField("cpf", formData.cpf, "#000");
-      drawField("inscricao", formData.inscricao, "#000");
-      drawField("localEmissao", formData.localEmissao, "#000");
-      drawField("validade", formData.validade, "#000");
+        const drawField = (key: string, text: string, color = "#000", bold = false) => {
+          const pos = positions[key];
+          if (!pos || !text) return;
+          ctx.fillStyle = color;
+          ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px Arial`;
+          ctx.fillText(text.toUpperCase(), pos.x, pos.y);
+        };
 
-      setRendered(true);
-    };
-    bg.src = templateBg;
+        drawField("nomeCompleto", formData.nomeCompleto, "#000", true);
+        drawField("dataNascimento", formData.dataNascimento, "#000");
+        drawField("rgOrgaoUf", formData.rgOrgaoUf, "#000");
+        drawField("cpf", formData.cpf, "#000");
+        drawField("inscricao", formData.inscricao, "#000");
+        drawField("localEmissao", formData.localEmissao, "#000");
+        drawField("validade", formData.validade, "#000");
+
+        setRendered(true);
+      }
+    })();
   }, [formData, positions]);
 
   if (!formData) {
