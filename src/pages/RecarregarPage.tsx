@@ -102,15 +102,17 @@ export default function RecarregarPage() {
 
   const sliderPrice = sliderValue[0] * 20;
 
-  // Load warning count on mount
+  // Load warning count — only count warnings from the last 7 days
   useEffect(() => {
     if (!user) return;
     const loadWarnings = async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const { count } = await supabase
         .from("pix_warnings")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .eq("status", "warning");
+        .eq("status", "warning")
+        .gte("resolved_at", sevenDaysAgo);
       setWarningCount(count ?? 0);
       setLoadingWarnings(false);
     };

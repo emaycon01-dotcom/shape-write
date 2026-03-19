@@ -215,6 +215,7 @@ export type Database = {
           resolved_at: string | null
           status: string
           user_id: string
+          warning_cycle_start: string | null
         }
         Insert: {
           amount?: number
@@ -224,6 +225,7 @@ export type Database = {
           resolved_at?: string | null
           status?: string
           user_id: string
+          warning_cycle_start?: string | null
         }
         Update: {
           amount?: number
@@ -233,6 +235,7 @@ export type Database = {
           resolved_at?: string | null
           status?: string
           user_id?: string
+          warning_cycle_start?: string | null
         }
         Relationships: []
       }
