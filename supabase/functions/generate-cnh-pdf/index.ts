@@ -376,6 +376,15 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
 </html>`;
 }
 
+function getEstadoFontSize(estado: string): number {
+  const len = estado.length;
+  if (len <= 4) return 18;
+  if (len <= 7) return 15;
+  if (len <= 12) return 12;
+  if (len <= 16) return 10;
+  return 8;
+}
+
 function buildCnhFisicaHtml(d: Record<string, string>) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
@@ -479,7 +488,18 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
     color: #111;
     font-weight: bold;
   }
-  .f-estado       { top: 450px; left: 175px; font-size: 15px; color: #1a5c2a; font-family: 'Times New Roman', 'Georgia', serif; font-weight: bold; }
+  .f-estado {
+    top: 441px; left: 95px;
+    width: 280px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1a5c2a;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+  }
   .mrz-overlay {
     top: 624px; left: 126px;
     width: 420px;
@@ -519,7 +539,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay f-renach">${renachClean}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
   <div class="overlay reg-vert-bot">${d.registro || ""}</div>
-  <div class="overlay f-estado">${d.estado_extenso || ""}</div>
+  <div class="overlay f-estado" style="font-size:${getEstadoFontSize(d.estado_extenso || "")}px;">${d.estado_extenso || ""}</div>
 </div>
 <div class="page">
   <div class="bg-template">

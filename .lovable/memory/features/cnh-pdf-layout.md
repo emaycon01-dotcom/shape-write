@@ -4,6 +4,13 @@ CNH PDF layout rules, field color expectations, and text-format constraints.
 - `buildCnhDigitalHtml` — single-page layout for CNH Digital (MRZ on front, has estado field)
 - `buildCnhFisicaHtml` — two-page layout for CNH Física (front + verso with MRZ)
 - `buildCatDateOverlays(cat, data, tipo)` — pass "digital" or "fisica" for correct positions
+- `getEstadoFontSize(estado)` — dynamic font sizing for estado field based on character count
+
+## CNH Física Estado Field (Bounding Box)
+- Bounding box: top:441px, left:95px, width:280px, height:22px
+- Centered horizontally and vertically via flexbox
+- Font size auto-scales: ≤4 chars→18px, ≤7→15px, ≤12→12px, ≤16→10px, else→8px
+- Color: #1a5c2a, Times New Roman, bold, uppercase
 
 ## CNH Digital Coordinates (updated 2026-03-17)
 photo: 98,167 (82×110) | signature: 93,276 (95×32)
