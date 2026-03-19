@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
-import { PDFDocument } from "pdf-lib";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
