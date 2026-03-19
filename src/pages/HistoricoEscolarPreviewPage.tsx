@@ -21,7 +21,7 @@ interface FieldPos {
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
-  brasao: { x: 250, y: 10, fontSize: 0, w: 40, h: 45 },
+  brasao: { x: 55, y: 18, fontSize: 0, w: 55, h: 65 },
   estadoEscola1: { x: 260, y: 58, fontSize: 8 },
   estadoEscola2: { x: 410, y: 705, fontSize: 8 },
   endereco: { x: 90, y: 710, fontSize: 7 },
