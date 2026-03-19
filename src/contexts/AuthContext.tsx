@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user_id: data.user.id,
         email,
         name,
-        credits: 5,
+        credits: 0,
         plano: "free",
       });
     }
