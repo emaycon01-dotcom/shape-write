@@ -42,6 +42,7 @@ interface FieldDef {
   h?: number;
   color?: string;
   rotate?: number;
+  imageUrl?: string;
 }
 
 const defaultFields: FieldDef[] = [
@@ -458,7 +459,7 @@ function GenericAlignContent({
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
-            const isBox = f.id === "photo" || f.id === "signature";
+            const isBox = f.id === "photo" || f.id === "signature" || f.id === "brasao";
 
             return (
               <div
@@ -495,7 +496,11 @@ function GenericAlignContent({
                 title={`${f.label}: x=${f.x}, y=${f.y}, font=${f.fontSize}`}
               >
                 {isBox ? (
-                  <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
+                  f.imageUrl ? (
+                    <img src={f.imageUrl} alt={f.label} className="w-full h-full object-contain" draggable={false} />
+                  ) : (
+                    <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
+                  )
                 ) : (
                   f.sampleText
                 )}
@@ -1140,44 +1145,45 @@ function CnhNauticaAlignContent() {
 
 const historicoEscolarFields: FieldDef[] = [
   { id: "brasao", label: "Brasão do Estado", sampleText: "[BRASÃO]", x: 55, y: 18, fontSize: 8, w: 55, h: 65, color: "#999" },
-  { id: "estadoEscola1", label: "Estado Extenso (cabeçalho)", sampleText: "ALAGOAS", x: 260, y: 58, fontSize: 8 },
-  { id: "estadoEscola2", label: "Estado (rodapé)", sampleText: "AL", x: 410, y: 705, fontSize: 8 },
-  { id: "endereco", label: "Endereço", sampleText: "Rua José Maria", x: 90, y: 710, fontSize: 7 },
-  { id: "numero", label: "Número", sampleText: "123", x: 310, y: 710, fontSize: 7 },
-  { id: "bairro", label: "Bairro", sampleText: "Centro", x: 65, y: 722, fontSize: 7 },
-  { id: "municipioEscola", label: "Município Escola", sampleText: "Batalha", x: 165, y: 722, fontSize: 7 },
-  { id: "cep", label: "CEP", sampleText: "57420-000", x: 310, y: 722, fontSize: 7 },
-  { id: "telefone", label: "Telefone", sampleText: "(82) 3234-5678", x: 65, y: 734, fontSize: 7 },
-  { id: "nomeAluno", label: "Nome do Aluno", sampleText: "CARLOS EDUARDO DA SILVA", x: 120, y: 746, fontSize: 7 },
-  { id: "dataNascimento", label: "Data Nascimento", sampleText: "03/04/1995", x: 180, y: 634, fontSize: 7 },
-  { id: "nomeMae", label: "Nome da Mãe", sampleText: "MARIA DA SILVA SANTOS", x: 65, y: 758, fontSize: 7 },
-  { id: "estadoAluno", label: "Estado Aluno", sampleText: "AL", x: 65, y: 770, fontSize: 7 },
-  { id: "rg", label: "RG", sampleText: "69/4939", x: 400, y: 746, fontSize: 7 },
-  { id: "municipioCabecalho", label: "Município (cabeçalho)", sampleText: "Batalha", x: 90, y: 104, fontSize: 7 },
-  { id: "anoFundamental", label: "Ano Fundamental", sampleText: "9º ANO - 2019", x: 90, y: 782, fontSize: 6 },
-  { id: "escolaFundamental", label: "Escola Fundamental", sampleText: "Escola Municipal São José", x: 200, y: 782, fontSize: 6 },
-  { id: "ufFundamental", label: "UF Fundamental", sampleText: "AL", x: 430, y: 782, fontSize: 6 },
-  { id: "municipioFundamental", label: "Município Fundamental", sampleText: "Batalha", x: 370, y: 782, fontSize: 6 },
-  { id: "medioAno1", label: "1ª Série Ano", sampleText: "2020", x: 90, y: 798, fontSize: 6 },
-  { id: "medioEscola1", label: "1ª Série Escola", sampleText: "Escola Estadual", x: 200, y: 798, fontSize: 6 },
-  { id: "medioUf1", label: "1ª Série UF", sampleText: "AL", x: 430, y: 798, fontSize: 6 },
-  { id: "medioMunicipio1", label: "1ª Série Município", sampleText: "Batalha", x: 370, y: 798, fontSize: 6 },
-  { id: "medioAno2", label: "2ª Série Ano", sampleText: "2021", x: 90, y: 808, fontSize: 6 },
-  { id: "medioEscola2", label: "2ª Série Escola", sampleText: "Escola Estadual", x: 200, y: 808, fontSize: 6 },
-  { id: "medioUf2", label: "2ª Série UF", sampleText: "AL", x: 430, y: 808, fontSize: 6 },
-  { id: "medioMunicipio2", label: "2ª Série Município", sampleText: "Batalha", x: 370, y: 808, fontSize: 6 },
-  { id: "medioAno3", label: "3ª Série Ano", sampleText: "2022", x: 90, y: 818, fontSize: 6 },
-  { id: "medioEscola3", label: "3ª Série Escola", sampleText: "Escola Estadual", x: 200, y: 818, fontSize: 6 },
-  { id: "medioUf3", label: "3ª Série UF", sampleText: "AL", x: 430, y: 818, fontSize: 6 },
-  { id: "medioMunicipio3", label: "3ª Série Município", sampleText: "Batalha", x: 370, y: 818, fontSize: 6 },
-  { id: "escolaConclusao", label: "Escola Conclusão", sampleText: "Escola Estadual Prof. João Reis", x: 195, y: 838, fontSize: 6 },
-  { id: "nomeConcludente", label: "Nome Concludente", sampleText: "CARLOS EDUARDO DA SILVA", x: 350, y: 842, fontSize: 6 },
-  { id: "anoFinalizacao", label: "Ano Finalização", sampleText: "2015", x: 190, y: 848, fontSize: 6 },
+  { id: "estadoEscola1", label: "Estado Extenso (cabeçalho)", sampleText: "PERNAMBUCO", x: 260, y: 58, fontSize: 8 },
+  { id: "estadoEscola2", label: "Estado (rodapé)", sampleText: "PE", x: 410, y: 705, fontSize: 8 },
+  { id: "endereco", label: "Endereço", sampleText: "RUA FIRMEZA", x: 90, y: 710, fontSize: 7 },
+  { id: "numero", label: "Número", sampleText: "1000", x: 310, y: 710, fontSize: 7 },
+  { id: "bairro", label: "Bairro", sampleText: "JAGUARIBE", x: 65, y: 722, fontSize: 7 },
+  { id: "municipioEscola", label: "Município Escola", sampleText: "ESCADA", x: 165, y: 722, fontSize: 7 },
+  { id: "cep", label: "CEP", sampleText: "55500000", x: 310, y: 722, fontSize: 7 },
+  { id: "telefone", label: "Telefone", sampleText: "(81) 992120805", x: 65, y: 734, fontSize: 7 },
+  { id: "nomeAluno", label: "Nome do Aluno", sampleText: "ALUNO SOUZA7", x: 120, y: 746, fontSize: 7 },
+  { id: "dataNascimento", label: "Data Nascimento", sampleText: "12/02/2004", x: 180, y: 634, fontSize: 7 },
+  { id: "nomeMae", label: "Nome da Mãe", sampleText: "MÃE DO SOUZA7", x: 65, y: 758, fontSize: 7 },
+  { id: "estadoAluno", label: "Estado Aluno", sampleText: "PE", x: 65, y: 770, fontSize: 7 },
+  { id: "rg", label: "RG", sampleText: "39.284.859-0", x: 400, y: 746, fontSize: 7 },
+  { id: "municipioCabecalho", label: "Município (cabeçalho)", sampleText: "ESCADA", x: 90, y: 104, fontSize: 7 },
+  { id: "anoFundamental", label: "Ano Fundamental", sampleText: "8ª Série / 9º Ano", x: 90, y: 782, fontSize: 6 },
+  { id: "escolaFundamental", label: "Escola Fundamental", sampleText: "Escola municipal", x: 200, y: 782, fontSize: 6 },
+  { id: "ufFundamental", label: "UF Fundamental", sampleText: "PE", x: 430, y: 782, fontSize: 6 },
+  { id: "municipioFundamental", label: "Município Fundamental", sampleText: "ESCADA", x: 370, y: 782, fontSize: 6 },
+  { id: "medioAno1", label: "1ª Série Ano", sampleText: "2000", x: 90, y: 798, fontSize: 6 },
+  { id: "medioEscola1", label: "1ª Série Escola", sampleText: "COSTA E SILVA", x: 200, y: 798, fontSize: 6 },
+  { id: "medioUf1", label: "1ª Série UF", sampleText: "PE", x: 430, y: 798, fontSize: 6 },
+  { id: "medioMunicipio1", label: "1ª Série Município", sampleText: "ESCADA", x: 370, y: 798, fontSize: 6 },
+  { id: "medioAno2", label: "2ª Série Ano", sampleText: "2001", x: 90, y: 808, fontSize: 6 },
+  { id: "medioEscola2", label: "2ª Série Escola", sampleText: "VIGÁRIO PEDROSA", x: 200, y: 808, fontSize: 6 },
+  { id: "medioUf2", label: "2ª Série UF", sampleText: "PE", x: 430, y: 808, fontSize: 6 },
+  { id: "medioMunicipio2", label: "2ª Série Município", sampleText: "ESCADA", x: 370, y: 808, fontSize: 6 },
+  { id: "medioAno3", label: "3ª Série Ano", sampleText: "", x: 90, y: 818, fontSize: 6 },
+  { id: "medioEscola3", label: "3ª Série Escola", sampleText: "", x: 200, y: 818, fontSize: 6 },
+  { id: "medioUf3", label: "3ª Série UF", sampleText: "", x: 430, y: 818, fontSize: 6 },
+  { id: "medioMunicipio3", label: "3ª Série Município", sampleText: "", x: 370, y: 818, fontSize: 6 },
+  { id: "escolaConclusao", label: "Escola Conclusão", sampleText: "Escola Estadual", x: 195, y: 838, fontSize: 6 },
+  { id: "nomeConcludente", label: "Nome Concludente", sampleText: "ALUNO SOUZA7", x: 350, y: 842, fontSize: 6 },
+  { id: "anoFinalizacao", label: "Ano Finalização", sampleText: "2004", x: 190, y: 848, fontSize: 6 },
 ];
 
 function HistoricoEscolarAlignContent() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: 595, h: 842 });
+  const [fieldsWithBrasao, setFieldsWithBrasao] = useState<FieldDef[]>(historicoEscolarFields);
 
   useEffect(() => {
     (async () => {
@@ -1203,6 +1209,32 @@ function HistoricoEscolarAlignContent() {
     })();
   }, []);
 
+  // Load brasão image for PE
+  useEffect(() => {
+    (async () => {
+      try {
+        const { loadBrasaoImage } = await import("@/lib/brasoes-estados");
+        const img = await loadBrasaoImage("PE");
+        if (img) {
+          // Convert to data URL
+          const c = document.createElement("canvas");
+          c.width = img.naturalWidth || img.width;
+          c.height = img.naturalHeight || img.height;
+          const ctx = c.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = c.toDataURL("image/png");
+            setFieldsWithBrasao(prev => prev.map(f =>
+              f.id === "brasao" ? { ...f, imageUrl: dataUrl } : f
+            ));
+          }
+        }
+      } catch (err) {
+        console.error("Error loading brasão for alignment:", err);
+      }
+    })();
+  }, []);
+
   if (!pdfUrl) return <div className="flex items-center justify-center py-20 text-muted-foreground">Carregando template...</div>;
 
   return (
@@ -1210,7 +1242,7 @@ function HistoricoEscolarAlignContent() {
       templateUrl={pdfUrl}
       storageKey="historico-escolar-field-positions"
       title="Alinhamento — Histórico Escolar"
-      fields={historicoEscolarFields}
+      fields={fieldsWithBrasao}
       pageWidth={pdfPageSize.w}
       pageHeight={pdfPageSize.h}
     />
