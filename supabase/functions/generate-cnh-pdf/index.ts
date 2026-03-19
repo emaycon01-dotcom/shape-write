@@ -516,35 +516,35 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
 <body>
 <div class="page">
   <div class="bg-template">
-    ${templateBg ? `<img src="${templateBg}" />` : ""}
+     ${templateBg ? `<img src="${escapeHtml(templateBg)}" />` : ""}
   </div>
-  <div class="overlay photo-overlay">${d.foto ? `<img src="${d.foto}" />` : ""}</div>
-  <div class="overlay sig-overlay">${d.assinatura ? `<img src="${d.assinatura}" />` : ""}</div>
-  <div class="overlay reg-vert-top">${d.registro || ""}</div>
-  <div class="overlay f-nome">${d.nome_completo || ""}</div>
-  <div class="overlay f-primeira-hab">${d.data_primeira_hab || ""}</div>
-  <div class="overlay f-nascimento">${d.data_nascimento || ""}</div>
-  <div class="overlay f-emissao">${d.data_emissao || ""}</div>
-  <div class="overlay f-validade">${d.data_validade || ""}</div>
-  <div class="overlay f-cat-big">${d.categoria || ""}</div>
-  <div class="overlay f-rg">${d.rg || ""}</div>
-  <div class="overlay f-cpf">${d.cpf || ""}</div>
-  <div class="overlay f-registro">${d.registro || ""}</div>
-  <div class="overlay f-cat-hab">${d.categoria || ""}</div>
-  <div class="overlay f-nacionalidade">${d.nacionalidade || ""}</div>
-  <div class="overlay f-pai">${d.nome_pai || ""}</div>
-  <div class="overlay f-mae">${d.nome_mae || ""}</div>
+  <div class="overlay photo-overlay">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
+  <div class="overlay sig-overlay">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
+  <div class="overlay reg-vert-top">${escapeHtml(d.registro || "")}</div>
+  <div class="overlay f-nome">${escapeHtml(d.nome_completo || "")}</div>
+  <div class="overlay f-primeira-hab">${escapeHtml(d.data_primeira_hab || "")}</div>
+  <div class="overlay f-nascimento">${escapeHtml(d.data_nascimento || "")}</div>
+  <div class="overlay f-emissao">${escapeHtml(d.data_emissao || "")}</div>
+  <div class="overlay f-validade">${escapeHtml(d.data_validade || "")}</div>
+  <div class="overlay f-cat-big">${escapeHtml(d.categoria || "")}</div>
+  <div class="overlay f-rg">${escapeHtml(d.rg || "")}</div>
+  <div class="overlay f-cpf">${escapeHtml(d.cpf || "")}</div>
+  <div class="overlay f-registro">${escapeHtml(d.registro || "")}</div>
+  <div class="overlay f-cat-hab">${escapeHtml(d.categoria || "")}</div>
+  <div class="overlay f-nacionalidade">${escapeHtml(d.nacionalidade || "")}</div>
+  <div class="overlay f-pai">${escapeHtml(d.nome_pai || "")}</div>
+  <div class="overlay f-mae">${escapeHtml(d.nome_mae || "")}</div>
   ${buildCatDateOverlays(d.categoria || "", d, "fisica")}
-  <div class="overlay f-obs">${d.observacoes || ""}</div>
-  <div class="overlay f-espelho">${espelhoClean}</div>
-  <div class="overlay f-renach">${renachClean}</div>
-  <div class="overlay f-local">${d.cidade_estado || ""}</div>
-  <div class="overlay reg-vert-bot">${d.registro || ""}</div>
-  <div class="overlay f-estado" style="font-size:${getEstadoFontSize(d.estado_extenso || "")}px;">${d.estado_extenso || ""}</div>
+  <div class="overlay f-obs">${escapeHtml(d.observacoes || "")}</div>
+  <div class="overlay f-espelho">${escapeHtml(espelhoClean)}</div>
+  <div class="overlay f-renach">${escapeHtml(renachClean)}</div>
+  <div class="overlay f-local">${escapeHtml(d.cidade_estado || "")}</div>
+  <div class="overlay reg-vert-bot">${escapeHtml(d.registro || "")}</div>
+  <div class="overlay f-estado" style="font-size:${getEstadoFontSize(d.estado_extenso || "")}px;">${escapeHtml(d.estado_extenso || "")}</div>
 </div>
 <div class="page">
   <div class="bg-template">
-    ${templateVersoBg ? `<img src="${templateVersoBg}" />` : ""}
+    ${templateVersoBg ? `<img src="${escapeHtml(templateVersoBg)}" />` : ""}
   </div>
   <div class="overlay" style="top:422px;left:447px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
