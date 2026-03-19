@@ -57,13 +57,7 @@ const HistoricoEscolarPreviewPage = lazy(() => import("./pages/HistoricoEscolarP
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages
-const AdminUsuariosPage = lazy(() => import("./pages/admin/AdminUsuariosPage"));
-const AdminGeracoesPage = lazy(() => import("./pages/admin/AdminGeracoesPage"));
-const AdminConcluidosPage = lazy(() => import("./pages/admin/AdminConcluidosPage"));
-const AdminCanceladosPage = lazy(() => import("./pages/admin/AdminCanceladosPage"));
-const AdminFinanceiroPage = lazy(() => import("./pages/admin/AdminFinanceiroPage"));
-const AdminReparticaoPage = lazy(() => import("./pages/admin/AdminReparticaoPage"));
-const AdminBloqueadosPage = lazy(() => import("./pages/admin/AdminBloqueadosPage"));
+const AdminPanelPage = lazy(() => import("./pages/admin/AdminPanelPage"));
 
 const queryClient = new QueryClient();
 
