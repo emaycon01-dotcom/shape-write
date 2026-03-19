@@ -116,6 +116,7 @@ export default function ChaAmadorFormPage() {
     const validade = new Date(now.getTime() + 365 * 5 * 86400000);
     setForm({
       nome: "CARLOS EDUARDO DA SILVA",
+      cpf: randomCpf(),
       nascimento: format(nasc, "dd/MM/yyyy"),
       validade: format(validade, "dd/MM/yyyy"),
       inscricao: generateInscricao(),
