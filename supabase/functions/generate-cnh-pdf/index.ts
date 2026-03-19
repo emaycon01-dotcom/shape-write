@@ -530,7 +530,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay f-renach">${renachClean}</div>
   <div class="overlay f-local">${d.cidade_estado || ""}</div>
   <div class="overlay reg-vert-bot">${d.registro || ""}</div>
-  <div class="overlay f-estado">${d.estado_extenso || ""}</div>
+  <div class="overlay f-estado" style="font-size:${getEstadoFontSize(d.estado_extenso || "")}px;">${d.estado_extenso || ""}</div>
 </div>
 <div class="page">
   <div class="bg-template">
