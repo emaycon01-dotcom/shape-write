@@ -1138,6 +1138,84 @@ function CnhNauticaAlignContent() {
   );
 }
 
+const historicoEscolarFields: FieldDef[] = [
+  { id: "estadoEscola1", label: "Estado (cabeçalho)", sampleText: "AL", x: 260, y: 58, fontSize: 8 },
+  { id: "estadoEscola2", label: "Estado (rodapé)", sampleText: "AL", x: 410, y: 705, fontSize: 8 },
+  { id: "endereco", label: "Endereço", sampleText: "Rua José Maria", x: 90, y: 710, fontSize: 7 },
+  { id: "numero", label: "Número", sampleText: "123", x: 310, y: 710, fontSize: 7 },
+  { id: "bairro", label: "Bairro", sampleText: "Centro", x: 65, y: 722, fontSize: 7 },
+  { id: "municipioEscola", label: "Município Escola", sampleText: "Batalha", x: 165, y: 722, fontSize: 7 },
+  { id: "cep", label: "CEP", sampleText: "57420-000", x: 310, y: 722, fontSize: 7 },
+  { id: "telefone", label: "Telefone", sampleText: "(82) 3234-5678", x: 65, y: 734, fontSize: 7 },
+  { id: "nomeAluno", label: "Nome do Aluno", sampleText: "CARLOS EDUARDO DA SILVA", x: 120, y: 746, fontSize: 7 },
+  { id: "dataNascimento", label: "Data Nascimento", sampleText: "03/04/1995", x: 180, y: 634, fontSize: 7 },
+  { id: "nomeMae", label: "Nome da Mãe", sampleText: "MARIA DA SILVA SANTOS", x: 65, y: 758, fontSize: 7 },
+  { id: "estadoAluno", label: "Estado Aluno", sampleText: "AL", x: 65, y: 770, fontSize: 7 },
+  { id: "rg", label: "RG", sampleText: "69/4939", x: 400, y: 746, fontSize: 7 },
+  { id: "municipioCabecalho", label: "Município (cabeçalho)", sampleText: "Batalha", x: 90, y: 104, fontSize: 7 },
+  { id: "anoFundamental", label: "Ano Fundamental", sampleText: "9º ANO - 2019", x: 90, y: 782, fontSize: 6 },
+  { id: "escolaFundamental", label: "Escola Fundamental", sampleText: "Escola Municipal São José", x: 200, y: 782, fontSize: 6 },
+  { id: "ufFundamental", label: "UF Fundamental", sampleText: "AL", x: 430, y: 782, fontSize: 6 },
+  { id: "municipioFundamental", label: "Município Fundamental", sampleText: "Batalha", x: 370, y: 782, fontSize: 6 },
+  { id: "medioAno1", label: "1ª Série Ano", sampleText: "2020", x: 90, y: 798, fontSize: 6 },
+  { id: "medioEscola1", label: "1ª Série Escola", sampleText: "Escola Estadual", x: 200, y: 798, fontSize: 6 },
+  { id: "medioUf1", label: "1ª Série UF", sampleText: "AL", x: 430, y: 798, fontSize: 6 },
+  { id: "medioMunicipio1", label: "1ª Série Município", sampleText: "Batalha", x: 370, y: 798, fontSize: 6 },
+  { id: "medioAno2", label: "2ª Série Ano", sampleText: "2021", x: 90, y: 808, fontSize: 6 },
+  { id: "medioEscola2", label: "2ª Série Escola", sampleText: "Escola Estadual", x: 200, y: 808, fontSize: 6 },
+  { id: "medioUf2", label: "2ª Série UF", sampleText: "AL", x: 430, y: 808, fontSize: 6 },
+  { id: "medioMunicipio2", label: "2ª Série Município", sampleText: "Batalha", x: 370, y: 808, fontSize: 6 },
+  { id: "medioAno3", label: "3ª Série Ano", sampleText: "2022", x: 90, y: 818, fontSize: 6 },
+  { id: "medioEscola3", label: "3ª Série Escola", sampleText: "Escola Estadual", x: 200, y: 818, fontSize: 6 },
+  { id: "medioUf3", label: "3ª Série UF", sampleText: "AL", x: 430, y: 818, fontSize: 6 },
+  { id: "medioMunicipio3", label: "3ª Série Município", sampleText: "Batalha", x: 370, y: 818, fontSize: 6 },
+  { id: "escolaConclusao", label: "Escola Conclusão", sampleText: "Escola Estadual Prof. João Reis", x: 195, y: 838, fontSize: 6 },
+  { id: "nomeConcludente", label: "Nome Concludente", sampleText: "CARLOS EDUARDO DA SILVA", x: 350, y: 842, fontSize: 6 },
+  { id: "anoFinalizacao", label: "Ano Finalização", sampleText: "2015", x: 190, y: 848, fontSize: 6 },
+];
+
+function HistoricoEscolarAlignContent() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: 595, h: 842 });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-historico-escolar.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        const vp = page.getViewport({ scale: 1 });
+        setPdfPageSize({ w: Math.round(vp.width), h: Math.round(vp.height) });
+
+        const canvas = document.createElement("canvas");
+        const scale = 2;
+        const sv = page.getViewport({ scale });
+        canvas.width = sv.width;
+        canvas.height = sv.height;
+        const ctx = canvas.getContext("2d")!;
+        await page.render({ canvasContext: ctx, viewport: sv }).promise;
+        setPdfUrl(canvas.toDataURL("image/png"));
+      } catch (err) {
+        console.error("Error loading Histórico Escolar PDF template:", err);
+      }
+    })();
+  }, []);
+
+  if (!pdfUrl) return <div className="flex items-center justify-center py-20 text-muted-foreground">Carregando template...</div>;
+
+  return (
+    <GenericAlignContent
+      templateUrl={pdfUrl}
+      storageKey="historico-escolar-field-positions"
+      title="Alinhamento — Histórico Escolar"
+      fields={historicoEscolarFields}
+      pageWidth={pdfPageSize.w}
+      pageHeight={pdfPageSize.h}
+    />
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
