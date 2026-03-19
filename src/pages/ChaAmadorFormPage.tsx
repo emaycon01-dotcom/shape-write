@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 interface ChaFormData {
   nome: string;
+  cpf: string;
   nascimento: string;
   validade: string;
   inscricao: string;
@@ -21,12 +22,26 @@ interface ChaFormData {
 
 const initial: ChaFormData = {
   nome: "",
+  cpf: "",
   nascimento: "",
   validade: "",
   inscricao: "",
   emissao: "",
   fotoBase64: "",
 };
+
+function formatCpf(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
+function randomCpf(): string {
+  const d = () => Math.floor(Math.random() * 10);
+  return formatCpf(Array.from({ length: 11 }, d).join(""));
+}
 
 function generateInscricao(): string {
   const d = () => Math.floor(Math.random() * 10);
