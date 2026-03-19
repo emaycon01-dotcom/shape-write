@@ -213,8 +213,10 @@ export default function CnhNauticaFormPage() {
             <FieldLabel>Local da Emissão</FieldLabel>
             <Input value={form.localEmissao} onChange={set("localEmissao")} placeholder="Ex: CAPITANIA DOS PORTOS DE SÃO PAULO" className={inputCls} required />
           </div>
-          <DateField label="Validade" value={form.validade} onChange={setDate("validade")} />
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <DateField label="Data de Emissão" value={form.dataEmissao} onChange={setDate("dataEmissao")} />
+            <DateField label="Validade" value={form.validade} onChange={setDate("validade")} />
+          </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
           {isEditMode ? <><RefreshCw className="w-5 h-5" /> Atualizar</> : <><Eye className="w-5 h-5" /> Gerar Preview</>}
