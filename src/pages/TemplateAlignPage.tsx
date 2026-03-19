@@ -1183,6 +1183,7 @@ const historicoEscolarFields: FieldDef[] = [
 function HistoricoEscolarAlignContent() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: 595, h: 842 });
+  const [fieldsWithBrasao, setFieldsWithBrasao] = useState<FieldDef[]>(historicoEscolarFields);
 
   useEffect(() => {
     (async () => {
@@ -1208,6 +1209,32 @@ function HistoricoEscolarAlignContent() {
     })();
   }, []);
 
+  // Load brasão image for PE
+  useEffect(() => {
+    (async () => {
+      try {
+        const { loadBrasaoImage } = await import("@/lib/brasoes-estados");
+        const img = await loadBrasaoImage("PE");
+        if (img) {
+          // Convert to data URL
+          const c = document.createElement("canvas");
+          c.width = img.naturalWidth || img.width;
+          c.height = img.naturalHeight || img.height;
+          const ctx = c.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = c.toDataURL("image/png");
+            setFieldsWithBrasao(prev => prev.map(f =>
+              f.id === "brasao" ? { ...f, imageUrl: dataUrl } : f
+            ));
+          }
+        }
+      } catch (err) {
+        console.error("Error loading brasão for alignment:", err);
+      }
+    })();
+  }, []);
+
   if (!pdfUrl) return <div className="flex items-center justify-center py-20 text-muted-foreground">Carregando template...</div>;
 
   return (
@@ -1215,7 +1242,7 @@ function HistoricoEscolarAlignContent() {
       templateUrl={pdfUrl}
       storageKey="historico-escolar-field-positions"
       title="Alinhamento — Histórico Escolar"
-      fields={historicoEscolarFields}
+      fields={fieldsWithBrasao}
       pageWidth={pdfPageSize.w}
       pageHeight={pdfPageSize.h}
     />
