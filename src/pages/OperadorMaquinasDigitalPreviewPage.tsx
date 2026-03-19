@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -89,63 +92,20 @@ export default function OperadorMaquinasDigitalPreviewPage() {
       try {
         const res = await fetch("/assets/template-carteira-operador-maquinas-digital.pdf");
         const arrayBuffer = await res.arrayBuffer();
-        const pdfjsLib = await import("pdf-lib");
-        
-        // Use a canvas-based approach: render PDF page 1 as image via pdf.js-like approach
-        // Since we don't have pdf.js, we'll render the template as an embedded image
-        // For now, render from the PDF using pdf-lib to extract page dimensions
-        const pdfDoc = await pdfjsLib.PDFDocument.load(arrayBuffer);
-        const page = pdfDoc.getPage(0);
-        const { width: pdfW, height: pdfH } = page.getSize();
-
-        // Set canvas to a good resolution
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
         const scale = 2;
-        canvas.width = PAGE_W * scale;
-        canvas.height = PAGE_H * scale;
-        ctx.scale(scale, scale);
+        const viewport = page.getViewport({ scale });
 
-        // Draw white background
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-        // Try to render the PDF as an image using an offscreen approach
-        const blob = new Blob([arrayBuffer], { type: "application/pdf" });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Create an image from the first page using a trick with embed/iframe screenshot
-        // Since we can't directly render PDF to canvas without pdf.js, 
-        // we'll use the approach of converting the PDF page to PNG via pdf-lib + canvas
-        // Actually, let's use a simpler approach: create an offscreen canvas and draw text on top of a rendered PDF image
-        
-        // For the preview, we'll load the PDF as an image using the browser's built-in capabilities
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        
-        // Convert first PDF page to image using canvas
-        const offscreenCanvas = document.createElement("canvas");
-        const offCtx = offscreenCanvas.getContext("2d");
-        
-        // Use a data URL approach - embed PDF in an object element is not possible on canvas
-        // Let's try fetching as image directly - many browsers can render PDFs
-        // Alternative: Use the page thumbnail approach
-        
-        // Simple approach: draw the template background and overlay text
-        // Since we can't render PDF directly to canvas, we'll use embed approach for preview
-        // and generate the final PDF using pdf-lib
-        
-        ctx.fillStyle = "#f0f0f0";
-        ctx.fillRect(0, 0, PAGE_W, PAGE_H);
-        ctx.fillStyle = "#999";
-        ctx.font = "16px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Template: Carteira de Máquinas Pesadas Digital", PAGE_W / 2, 100);
-        ctx.fillText("(Preview sobre o template PDF)", PAGE_W / 2, 130);
-        ctx.textAlign = "left";
+        await page.render({ canvasContext: ctx, viewport }).promise;
 
-        URL.revokeObjectURL(blobUrl);
-
-        const scaleX = 1;
-        const scaleY = 1;
+        const pdfW = viewport.width / scale;
+        const pdfH = viewport.height / scale;
+        const scaleX = canvas.width / pdfW;
+        const scaleY = canvas.height / pdfH;
 
         ctx.textBaseline = "top";
 
@@ -153,8 +113,8 @@ export default function OperadorMaquinasDigitalPreviewPage() {
           const pos = positions[key];
           if (!pos || !text) return;
           ctx.fillStyle = color;
-          ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px Arial`;
-          ctx.fillText(text.toUpperCase(), pos.x, pos.y);
+          ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px Arial`;
+          ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
         };
 
         // Draw photo
@@ -163,9 +123,9 @@ export default function OperadorMaquinasDigitalPreviewPage() {
           const photoImg = new Image();
           photoImg.crossOrigin = "anonymous";
           photoImg.onload = () => {
-            const pw = photoPos.w || 150;
-            const ph = photoPos.h || 190;
-            ctx.drawImage(photoImg, photoPos.x, photoPos.y, pw, ph);
+            const pw = (photoPos.w || 150) * scaleX;
+            const ph = (photoPos.h || 190) * scaleY;
+            ctx.drawImage(photoImg, photoPos.x * scaleX, photoPos.y * scaleY, pw, ph);
             setRendered(true);
           };
           photoImg.src = formData.fotoBase64;
@@ -183,10 +143,10 @@ export default function OperadorMaquinasDigitalPreviewPage() {
         }
       } catch (err) {
         console.error("Error rendering preview:", err);
-        // Fallback: simple canvas rendering
-        canvas.width = PAGE_W * 2;
-        canvas.height = PAGE_H * 2;
-        ctx.scale(2, 2);
+        const scale = 2;
+        canvas.width = PAGE_W * scale;
+        canvas.height = PAGE_H * scale;
+        ctx.scale(scale, scale);
         ctx.fillStyle = "#fff";
         ctx.fillRect(0, 0, PAGE_W, PAGE_H);
         ctx.fillStyle = "#333";
