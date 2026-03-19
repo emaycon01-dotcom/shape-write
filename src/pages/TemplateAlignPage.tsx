@@ -1049,10 +1049,11 @@ const cnhNauticaFields: FieldDef[] = [
   { id: "nomeCompleto", label: "Nome Completo", sampleText: "CARLOS EDUARDO DA SILVA", x: 94, y: 221, fontSize: 28 },
   { id: "dataNascimento", label: "Nascimento", sampleText: "15/01/1990", x: 90, y: 296, fontSize: 28 },
   { id: "rgOrgaoUf", label: "RG/Órgão/UF", sampleText: "12345678 SSP/SP", x: 259, y: 296, fontSize: 28 },
-  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 544, y: 294, fontSize: 26 },
+  { id: "cpf", label: "CPF", sampleText: "000.000.000-00", x: 529, y: 297, fontSize: 26 },
   { id: "inscricao", label: "Inscrição", sampleText: "215A2023852176", x: 95, y: 434, fontSize: 28 },
+  { id: "dataEmissao", label: "Data de Emissão", sampleText: "15/03/2026", x: 100, y: 480, fontSize: 20 },
   { id: "localEmissao", label: "Local da Emissão", sampleText: "CAPITANIA DOS PORTOS DE SÃO PAULO", x: 100, y: 730, fontSize: 20 },
-  { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 544, y: 722, fontSize: 27 },
+  { id: "validade", label: "Validade", sampleText: "12/02/2028", x: 552, y: 437, fontSize: 24.5 },
 ];
 
 function CnhNauticaAlignContent() {
