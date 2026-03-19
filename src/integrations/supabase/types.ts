@@ -155,6 +155,27 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempt_type: string
+          created_at: string
+          id: string
+          identifier: string
+        }
+        Insert: {
+          attempt_type?: string
+          created_at?: string
+          id?: string
+          identifier: string
+        }
+        Update: {
+          attempt_type?: string
+          created_at?: string
+          id?: string
+          identifier?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -162,6 +183,7 @@ export type Database = {
           email: string
           id: string
           name: string
+          pin_hash: string | null
           plano: string
           user_id: string
         }
@@ -171,6 +193,7 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          pin_hash?: string | null
           plano?: string
           user_id: string
         }
@@ -180,6 +203,7 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          pin_hash?: string | null
           plano?: string
           user_id?: string
         }
@@ -241,6 +265,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_login_attempts: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _cargo: Database["public"]["Enums"]["app_cargo"]

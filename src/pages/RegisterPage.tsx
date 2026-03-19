@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 export default function RegisterPage() {
@@ -11,15 +13,49 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
+
+    // Basic validation
+    if (name.trim().length < 2) {
+      setError("Nome deve ter pelo menos 2 caracteres");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Senha deve ter pelo menos 6 caracteres");
+      setLoading(false);
+      return;
+    }
+
     try {
-      await register(name, email, password);
+      // Check rate limit server-side
+      const { data: rateCheck } = await supabase.functions.invoke("rate-limit", {
+        body: { action: "check", identifier: `register:${email}` },
+      });
+
+      if (rateCheck && !rateCheck.allowed) {
+        setError("Muitos registros recentes. Aguarde 1 hora.");
+        setLoading(false);
+        return;
+      }
+
+      // Record the attempt
+      await supabase.functions.invoke("rate-limit", {
+        body: { action: "record", identifier: `register:${email}` },
+      });
+
+      await register(name.trim(), email.trim(), password);
       navigate("/dashboard");
+    } catch (err: any) {
+      setError(err?.message || "Erro ao criar conta");
     } finally {
       setLoading(false);
     }
@@ -43,16 +79,50 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">Nome</Label>
-              <Input id="name" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)} className="bg-secondary border-border" required />
+              <Input
+                id="name"
+                placeholder="Seu nome"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="bg-secondary border-border"
+                required
+                maxLength={100}
+                autoComplete="name"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
-              <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-secondary border-border" required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-secondary border-border"
+                required
+                maxLength={255}
+                autoComplete="email"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-secondary border-border" required />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-secondary border-border"
+                required
+                minLength={6}
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
             </div>
+
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
 
             <Button type="submit" variant="gradient" className="w-full h-12 rounded-lg text-base" disabled={loading}>
               {loading ? "Criando..." : "Criar Conta"}
@@ -63,6 +133,11 @@ export default function RegisterPage() {
             Já tem conta?{" "}
             <Link to="/login" className="text-accent font-medium hover:underline">Entrar</Link>
           </p>
+
+          <div className="flex items-center justify-center gap-1.5 mt-6 text-xs text-muted-foreground">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Protegido por Bellarus Security</span>
+          </div>
         </div>
       </div>
     </div>
