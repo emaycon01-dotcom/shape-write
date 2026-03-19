@@ -16,6 +16,7 @@ interface FormData {
   cpf: string;
   inscricao: string;
   localEmissao: string;
+  dataEmissao: string;
   validade: string;
 }
 
@@ -26,6 +27,7 @@ const initial: FormData = {
   cpf: "",
   inscricao: "",
   localEmissao: "CAPITANIA DOS PORTOS DE SÃO PAULO",
+  dataEmissao: "",
   validade: "",
 };
 
@@ -111,6 +113,7 @@ export default function CnhNauticaFormPage() {
       cpf: randomCpf(),
       inscricao: generateInscricao(),
       localEmissao: "CAPITANIA DOS PORTOS DE SÃO PAULO",
+      dataEmissao: format(now, "dd/MM/yyyy"),
       validade: format(validade, "dd/MM/yyyy"),
     });
     toast({ title: "Formulário preenchido com dados de teste!" });
@@ -210,7 +213,10 @@ export default function CnhNauticaFormPage() {
             <FieldLabel>Local da Emissão</FieldLabel>
             <Input value={form.localEmissao} onChange={set("localEmissao")} placeholder="Ex: CAPITANIA DOS PORTOS DE SÃO PAULO" className={inputCls} required />
           </div>
-          <DateField label="Validade" value={form.validade} onChange={setDate("validade")} />
+          <div className="grid grid-cols-2 gap-4">
+            <DateField label="Data de Emissão" value={form.dataEmissao} onChange={setDate("dataEmissao")} />
+            <DateField label="Validade" value={form.validade} onChange={setDate("validade")} />
+          </div>
         </div>
 
         <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold gap-2">
