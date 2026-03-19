@@ -57,13 +57,7 @@ const HistoricoEscolarPreviewPage = lazy(() => import("./pages/HistoricoEscolarP
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages
-const AdminUsuariosPage = lazy(() => import("./pages/admin/AdminUsuariosPage"));
-const AdminGeracoesPage = lazy(() => import("./pages/admin/AdminGeracoesPage"));
-const AdminConcluidosPage = lazy(() => import("./pages/admin/AdminConcluidosPage"));
-const AdminCanceladosPage = lazy(() => import("./pages/admin/AdminCanceladosPage"));
-const AdminFinanceiroPage = lazy(() => import("./pages/admin/AdminFinanceiroPage"));
-const AdminReparticaoPage = lazy(() => import("./pages/admin/AdminReparticaoPage"));
-const AdminBloqueadosPage = lazy(() => import("./pages/admin/AdminBloqueadosPage"));
+const AdminPanelPage = lazy(() => import("./pages/admin/AdminPanelPage"));
 
 const queryClient = new QueryClient();
 
@@ -133,14 +127,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
-                  {/* Admin routes */}
-                  <Route path="admin/usuarios" element={<AdminUsuariosPage />} />
-                  <Route path="admin/geracoes" element={<AdminGeracoesPage />} />
-                  <Route path="admin/concluidos" element={<AdminConcluidosPage />} />
-                  <Route path="admin/cancelados" element={<AdminCanceladosPage />} />
-                  <Route path="admin/financeiro" element={<AdminFinanceiroPage />} />
-                  <Route path="admin/reparticao" element={<AdminReparticaoPage />} />
-                  <Route path="admin/bloqueados" element={<AdminBloqueadosPage />} />
+                  {/* Admin */}
+                  <Route path="admin" element={<AdminPanelPage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
