@@ -6,6 +6,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "certidao-nascimento": "/dashboard/documents/certidao-nascimento",
   "comprovante-residencia": "/dashboard/documents/comprovante-residencia",
   "exame-toxicologico": "/dashboard/documents/exame-toxicologico",
+  "historico-escolar": "/dashboard/documents/historico-escolar",
   "cpf-fisico": "/dashboard/documentos-fisicos/carteirinhas/cpf-fisico",
   "operador-maquinas-digital": "/dashboard/documentos-fisicos/carteirinhas/operador-maquinas-digital",
   "cedula-policia-pe": "/dashboard/documentos-fisicos/carteirinhas/cedula-policia-pe",
