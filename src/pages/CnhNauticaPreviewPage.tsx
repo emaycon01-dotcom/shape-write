@@ -27,6 +27,7 @@ const DEFAULT_POSITIONS: Record<string, FieldPos> = {
   rgOrgaoUf: { x: 259, y: 296, fontSize: 28 },
   cpf: { x: 529, y: 297, fontSize: 26 },
   inscricao: { x: 95, y: 434, fontSize: 28 },
+  dataEmissao: { x: 100, y: 480, fontSize: 20 },
   localEmissao: { x: 100, y: 730, fontSize: 20 },
   validade: { x: 552, y: 437, fontSize: 24.5 },
 };
