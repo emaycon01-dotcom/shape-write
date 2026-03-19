@@ -126,6 +126,7 @@ export default function ChaAmadorPreviewPage() {
 
       const BLACK = "#000000";
       drawField("nome", formData.nome, BLACK, true);
+      drawField("cpf", formData.cpf, BLACK);
       drawField("nascimento", formData.nascimento, BLACK);
       drawField("validade", formData.validade, BLACK);
       drawField("inscricao", formData.inscricao, BLACK);
