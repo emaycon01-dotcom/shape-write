@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      banned_devices: {
+        Row: {
+          banned_at: string
+          banned_by: string | null
+          fingerprint: string
+          id: string
+          reason: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          banned_at?: string
+          banned_by?: string | null
+          fingerprint: string
+          id?: string
+          reason?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          banned_at?: string
+          banned_by?: string | null
+          fingerprint?: string
+          id?: string
+          reason?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       blocked_users: {
         Row: {
           blocked_at: string
