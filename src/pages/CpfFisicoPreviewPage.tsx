@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Share2, CreditCard, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
-import templateBgUrl from "@/assets/template-cpf-fisico.jpg";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -84,71 +86,59 @@ export default function CpfFisicoPreviewPage() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    bgImg.onload = () => {
-      const scale = 2;
-      canvas.width = PAGE_W * scale;
-      canvas.height = PAGE_H * scale;
-      ctx.scale(scale, scale);
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-cpf-fisico.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        const scale = 2;
+        const viewport = page.getViewport({ scale });
 
-      ctx.drawImage(bgImg, 0, 0, PAGE_W, PAGE_H);
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-      ctx.textBaseline = "top";
+        await page.render({ canvasContext: ctx, viewport }).promise;
 
-      const BLUE = "#1a1a6e";
-      const FONT = "'Times New Roman', 'Georgia', serif";
+        const pdfW = viewport.width / scale;
+        const pdfH = viewport.height / scale;
+        const scaleX = canvas.width / pdfW;
+        const scaleY = canvas.height / pdfH;
 
-      const drawField = (key: string, text: string, color = BLUE, bold = false) => {
-        const pos = positions[key];
-        if (!pos || !text) return;
-        ctx.fillStyle = color;
-        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px ${FONT}`;
-        ctx.fillText(text.toUpperCase(), pos.x, pos.y);
-      };
+        ctx.textBaseline = "top";
 
-      drawField("cpf", formData.cpf, BLUE, true);
-      drawField("nomeCompleto", formData.nomeCompleto, BLUE, true);
-      drawField("dataNascimento", formData.dataNascimento, BLUE);
-      drawField("data", formData.data, BLUE);
-      drawField("hora", formData.hora, BLUE);
+        const BLUE = "#1a1a6e";
+        const FONT = "'Times New Roman', 'Georgia', serif";
 
-      setRendered(true);
-    };
-    bgImg.onerror = () => {
-      const scale = 2;
-      canvas.width = PAGE_W * scale;
-      canvas.height = PAGE_H * scale;
-      ctx.scale(scale, scale);
-      ctx.fillStyle = "#f0f0f0";
-      ctx.fillRect(0, 0, PAGE_W, PAGE_H);
-      ctx.fillStyle = "#999";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("Template: Comprovante de CPF", PAGE_W / 2, 100);
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
+        const drawField = (key: string, text: string, color = BLUE, bold = false) => {
+          const pos = positions[key];
+          if (!pos || !text) return;
+          ctx.fillStyle = color;
+          ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px ${FONT}`;
+          ctx.fillText(text.toUpperCase(), pos.x * scaleX, pos.y * scaleY);
+        };
 
-      const BLUE = "#1a1a6e";
-      const FONT = "'Times New Roman', 'Georgia', serif";
+        drawField("cpf", formData.cpf, BLUE, true);
+        drawField("nomeCompleto", formData.nomeCompleto, BLUE, true);
+        drawField("dataNascimento", formData.dataNascimento, BLUE);
+        drawField("data", formData.data, BLUE);
+        drawField("hora", formData.hora, BLUE);
 
-      const drawField = (key: string, text: string, color = BLUE, bold = false) => {
-        const pos = positions[key];
-        if (!pos || !text) return;
-        ctx.fillStyle = color;
-        ctx.font = `${bold ? "bold " : ""}${pos.fontSize}px ${FONT}`;
-        ctx.fillText(text.toUpperCase(), pos.x, pos.y);
-      };
-
-      drawField("cpf", formData.cpf, BLUE, true);
-      drawField("nomeCompleto", formData.nomeCompleto, BLUE, true);
-      drawField("dataNascimento", formData.dataNascimento, BLUE);
-      drawField("data", formData.data, BLUE);
-      drawField("hora", formData.hora, BLUE);
-
-      setRendered(true);
-    };
-    bgImg.src = templateBgUrl;
+        setRendered(true);
+      } catch (err) {
+        console.error("Error rendering CPF preview:", err);
+        const scale = 2;
+        canvas.width = PAGE_W * scale;
+        canvas.height = PAGE_H * scale;
+        ctx.scale(scale, scale);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+        ctx.fillStyle = "#333";
+        ctx.font = "16px Arial";
+        ctx.fillText("Erro ao carregar template", 50, 50);
+        setRendered(true);
+      }
+    })();
   }, [formData, positions]);
 
   if (!formData) {
