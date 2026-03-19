@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
 import * as pdfjsLib from "pdfjs-dist";
 import type { HistoricoFormData } from "./HistoricoEscolarFormPage";
+import { ESTADO_NOMES, loadBrasaoImage } from "@/lib/brasoes-estados";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
@@ -15,9 +16,12 @@ interface FieldPos {
   x: number;
   y: number;
   fontSize: number;
+  w?: number;
+  h?: number;
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
+  brasao: { x: 250, y: 10, fontSize: 0, w: 40, h: 45 },
   estadoEscola1: { x: 260, y: 58, fontSize: 8 },
   estadoEscola2: { x: 410, y: 705, fontSize: 8 },
   endereco: { x: 90, y: 710, fontSize: 7 },
@@ -154,8 +158,20 @@ export default function HistoricoEscolarPreviewPage() {
         const { bairro, municipio: municipioEscola, cep } = parseBairroMunicipioCep(formData.bairroMunicipioCep);
         const { uf: ufFund, municipio: munFund } = parseUfMunicipio(formData.ufMunicipioFundamental);
 
-        // Sessão 1
-        drawField("estadoEscola1", formData.estadoEscola);
+        // Draw brasão image
+        if (formData.estadoEscola) {
+          const brasaoImg = await loadBrasaoImage(formData.estadoEscola);
+          if (brasaoImg) {
+            const bp = positions["brasao"] || DEFAULT_POSITIONS["brasao"];
+            const bw = (bp.w || 40) * scaleX;
+            const bh = (bp.h || 45) * scaleY;
+            ctx.drawImage(brasaoImg, bp.x * scaleX, bp.y * scaleY, bw, bh);
+          }
+        }
+
+        // Sessão 1 - estadoEscola1 in full name (e.g. "ALAGOAS"), estadoEscola2 as abbreviation
+        const estadoExtenso = ESTADO_NOMES[formData.estadoEscola] || formData.estadoEscola;
+        drawField("estadoEscola1", estadoExtenso);
         drawField("estadoEscola2", formData.estadoEscola);
         drawField("endereco", endereco);
         drawField("numero", numero);
