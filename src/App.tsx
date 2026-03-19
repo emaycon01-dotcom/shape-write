@@ -127,8 +127,8 @@ const App = () => (
                   <Route path="documentos-fisicos/carteirinhas/cnh-nautica/preview" element={<CnhNauticaPreviewPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo" element={<CarteirinhaFormPage />} />
                   <Route path="documentos-fisicos/carteirinhas/:tipo/preview" element={<CarteirinhaPreviewPage />} />
-                  {/* Admin */}
-                  <Route path="admin" element={<AdminPanelPage />} />
+                  {/* Admin — guarded by AdminRoute */}
+                  <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
