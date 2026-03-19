@@ -1,21 +1,26 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Lock, ShieldCheck, KeyRound, Loader2 } from "lucide-react";
+import { Lock, ShieldCheck, KeyRound, Loader2, AlertTriangle } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 interface PinGateProps {
   mode: "setup" | "verify";
   onSuccess: () => void;
+  userId?: string;
+  userEmail?: string;
 }
 
-export default function PinGate({ mode, onSuccess }: PinGateProps) {
+export default function PinGate({ mode, onSuccess, userId, userEmail }: PinGateProps) {
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [step, setStep] = useState<"enter" | "confirm">("enter");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [failCount, setFailCount] = useState(0);
+  const { reportViolation } = useDeviceSecurity();
 
   const handleVerify = useCallback(async (value: string) => {
     if (value.length !== 4) return;
@@ -27,29 +32,42 @@ export default function PinGate({ mode, onSuccess }: PinGateProps) {
         body: { action: "verify", pin: value },
       });
 
-      if (fnError) {
-        const parsed = typeof fnError === "object" && "message" in fnError
-          ? fnError.message
-          : "Erro ao verificar PIN";
-        setError(parsed);
+      if (fnError || !data?.valid) {
+        const newFailCount = failCount + 1;
+        setFailCount(newFailCount);
+
+        // Report violation after 5 wrong PINs
+        if (newFailCount >= 5) {
+          await reportViolation(
+            userId,
+            userEmail,
+            `Brute force PIN: ${newFailCount} tentativas erradas`
+          );
+        }
+
+        if (data?.error === "Muitas tentativas. Aguarde 15 minutos.") {
+          setError(data.error);
+        } else {
+          const remaining = Math.max(0, 5 - newFailCount);
+          setError(
+            remaining > 0
+              ? `PIN incorreto (${remaining} tentativa${remaining !== 1 ? "s" : ""} antes do bloqueio)`
+              : "PIN incorreto — violação registrada"
+          );
+        }
         setPin("");
         setLoading(false);
         return;
       }
 
-      if (data?.valid) {
-        sessionStorage.setItem("pin_verified", Date.now().toString());
-        onSuccess();
-      } else {
-        setError(data?.error || "PIN incorreto");
-        setPin("");
-      }
+      sessionStorage.setItem("pin_verified", Date.now().toString());
+      onSuccess();
     } catch {
       setError("Erro de conexão");
       setPin("");
     }
     setLoading(false);
-  }, [onSuccess]);
+  }, [onSuccess, failCount, reportViolation, userId, userEmail]);
 
   const handleSetup = useCallback(async () => {
     if (step === "enter") {
@@ -144,7 +162,10 @@ export default function PinGate({ mode, onSuccess }: PinGateProps) {
         </div>
 
         {error && (
-          <p className="text-sm text-destructive font-medium">{error}</p>
+          <div className="flex items-center justify-center gap-2 text-sm text-destructive font-medium">
+            {failCount >= 3 && <AlertTriangle className="w-4 h-4" />}
+            <span>{error}</span>
+          </div>
         )}
 
         {loading && (
@@ -168,6 +189,13 @@ export default function PinGate({ mode, onSuccess }: PinGateProps) {
             <ShieldCheck className="w-4 h-4 mr-2" />
             {step === "enter" ? "Continuar" : "Salvar PIN"}
           </Button>
+        )}
+
+        {failCount >= 3 && !isSetup && (
+          <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive">
+            <p className="font-semibold">⚠️ Aviso de segurança</p>
+            <p className="mt-1">Múltiplas tentativas incorretas detectadas. Continuando, seu dispositivo poderá ser bloqueado permanentemente.</p>
+          </div>
         )}
 
         <div className="flex items-center gap-2 justify-center text-xs text-muted-foreground">
