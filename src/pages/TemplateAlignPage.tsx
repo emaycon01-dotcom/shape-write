@@ -1035,12 +1035,43 @@ const cpfFisicoFields: FieldDef[] = [
 ];
 
 function CpfFisicoAlignContent() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: PAGE_W, h: PAGE_H });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-cpf-fisico.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1 });
+        setPdfPageSize({ w: viewport.width, h: viewport.height });
+
+        const canvas = document.createElement("canvas");
+        const scale = 2;
+        const sv = page.getViewport({ scale });
+        canvas.width = sv.width;
+        canvas.height = sv.height;
+        const ctx = canvas.getContext("2d")!;
+        await page.render({ canvasContext: ctx, viewport: sv }).promise;
+        setPdfUrl(canvas.toDataURL("image/png"));
+      } catch (err) {
+        console.error("Error loading CPF PDF template:", err);
+      }
+    })();
+  }, []);
+
+  if (!pdfUrl) return <div className="flex items-center justify-center py-20 text-muted-foreground">Carregando template...</div>;
+
   return (
     <GenericAlignContent
-      templateUrl={templateCpfFisicoUrl}
+      templateUrl={pdfUrl}
       storageKey="cpf-fisico-field-positions"
       title="Alinhamento — CPF Físico"
       fields={cpfFisicoFields}
+      pageWidth={pdfPageSize.w}
+      pageHeight={pdfPageSize.h}
     />
   );
 }
