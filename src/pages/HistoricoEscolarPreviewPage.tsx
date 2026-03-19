@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { jsPDF } from "jspdf";
 import * as pdfjsLib from "pdfjs-dist";
 import type { HistoricoFormData } from "./HistoricoEscolarFormPage";
+import { ESTADO_NOMES, loadBrasaoImage } from "@/lib/brasoes-estados";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
@@ -15,6 +16,8 @@ interface FieldPos {
   x: number;
   y: number;
   fontSize: number;
+  w?: number;
+  h?: number;
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
