@@ -10,48 +10,90 @@ export const ESTADO_NOMES: Record<string, string> = {
   SE: "SERGIPE", TO: "TOCANTINS",
 };
 
-// Coat of arms URLs from Wikimedia Commons (SVG rendered as PNG via thumb)
-const WIKI_BASE = "https://upload.wikimedia.org/wikipedia/commons/thumb";
-
-export const BRASAO_URLS: Record<string, string> = {
-  AC: `${WIKI_BASE}/4/4c/Brasão_do_Acre.svg/120px-Brasão_do_Acre.svg.png`,
-  AL: `${WIKI_BASE}/1/17/Brasão_de_Alagoas.svg/120px-Brasão_de_Alagoas.svg.png`,
-  AP: `${WIKI_BASE}/b/ba/Brasão_do_Amapá.svg/120px-Brasão_do_Amapá.svg.png`,
-  AM: `${WIKI_BASE}/0/0c/Brasão_do_Amazonas.svg/120px-Brasão_do_Amazonas.svg.png`,
-  BA: `${WIKI_BASE}/6/6e/Brasão_da_Bahia.svg/120px-Brasão_da_Bahia.svg.png`,
-  CE: `${WIKI_BASE}/a/a2/Brasão_do_Ceará.svg/120px-Brasão_do_Ceará.svg.png`,
-  DF: `${WIKI_BASE}/d/d4/Brasão_do_Distrito_Federal_%28Brasil%29.svg/120px-Brasão_do_Distrito_Federal_%28Brasil%29.svg.png`,
-  ES: `${WIKI_BASE}/4/43/Brasão_do_Espírito_Santo.svg/120px-Brasão_do_Espírito_Santo.svg.png`,
-  GO: `${WIKI_BASE}/b/be/Brasão_de_Goiás.svg/120px-Brasão_de_Goiás.svg.png`,
-  MA: `${WIKI_BASE}/0/0b/Brasão_do_Maranhão.svg/120px-Brasão_do_Maranhão.svg.png`,
-  MT: `${WIKI_BASE}/c/c2/Brasão_de_Mato_Grosso.svg/120px-Brasão_de_Mato_Grosso.svg.png`,
-  MS: `${WIKI_BASE}/a/a3/Brasão_de_Mato_Grosso_do_Sul.svg/120px-Brasão_de_Mato_Grosso_do_Sul.svg.png`,
-  MG: `${WIKI_BASE}/2/2c/Brasão_de_Minas_Gerais.svg/120px-Brasão_de_Minas_Gerais.svg.png`,
-  PA: `${WIKI_BASE}/d/d5/Brasão_do_Pará.svg/120px-Brasão_do_Pará.svg.png`,
-  PB: `${WIKI_BASE}/9/9a/Brasão_da_Paraíba.svg/120px-Brasão_da_Paraíba.svg.png`,
-  PR: `${WIKI_BASE}/e/e2/Brasão_do_Paraná.svg/120px-Brasão_do_Paraná.svg.png`,
-  PE: `${WIKI_BASE}/8/8d/Brasão_de_Pernambuco.svg/120px-Brasão_de_Pernambuco.svg.png`,
-  PI: `${WIKI_BASE}/3/33/Brasão_do_Piauí.svg/120px-Brasão_do_Piauí.svg.png`,
-  RJ: `${WIKI_BASE}/3/3e/Brasão_do_estado_do_Rio_de_Janeiro.svg/120px-Brasão_do_estado_do_Rio_de_Janeiro.svg.png`,
-  RN: `${WIKI_BASE}/3/3b/Brasão_do_Rio_Grande_do_Norte.svg/120px-Brasão_do_Rio_Grande_do_Norte.svg.png`,
-  RS: `${WIKI_BASE}/4/4e/Brasão_do_Rio_Grande_do_Sul.svg/120px-Brasão_do_Rio_Grande_do_Sul.svg.png`,
-  RO: `${WIKI_BASE}/6/62/Brasão_de_Rondônia.svg/120px-Brasão_de_Rondônia.svg.png`,
-  RR: `${WIKI_BASE}/7/72/Brasão_de_Roraima.svg/120px-Brasão_de_Roraima.svg.png`,
-  SC: `${WIKI_BASE}/d/d4/Brasão_de_Santa_Catarina.svg/120px-Brasão_de_Santa_Catarina.svg.png`,
-  SP: `${WIKI_BASE}/0/0d/Brasão_do_estado_de_São_Paulo.svg/120px-Brasão_do_estado_de_São_Paulo.svg.png`,
-  SE: `${WIKI_BASE}/3/34/Brasão_de_Sergipe.svg/120px-Brasão_de_Sergipe.svg.png`,
-  TO: `${WIKI_BASE}/0/0e/Brasão_do_Tocantins.svg/120px-Brasão_do_Tocantins.svg.png`,
+// Wikipedia page titles for each state's coat of arms - used with the REST API
+const BRASAO_WIKI_FILES: Record<string, string> = {
+  AC: "Bras%C3%A3o_do_Acre",
+  AL: "Bras%C3%A3o_de_Alagoas",
+  AP: "Bras%C3%A3o_do_Amap%C3%A1",
+  AM: "Bras%C3%A3o_do_Amazonas",
+  BA: "Bras%C3%A3o_da_Bahia",
+  CE: "Bras%C3%A3o_do_Cear%C3%A1",
+  DF: "Bras%C3%A3o_do_Distrito_Federal_(Brasil)",
+  ES: "Bras%C3%A3o_do_Esp%C3%ADrito_Santo",
+  GO: "Bras%C3%A3o_de_Goi%C3%A1s",
+  MA: "Bras%C3%A3o_do_Maranh%C3%A3o",
+  MT: "Bras%C3%A3o_de_Mato_Grosso",
+  MS: "Bras%C3%A3o_de_Mato_Grosso_do_Sul",
+  MG: "Bras%C3%A3o_de_Minas_Gerais",
+  PA: "Bras%C3%A3o_do_Par%C3%A1",
+  PB: "Bras%C3%A3o_da_Para%C3%ADba",
+  PR: "Bras%C3%A3o_do_Paran%C3%A1",
+  PE: "Bras%C3%A3o_de_Pernambuco",
+  PI: "Bras%C3%A3o_do_Piau%C3%AD",
+  RJ: "Bras%C3%A3o_do_estado_do_Rio_de_Janeiro",
+  RN: "Bras%C3%A3o_do_Rio_Grande_do_Norte",
+  RS: "Bras%C3%A3o_do_Rio_Grande_do_Sul",
+  RO: "Bras%C3%A3o_de_Rond%C3%B4nia",
+  RR: "Bras%C3%A3o_de_Roraima",
+  SC: "Bras%C3%A3o_de_Santa_Catarina",
+  SP: "Bras%C3%A3o_do_estado_de_S%C3%A3o_Paulo",
+  SE: "Bras%C3%A3o_de_Sergipe",
+  TO: "Bras%C3%A3o_do_Tocantins",
 };
 
-/** Load a brasão image. Returns an HTMLImageElement or null on failure. */
-export function loadBrasaoImage(uf: string): Promise<HTMLImageElement | null> {
-  const url = BRASAO_URLS[uf];
-  if (!url) return Promise.resolve(null);
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
+// Cache for loaded brasão images
+const brasaoCache: Record<string, HTMLImageElement | null> = {};
+
+/**
+ * Load a brasão image via Wikimedia Commons API (avoids CORS issues).
+ * Uses fetch to get the image as blob, then creates an object URL.
+ * Returns an HTMLImageElement or null on failure.
+ */
+export async function loadBrasaoImage(uf: string): Promise<HTMLImageElement | null> {
+  // Return cached version if available
+  if (uf in brasaoCache) return brasaoCache[uf];
+
+  const fileName = BRASAO_WIKI_FILES[uf];
+  if (!fileName) {
+    brasaoCache[uf] = null;
+    return null;
+  }
+
+  try {
+    // Use Wikimedia Commons API to get the actual image URL with proper CORS
+    const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=File:${fileName}.svg&prop=imageinfo&iiprop=url&iiurlwidth=200&format=json&origin=*`;
+    const apiRes = await fetch(apiUrl);
+    const apiData = await apiRes.json();
+    
+    const pages = apiData?.query?.pages;
+    if (!pages) throw new Error("No pages");
+    
+    const pageId = Object.keys(pages)[0];
+    const imageInfo = pages[pageId]?.imageinfo?.[0];
+    const thumbUrl = imageInfo?.thumburl;
+    
+    if (!thumbUrl) throw new Error("No thumb URL");
+
+    // Fetch the actual image as blob to avoid CORS canvas tainting
+    const imgRes = await fetch(thumbUrl);
+    const blob = await imgRes.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        brasaoCache[uf] = img;
+        resolve(img);
+      };
+      img.onerror = () => {
+        brasaoCache[uf] = null;
+        resolve(null);
+      };
+      img.src = blobUrl;
+    });
+  } catch (err) {
+    console.error(`Failed to load brasão for ${uf}:`, err);
+    brasaoCache[uf] = null;
+    return null;
+  }
 }
