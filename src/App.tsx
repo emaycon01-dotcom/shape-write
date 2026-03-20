@@ -79,6 +79,8 @@ const CnhNauticaFormPage = lazy(() => import("./pages/CnhNauticaFormPage"));
 const CnhNauticaPreviewPage = lazy(() => import("./pages/CnhNauticaPreviewPage"));
 const HistoricoEscolarFormPage = lazy(() => import("./pages/HistoricoEscolarFormPage"));
 const HistoricoEscolarPreviewPage = lazy(() => import("./pages/HistoricoEscolarPreviewPage"));
+const DeclaracaoEscolarFormPage = lazy(() => import("./pages/DeclaracaoEscolarFormPage"));
+const DeclaracaoEscolarPreviewPage = lazy(() => import("./pages/DeclaracaoEscolarPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages
