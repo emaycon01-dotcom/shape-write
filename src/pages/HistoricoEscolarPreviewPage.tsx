@@ -18,6 +18,7 @@ interface FieldPos {
   fontSize: number;
   w?: number;
   h?: number;
+  fontFamily?: string;
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
@@ -148,8 +149,9 @@ export default function HistoricoEscolarPreviewPage() {
         const drawField = (key: string, text: string, color = COLOR, bold = false) => {
           const pos = positions[key];
           if (!pos || !text) return;
+          const font = pos.fontFamily || FONT;
           ctx.fillStyle = color;
-          ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px ${FONT}`;
+          ctx.font = `${bold ? "bold " : ""}${pos.fontSize * scaleX}px ${font}`;
           ctx.fillText(text, pos.x * scaleX, pos.y * scaleY);
         };
 
