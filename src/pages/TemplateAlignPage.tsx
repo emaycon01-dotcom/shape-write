@@ -195,6 +195,24 @@ function FieldPropertiesPanel({
         </div>
       )}
 
+      {/* Font family selector */}
+      {!isBox && (
+        <div>
+          <Label className="text-xs text-muted-foreground">Fonte</Label>
+          <select
+            value={field.fontFamily || "Arial"}
+            onChange={(e) => onUpdate({ fontFamily: e.target.value })}
+            className="w-full h-7 text-xs rounded-md border border-border bg-secondary/50 px-2 mt-1"
+          >
+            {FONT_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value} style={{ fontFamily: opt.value }}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Rotation for rotated fields */}
       {field.rotate !== undefined && (
         <div>
