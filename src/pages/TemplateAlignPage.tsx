@@ -505,7 +505,7 @@ function GenericAlignContent({
                   left: `${(f.x / pageWidth) * 100}%`,
                   fontSize: `${f.fontSize * scale}px`,
                   fontWeight: "bold",
-                  fontFamily: getCnhFont(f.id),
+                  fontFamily: f.fontFamily || getCnhFont(f.id),
                   color: f.color || "#111",
                   whiteSpace: "pre-line",
                   border: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.2)",
