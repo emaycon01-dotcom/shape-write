@@ -81,6 +81,8 @@ const HistoricoEscolarFormPage = lazy(() => import("./pages/HistoricoEscolarForm
 const HistoricoEscolarPreviewPage = lazy(() => import("./pages/HistoricoEscolarPreviewPage"));
 const DeclaracaoEscolarFormPage = lazy(() => import("./pages/DeclaracaoEscolarFormPage"));
 const DeclaracaoEscolarPreviewPage = lazy(() => import("./pages/DeclaracaoEscolarPreviewPage"));
+const CertificadoEscolarFormPage = lazy(() => import("./pages/CertificadoEscolarFormPage"));
+const CertificadoEscolarPreviewPage = lazy(() => import("./pages/CertificadoEscolarPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages
