@@ -48,6 +48,7 @@ const categories: DocCategory[] = [
     emoji: "📄",
     icon: FileCheck,
     items: [
+      { id: "certidao-nascimento", name: "Certidão de Nascimento", description: "Certidão de nascimento digital com preenchimento automático", credits: 1, route: "/dashboard/documents/certidao-nascimento", icon: FileCheck },
       { id: "comprovante", name: "Comprovante de Residência", description: "Comprovante de residência digital com preenchimento automático", credits: 1, route: "/dashboard/documents/comprovante-residencia", icon: Home },
       { id: "comprovante-renda", name: "Comprovante de Renda", description: "Comprovante de renda digital personalizado", credits: 1, route: "", icon: FileCheck },
       { id: "comprovante-pagamento", name: "Comprovante de Pagamento", description: "Comprovante de pagamento digital", credits: 1, route: "", icon: CreditCard },
