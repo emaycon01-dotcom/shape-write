@@ -43,7 +43,22 @@ interface FieldDef {
   color?: string;
   rotate?: number;
   imageUrl?: string;
+  fontFamily?: string;
+  isBox?: boolean;
 }
+
+const FONT_OPTIONS = [
+  { value: "Arial", label: "Arial" },
+  { value: "Times New Roman", label: "Times New Roman" },
+  { value: "Courier New", label: "Courier New" },
+  { value: "Georgia", label: "Georgia" },
+  { value: "Verdana", label: "Verdana" },
+  { value: "Trebuchet MS", label: "Trebuchet MS" },
+  { value: "Tahoma", label: "Tahoma" },
+  { value: "Lucida Console", label: "Lucida Console" },
+  { value: "Impact", label: "Impact" },
+  { value: "Comic Sans MS", label: "Comic Sans MS" },
+];
 
 const defaultFields: FieldDef[] = [
   { id: "photo", label: "Foto", sampleText: "[FOTO]", x: 98, y: 167, fontSize: 8, w: 82, h: 110, color: "#999" },
