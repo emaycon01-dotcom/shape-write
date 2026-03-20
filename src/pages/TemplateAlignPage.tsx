@@ -1282,6 +1282,57 @@ function HistoricoEscolarAlignContent() {
   );
 }
 
+const declaracaoEscolarFields: FieldDef[] = [
+  { id: "nomeEscola", label: "Nome da Escola", sampleText: "ESCOLA ESTADUAL PROF. JOÃO REIS", x: 160, y: 260, fontSize: 11 },
+  { id: "nomeCompleto", label: "Nome Completo", sampleText: "CARLOS EDUARDO DA SILVA", x: 185, y: 290, fontSize: 11 },
+  { id: "rg", label: "RG", sampleText: "12.345.678-9", x: 340, y: 320, fontSize: 11 },
+  { id: "dataNascimento", label: "Data de Nascimento", sampleText: "03/04/1995", x: 200, y: 350, fontSize: 11 },
+  { id: "municipio", label: "Município", sampleText: "RECIFE", x: 250, y: 380, fontSize: 11 },
+  { id: "estado", label: "Estado", sampleText: "PERNAMBUCO", x: 400, y: 380, fontSize: 11 },
+];
+
+function DeclaracaoEscolarAlignContent() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: 595, h: 842 });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-declaracao-escolar.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        const vp = page.getViewport({ scale: 1 });
+        setPdfPageSize({ w: Math.round(vp.width), h: Math.round(vp.height) });
+
+        const canvas = document.createElement("canvas");
+        const scale = 2;
+        const sv = page.getViewport({ scale });
+        canvas.width = sv.width;
+        canvas.height = sv.height;
+        const ctx = canvas.getContext("2d")!;
+        await page.render({ canvasContext: ctx, viewport: sv }).promise;
+        setPdfUrl(canvas.toDataURL("image/png"));
+      } catch (err) {
+        console.error("Error loading Declaração Escolar PDF template:", err);
+      }
+    })();
+  }, []);
+
+  if (!pdfUrl) return <div className="flex items-center justify-center py-20 text-muted-foreground">Carregando template...</div>;
+
+  return (
+    <GenericAlignContent
+      templateUrl={pdfUrl}
+      storageKey="declaracao-escolar-field-positions"
+      title="Alinhamento — Declaração Escolar"
+      fields={declaracaoEscolarFields}
+      pageWidth={pdfPageSize.w}
+      pageHeight={pdfPageSize.h}
+    />
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
@@ -1301,6 +1352,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="exame-toxico">EXAME TOXICO.</TabsTrigger>
               <TabsTrigger value="cha-amador">CHÁ AMADOR</TabsTrigger>
               <TabsTrigger value="historico-escolar">HIST. ESCOLAR</TabsTrigger>
+              <TabsTrigger value="declaracao-escolar">DECL. ESCOLAR</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh">
               <CnhAlignContent />
@@ -1325,6 +1377,9 @@ export default function TemplateAlignPage() {
             </TabsContent>
             <TabsContent value="historico-escolar">
               <HistoricoEscolarAlignContent />
+            </TabsContent>
+            <TabsContent value="declaracao-escolar">
+              <DeclaracaoEscolarAlignContent />
             </TabsContent>
           </Tabs>
         </TabsContent>

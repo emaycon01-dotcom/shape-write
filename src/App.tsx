@@ -79,6 +79,8 @@ const CnhNauticaFormPage = lazy(() => import("./pages/CnhNauticaFormPage"));
 const CnhNauticaPreviewPage = lazy(() => import("./pages/CnhNauticaPreviewPage"));
 const HistoricoEscolarFormPage = lazy(() => import("./pages/HistoricoEscolarFormPage"));
 const HistoricoEscolarPreviewPage = lazy(() => import("./pages/HistoricoEscolarPreviewPage"));
+const DeclaracaoEscolarFormPage = lazy(() => import("./pages/DeclaracaoEscolarFormPage"));
+const DeclaracaoEscolarPreviewPage = lazy(() => import("./pages/DeclaracaoEscolarPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages
@@ -125,6 +127,8 @@ const App = () => (
                       <Route path="documents/cha-amador/preview" element={<ChaAmadorPreviewPage />} />
                       <Route path="documents/historico-escolar" element={<HistoricoEscolarFormPage />} />
                       <Route path="documents/historico-escolar/preview" element={<HistoricoEscolarPreviewPage />} />
+                      <Route path="documents/declaracao-escolar" element={<DeclaracaoEscolarFormPage />} />
+                      <Route path="documents/declaracao-escolar/preview" element={<DeclaracaoEscolarPreviewPage />} />
                       <Route path="history" element={<HistoryPage />} />
                       <Route path="recarregar" element={<RecarregarPage />} />
                       <Route path="planos" element={<PlanosPage />} />
