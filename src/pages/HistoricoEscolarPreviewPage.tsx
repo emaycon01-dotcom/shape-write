@@ -18,6 +18,7 @@ interface FieldPos {
   fontSize: number;
   w?: number;
   h?: number;
+  fontFamily?: string;
 }
 
 const DEFAULT_POSITIONS: Record<string, FieldPos> = {
