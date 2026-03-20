@@ -1333,6 +1333,92 @@ function DeclaracaoEscolarAlignContent() {
   );
 }
 
+const certificadoEscolarFields: FieldDef[] = [
+  { id: "brasao", label: "Brasão", sampleText: "[BRASÃO]", x: 80, y: 20, fontSize: 9, w: 80, h: 90, isBox: true },
+  { id: "estado1", label: "Estado (1ª vez)", sampleText: "SÃO PAULO", x: 280, y: 120, fontSize: 11 },
+  { id: "estado2", label: "Estado (2ª vez)", sampleText: "SÃO PAULO", x: 310, y: 740, fontSize: 10 },
+  { id: "nomeEscola1", label: "Escola (1ª vez)", sampleText: "ESCOLA ESTADUAL PROF. JOÃO REIS", x: 100, y: 210, fontSize: 12 },
+  { id: "enderecoEscola", label: "Endereço Escola", sampleText: "Rua das Flores, 123 - Centro", x: 60, y: 230, fontSize: 10 },
+  { id: "nomeCompleto1", label: "Nome (1ª vez)", sampleText: "CARLOS EDUARDO DA SILVA", x: 200, y: 290, fontSize: 12 },
+  { id: "anoFinalizacao1", label: "Ano Final. (1ª)", sampleText: "2022", x: 380, y: 310, fontSize: 11 },
+  { id: "rg1", label: "RG (1ª vez)", sampleText: "12.345.678-9", x: 60, y: 340, fontSize: 11 },
+  { id: "dataNascimento", label: "Data Nascimento", sampleText: "03/04/1995", x: 160, y: 380, fontSize: 11 },
+  { id: "estadoCidade", label: "Estado/Cidade", sampleText: "SP/CAMPINAS", x: 220, y: 415, fontSize: 10 },
+  { id: "nomeMae", label: "Mãe", sampleText: "MARIA SANTOS DA SILVA", x: 70, y: 490, fontSize: 11 },
+  { id: "nomePai", label: "Pai", sampleText: "JOSE CARLOS DA SILVA", x: 70, y: 520, fontSize: 11 },
+  { id: "nomeEscola2", label: "Escola (2ª vez)", sampleText: "ESCOLA ESTADUAL PROF. JOÃO REIS", x: 220, y: 690, fontSize: 10 },
+  { id: "nomeCompleto2", label: "Nome (2ª vez)", sampleText: "CARLOS EDUARDO DA SILVA", x: 240, y: 710, fontSize: 10 },
+  { id: "rg2", label: "RG (2ª vez)", sampleText: "12.345.678-9", x: 350, y: 730, fontSize: 10 },
+  { id: "anoFinalizacao2", label: "Ano Final. (2ª)", sampleText: "2022", x: 400, y: 760, fontSize: 10 },
+];
+
+function CertificadoEscolarAlignContent() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfPageSize, setPdfPageSize] = useState<{ w: number; h: number }>({ w: 595, h: 842 });
+  const [fieldsWithBrasao, setFieldsWithBrasao] = useState<FieldDef[]>(certificadoEscolarFields);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/assets/template-certificado-escolar.pdf");
+        const arrayBuffer = await res.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        const vp = page.getViewport({ scale: 1 });
+        setPdfPageSize({ w: Math.round(vp.width), h: Math.round(vp.height) });
+
+        const canvas = document.createElement("canvas");
+        const scale = 2;
+        const sv = page.getViewport({ scale });
+        canvas.width = sv.width;
+        canvas.height = sv.height;
+        const ctx = canvas.getContext("2d")!;
+        await page.render({ canvasContext: ctx, viewport: sv }).promise;
+        setPdfUrl(canvas.toDataURL("image/png"));
+      } catch (err) {
+        console.error("Error loading Certificado Escolar PDF template:", err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { loadBrasaoImage } = await import("@/lib/brasoes-estados");
+        const img = await loadBrasaoImage("SP");
+        if (img) {
+          const c = document.createElement("canvas");
+          c.width = img.naturalWidth || img.width;
+          c.height = img.naturalHeight || img.height;
+          const ctx = c.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = c.toDataURL("image/png");
+            setFieldsWithBrasao(prev => prev.map(f =>
+              f.id === "brasao" ? { ...f, imageUrl: dataUrl } : f
+            ));
+          }
+        }
+      } catch (err) {
+        console.error("Error loading brasão for alignment:", err);
+      }
+    })();
+  }, []);
+
+  if (!pdfUrl) return <div className="flex items-center justify-center py-20 text-muted-foreground">Carregando template...</div>;
+
+  return (
+    <GenericAlignContent
+      templateUrl={pdfUrl}
+      storageKey="certificado-escolar-field-positions"
+      title="Alinhamento — Certificado Escolar"
+      fields={fieldsWithBrasao}
+      pageWidth={pdfPageSize.w}
+      pageHeight={pdfPageSize.h}
+    />
+  );
+}
+
 export default function TemplateAlignPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
