@@ -98,7 +98,7 @@ function FieldPropertiesPanel({
   field: FieldDef;
   onUpdate: (updates: Partial<FieldDef>) => void;
 }) {
-  const isBox = field.id === "photo" || field.id === "signature";
+  const isBox = field.isBox || field.id === "photo" || field.id === "signature" || field.id === "brasao";
 
   return (
     <div className="glass rounded-lg p-3 space-y-3 text-sm">
