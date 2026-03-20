@@ -174,7 +174,7 @@ export default function HistoricoEscolarPreviewPage() {
         // Sessão 1 - estadoEscola1 in full name (e.g. "ALAGOAS"), estadoEscola2 as abbreviation
         const estadoExtenso = ESTADO_NOMES[formData.estadoEscola] || formData.estadoEscola;
         drawField("estadoEscola1", estadoExtenso);
-        drawField("estadoEscola2", formData.estadoEscola);
+        drawField("estadoEscola2", estadoExtenso);
         drawField("endereco", endereco);
         drawField("numero", numero);
         drawField("bairro", bairro);
