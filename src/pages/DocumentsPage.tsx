@@ -60,7 +60,7 @@ const categories: DocCategory[] = [
     icon: FileText,
     items: [
       { id: "certificado-escolar", name: "Certificado Escolar", description: "Certificado escolar digital personalizado", credits: 1, route: "", icon: FileText },
-      { id: "conclusao-escolar", name: "Conclusão Escolar", description: "Conclusão escolar digital personalizada", credits: 1, route: "", icon: FileText },
+      { id: "certidao-obito", name: "Certidão de Óbito", description: "Certidão de óbito digital personalizada", credits: 1, route: "", icon: FileText },
     ],
   },
   {
