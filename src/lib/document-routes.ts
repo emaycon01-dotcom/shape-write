@@ -28,6 +28,7 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "operador-maquinas-digital": "Operador de Máquinas Digital",
   "historico-escolar": "Histórico Escolar",
   "declaracao-escolar": "Declaração Escolar",
+  "certificado-escolar": "Certificado Escolar",
   "cedula-policia-pe": "Cédula Policial PE",
   "bombeiro-militar": "Bombeiro Militar",
   "seguranca-escolar": "Segurança Escolar",

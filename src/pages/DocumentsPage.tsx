@@ -60,7 +60,7 @@ const categories: DocCategory[] = [
     emoji: "🎓",
     icon: FileText,
     items: [
-      { id: "certificado-escolar", name: "Certificado Escolar", description: "Certificado escolar digital personalizado", credits: 1, route: "", icon: FileText },
+      { id: "certificado-escolar", name: "Certificado Escolar", description: "Certificado escolar digital com brasão automático", credits: 1, route: "/dashboard/documents/certificado-escolar", icon: FileText },
       { id: "certidao-obito", name: "Certidão de Óbito", description: "Certidão de óbito digital personalizada", credits: 1, route: "", icon: FileText },
     ],
   },
