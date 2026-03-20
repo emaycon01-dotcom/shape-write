@@ -422,7 +422,7 @@ function GenericAlignContent({
 
   const copyCode = () => {
     const obj = fields.reduce((acc, f) => {
-      acc[f.id] = { x: f.x, y: f.y, fontSize: f.fontSize, ...(f.w ? { w: f.w } : {}), ...(f.h ? { h: f.h } : {}), ...(f.rotate !== undefined ? { rotate: f.rotate } : {}) };
+      acc[f.id] = { x: f.x, y: f.y, fontSize: f.fontSize, ...(f.w ? { w: f.w } : {}), ...(f.h ? { h: f.h } : {}), ...(f.rotate !== undefined ? { rotate: f.rotate } : {}), ...(f.fontFamily && f.fontFamily !== "Arial" ? { fontFamily: f.fontFamily } : {}) };
       return acc;
     }, {} as Record<string, any>);
     navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
