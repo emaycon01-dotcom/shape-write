@@ -127,6 +127,8 @@ const App = () => (
                       <Route path="documents/cha-amador/preview" element={<ChaAmadorPreviewPage />} />
                       <Route path="documents/historico-escolar" element={<HistoricoEscolarFormPage />} />
                       <Route path="documents/historico-escolar/preview" element={<HistoricoEscolarPreviewPage />} />
+                      <Route path="documents/declaracao-escolar" element={<DeclaracaoEscolarFormPage />} />
+                      <Route path="documents/declaracao-escolar/preview" element={<DeclaracaoEscolarPreviewPage />} />
                       <Route path="history" element={<HistoryPage />} />
                       <Route path="recarregar" element={<RecarregarPage />} />
                       <Route path="planos" element={<PlanosPage />} />
