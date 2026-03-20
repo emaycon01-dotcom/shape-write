@@ -1439,6 +1439,7 @@ export default function TemplateAlignPage() {
               <TabsTrigger value="cha-amador">CHÁ AMADOR</TabsTrigger>
               <TabsTrigger value="historico-escolar">HIST. ESCOLAR</TabsTrigger>
               <TabsTrigger value="declaracao-escolar">DECL. ESCOLAR</TabsTrigger>
+              <TabsTrigger value="certificado-escolar">CERT. ESCOLAR</TabsTrigger>
             </TabsList>
             <TabsContent value="cnh">
               <CnhAlignContent />
