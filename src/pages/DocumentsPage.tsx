@@ -36,10 +36,6 @@ const categories: DocCategory[] = [
     icon: FileText,
     items: [
       { id: "cnh", name: "CNH Digital (2026)", description: "CNH Digital com login, APK e QR Code", credits: 1, route: "/dashboard/documents/cnh", icon: FileText },
-      { id: "cha-amador", name: "CHÁ Amador Digital", description: "Carteira de Habilitação de Amador com foto e dados", credits: 1, route: "", icon: FileText },
-      { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "", icon: FileText },
-      { id: "historico-escolar", name: "Histórico Escolar", description: "Histórico escolar digital com preenchimento automático", credits: 1, route: "/dashboard/documents/historico-escolar", icon: FileText },
-      { id: "declaracao-escolar", name: "Declaração Escolar", description: "Declaração de conclusão escolar com preenchimento automático", credits: 1, route: "/dashboard/documents/declaracao-escolar", icon: FileText },
     ],
   },
   {
@@ -50,8 +46,6 @@ const categories: DocCategory[] = [
     items: [
       { id: "certidao-nascimento", name: "Certidão de Nascimento", description: "Certidão de nascimento digital com preenchimento automático", credits: 1, route: "/dashboard/documents/certidao-nascimento", icon: FileCheck },
       { id: "comprovante", name: "Comprovante de Residência", description: "Comprovante de residência digital com preenchimento automático", credits: 1, route: "/dashboard/documents/comprovante-residencia", icon: Home },
-      { id: "comprovante-renda", name: "Comprovante de Renda", description: "Comprovante de renda digital personalizado", credits: 1, route: "", icon: FileCheck },
-      { id: "comprovante-pagamento", name: "Comprovante de Pagamento", description: "Comprovante de pagamento digital", credits: 1, route: "", icon: CreditCard },
     ],
   },
   {
@@ -61,7 +55,8 @@ const categories: DocCategory[] = [
     icon: FileText,
     items: [
       { id: "certificado-escolar", name: "Certificado Escolar", description: "Certificado escolar digital com brasão automático", credits: 1, route: "/dashboard/documents/certificado-escolar", icon: FileText },
-      { id: "certidao-obito", name: "Certidão de Óbito", description: "Certidão de óbito digital personalizada", credits: 1, route: "", icon: FileText },
+      { id: "historico-escolar", name: "Histórico Escolar", description: "Histórico escolar digital com preenchimento automático", credits: 1, route: "/dashboard/documents/historico-escolar", icon: FileText },
+      { id: "declaracao-escolar", name: "Declaração Escolar", description: "Declaração de conclusão escolar com preenchimento automático", credits: 1, route: "/dashboard/documents/declaracao-escolar", icon: FileText },
     ],
   },
   {
@@ -71,6 +66,19 @@ const categories: DocCategory[] = [
     icon: Stethoscope,
     items: [
       { id: "exame-toxico", name: "Exame Toxicológico", description: "Exame toxicológico digital com preenchimento automático", credits: 1, route: "/dashboard/documents/exame-toxicologico", icon: FlaskConical },
+    ],
+  },
+  {
+    id: "manutencao",
+    name: "EM MANUTENÇÃO",
+    emoji: "🔧",
+    icon: Wrench,
+    items: [
+      { id: "cha-amador", name: "CHÁ Amador Digital", description: "Carteira de Habilitação de Amador com foto e dados", credits: 1, route: "", icon: FileText },
+      { id: "rg", name: "CIN (RG Digital)", description: "Carteira de Identidade Nacional", credits: 1, route: "", icon: FileText },
+      { id: "comprovante-renda", name: "Comprovante de Renda", description: "Comprovante de renda digital personalizado", credits: 1, route: "", icon: FileCheck },
+      { id: "comprovante-pagamento", name: "Comprovante de Pagamento", description: "Comprovante de pagamento digital", credits: 1, route: "", icon: CreditCard },
+      { id: "certidao-obito", name: "Certidão de Óbito", description: "Certidão de óbito digital personalizada", credits: 1, route: "", icon: FileText },
       { id: "atestado", name: "Atestado Médico", description: "Atestado médico digital personalizado", credits: 1, route: "", icon: Stethoscope },
       { id: "receita", name: "Receita Médica", description: "Receita médica digital personalizada", credits: 1, route: "", icon: Stethoscope },
     ],
