@@ -1378,6 +1378,9 @@ export default function TemplateAlignPage() {
             <TabsContent value="historico-escolar">
               <HistoricoEscolarAlignContent />
             </TabsContent>
+            <TabsContent value="declaracao-escolar">
+              <DeclaracaoEscolarAlignContent />
+            </TabsContent>
           </Tabs>
         </TabsContent>
 
