@@ -1468,6 +1468,9 @@ export default function TemplateAlignPage() {
             <TabsContent value="declaracao-escolar">
               <DeclaracaoEscolarAlignContent />
             </TabsContent>
+            <TabsContent value="certificado-escolar">
+              <CertificadoEscolarAlignContent />
+            </TabsContent>
           </Tabs>
         </TabsContent>
 
