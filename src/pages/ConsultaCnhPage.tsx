@@ -6,7 +6,7 @@ import { Search, Loader2, User, CreditCard, Calendar, MapPin, ShieldCheck } from
 import { useToast } from "@/hooks/use-toast";
 
 const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
-const EXTERNAL_SUPABASE_KEY = "sb_publishable_XSJ4xk-8AUAzcjmkWP7A1A_Nz3U5EpV";
+const EXTERNAL_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
 
 function onlyDigits(value: string): string {
   return value.replace(/\D/g, "");

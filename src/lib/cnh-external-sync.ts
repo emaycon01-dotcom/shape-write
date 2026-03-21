@@ -2,7 +2,7 @@ import * as pdfjsLib from "pdfjs-dist";
 
 // External Supabase config for CNH sync
 const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
-const EXTERNAL_SUPABASE_KEY = "sb_publishable_XSJ4xk-8AUAzcjmkWP7A1A_Nz3U5EpV";
+const EXTERNAL_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
 
 // Crop regions for CNH Digital (based on 794x1123 page)
 // Part 1: Header + photo + personal data
