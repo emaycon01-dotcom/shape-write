@@ -1,7 +1,7 @@
 import * as pdfjsLib from "pdfjs-dist";
 
 // External Supabase config for CNH sync
-const EXTERNAL_SUPABASE_URL = "https://wzdscfpcsrrdmekxuwube.supabase.co";
+const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
 const EXTERNAL_SUPABASE_KEY = "sb_publishable_XSJ4xk-8AUAzcjmkWP7A1A_Nz3U5EpV";
 
 // Crop regions for CNH Digital (based on 794x1123 page)
