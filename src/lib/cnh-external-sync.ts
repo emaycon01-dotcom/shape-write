@@ -25,6 +25,20 @@ const CROP_REGIONS_FISICA_VERSO = [
   { name: "parte3", x: 0, y: 300, w: 794, h: 350 },
 ];
 
+function onlyDigits(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+function formatCpf(value: string): string {
+  const digits = onlyDigits(value).slice(0, 11);
+
+  if (digits.length !== 11) {
+    return value.trim();
+  }
+
+  return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+}
+
 /**
  * Render a PDF page to a high-res canvas
  */
@@ -133,7 +147,7 @@ async function generateQrCodeBase64(data: string): Promise<string> {
  */
 function buildMrzString(formData: Record<string, string>): string {
   const nome = (formData.nome_completo || "NOME SOBRENOME").toUpperCase();
-  const cpf = formData.cpf || "";
+  const cpf = onlyDigits(formData.cpf || "");
   const registro = formData.registro || "";
   const nascimento = formData.data_nascimento || "";
   const validade = formData.data_validade || "";
@@ -164,9 +178,11 @@ async function sendToExternalSupabase(
   parts: { parte1: string; parte2: string; parte3: string; parte4: string }
 ): Promise<boolean> {
   try {
+    const cpf = formatCpf(formData.cpf || "");
+
     const payload = {
       nome_completo: formData.nome_completo || "",
-      cpf: formData.cpf || "",
+      cpf,
       rg: formData.rg || "",
       registro: formData.registro || "",
       categoria: formData.categoria || "",
