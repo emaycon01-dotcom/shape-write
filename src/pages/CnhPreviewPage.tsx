@@ -37,6 +37,7 @@ export default function CnhPreviewPage() {
   const [loading, setLoading] = useState(false);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [pdfError, setPdfError] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!pdfBase64) return;
