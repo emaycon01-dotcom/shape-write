@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Search, Loader2, User, CreditCard, Calendar, MapPin, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
+const EXTERNAL_SUPABASE_URL = "https://wzdscfpcsrrdmekxuwube.supabase.co";
 const EXTERNAL_SUPABASE_KEY = "sb_publishable_XSJ4xk-8AUAzcjmkWP7A1A_Nz3U5EpV";
 
 function onlyDigits(value: string): string {
