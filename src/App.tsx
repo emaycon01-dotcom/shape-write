@@ -84,6 +84,7 @@ const DeclaracaoEscolarPreviewPage = lazy(() => import("./pages/DeclaracaoEscola
 const CertificadoEscolarFormPage = lazy(() => import("./pages/CertificadoEscolarFormPage"));
 const CertificadoEscolarPreviewPage = lazy(() => import("./pages/CertificadoEscolarPreviewPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const ConsultaCnhPage = lazy(() => import("./pages/ConsultaCnhPage"));
 
 // Admin pages
 const AdminPanelPage = lazy(() => import("./pages/admin/AdminPanelPage"));
@@ -112,6 +113,7 @@ const App = () => (
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify/:id" element={<VerifyPage />} />
+                    <Route path="/consulta-cnh" element={<ConsultaCnhPage />} />
                     <Route path="/dashboard" element={<DashboardLayout />}>
                       <Route index element={<DashboardHome />} />
                       <Route path="documents" element={<DocumentsPage />} />
