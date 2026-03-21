@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw } from "lucide-react";
+import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
@@ -37,6 +37,7 @@ export default function CnhPreviewPage() {
   const [loading, setLoading] = useState(false);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [pdfError, setPdfError] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!pdfBase64) return;
@@ -263,13 +264,55 @@ export default function CnhPreviewPage() {
           </Button>
         </div>
       ) : (
-        <div className="flex gap-3">
-          <Button variant="gradient" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleDownload}>
-            <Download className="w-5 h-5 mr-2" /> Baixar
-          </Button>
-          <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleShare}>
-            <Share2 className="w-5 h-5 mr-2" /> Compartilhar
-          </Button>
+        <div className="space-y-4">
+          <div className="flex gap-3">
+            <Button variant="gradient" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleDownload}>
+              <Download className="w-5 h-5 mr-2" /> Baixar
+            </Button>
+            <Button variant="outline" className="flex-1 h-12 rounded-xl font-semibold" onClick={handleShare}>
+              <Share2 className="w-5 h-5 mr-2" /> Compartilhar
+            </Button>
+          </div>
+
+          {/* Thank you message card */}
+          {(() => {
+            const cpf = formData.cpf?.replace(/\D/g, "") || "";
+            const senha = cpf.slice(-6);
+            const cpfFormatted = formData.cpf || cpf;
+            const nomeUsuario = user?.name || "nosso sistema";
+
+            const mensagem = `Olá! 👋 Obrigado por comprar com ${nomeUsuario}. Aqui estão seus dados de acesso para o App CNH:\n\nLogin: ${cpfFormatted}\nSenha: ${senha}\n\nAcesse nosso site ou aplicativo para visualizar sua CNH digital.`;
+
+            const handleCopy = () => {
+              navigator.clipboard.writeText(mensagem).then(() => {
+                setCopied(true);
+                toast({ title: "Mensagem copiada!" });
+                setTimeout(() => setCopied(false), 2500);
+              }).catch(() => {
+                toast({ title: "Erro ao copiar", variant: "destructive" });
+              });
+            };
+
+            return (
+              <div className="glass rounded-xl p-5 space-y-3">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wider">Mensagem de entrega</p>
+                <div className="bg-secondary/50 rounded-lg p-4 text-sm text-foreground leading-relaxed whitespace-pre-line">
+                  {mensagem}
+                </div>
+                <Button
+                  variant="gradient"
+                  className="w-full h-12 rounded-xl font-semibold text-sm"
+                  onClick={handleCopy}
+                >
+                  {copied ? (
+                    <><Check className="w-5 h-5 mr-2" /> Copiado!</>
+                  ) : (
+                    <><Copy className="w-5 h-5 mr-2" /> Copiar mensagem para a área de transferência</>
+                  )}
+                </Button>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
