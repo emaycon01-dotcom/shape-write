@@ -72,73 +72,58 @@ function cropCanvasToBase64(
 }
 
 /**
- * Generate QR code as base64 from MRZ data using canvas
+ * Generate QR code as base64 from data using canvas
  */
 async function generateQrCodeBase64(data: string): Promise<string> {
-  // Dynamically import QR code generation
-  const { default: QRCodeModule } = await import("qrcode.react");
-  
-  // Use a simpler approach: create a canvas-based QR code
-  const canvas = document.createElement("canvas");
-  canvas.width = 600;
-  canvas.height = 600;
-  const ctx = canvas.getContext("2d")!;
-  
-  // Draw white background
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, 600, 600);
-  
-  // Generate QR using a temporary element approach
-  const container = document.createElement("div");
-  container.style.position = "fixed";
-  container.style.left = "-9999px";
-  document.body.appendChild(container);
-  
-  // Use dynamic import for QR generation to canvas
   try {
-    const QRCode = await import("qrcode.react");
+    const { QRCodeCanvas } = await import("qrcode.react");
     const { createRoot } = await import("react-dom/client");
-    const { createElement } = await import("react");
-    
-    const qrCanvas = document.createElement("canvas");
-    
-    // Render QR to a temporary container
-    const tempDiv = document.createElement("div");
-    container.appendChild(tempDiv);
-    
-    const root = createRoot(tempDiv);
-    
+    const { createElement, createRef } = await import("react");
+
+    const container = document.createElement("div");
+    container.style.position = "fixed";
+    container.style.left = "-9999px";
+    document.body.appendChild(container);
+
     return new Promise<string>((resolve) => {
-      root.render(
-        createElement(QRCode.QRCodeCanvas, {
+      const root = createRoot(container);
+      
+      // We'll use a wrapper that grabs the canvas after render
+      const Wrapper = () => {
+        return createElement(QRCodeCanvas, {
           value: data,
           size: 600,
-          level: "M",
+          level: "M" as const,
           includeMargin: true,
-          ref: (el: HTMLCanvasElement | null) => {
-            if (el) {
-              setTimeout(() => {
-                const dataUrl = el.toDataURL("image/jpeg", 0.95);
-                root.unmount();
-                document.body.removeChild(container);
-                resolve(dataUrl);
-              }, 100);
-            }
-          },
-        } as any)
-      );
+        });
+      };
+      
+      root.render(createElement(Wrapper));
+      
+      // Wait for render, then grab canvas
+      setTimeout(() => {
+        const canvasEl = container.querySelector("canvas");
+        if (canvasEl) {
+          const dataUrl = canvasEl.toDataURL("image/jpeg", 0.95);
+          root.unmount();
+          document.body.removeChild(container);
+          resolve(dataUrl);
+        } else {
+          root.unmount();
+          document.body.removeChild(container);
+          resolve("");
+        }
+      }, 300);
       
       // Fallback timeout
       setTimeout(() => {
         try { root.unmount(); } catch {}
         try { document.body.removeChild(container); } catch {}
-        // Return a simple encoded data URL as fallback
         resolve("");
       }, 3000);
     });
   } catch (err) {
     console.error("QR generation failed:", err);
-    document.body.removeChild(container);
     return "";
   }
 }
