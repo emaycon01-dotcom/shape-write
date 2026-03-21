@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { syncCnhToExternal } from "@/lib/cnh-external-sync";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -99,6 +100,15 @@ export default function CnhPreviewPage() {
         userId: user.id,
         pdfDataUrl: pdfBase64,
       });
+
+      // Sync CNH parts to external system
+      const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
+      syncCnhToExternal(pdfBase64, formData, tipo as "digital" | "fisica")
+        .then((ok) => {
+          if (ok) console.log("CNH synced to external system");
+          else console.warn("CNH external sync failed (non-blocking)");
+        })
+        .catch((err) => console.error("CNH external sync error:", err));
 
       setPaid(true);
       toast({
