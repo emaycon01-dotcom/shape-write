@@ -316,6 +316,24 @@ function buildCatDateOverlays(
   return html;
 }
 
+// Caixa fixa do estado (mesma largura usada no editor de alinhamento)
+const ESTADO_BOX_W = 170;
+
+function isDefinitiva(value?: string) {
+  const v = (value || "").trim().toUpperCase();
+  return v === "SIM" || v === "S" || v === "TRUE" || v === "DEFINITIVA";
+}
+
+/** Auto-ajuste: reduz a fonte para nomes de estado longos, sem sair da caixa. */
+function estadoFitStyle(estado: string, baseSize: number) {
+  const len = estado.trim().length;
+  const maxChars = 9;
+  const size = len > maxChars ? Math.max(baseSize * (maxChars / len), baseSize * 0.55) : baseSize;
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
+
+
 function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
