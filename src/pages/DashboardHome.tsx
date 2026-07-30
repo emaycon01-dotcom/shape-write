@@ -111,12 +111,13 @@ export default function DashboardHome() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-card/70 px-4 py-3 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.08)]">
-            <p className="text-[9px] tracking-[0.2em] text-muted-foreground">SALDO DISPONÍVEL</p>
-            <p className="font-display text-2xl font-bold text-foreground">
-              {user?.credits ?? 0}{" "}
-              <span className="text-xs font-medium text-muted-foreground">créditos</span>
-            </p>
+          <div className="inline-flex items-center gap-2 self-start rounded-lg border border-border/60 bg-card/70 px-3 py-1.5 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.08)] sm:self-auto">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Saldo</span>
+            <span className="h-3 w-px bg-border/70" />
+            <span className="font-display text-sm font-bold leading-none text-foreground">
+              {user?.credits ?? 0}
+              <span className="ml-1 text-[10px] font-medium text-muted-foreground">créditos</span>
+            </span>
           </div>
         </div>
       </section>
