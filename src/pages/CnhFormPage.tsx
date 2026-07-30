@@ -68,6 +68,17 @@ function parseCategories(cat: string): string[] {
   return cats;
 }
 
+const AVAILABLE_CATEGORY_LETTERS = ["A", "B", "C", "D", "E"];
+
+function addCategory(current: string, letter: string): string {
+  const set = new Set([...parseCategories(current), letter]);
+  return AVAILABLE_CATEGORY_LETTERS.filter((c) => set.has(c)).join("");
+}
+
+function removeCategory(current: string, letter: string): string {
+  return parseCategories(current).filter((c) => c !== letter).join("");
+}
+
 const initial: CnhFormData = {
   cpf: "", nomeCompleto: "", uf: "", genero: "", nacionalidade: "",
   dataNascimentoLocal: "", registro: "", categoria: "", cnhDefinitiva: "",
