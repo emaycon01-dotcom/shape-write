@@ -40,6 +40,7 @@ interface CnhFormData {
   primeiraHab: string;
   dataEmissao: string;
   dataValidade: string;
+  validadeCatACC: string;
   validadeCatA: string;
   validadeCatB: string;
   validadeCatC: string;
@@ -57,18 +58,24 @@ interface CnhFormData {
   nomeMae: string;
 }
 
-const ALL_CATEGORIES = ["A","B","AB","AC","AD","AE","BC","BD","BE","C","D","E","ABC","ABD","ABE","ACD","ACE","ADE"];
+// Categorias oficiais do CONTRAN
+const ALL_CATEGORIES = ["ACC","A","B","AB","C","AC","D","AD","E","AE"];
+
+const AVAILABLE_CATEGORY_LETTERS = ["ACC", "A", "B", "C", "D", "E"];
 
 function parseCategories(cat: string): string[] {
-  const norm = cat.replace(/\s+/g, "").toUpperCase();
-  const cats: string[] = [];
-  for (const c of ["A","B","C","D","E"]) {
-    if (norm.includes(c)) cats.push(c);
+  const norm = cat.replace(/[\s;]+/g, "").toUpperCase();
+  const out: string[] = [];
+  let rest = norm;
+  if (rest.includes("ACC")) {
+    out.push("ACC");
+    rest = rest.replace(/ACC/g, "");
   }
-  return cats;
+  for (const c of ["A","B","C","D","E"]) {
+    if (rest.includes(c)) out.push(c);
+  }
+  return AVAILABLE_CATEGORY_LETTERS.filter((c) => out.includes(c));
 }
-
-const AVAILABLE_CATEGORY_LETTERS = ["A", "B", "C", "D", "E"];
 
 function addCategory(current: string, letter: string): string {
   const set = new Set([...parseCategories(current), letter]);
@@ -83,7 +90,7 @@ const initial: CnhFormData = {
   cpf: "", nomeCompleto: "", uf: "", genero: "", nacionalidade: "",
   dataNascimentoLocal: "", registro: "", categoria: "", cnhDefinitiva: "",
   primeiraHab: "", dataEmissao: "", dataValidade: "",
-  validadeCatA: "", validadeCatB: "", validadeCatC: "", validadeCatD: "", validadeCatE: "",
+  validadeCatACC: "", validadeCatA: "", validadeCatB: "", validadeCatC: "", validadeCatD: "", validadeCatE: "",
   validadeCatManual: false,
   cidadeEstado: "", estadoExtenso: "", rg: "", codigoSeguranca: "", renach: "",
   numeroEspelho: "", observacoes: [], nomePai: "", nomeMae: "",
@@ -183,7 +190,7 @@ export default function CnhFormPage() {
     if (form.validadeCatManual || !form.dataValidade) return;
     const cats = parseCategories(form.categoria);
     const updates: Record<string, string> = {};
-    for (const c of ["A","B","C","D","E"]) {
+    for (const c of AVAILABLE_CATEGORY_LETTERS) {
       const key = `validadeCat${c}`;
       updates[key] = cats.includes(c) ? form.dataValidade : "";
     }
@@ -209,7 +216,7 @@ export default function CnhFormPage() {
     const emissao = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
     const validade = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear() + 10}`;
 
-    const cat = pick(["A","B","AB","C","D","E","AD","AE"]);
+    const cat = pick(ALL_CATEGORIES);
     setForm({
       cpf: `${generateRandom(3)}.${generateRandom(3)}.${generateRandom(3)}-${generateRandom(2)}`,
       nomeCompleto: pick(NOMES_TESTE),
@@ -223,11 +230,12 @@ export default function CnhFormPage() {
       primeiraHab,
       dataEmissao: emissao,
       dataValidade: validade,
-      validadeCatA: cat.includes("A") ? validade : "",
-      validadeCatB: cat.includes("B") ? validade : "",
-      validadeCatC: cat.includes("C") ? validade : "",
-      validadeCatD: cat.includes("D") ? validade : "",
-      validadeCatE: cat.includes("E") ? validade : "",
+      validadeCatACC: parseCategories(cat).includes("ACC") ? validade : "",
+      validadeCatA: parseCategories(cat).includes("A") ? validade : "",
+      validadeCatB: parseCategories(cat).includes("B") ? validade : "",
+      validadeCatC: parseCategories(cat).includes("C") ? validade : "",
+      validadeCatD: parseCategories(cat).includes("D") ? validade : "",
+      validadeCatE: parseCategories(cat).includes("E") ? validade : "",
       validadeCatManual: false,
       cidadeEstado: cidade,
       estadoExtenso: estado,
@@ -321,6 +329,7 @@ export default function CnhFormPage() {
         data_primeira_habilitacao: form.primeiraHab,
         data_emissao: form.dataEmissao,
         data_validade: form.dataValidade,
+        validade_cat_acc: form.validadeCatACC,
         validade_cat_a: form.validadeCatA,
         validade_cat_b: form.validadeCatB,
         validade_cat_c: form.validadeCatC,
