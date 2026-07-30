@@ -267,4 +267,7 @@ export default function DashboardHome() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
 
