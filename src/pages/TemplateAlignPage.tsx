@@ -345,11 +345,11 @@ function CnhAlignEditor() {
                 style={{
                   top: `${(f.y / PAGE_H) * 100}%`,
                   left: `${(f.x / PAGE_W) * 100}%`,
-                  fontSize: `${f.fontSize * scale}px`,
+                  fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: CNH_FONT,
+                  fontFamily: f.id === "mrz" ? "'OCR B','OCRB','Courier New',Courier,monospace" : isEstado ? "Arial, Helvetica, sans-serif" : CNH_FONT,
                   color: f.color || "#111",
-                  whiteSpace: "pre-line",
+                  whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
                   background: isSelected ? "hsl(var(--primary) / 0.1)" : "transparent",
                   zIndex: isSelected ? 50 : 10,
@@ -357,6 +357,7 @@ function CnhAlignEditor() {
                   transformOrigin: f.rotate ? "left top" : undefined,
                   letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : f.rotate ? `${1.2 * scale}px` : undefined,
                   lineHeight: f.id === "mrz" ? 1.6 : 1,
+                  ...(isEstado ? { width: `${((170 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
                     ? {
                         width: `${(((f.w || 80) / PAGE_W) * 100).toFixed(4)}%`,
