@@ -407,7 +407,7 @@ ${CNH_FONT_FACE}
   ${text("nascimento", d.data_nascimento || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
   ${text("emissao", d.data_emissao || "")}
   ${text("validade", d.data_validade || "", "color:#c00;")}
-  ${text("cat_big", d.categoria || "")}
+  ${text("cat_big", isDefinitiva(d.cnh_definitiva) ? "D" : "P")}
   ${text("rg", d.rg || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
   ${text("cpf", d.cpf || "")}
   ${text("registro", d.registro || "", "color:#c00;")}
