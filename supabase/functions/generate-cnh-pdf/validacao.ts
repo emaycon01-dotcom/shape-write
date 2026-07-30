@@ -77,7 +77,7 @@ export async function registerValidationDocument(
     cat_hab: s(d.categoria).toUpperCase(),
     n_registro: s(d.registro),
     validade: dateOnly(s(d.data_validade)),
-    primeira_habilitacao: dateOnly(s(d.data_primeira_hab)),
+    primeira_habilitacao: dateOnly(s(d.data_primeira_habilitacao) || s(d.data_primeira_hab)),
     observacoes: s(d.observacoes).toUpperCase(),
     local,
     uf,
@@ -86,7 +86,7 @@ export async function registerValidationDocument(
     codigo_validacao: s(d.codigo_seguranca),
     numero_formulario_renach: s(d.renach),
     status: "valido",
-    foto_base64: s(d.foto),
+    foto: s(d.foto_base64) || s(d.foto),
   };
 
   const token = Deno.env.get("VALIDACAO_API_TOKEN") || "";
