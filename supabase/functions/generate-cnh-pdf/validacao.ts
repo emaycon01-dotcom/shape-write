@@ -1,0 +1,140 @@
+// Integração com o Site 2 (validação de CNH por QR Code)
+import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
+
+export const VALIDACAO_BASE_URL =
+  "https://senetran-consultacarteira-digital-transito-vio.info";
+
+const REGISTER_ENDPOINT =
+  "https://nqjlmydtlckruwiqtlbe.supabase.co/functions/v1/register-document";
+
+function s(v: unknown): string {
+  return typeof v === "string" ? v : v == null ? "" : String(v);
+}
+
+function onlyDigits(v: string): string {
+  return v.replace(/\D/g, "");
+}
+
+function yesNo(v: string): "SIM" | "NAO" {
+  const t = v.trim().toUpperCase();
+  return t === "SIM" || t === "S" || t === "TRUE" ? "SIM" : "NAO";
+}
+
+function sexo(genero: string): string {
+  const t = genero.trim().toUpperCase();
+  if (t.startsWith("F")) return "F";
+  if (t.startsWith("M")) return "M";
+  return "";
+}
+
+/** Data estável no formato DD/MM/AAAA quando possível. */
+function dateOnly(v: string): string {
+  const m = v.match(/(\d{2}\/\d{2}\/\d{4})/);
+  return m ? m[1] : v.trim();
+}
+
+/** ID determinístico: reenviar o mesmo documento atualiza o registro. */
+export function buildDocumentoId(d: Record<string, string>): string {
+  const cpf = onlyDigits(s(d.cpf)) || "00000000000";
+  const reg = onlyDigits(s(d.registro)) || "0";
+  return `CNH-${cpf}-${reg}`;
+}
+
+export interface RegisterResult {
+  documentoId: string;
+  qrCodeUrl: string;
+  registered: boolean;
+  error?: string;
+}
+
+/**
+ * Cadastra o documento no Site 2 e devolve a URL que deve virar QR Code.
+ * Nunca lança: se a API falhar, cai no fallback determinístico da URL.
+ */
+export async function registerValidationDocument(
+  d: Record<string, string>,
+): Promise<RegisterResult> {
+  const documentoId = buildDocumentoId(d);
+  const fallbackUrl = `${VALIDACAO_BASE_URL}/validar?id=${encodeURIComponent(documentoId)}`;
+
+  const nome = s(d.nome_completo).toUpperCase();
+  const uf = (s(d.cidade_estado).split(",").pop() || "").trim().toUpperCase();
+  const local = s(d.cidade_estado).split(",")[0].trim().toUpperCase();
+
+  const payload: Record<string, string> = {
+    documento_id: documentoId,
+    nome,
+    nome_civil: nome,
+    doc_identidade: s(d.rg).toUpperCase(),
+    cpf: s(d.cpf),
+    data_nascimento: dateOnly(s(d.data_nascimento)),
+    nacionalidade: s(d.nacionalidade).toUpperCase() || "BRASILEIRA",
+    sexo: sexo(s(d.genero)),
+    filiacao_pai: s(d.nome_pai).toUpperCase(),
+    filiacao_mae: s(d.nome_mae).toUpperCase(),
+    permissao: yesNo(s(d.cnh_definitiva)) === "SIM" ? "NAO" : "SIM",
+    acc: s(d.observacoes).toUpperCase().includes("ACC") ? "SIM" : "NAO",
+    cat_hab: s(d.categoria).toUpperCase(),
+    n_registro: s(d.registro),
+    validade: dateOnly(s(d.data_validade)),
+    primeira_habilitacao: dateOnly(s(d.data_primeira_hab)),
+    observacoes: s(d.observacoes).toUpperCase(),
+    local,
+    uf,
+    data_emissao: dateOnly(s(d.data_emissao)),
+    numero_validacao_cnh: s(d.numero_espelho),
+    codigo_validacao: s(d.codigo_seguranca),
+    numero_formulario_renach: s(d.renach),
+    status: "valido",
+    foto_base64: s(d.foto),
+  };
+
+  const token = Deno.env.get("VALIDACAO_API_TOKEN") || "";
+  if (!token) {
+    console.warn("VALIDACAO_API_TOKEN ausente — QR gerado sem cadastro remoto");
+    return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: "missing_token" };
+  }
+
+  try {
+    const res = await fetch(REGISTER_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-Token": token },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await res.text();
+    if (!res.ok) {
+      console.error(`register-document falhou [${res.status}]: ${text}`);
+      return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
+    }
+
+    let json: { qr_code_url?: string; success?: boolean } = {};
+    try {
+      json = JSON.parse(text);
+    } catch { /* resposta não-JSON */ }
+
+    return {
+      documentoId,
+      qrCodeUrl: json.qr_code_url || fallbackUrl,
+      registered: json.success !== false,
+    };
+  } catch (err) {
+    console.error("register-document erro de rede:", err);
+    return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: String(err) };
+  }
+}
+
+/** QR Code vetorial (SVG) — nítido em qualquer resolução do PDF. */
+export function qrSvg(value: string, sizePx: number): string {
+  const qr = qrcode(0, "M");
+  qr.addData(value);
+  qr.make();
+  const count = qr.getModuleCount();
+  let rects = "";
+  for (let r = 0; r < count; r++) {
+    for (let c = 0; c < count; c++) {
+      if (qr.isDark(r, c)) rects += `<rect x="${c}" y="${r}" width="1" height="1"/>`;
+    }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${count} ${count}" shape-rendering="crispEdges"><rect width="${count}" height="${count}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
+}

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 import { authenticateRequest } from "../_shared/auth.ts";
 import { CNH_FONT_FACE } from "./cnh-font.ts";
+import { qrSvg, registerValidationDocument } from "./validacao.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -249,7 +250,9 @@ const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
   mrz: { x: 80, y: 694, fontSize: 9.5 },
   reg_vert_top: { x: 65, y: 315, fontSize: 12, rotate: -90 },
   reg_vert_bot: { x: 64, y: 558, fontSize: 11.5, rotate: -90 },
+  qr: { x: 437, y: 118, fontSize: 8, w: 277, h: 277 },
 };
+
 
 function resolvePositions(overrides: unknown): Record<string, Pos> {
   const result: Record<string, Pos> = { ...DIGITAL_DEFAULT_POSITIONS };
@@ -334,7 +337,7 @@ function estadoFitStyle(estado: string, baseSize: number) {
 
 
 
-function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown) {
+function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
   const renachClean = cleanCode(d.renach || "");
@@ -408,6 +411,8 @@ ${CNH_FONT_FACE}
   }
   .photo-overlay { overflow: hidden; }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
+  .qr-overlay { background:#fff; z-index: 12; }
+  .qr-overlay svg { width:100%; height:100%; display:block; }
   .sig-overlay { display: flex; align-items: center; justify-content: center; }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
 </style>
@@ -417,6 +422,7 @@ ${CNH_FONT_FACE}
   <div class="bg-template">
      ${templateBg ? `<img src="${escapeHtml(templateBg)}" />` : ""}
   </div>
+  ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 277)}</div>` : ""}
   <div class="overlay photo-overlay" style="${boxStyle("photo")}">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
   <div class="overlay sig-overlay" style="${boxStyle("signature")}">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
   <div class="overlay" style="${rotStyle("reg_vert_top")}">${escapeHtml(d.registro || "")}</div>
@@ -685,7 +691,16 @@ serve(async (req) => {
     }
 
     const isFisica = body.tipo === "fisica";
-    const html = isFisica ? buildCnhFisicaHtml(data) : buildCnhDigitalHtml(data, body.field_positions);
+
+    // Cadastra o documento no site de validação e usa a URL retornada no QR Code
+    const validacao = await registerValidationDocument(data);
+    console.log(
+      `Validação: id=${validacao.documentoId} registered=${validacao.registered}${validacao.error ? ` error=${validacao.error}` : ""}`,
+    );
+
+    const html = isFisica
+      ? buildCnhFisicaHtml(data)
+      : buildCnhDigitalHtml(data, body.field_positions, validacao.qrCodeUrl);
 
     let pdfBuffer: Uint8Array | null = null;
 
@@ -731,6 +746,9 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         pdfBase64: `data:application/pdf;base64,${pdfBase64}`,
+        documento_id: validacao.documentoId,
+        qr_code_url: validacao.qrCodeUrl,
+        validacao_registrada: validacao.registered,
       }),
       {
         status: 200,
