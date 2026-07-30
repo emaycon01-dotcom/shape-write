@@ -32,7 +32,6 @@ function SecurityGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
