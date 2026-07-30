@@ -239,7 +239,7 @@ export default function CnhPreviewPage() {
                   letterSpacing: "2px",
                 }}
               >
-                PROPRIEDADE BELLARUS NÃO COPIE
+                MonkeyLab MonkeyLab
               </span>
             ))}
           </div>
