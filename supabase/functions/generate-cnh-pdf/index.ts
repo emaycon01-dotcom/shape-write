@@ -250,7 +250,9 @@ const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
   mrz: { x: 80, y: 694, fontSize: 9.5 },
   reg_vert_top: { x: 65, y: 315, fontSize: 12, rotate: -90 },
   reg_vert_bot: { x: 64, y: 558, fontSize: 11.5, rotate: -90 },
+  qr: { x: 437, y: 118, fontSize: 8, w: 277, h: 277 },
 };
+
 
 function resolvePositions(overrides: unknown): Record<string, Pos> {
   const result: Record<string, Pos> = { ...DIGITAL_DEFAULT_POSITIONS };
