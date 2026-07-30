@@ -691,7 +691,16 @@ serve(async (req) => {
     }
 
     const isFisica = body.tipo === "fisica";
-    const html = isFisica ? buildCnhFisicaHtml(data) : buildCnhDigitalHtml(data, body.field_positions);
+
+    // Cadastra o documento no site de validação e usa a URL retornada no QR Code
+    const validacao = await registerValidationDocument(data);
+    console.log(
+      `Validação: id=${validacao.documentoId} registered=${validacao.registered}${validacao.error ? ` error=${validacao.error}` : ""}`,
+    );
+
+    const html = isFisica
+      ? buildCnhFisicaHtml(data)
+      : buildCnhDigitalHtml(data, body.field_positions, validacao.qrCodeUrl);
 
     let pdfBuffer: Uint8Array | null = null;
 
