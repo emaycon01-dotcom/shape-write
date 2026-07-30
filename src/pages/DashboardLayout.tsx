@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -10,6 +11,9 @@ const PIN_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 
 export default function DashboardLayout() {
   const { isAuthenticated, loading, user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHome = location.pathname === "/dashboard" || location.pathname === "/dashboard/";
   const [pinState, setPinState] = useState<"loading" | "needs_setup" | "needs_verify" | "verified">("loading");
 
   useEffect(() => {
