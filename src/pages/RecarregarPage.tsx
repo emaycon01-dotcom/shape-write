@@ -122,6 +122,17 @@ export default function RecarregarPage() {
     loadWarnings();
   }, [user]);
 
+  // Zera as advertências quando um depósito é confirmado
+  const clearAllWarnings = useCallback(async () => {
+    if (!user) return;
+    await supabase
+      .from("pix_warnings")
+      .update({ status: "cleared", resolved_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .in("status", ["warning", "pending"]);
+    setWarningCount(0);
+  }, [user]);
+
   // Cooldown timer
   useEffect(() => {
     if (cooldownUntil <= Date.now()) {
@@ -223,11 +234,12 @@ export default function RecarregarPage() {
       if (data?.status === "pago") {
         setPaid(true);
         clearInterval(interval);
-        toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados." });
+        await clearAllWarnings();
+        toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [showQr, txId, paid, toast]);
+  }, [showQr, txId, paid, toast, clearAllWarnings]);
 
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
@@ -248,7 +260,8 @@ export default function RecarregarPage() {
         .update({ status: "paid", resolved_at: new Date().toISOString() })
         .eq("qr_code_id", qrId)
         .eq("user_id", user.id);
-      toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados." });
+      await clearAllWarnings();
+      toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
       return;
     }
 
@@ -257,7 +270,7 @@ export default function RecarregarPage() {
       description: "Assim que o PIX for compensado os créditos entram automaticamente.",
       variant: "destructive",
     });
-  }, [user, qrId, txId, toast]);
+  }, [user, qrId, txId, toast, clearAllWarnings]);
 
   const handleCopyPix = useCallback(async () => {
     try {
