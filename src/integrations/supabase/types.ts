@@ -152,6 +152,54 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          credits_amount: number
+          elitepay_charge_id: string | null
+          id: string
+          paid_at: string | null
+          pix_code: string | null
+          plan_name: string | null
+          qr_code_base64: string | null
+          status: string
+          txid: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          credits_amount?: number
+          elitepay_charge_id?: string | null
+          id?: string
+          paid_at?: string | null
+          pix_code?: string | null
+          plan_name?: string | null
+          qr_code_base64?: string | null
+          status?: string
+          txid?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          credits_amount?: number
+          elitepay_charge_id?: string | null
+          id?: string
+          paid_at?: string | null
+          pix_code?: string | null
+          plan_name?: string | null
+          qr_code_base64?: string | null
+          status?: string
+          txid?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       generation_logs: {
         Row: {
           created_at: string

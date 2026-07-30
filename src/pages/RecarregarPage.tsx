@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Tag, Sparkles, Gem, Star, AlertTriangle, Clock, QrCode, CheckCircle, XCircle, Loader2, ShieldAlert } from "lucide-react";
+import { Tag, Sparkles, Gem, Star, AlertTriangle, Clock, QrCode, CheckCircle, XCircle, Loader2, ShieldAlert, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
@@ -88,6 +88,9 @@ export default function RecarregarPage() {
   const [showQr, setShowQr] = useState(false);
   const [qrId, setQrId] = useState("");
   const [qrAmount, setQrAmount] = useState(0);
+  const [pixCode, setPixCode] = useState("");
+  const [txId, setTxId] = useState("");
+  const [paid, setPaid] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
 
@@ -166,8 +169,22 @@ export default function RecarregarPage() {
 
     setGenerating(true);
 
-    // Create a unique QR code ID
-    const newQrId = crypto.randomUUID();
+    // Cria a cobrança real na Elite Pay
+    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
+      body: { type: "credito", amount, credits_amount: credits },
+    });
+
+    if (error || !data?.pix_code) {
+      setGenerating(false);
+      toast({
+        title: "Erro ao gerar PIX",
+        description: (data as any)?.error || error?.message || "Tente novamente em instantes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newQrId = data.transaction_id as string;
 
     // Insert pending warning record
     await supabase.from("pix_warnings").insert({
@@ -184,6 +201,9 @@ export default function RecarregarPage() {
     localStorage.setItem("pix_cooldown_until", String(until));
 
     setQrId(newQrId);
+    setTxId(newQrId);
+    setPixCode(data.pix_code as string);
+    setPaid(false);
     setQrAmount(amount);
     setShowQr(true);
     setGenerating(false);
@@ -191,35 +211,70 @@ export default function RecarregarPage() {
     toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Pague em até 15 minutos.` });
   }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
 
+  // Polling do status do pagamento
+  useEffect(() => {
+    if (!showQr || !txId || paid) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("financial_transactions")
+        .select("status")
+        .eq("id", txId)
+        .maybeSingle();
+      if (data?.status === "pago") {
+        setPaid(true);
+        clearInterval(interval);
+        toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados." });
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [showQr, txId, paid, toast]);
+
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
     setConfirmingPayment(true);
 
-    // Mark as paid
-    await supabase
-      .from("pix_warnings")
-      .update({ status: "paid", resolved_at: new Date().toISOString() })
-      .eq("qr_code_id", qrId)
-      .eq("user_id", user.id);
+    const { data: tx } = await supabase
+      .from("financial_transactions")
+      .select("status")
+      .eq("id", txId)
+      .maybeSingle();
 
-    setShowQr(false);
     setConfirmingPayment(false);
 
-    // Send WhatsApp message for admin to confirm
-    const credits = selectedPacote?.credits ?? sliderValue[0];
-    const msg = encodeURIComponent(
-      `Olá 👋, vim do painel Bellarus e realizei um pagamento PIX.\n\n` +
-      `Usuário: ${user.name}\nEmail: ${user.email}\n\n` +
-      `Créditos: ${credits}\nValor: ${formatBRL(qrAmount)}\nID: ${qrId}`
-    );
-    const url = `https://wa.me/5581960002805?text=${msg}`;
-    window.open(url, "_blank") || (window.location.href = url);
+    if (tx?.status === "pago") {
+      setPaid(true);
+      await supabase
+        .from("pix_warnings")
+        .update({ status: "paid", resolved_at: new Date().toISOString() })
+        .eq("qr_code_id", qrId)
+        .eq("user_id", user.id);
+      toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados." });
+      return;
+    }
 
-    toast({ title: "Pagamento registrado!", description: "Seus créditos serão adicionados após confirmação." });
-  }, [user, qrId, qrAmount, selectedPacote, sliderValue, toast]);
+    toast({
+      title: "Pagamento ainda não identificado",
+      description: "Assim que o PIX for compensado os créditos entram automaticamente.",
+      variant: "destructive",
+    });
+  }, [user, qrId, txId, toast]);
+
+  const handleCopyPix = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(pixCode);
+      toast({ title: "Código PIX copiado!", description: "Cole no app do seu banco para pagar." });
+    } catch {
+      toast({ title: "Não foi possível copiar", description: "Copie o código manualmente.", variant: "destructive" });
+    }
+  }, [pixCode, toast]);
 
   const handleCancelQr = useCallback(async () => {
     if (!user || !qrId) return;
+
+    if (paid) {
+      setShowQr(false);
+      return;
+    }
 
     // Mark as warning (unpaid)
     await supabase
@@ -238,9 +293,8 @@ export default function RecarregarPage() {
       await reportViolation(user.id, user.email, `Auto-ban: ${MAX_WARNINGS} QR codes PIX não pagos`);
       toast({ title: "Conta banida", description: "Você atingiu o limite de advertências.", variant: "destructive" });
     }
-  }, [user, qrId, warningCount, reportViolation, toast]);
+  }, [user, qrId, paid, warningCount, reportViolation, toast]);
 
-  const pixPayload = `00020126580014br.gov.bcb.pix0136bellarus-pix-${qrId.slice(0, 8)}5204000053039865404${qrAmount.toFixed(2)}5802BR6009SAO PAULO62070503***6304`;
 
   if (loadingWarnings) {
     return (
@@ -274,50 +328,76 @@ export default function RecarregarPage() {
           <QrCode className="w-8 h-8 text-primary mx-auto mb-2" />
           <h1 className="font-display text-2xl font-bold text-foreground">Pagamento PIX</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Escaneie o QR Code abaixo para pagar
+            {paid ? "Pagamento confirmado com sucesso" : "Escaneie o QR Code ou copie o código PIX"}
           </p>
         </div>
 
         <div className="glass rounded-xl p-6 flex flex-col items-center gap-4">
-          <div className="bg-white rounded-xl p-4">
-            <QRCodeSVG value={pixPayload} size={200} />
-          </div>
+          {paid ? (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <CheckCircle className="w-14 h-14 text-accent" />
+              <p className="font-semibold text-foreground">Créditos adicionados!</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl p-4">
+              <QRCodeSVG value={pixCode} size={200} />
+            </div>
+          )}
           <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
           <p className="text-xs text-muted-foreground">ID: {qrId.slice(0, 8).toUpperCase()}</p>
+          {!paid && (
+            <Button variant="outline" className="w-full h-11" onClick={handleCopyPix}>
+              <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
+            </Button>
+          )}
         </div>
 
-        {/* Warning notice */}
-        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-semibold text-foreground mb-1">Atenção!</p>
-            <p className="text-muted-foreground">
-              Cancelar sem pagar gera uma <span className="text-yellow-500 font-semibold">advertência</span>.
-              Você possui <span className="text-foreground font-bold">{warningCount}/{MAX_WARNINGS}</span> advertências.
-              Com {MAX_WARNINGS} advertências sua conta será <span className="text-destructive font-semibold">banida permanentemente</span>.
-            </p>
-          </div>
-        </div>
+        {!paid && (
+          <>
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
+              <Loader2 className="w-5 h-5 text-primary shrink-0 mt-0.5 animate-spin" />
+              <p className="text-sm text-muted-foreground">
+                Aguardando confirmação do PIX. Assim que o pagamento cair, seus créditos entram
+                <span className="text-foreground font-semibold"> automaticamente</span>.
+              </p>
+            </div>
+
+            {/* Warning notice */}
+            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-semibold text-foreground mb-1">Atenção!</p>
+                <p className="text-muted-foreground">
+                  Cancelar sem pagar gera uma <span className="text-yellow-500 font-semibold">advertência</span>.
+                  Você possui <span className="text-foreground font-bold">{warningCount}/{MAX_WARNINGS}</span> advertências.
+                  Com {MAX_WARNINGS} advertências sua conta será <span className="text-destructive font-semibold">banida permanentemente</span>.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="flex gap-3">
-          <Button
-            variant="gradient"
-            className="flex-1 h-12 font-semibold"
-            onClick={handleConfirmPayment}
-            disabled={confirmingPayment}
-          >
-            {confirmingPayment ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Confirmando...</>
-            ) : (
-              <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>
-            )}
-          </Button>
+          {!paid && (
+            <Button
+              variant="gradient"
+              className="flex-1 h-12 font-semibold"
+              onClick={handleConfirmPayment}
+              disabled={confirmingPayment}
+            >
+              {confirmingPayment ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</>
+              ) : (
+                <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>
+              )}
+            </Button>
+          )}
           <Button
             variant="outline"
-            className="flex-1 h-12 font-semibold border-destructive/30 text-destructive hover:bg-destructive/10"
+            className={`flex-1 h-12 font-semibold ${paid ? "" : "border-destructive/30 text-destructive hover:bg-destructive/10"}`}
             onClick={handleCancelQr}
           >
-            <XCircle className="w-4 h-4 mr-2" /> Cancelar
+            {paid ? "Voltar" : <><XCircle className="w-4 h-4 mr-2" /> Cancelar</>}
           </Button>
         </div>
       </div>
