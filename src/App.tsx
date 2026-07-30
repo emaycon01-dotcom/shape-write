@@ -83,6 +83,7 @@ const App = () => (
                       <Route path="history" element={<HistoryPage />} />
                       <Route path="recarregar" element={<RecarregarPage />} />
                       <Route path="template-align" element={<TemplateAlignPage />} />
+                      <Route path="ferramentas/assinaturas" element={<SignatureGeneratorPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
                     </Route>
