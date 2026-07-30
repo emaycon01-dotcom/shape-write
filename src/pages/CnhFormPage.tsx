@@ -319,6 +319,7 @@ export default function CnhFormPage() {
         numero_espelho: form.numeroEspelho,
         cidade_estado: form.cidadeEstado,
         estado_extenso: form.estadoExtenso,
+        cnh_definitiva: form.cnhDefinitiva,
         nome_pai: form.nomePai,
         nome_mae: form.nomeMae,
         observacoes: form.observacoes.join(", "),

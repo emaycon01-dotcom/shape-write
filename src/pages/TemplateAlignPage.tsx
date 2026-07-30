@@ -35,7 +35,7 @@ export const defaultCnhFields: FieldDef[] = [
   { id: "nascimento", label: "Nascimento", sampleText: "11/03/1989, RIO DE JANEIRO, RJ", x: 192, y: 168, fontSize: 6.5 },
   { id: "emissao", label: "Emissão", sampleText: "14/03/2026", x: 191, y: 187, fontSize: 6.5 },
   { id: "validade", label: "Validade", sampleText: "14/03/2036", x: 253, y: 187, fontSize: 6.5, color: "#c00" },
-  { id: "cat_big", label: "Cat. Grande", sampleText: "AB", x: 338, y: 184, fontSize: 11 },
+  { id: "cat_big", label: "Cat. Grande (D/P)", sampleText: "D", x: 338, y: 184, fontSize: 11 },
   { id: "validade_cat_a", label: "Validade Cat. A", sampleText: "14/03/2036", x: 171, y: 353, fontSize: 4.5 },
   { id: "validade_cat_b", label: "Validade Cat. B", sampleText: "14/03/2036", x: 171, y: 375, fontSize: 4.5 },
   { id: "validade_cat_c", label: "Validade Cat. C", sampleText: "14/03/2036", x: 171, y: 397, fontSize: 4.5 },
@@ -52,17 +52,17 @@ export const defaultCnhFields: FieldDef[] = [
   { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 281, y: 495, fontSize: 6.5 },
   { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 280, y: 509, fontSize: 6.5 },
   { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 100, y: 505, fontSize: 6 },
-  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 163, y: 531, fontSize: 15, bold: true },
+  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 163, y: 531, fontSize: 15 },
   {
     id: "mrz",
     label: "MRZ",
-    sampleText: "I<BRA079158889PB927125303<<<<\n8903118M3603147BRA<<<<<<<<<<<4\nMARIA<<OLIVEIRA<<SANTOS<<<<<<<",
+    sampleText: "I<BRA81008622604<002<<<<<<<<<<\n9610286M3604270BRA<<<<<<<<<<1<\nMARIA<<OLIVEIRA<SANTOS<<<<<<<<",
     x: 80,
     y: 694,
     fontSize: 9.5,
   },
-  { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 65, y: 315, fontSize: 12, rotate: -90, bold: true },
-  { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 64, y: 558, fontSize: 11.5, rotate: -90, bold: true },
+  { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 65, y: 315, fontSize: 12, rotate: -90 },
+  { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 64, y: 558, fontSize: 11.5, rotate: -90 },
 ];
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
@@ -321,6 +321,13 @@ function CnhAlignEditor() {
           {fields.map((f) => {
             const isSelected = f.id === selected;
             const isBox = f.id === "photo" || f.id === "signature";
+            const isEstado = f.id === "estado";
+            const estadoSize = isEstado
+              ? f.sampleText.length > 9
+                ? Math.max(f.fontSize * (9 / f.sampleText.length), f.fontSize * 0.55)
+                : f.fontSize
+              : f.fontSize;
+
 
             return (
               <div
@@ -338,11 +345,11 @@ function CnhAlignEditor() {
                 style={{
                   top: `${(f.y / PAGE_H) * 100}%`,
                   left: `${(f.x / PAGE_W) * 100}%`,
-                  fontSize: `${f.fontSize * scale}px`,
+                  fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: CNH_FONT,
+                  fontFamily: f.id === "mrz" ? "'OCR B','OCRB','Courier New',Courier,monospace" : isEstado ? "Arial, Helvetica, sans-serif" : CNH_FONT,
                   color: f.color || "#111",
-                  whiteSpace: "pre-line",
+                  whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
                   background: isSelected ? "hsl(var(--primary) / 0.1)" : "transparent",
                   zIndex: isSelected ? 50 : 10,
@@ -350,6 +357,7 @@ function CnhAlignEditor() {
                   transformOrigin: f.rotate ? "left top" : undefined,
                   letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : f.rotate ? `${1.2 * scale}px` : undefined,
                   lineHeight: f.id === "mrz" ? 1.6 : 1,
+                  ...(isEstado ? { width: `${((170 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
                     ? {
                         width: `${(((f.w || 80) / PAGE_W) * 100).toFixed(4)}%`,

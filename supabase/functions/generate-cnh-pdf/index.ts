@@ -128,39 +128,50 @@ function mrzCheckDigit(value: string) {
   return String(sum % 10);
 }
 
+const MRZ_SUFFIXES = ["002", "082", "882"];
+
 function buildMrz(d: Record<string, string>) {
-  const registro = toMrzToken(d.registro || d.numero_espelho || "").replace(/[^A-Z0-9<]/g, "");
-  const docNumber = registro.padEnd(9, "<").slice(0, 9);
+  // Linha 1: I<BRA + nº de registro (11) + "<" + código de 3 dígitos + preenchimento até 30
+  const registro = toMrzToken(d.registro || d.numero_espelho || "")
+    .replace(/[^A-Z0-9]/g, "")
+    .padEnd(11, "0")
+    .slice(0, 11);
 
-  const optionalData = toMrzToken(d.renach || d.numero_espelho || "")
-    .replace(/[^A-Z0-9<]/g, "")
-    .padEnd(15, "<")
-    .slice(0, 15);
+  const digitSum = registro.split("").reduce((acc, c) => acc + (Number(c) || 0), 0);
+  const suffix = MRZ_SUFFIXES[digitSum % MRZ_SUFFIXES.length];
 
+  const line1 = `I<BRA${registro}<${suffix}`.padEnd(30, "<").slice(0, 30);
+
+  // Linha 2: nascimento + dv + sexo + validade + dv + BRA + opcional + dv composto
   const birth = toMrzDate(d.data_nascimento || "");
   const expiry = toMrzDate(d.data_validade || "");
   const birthCheck = mrzCheckDigit(birth);
   const expiryCheck = mrzCheckDigit(expiry);
 
   const gender = normalizeMrzText(d.genero || "");
-  const sex = gender.startsWith("F") ? "F" : gender.startsWith("M") ? "M" : "<";
+  const sex = gender.startsWith("F") ? "F" : "M";
 
-  const personalNumber = "<<<<<<<<<<<";
-
-  const docCheck = mrzCheckDigit(docNumber);
+  const optional = "<<<<<<<<<<";
   const finalCheck = mrzCheckDigit(
-    `${docNumber}${docCheck}${optionalData}${birth}${birthCheck}${expiry}${expiryCheck}${personalNumber}`
+    `${registro}${suffix}${birth}${birthCheck}${expiry}${expiryCheck}${optional}`
   );
 
-  const fullName = toMrzToken(d.nome_completo || "NOME SOBRENOME")
-    .replace(/<+/g, "<<")
+  const line2 = `${birth}${birthCheck}${sex}${expiry}${expiryCheck}BRA${optional}${finalCheck}<`
     .padEnd(30, "<")
     .slice(0, 30);
 
+  // Linha 3: PRIMEIRO<<SEGUNDO<TERCEIRO<<<<
+  const parts = toMrzToken(d.nome_completo || "NOME SOBRENOME")
+    .split("<")
+    .filter(Boolean);
+  const first = parts.shift() || "NOME";
+  const rest = parts.join("<");
+  const line3 = `${first}<<${rest}`.padEnd(30, "<").slice(0, 30);
+
   return {
-    line1: escapeHtml(`I<BRA${docNumber}${docCheck}${optionalData}`),
-    line2: escapeHtml(`${birth}${birthCheck}${sex}${expiry}${expiryCheck}BRA${personalNumber}${finalCheck}`),
-    line3: escapeHtml(fullName),
+    line1: escapeHtml(line1),
+    line2: escapeHtml(line2),
+    line3: escapeHtml(line3),
   };
 }
 
@@ -305,6 +316,24 @@ function buildCatDateOverlays(
   return html;
 }
 
+// Caixa fixa do estado (mesma largura usada no editor de alinhamento)
+const ESTADO_BOX_W = 170;
+
+function isDefinitiva(value?: string) {
+  const v = (value || "").trim().toUpperCase();
+  return v === "SIM" || v === "S" || v === "TRUE" || v === "DEFINITIVA";
+}
+
+/** Auto-ajuste: reduz a fonte para nomes de estado longos, sem sair da caixa. */
+function estadoFitStyle(estado: string, baseSize: number) {
+  const len = estado.trim().length;
+  const maxChars = 9;
+  const size = len > maxChars ? Math.max(baseSize * (maxChars / len), baseSize * 0.55) : baseSize;
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
+
+
 function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
@@ -324,7 +353,7 @@ function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown
 
   const rotStyle = (id: string) => {
     const pos = p[id];
-    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;transform:rotate(${pos.rotate ?? -90}deg);transform-origin:left top;letter-spacing:1.2px;white-space:nowrap;color:#111;font-weight:bold;`;
+    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;transform:rotate(${pos.rotate ?? -90}deg);transform-origin:left top;letter-spacing:1.2px;white-space:nowrap;color:#111;font-weight:normal;`;
   };
 
   const text = (id: string, value: string, extra = "") =>
@@ -396,7 +425,7 @@ ${CNH_FONT_FACE}
   ${text("nascimento", d.data_nascimento || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
   ${text("emissao", d.data_emissao || "")}
   ${text("validade", d.data_validade || "", "color:#c00;")}
-  ${text("cat_big", d.categoria || "")}
+  ${text("cat_big", isDefinitiva(d.cnh_definitiva) ? "D" : "P")}
   ${text("rg", d.rg || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
   ${text("cpf", d.cpf || "")}
   ${text("registro", d.registro || "", "color:#c00;")}
@@ -409,9 +438,9 @@ ${CNH_FONT_FACE}
   ${text("espelho", espelhoClean, "white-space:nowrap;")}
   ${text("renach", renachClean, "white-space:nowrap;")}
   ${text("local", d.cidade_estado || "")}
-  ${text("estado", d.estado_extenso || "", "font-weight:bold;")}
+  <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;text-align:center;white-space:nowrap;font-weight:normal;font-family:Arial,Helvetica,sans-serif;`)}${estadoFitStyle(d.estado_extenso || "", p.estado.fontSize)}">${escapeHtml(d.estado_extenso || "")}</div>
   <div class="overlay" style="${rotStyle("reg_vert_bot")}">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay" style="${base("mrz", "width:420px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="${base("mrz", "width:460px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;font-family:'OCR B','OCRB','Courier New',Courier,monospace;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
 </html>`;
@@ -636,6 +665,7 @@ serve(async (req) => {
       numero_espelho: body.numero_espelho || "",
       cidade_estado: body.cidade_estado || "",
       estado_extenso: body.estado_extenso || "",
+      cnh_definitiva: body.cnh_definitiva || "",
       nome_pai: body.nome_pai || "",
       nome_mae: body.nome_mae || "",
       observacoes: body.observacoes || "",
