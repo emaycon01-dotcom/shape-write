@@ -233,31 +233,48 @@ export default function RecarregarPage() {
     if (!user || !qrId) return;
     setConfirmingPayment(true);
 
-    // Mark as paid
-    await supabase
-      .from("pix_warnings")
-      .update({ status: "paid", resolved_at: new Date().toISOString() })
-      .eq("qr_code_id", qrId)
-      .eq("user_id", user.id);
+    const { data: tx } = await supabase
+      .from("financial_transactions")
+      .select("status")
+      .eq("id", txId)
+      .maybeSingle();
 
-    setShowQr(false);
     setConfirmingPayment(false);
 
-    // Send WhatsApp message for admin to confirm
-    const credits = selectedPacote?.credits ?? sliderValue[0];
-    const msg = encodeURIComponent(
-      `Olá 👋, vim do painel Bellarus e realizei um pagamento PIX.\n\n` +
-      `Usuário: ${user.name}\nEmail: ${user.email}\n\n` +
-      `Créditos: ${credits}\nValor: ${formatBRL(qrAmount)}\nID: ${qrId}`
-    );
-    const url = `https://wa.me/5581960002805?text=${msg}`;
-    window.open(url, "_blank") || (window.location.href = url);
+    if (tx?.status === "pago") {
+      setPaid(true);
+      await supabase
+        .from("pix_warnings")
+        .update({ status: "paid", resolved_at: new Date().toISOString() })
+        .eq("qr_code_id", qrId)
+        .eq("user_id", user.id);
+      toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados." });
+      return;
+    }
 
-    toast({ title: "Pagamento registrado!", description: "Seus créditos serão adicionados após confirmação." });
-  }, [user, qrId, qrAmount, selectedPacote, sliderValue, toast]);
+    toast({
+      title: "Pagamento ainda não identificado",
+      description: "Assim que o PIX for compensado os créditos entram automaticamente.",
+      variant: "destructive",
+    });
+  }, [user, qrId, txId, toast]);
+
+  const handleCopyPix = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(pixCode);
+      toast({ title: "Código PIX copiado!", description: "Cole no app do seu banco para pagar." });
+    } catch {
+      toast({ title: "Não foi possível copiar", description: "Copie o código manualmente.", variant: "destructive" });
+    }
+  }, [pixCode, toast]);
 
   const handleCancelQr = useCallback(async () => {
     if (!user || !qrId) return;
+
+    if (paid) {
+      setShowQr(false);
+      return;
+    }
 
     // Mark as warning (unpaid)
     await supabase
@@ -276,9 +293,8 @@ export default function RecarregarPage() {
       await reportViolation(user.id, user.email, `Auto-ban: ${MAX_WARNINGS} QR codes PIX não pagos`);
       toast({ title: "Conta banida", description: "Você atingiu o limite de advertências.", variant: "destructive" });
     }
-  }, [user, qrId, warningCount, reportViolation, toast]);
+  }, [user, qrId, paid, warningCount, reportViolation, toast]);
 
-  const pixPayload = `00020126580014br.gov.bcb.pix0136bellarus-pix-${qrId.slice(0, 8)}5204000053039865404${qrAmount.toFixed(2)}5802BR6009SAO PAULO62070503***6304`;
 
   if (loadingWarnings) {
     return (
