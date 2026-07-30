@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 import { authenticateRequest } from "../_shared/auth.ts";
+import { CNH_FONT_FACE } from "./cnh-font.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -246,10 +247,11 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
 <head>
 <meta charset="UTF-8">
 <style>
+${CNH_FONT_FACE}
   @page { size: A4 portrait; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'CNHDigital', Arial, Helvetica, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     background: #fff;
@@ -277,7 +279,7 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
   .overlay {
     position: absolute;
     z-index: 10;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'CNHDigital', Arial, Helvetica, sans-serif;
     color: #111;
     font-weight: normal;
   }
@@ -317,10 +319,10 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
   .f-pai          { top: 266px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-mae          { top: 286px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
   .f-obs          { top: 427px; left: 97px; font-size: 5.5px; max-width: 370px; }
-  .f-espelho      { top: 495px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
-  .f-renach       { top: 509px; left: 280px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+  .f-espelho      { top: 495px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'CNHDigital', Arial, Helvetica, sans-serif; }
+  .f-renach       { top: 509px; left: 280px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'CNHDigital', Arial, Helvetica, sans-serif; }
   .f-local        { top: 505px; left: 100px; font-size: 6px; }
-  .f-estado       { top: 531px; left: 163px; font-size: 15px; color: #111; font-family: Arial, Helvetica, sans-serif; font-weight: bold; }
+  .f-estado       { top: 531px; left: 163px; font-size: 15px; color: #111; font-family: 'CNHDigital', Arial, Helvetica, sans-serif; font-weight: bold; }
   .reg-vert-bot {
     top: 558px; left: 64px;
     transform: rotate(-90deg);
@@ -334,7 +336,7 @@ function buildCnhDigitalHtml(d: Record<string, string>) {
   .mrz-overlay {
     top: 694px; left: 80px;
     width: 420px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'CNHDigital', Arial, Helvetica, sans-serif;
     font-size: 9.5px;
     color: #111;
     letter-spacing: 1.6px;
