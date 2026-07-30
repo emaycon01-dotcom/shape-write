@@ -348,7 +348,7 @@ function CnhAlignEditor() {
                   left: `${(f.x / PAGE_W) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: f.id === "mrz" ? "'OCR B','OCRB','Courier New',Courier,monospace" : isEstado ? "Arial, Helvetica, sans-serif" : CNH_FONT,
+                  fontFamily: CNH_FONT,
                   color: f.color || "#111",
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
@@ -356,7 +356,7 @@ function CnhAlignEditor() {
                   zIndex: isSelected ? 50 : 10,
                   transform: f.rotate ? `rotate(${f.rotate}deg)` : undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
-                  letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : f.rotate ? `${1.2 * scale}px` : undefined,
+                  letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : undefined,
                   lineHeight: f.id === "mrz" ? 1.6 : 1,
                   ...(isEstado ? { width: `${((170 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
