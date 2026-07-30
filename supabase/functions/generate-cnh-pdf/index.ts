@@ -167,7 +167,7 @@ function buildMrz(d: Record<string, string>) {
     .filter(Boolean);
   const first = parts.shift() || "NOME";
   const rest = parts.join("<");
-  const line3 = `${first}<<${rest}`.padEnd(30, "<").slice(0, 30);
+  const line3 = `${first}<<${rest}`.padEnd(31, "<").slice(0, 31);
 
   return {
     line1: escapeHtml(line1),
@@ -432,7 +432,7 @@ ${CNH_FONT_FACE}
   }
   .photo-overlay { overflow: hidden; }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
-  .qr-overlay { background:#fff; z-index: 12; }
+  .qr-overlay { background:#fff; z-index: 12; box-shadow: 0 0 0 8px #fff; outline: 8px solid #fff; }
   .qr-overlay svg { width:100%; height:100%; display:block; }
   .sig-overlay { display: flex; align-items: center; justify-content: center; }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
