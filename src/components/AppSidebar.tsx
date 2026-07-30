@@ -11,6 +11,9 @@ import {
   Palette,
   ShieldBan,
   SlidersHorizontal,
+  Rocket,
+  Star,
+  Gem,
 } from "lucide-react";
 import {
   Sidebar,
