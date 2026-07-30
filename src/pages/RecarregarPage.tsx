@@ -169,8 +169,22 @@ export default function RecarregarPage() {
 
     setGenerating(true);
 
-    // Create a unique QR code ID
-    const newQrId = crypto.randomUUID();
+    // Cria a cobrança real na Elite Pay
+    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
+      body: { type: "credito", amount, credits_amount: credits },
+    });
+
+    if (error || !data?.pix_code) {
+      setGenerating(false);
+      toast({
+        title: "Erro ao gerar PIX",
+        description: (data as any)?.error || error?.message || "Tente novamente em instantes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newQrId = data.transaction_id as string;
 
     // Insert pending warning record
     await supabase.from("pix_warnings").insert({
@@ -187,12 +201,33 @@ export default function RecarregarPage() {
     localStorage.setItem("pix_cooldown_until", String(until));
 
     setQrId(newQrId);
+    setTxId(newQrId);
+    setPixCode(data.pix_code as string);
+    setPaid(false);
     setQrAmount(amount);
     setShowQr(true);
     setGenerating(false);
 
     toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Pague em até 15 minutos.` });
   }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
+
+  // Polling do status do pagamento
+  useEffect(() => {
+    if (!showQr || !txId || paid) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("financial_transactions")
+        .select("status")
+        .eq("id", txId)
+        .maybeSingle();
+      if (data?.status === "pago") {
+        setPaid(true);
+        clearInterval(interval);
+        toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados." });
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [showQr, txId, paid, toast]);
 
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
