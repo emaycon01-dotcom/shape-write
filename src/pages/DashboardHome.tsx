@@ -1,9 +1,20 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, Check,
+  ShieldCheck, Zap, Clock, Check, Percent,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const PLANOS = [
   {
@@ -12,7 +23,10 @@ export const PLANOS = [
     icon: Rocket,
     gradient: "gradient-dealer",
     ring: "ring-sky-500/30",
-    beneficios: ["Painel de serviços", "CNH Digital", "Suporte padrão"],
+    desconto: 25,
+    descricao:
+      "Plano de entrada da Bellarus. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Dealer na conta recebe 25% de desconto em todo o sistema.",
+    beneficios: ["Painel de serviços", "CNH Digital", "Suporte padrão", "25% de desconto em todo o sistema"],
   },
   {
     nome: "Master",
@@ -21,7 +35,10 @@ export const PLANOS = [
     gradient: "gradient-master",
     ring: "ring-purple-500/30",
     destaque: true,
-    beneficios: ["Tudo do Dealer", "Fila prioritária", "Suporte prioritário"],
+    desconto: 50,
+    descricao:
+      "Plano intermediário com tudo do Dealer, fila prioritária de geração e suporte prioritário. Quem tem o plano Master na conta recebe 50% de desconto em todo o sistema.",
+    beneficios: ["Tudo do Dealer", "Fila prioritária", "Suporte prioritário", "50% de desconto em todo o sistema"],
   },
   {
     nome: "Diamond",
@@ -29,9 +46,13 @@ export const PLANOS = [
     icon: Gem,
     gradient: "gradient-diamond",
     ring: "ring-amber-500/30",
-    beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado"],
+    desconto: 100,
+    descricao:
+      "Plano máximo da Bellarus: tudo do Master, limites ampliados e atendimento dedicado. Quem tem o plano Diamond na conta recebe 100% de desconto em todo o sistema.",
+    beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado", "100% de desconto em todo o sistema"],
   },
 ];
+
 
 const formatDate = () => {
   const d = new Date();
