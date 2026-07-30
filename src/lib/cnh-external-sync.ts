@@ -1,282 +1,149 @@
 import * as pdfjsLib from "pdfjs-dist";
 
-// External Supabase config for CNH sync
+/**
+ * Integração com o app "CNH do Brasil" (Site 2 — fotos).
+ * Grava um registro na tabela pública `cnh` do projeto externo.
+ * Todo o processamento (render do PDF -> JPEG base64) acontece NO NAVEGADOR,
+ * para não consumir recursos do backend.
+ */
 const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
-const EXTERNAL_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
+const EXTERNAL_SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
 
-// Crop regions for CNH Digital (based on 794x1123 page)
-// Part 1: Header + photo + personal data
-// Part 2: Categories + obs + local + estado
-// Part 3: Description text + MRZ
-// Part 4: QR code (generated from data)
-const CROP_REGIONS_DIGITAL = [
-  { name: "parte1", x: 0, y: 0, w: 794, h: 310 },
-  { name: "parte2", x: 0, y: 310, w: 794, h: 260 },
-  { name: "parte3", x: 0, y: 570, w: 794, h: 230 },
-];
-
-// For Física (2 pages) - front page gets 2 parts, verso gets 1 + QR
-const CROP_REGIONS_FISICA = [
-  { name: "parte1", x: 0, y: 0, w: 794, h: 260 },
-  { name: "parte2", x: 0, y: 260, w: 794, h: 260 },
-];
-
-const CROP_REGIONS_FISICA_VERSO = [
-  { name: "parte3", x: 0, y: 300, w: 794, h: 350 },
-];
+/** largura mínima exigida pelo app (px) */
+const MIN_WIDTH = 2400;
+const TARGET_WIDTH = 3176; // ~300 DPI em A4
+const JPEG_QUALITY = 0.92;
 
 function onlyDigits(value: string): string {
-  return value.replace(/\D/g, "");
+  return (value || "").replace(/\D/g, "");
 }
 
 function formatCpf(value: string): string {
   const digits = onlyDigits(value).slice(0, 11);
-
-  if (digits.length !== 11) {
-    return value.trim();
-  }
-
+  if (digits.length !== 11) return (value || "").trim();
   return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }
 
-/**
- * Render a PDF page to a high-res canvas
- */
-async function renderPdfPageToCanvas(
-  pdfData: Uint8Array,
-  pageIndex: number,
-  scale: number = 3
-): Promise<HTMLCanvasElement> {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-
-  const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
-  const page = await pdf.getPage(pageIndex + 1);
-  const viewport = page.getViewport({ scale });
-
-  const canvas = document.createElement("canvas");
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  const ctx = canvas.getContext("2d")!;
-
-  await page.render({ canvasContext: ctx, viewport }).promise;
-  return canvas;
+function toBrDate(value: string): string {
+  const v = (value || "").trim();
+  const iso = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+  return v;
 }
 
-/**
- * Crop a region from a canvas and return as high-quality base64 JPEG
- */
-function cropCanvasToBase64(
-  source: HTMLCanvasElement,
-  region: { x: number; y: number; w: number; h: number },
-  scale: number = 3
-): string {
-  const sx = region.x * scale;
-  const sy = region.y * scale;
-  const sw = region.w * scale;
-  const sh = region.h * scale;
-
-  const cropCanvas = document.createElement("canvas");
-  cropCanvas.width = sw;
-  cropCanvas.height = sh;
-  const ctx = cropCanvas.getContext("2d")!;
-  ctx.drawImage(source, sx, sy, sw, sh, 0, 0, sw, sh);
-
-  // High quality JPEG
-  return cropCanvas.toDataURL("image/jpeg", 0.95);
+function normalizeSexo(value: string): string {
+  const v = (value || "").trim().toUpperCase();
+  if (v.startsWith("F")) return "FEMININO";
+  return "MASCULINO";
 }
 
-/**
- * Generate QR code as base64 from data using canvas
- */
-async function generateQrCodeBase64(data: string): Promise<string> {
-  try {
-    const { QRCodeCanvas } = await import("qrcode.react");
-    const { createRoot } = await import("react-dom/client");
-    const { createElement, createRef } = await import("react");
-
-    const container = document.createElement("div");
-    container.style.position = "fixed";
-    container.style.left = "-9999px";
-    document.body.appendChild(container);
-
-    return new Promise<string>((resolve) => {
-      const root = createRoot(container);
-      
-      // We'll use a wrapper that grabs the canvas after render
-      const Wrapper = () => {
-        return createElement(QRCodeCanvas, {
-          value: data,
-          size: 600,
-          level: "M" as const,
-          includeMargin: true,
-        });
-      };
-      
-      root.render(createElement(Wrapper));
-      
-      // Wait for render, then grab canvas
-      setTimeout(() => {
-        const canvasEl = container.querySelector("canvas");
-        if (canvasEl) {
-          const dataUrl = canvasEl.toDataURL("image/jpeg", 0.95);
-          root.unmount();
-          document.body.removeChild(container);
-          resolve(dataUrl);
-        } else {
-          root.unmount();
-          document.body.removeChild(container);
-          resolve("");
-        }
-      }, 300);
-      
-      // Fallback timeout
-      setTimeout(() => {
-        try { root.unmount(); } catch {}
-        try { document.body.removeChild(container); } catch {}
-        resolve("");
-      }, 3000);
-    });
-  } catch (err) {
-    console.error("QR generation failed:", err);
-    return "";
-  }
-}
-
-/**
- * Build MRZ string for QR code content
- */
-function buildMrzString(formData: Record<string, string>): string {
-  const nome = (formData.nome_completo || "NOME SOBRENOME").toUpperCase();
-  const cpf = onlyDigits(formData.cpf || "");
-  const registro = formData.registro || "";
-  const nascimento = formData.data_nascimento || "";
-  const validade = formData.data_validade || "";
-  const categoria = formData.categoria || "";
-  const renach = formData.renach || "";
-  
-  return `CNH|${nome}|${cpf}|${registro}|${nascimento}|${validade}|${categoria}|${renach}`;
-}
-
-/**
- * Convert a base64 data URL to Uint8Array
- */
 function base64ToBytes(dataUrl: string): Uint8Array {
   const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
 }
 
-/**
- * Send CNH parts to external Supabase "cnh" table
- */
-async function sendToExternalSupabase(
-  formData: Record<string, string>,
-  parts: { parte1: string; parte2: string; parte3: string; parte4: string }
-): Promise<boolean> {
-  try {
-    const cpf = formatCpf(formData.cpf || "");
+/** Renderiza a página inteira do PDF como JPEG base64 em ~300 DPI */
+async function renderFullPageJpeg(pdfBytes: Uint8Array, pageIndex = 0): Promise<string> {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
-    const payload = {
-      nome_completo: formData.nome_completo || "",
-      cpf,
-      rg: formData.rg || "",
-      registro: formData.registro || "",
-      categoria: formData.categoria || "",
-      data_nascimento: formData.data_nascimento || "",
-      data_emissao: formData.data_emissao || "",
-      data_validade: formData.data_validade || "",
-      renach: formData.renach || "",
-      numero_espelho: formData.numero_espelho || "",
-      cidade_estado: formData.cidade_estado || "",
-      estado_extenso: formData.estado_extenso || "",
-      parte1: parts.parte1,
-      parte2: parts.parte2,
-      parte3: parts.parte3,
-      parte4: parts.parte4,
-    };
+  const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+  const page = await pdf.getPage(pageIndex + 1);
 
-    const response = await fetch(`${EXTERNAL_SUPABASE_URL}/rest/v1/cnh`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: EXTERNAL_SUPABASE_KEY,
-        Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(payload),
-    });
+  const base = page.getViewport({ scale: 1 });
+  const scale = Math.max(TARGET_WIDTH / base.width, MIN_WIDTH / base.width);
+  const viewport = page.getViewport({ scale });
 
-    if (!response.ok) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(viewport.width);
+  canvas.height = Math.round(viewport.height);
+  const ctx = canvas.getContext("2d", { alpha: false })!;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  await page.render({ canvasContext: ctx, viewport }).promise;
+
+  const dataUrl = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
+  canvas.width = 0;
+  canvas.height = 0;
+  return dataUrl;
+}
+
+function buildPayload(formData: Record<string, string>, imagem: string) {
+  const cpf = formatCpf(formData.cpf || "");
+  const nascimento = toBrDate(formData.data_nascimento || "");
+  const cidadeEstado = (formData.cidade_estado || "").toUpperCase();
+  const estadoExtenso = (formData.estado_extenso || "").toUpperCase();
+
+  const nascimentoCompleto = [nascimento, formData.naturalidade, cidadeEstado]
+    .filter(Boolean)
+    .join(", ");
+
+  return {
+    nome_completo: (formData.nome_completo || "").toUpperCase(),
+    cpf,
+    rg: formData.rg || "",
+    registro: onlyDigits(formData.registro || ""),
+    categoria: (formData.categoria || "").toUpperCase(),
+    data_nascimento: nascimentoCompleto || nascimento,
+    data_emissao: toBrDate(formData.data_emissao || ""),
+    data_validade: toBrDate(formData.data_validade || ""),
+    renach: (formData.renach || "").toUpperCase(),
+    numero_espelho: formData.numero_espelho || "",
+    cidade_estado: cidadeEstado,
+    estado_extenso: estadoExtenso,
+    sexo: normalizeSexo(formData.genero || formData.sexo || ""),
+    parte1: imagem,
+    parte2: imagem,
+    parte3: imagem,
+    parte4: imagem,
+  };
+}
+
+async function postWithRetry(payload: Record<string, string>, attempts = 3): Promise<boolean> {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      const response = await fetch(`${EXTERNAL_SUPABASE_URL}/rest/v1/cnh`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: EXTERNAL_SUPABASE_KEY,
+          Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) return true;
+
       const errText = await response.text();
-      console.error("External Supabase error:", response.status, errText);
-      return false;
+      console.error(`CNH sync tentativa ${i} falhou [${response.status}]:`, errText);
+    } catch (err) {
+      console.error(`CNH sync tentativa ${i} com erro de rede:`, err);
     }
 
-    console.log("CNH parts sent to external Supabase successfully");
-    return true;
-  } catch (err) {
-    console.error("Failed to send CNH to external Supabase:", err);
-    return false;
+    if (i < attempts) await new Promise((r) => setTimeout(r, 1200 * i));
   }
+  return false;
 }
 
 /**
- * Main function: capture CNH PDF as 4 images and send to external Supabase
+ * Renderiza o PDF gerado como imagem de página inteira e grava no app externo.
  */
 export async function syncCnhToExternal(
   pdfBase64: string,
   formData: Record<string, string>,
-  tipo: "digital" | "fisica" = "digital"
+  _tipo: "digital" | "fisica" = "digital"
 ): Promise<boolean> {
   try {
-    console.log("Starting CNH external sync...");
-    
     const pdfBytes = base64ToBytes(pdfBase64);
-    const scale = 3; // 3x for high quality
+    const imagem = await renderFullPageJpeg(pdfBytes, 0);
+    if (!imagem.startsWith("data:image/jpeg;base64,")) return false;
 
-    if (tipo === "digital") {
-      // Single page - crop into 3 parts + QR code
-      const canvas = await renderPdfPageToCanvas(pdfBytes, 0, scale);
-
-      const parte1 = cropCanvasToBase64(canvas, CROP_REGIONS_DIGITAL[0], scale);
-      const parte2 = cropCanvasToBase64(canvas, CROP_REGIONS_DIGITAL[1], scale);
-      const parte3 = cropCanvasToBase64(canvas, CROP_REGIONS_DIGITAL[2], scale);
-
-      // Generate QR code from CNH data
-      const mrzString = buildMrzString(formData);
-      let parte4 = await generateQrCodeBase64(mrzString);
-      if (!parte4) {
-        // Fallback: use bottom section of page
-        parte4 = cropCanvasToBase64(canvas, { x: 0, y: 800, w: 794, h: 323 }, scale);
-      }
-
-      return await sendToExternalSupabase(formData, { parte1, parte2, parte3, parte4 });
-    } else {
-      // Física: 2 pages
-      const canvas1 = await renderPdfPageToCanvas(pdfBytes, 0, scale);
-      const parte1 = cropCanvasToBase64(canvas1, CROP_REGIONS_FISICA[0], scale);
-      const parte2 = cropCanvasToBase64(canvas1, CROP_REGIONS_FISICA[1], scale);
-
-      let parte3 = "";
-      try {
-        const canvas2 = await renderPdfPageToCanvas(pdfBytes, 1, scale);
-        parte3 = cropCanvasToBase64(canvas2, CROP_REGIONS_FISICA_VERSO[0], scale);
-      } catch {
-        parte3 = cropCanvasToBase64(canvas1, { x: 0, y: 520, w: 794, h: 300 }, scale);
-      }
-
-      const mrzString = buildMrzString(formData);
-      let parte4 = await generateQrCodeBase64(mrzString);
-      if (!parte4) {
-        parte4 = cropCanvasToBase64(canvas1, { x: 0, y: 800, w: 794, h: 323 }, scale);
-      }
-
-      return await sendToExternalSupabase(formData, { parte1, parte2, parte3, parte4 });
-    }
+    return await postWithRetry(buildPayload(formData, imagem));
   } catch (err) {
     console.error("CNH external sync failed:", err);
     return false;
