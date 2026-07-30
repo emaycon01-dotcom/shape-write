@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, Trash2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { mapCnhEditPayload } from "@/lib/cnh-history-edit";
+import { loadCnhFieldPositions } from "@/lib/cnh-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateCnhUrl from "@/assets/template-cnh-bg-hq.jpg";
@@ -324,6 +325,7 @@ export default function CnhFormPage() {
         foto_base64: fotoPreview || "",
         assinatura_base64: assPreview || "",
         template_base64: templateBase64,
+        field_positions: loadCnhFieldPositions() ?? undefined,
       };
 
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {

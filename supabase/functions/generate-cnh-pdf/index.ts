@@ -206,16 +206,84 @@ function getCatDate(cat: string, d: Record<string, string>): string {
   return d[key] || d.data_validade || "";
 }
 
-function buildCatDateOverlays(activeCategory: string, d: Record<string, string>, tipo?: string) {
+type Pos = { x: number; y: number; fontSize: number; w?: number; h?: number; rotate?: number };
+
+// Defaults MUST match src/pages/TemplateAlignPage.tsx defaultCnhFields
+const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
+  photo: { x: 98, y: 167, fontSize: 8, w: 82, h: 110 },
+  signature: { x: 93, y: 276, fontSize: 7, w: 95, h: 32 },
+  nome: { x: 100, y: 149, fontSize: 6.5 },
+  primeira_hab: { x: 308, y: 149, fontSize: 6.5 },
+  nascimento: { x: 192, y: 168, fontSize: 6.5 },
+  emissao: { x: 191, y: 187, fontSize: 6.5 },
+  validade: { x: 253, y: 187, fontSize: 6.5 },
+  cat_big: { x: 338, y: 184, fontSize: 11 },
+  validade_cat_a: { x: 171, y: 353, fontSize: 4.5 },
+  validade_cat_b: { x: 171, y: 375, fontSize: 4.5 },
+  validade_cat_c: { x: 171, y: 397, fontSize: 4.5 },
+  validade_cat_d: { x: 275, y: 342, fontSize: 4.5 },
+  validade_cat_e: { x: 274, y: 375, fontSize: 4.5 },
+  rg: { x: 190, y: 207, fontSize: 6.5 },
+  cpf: { x: 190, y: 226, fontSize: 6.5 },
+  registro: { x: 256, y: 226, fontSize: 6.5 },
+  cat_hab: { x: 319, y: 226, fontSize: 7 },
+  nacionalidade: { x: 190, y: 246, fontSize: 6.5 },
+  pai: { x: 190, y: 266, fontSize: 6.5 },
+  mae: { x: 190, y: 286, fontSize: 6.5 },
+  obs: { x: 97, y: 427, fontSize: 5.5 },
+  espelho: { x: 281, y: 495, fontSize: 6.5 },
+  renach: { x: 280, y: 509, fontSize: 6.5 },
+  local: { x: 100, y: 505, fontSize: 6 },
+  estado: { x: 163, y: 531, fontSize: 15 },
+  mrz: { x: 80, y: 694, fontSize: 9.5 },
+  reg_vert_top: { x: 65, y: 315, fontSize: 12, rotate: -90 },
+  reg_vert_bot: { x: 64, y: 558, fontSize: 11.5, rotate: -90 },
+};
+
+function resolvePositions(overrides: unknown): Record<string, Pos> {
+  const result: Record<string, Pos> = { ...DIGITAL_DEFAULT_POSITIONS };
+  let parsed: Record<string, Partial<Pos>> | null = null;
+
+  try {
+    parsed = typeof overrides === "string" ? JSON.parse(overrides) : (overrides as Record<string, Partial<Pos>>);
+  } catch {
+    parsed = null;
+  }
+
+  if (parsed && typeof parsed === "object") {
+    for (const [key, value] of Object.entries(parsed)) {
+      const base = result[key];
+      if (!base || !value || typeof value.x !== "number" || typeof value.y !== "number") continue;
+      result[key] = {
+        ...base,
+        x: value.x,
+        y: value.y,
+        fontSize: typeof value.fontSize === "number" ? value.fontSize : base.fontSize,
+        ...(typeof value.w === "number" ? { w: value.w } : {}),
+        ...(typeof value.h === "number" ? { h: value.h } : {}),
+        ...(typeof value.rotate === "number" ? { rotate: value.rotate } : {}),
+      };
+    }
+  }
+
+  return result;
+}
+
+function buildCatDateOverlays(
+  activeCategory: string,
+  d: Record<string, string>,
+  tipo: string | undefined,
+  positions?: Record<string, Pos>
+) {
   const active = parseActiveCategories(activeCategory);
   const isDigital = tipo !== "fisica";
   const catPositions: Record<string, { x: number; y: number; fontSize: number }> = isDigital
     ? {
-        A: { x: 171, y: 353, fontSize: 4.5 },
-        B: { x: 171, y: 375, fontSize: 4.5 },
-        C: { x: 171, y: 397, fontSize: 4.5 },
-        D: { x: 275, y: 342, fontSize: 4.5 },
-        E: { x: 274, y: 375, fontSize: 4.5 },
+        A: positions?.validade_cat_a ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_a,
+        B: positions?.validade_cat_b ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_b,
+        C: positions?.validade_cat_c ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_c,
+        D: positions?.validade_cat_d ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_d,
+        E: positions?.validade_cat_e ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_e,
       }
     : {
         A: { x: 169, y: 280, fontSize: 4.5 },
@@ -237,11 +305,32 @@ function buildCatDateOverlays(activeCategory: string, d: Record<string, string>,
   return html;
 }
 
-function buildCnhDigitalHtml(d: Record<string, string>) {
+function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
   const renachClean = cleanCode(d.renach || "");
   const templateBg = d.template_bg || "";
+  const p = resolvePositions(fieldPositions);
+
+  const base = (id: string, extra = "") => {
+    const pos = p[id];
+    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;${extra}`;
+  };
+
+  const boxStyle = (id: string, extra = "") => {
+    const pos = p[id];
+    return `top:${pos.y}px;left:${pos.x}px;width:${pos.w}px;height:${pos.h}px;${extra}`;
+  };
+
+  const rotStyle = (id: string) => {
+    const pos = p[id];
+    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;transform:rotate(${pos.rotate ?? -90}deg);transform-origin:left top;letter-spacing:1.2px;white-space:nowrap;color:#111;font-weight:bold;`;
+  };
+
+  const text = (id: string, value: string, extra = "") =>
+    `<div class="overlay" style="${base(id, extra)}">${escapeHtml(value)}</div>`;
+
+  const ellipsis = "max-width:290px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
 
   return `<!DOCTYPE html>
 <html>
@@ -286,67 +375,12 @@ ${CNH_FONT_FACE}
     font-family: 'CNHDigital', Arial, Helvetica, sans-serif;
     color: #111;
     font-weight: normal;
+    line-height: 1;
   }
-  .photo-overlay {
-    top: 167px; left: 98px;
-    width: 82px; height: 110px;
-    overflow: hidden;
-  }
+  .photo-overlay { overflow: hidden; }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
-  .sig-overlay {
-    top: 276px; left: 93px;
-    width: 95px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .sig-overlay { display: flex; align-items: center; justify-content: center; }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
-  .reg-vert-top {
-    top: 315px; left: 65px;
-    transform: rotate(-90deg);
-    transform-origin: left top;
-    font-size: 12px;
-    letter-spacing: 1.2px;
-    white-space: nowrap;
-    color: #111;
-    font-weight: bold;
-  }
-  .f-nome         { top: 149px; left: 100px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .f-primeira-hab { top: 149px; left: 308px; font-size: 6.5px; }
-  .f-nascimento   { top: 168px; left: 192px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
-  .f-emissao      { top: 187px; left: 191px; font-size: 6.5px; }
-  .f-validade     { top: 187px; left: 253px; font-size: 6.5px; color: #c00; }
-  .f-cat-big      { top: 184px; left: 338px; font-size: 11px; color: #111; }
-  .f-rg           { top: 207px; left: 190px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
-  .f-cpf          { top: 226px; left: 190px; font-size: 6.5px; }
-  .f-registro     { top: 226px; left: 256px; font-size: 6.5px; color: #c00; }
-  .f-cat-hab      { top: 226px; left: 319px; font-size: 7px; color: #c00; }
-  .f-nacionalidade { top: 246px; left: 190px; font-size: 6.5px; }
-  .f-pai          { top: 266px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-mae          { top: 286px; left: 190px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-obs          { top: 427px; left: 97px; font-size: 5.5px; max-width: 370px; }
-  .f-espelho      { top: 495px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'CNHDigital', Arial, Helvetica, sans-serif; }
-  .f-renach       { top: 509px; left: 280px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'CNHDigital', Arial, Helvetica, sans-serif; }
-  .f-local        { top: 505px; left: 100px; font-size: 6px; }
-  .f-estado       { top: 531px; left: 163px; font-size: 15px; color: #111; font-family: 'CNHDigital', Arial, Helvetica, sans-serif; font-weight: bold; }
-  .reg-vert-bot {
-    top: 558px; left: 64px;
-    transform: rotate(-90deg);
-    transform-origin: left top;
-    font-size: 11.5px;
-    letter-spacing: 1.2px;
-    white-space: nowrap;
-    color: #111;
-    font-weight: bold;
-  }
-  .mrz-overlay {
-    top: 694px; left: 80px;
-    width: 420px;
-    font-family: 'CNHDigital', Arial, Helvetica, sans-serif;
-    font-size: 9.5px;
-    color: #111;
-    letter-spacing: 1.6px;
-    line-height: 1.6;
-    white-space: pre-line;
-  }
 </style>
 </head>
 <body>
@@ -354,34 +388,35 @@ ${CNH_FONT_FACE}
   <div class="bg-template">
      ${templateBg ? `<img src="${escapeHtml(templateBg)}" />` : ""}
   </div>
-  <div class="overlay photo-overlay">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
-  <div class="overlay sig-overlay">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
-  <div class="overlay reg-vert-top">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay f-nome">${escapeHtml(d.nome_completo || "")}</div>
-  <div class="overlay f-primeira-hab">${escapeHtml(d.data_primeira_hab || "")}</div>
-  <div class="overlay f-nascimento">${escapeHtml(d.data_nascimento || "")}</div>
-  <div class="overlay f-emissao">${escapeHtml(d.data_emissao || "")}</div>
-  <div class="overlay f-validade">${escapeHtml(d.data_validade || "")}</div>
-  <div class="overlay f-cat-big">${escapeHtml(d.categoria || "")}</div>
-  <div class="overlay f-rg">${escapeHtml(d.rg || "")}</div>
-  <div class="overlay f-cpf">${escapeHtml(d.cpf || "")}</div>
-  <div class="overlay f-registro">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay f-cat-hab">${escapeHtml(d.categoria || "")}</div>
-  <div class="overlay f-nacionalidade">${escapeHtml(d.nacionalidade || "")}</div>
-  <div class="overlay f-pai">${escapeHtml(d.nome_pai || "")}</div>
-  <div class="overlay f-mae">${escapeHtml(d.nome_mae || "")}</div>
-  ${buildCatDateOverlays(d.categoria || "", d, "digital")}
-  <div class="overlay f-obs">${escapeHtml(d.observacoes || "")}</div>
-  <div class="overlay f-espelho">${escapeHtml(espelhoClean)}</div>
-  <div class="overlay f-renach">${escapeHtml(renachClean)}</div>
-  <div class="overlay f-local">${escapeHtml(d.cidade_estado || "")}</div>
-  <div class="overlay f-estado">${escapeHtml(d.estado_extenso || "")}</div>
-  <div class="overlay reg-vert-bot">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay mrz-overlay">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay photo-overlay" style="${boxStyle("photo")}">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
+  <div class="overlay sig-overlay" style="${boxStyle("signature")}">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
+  <div class="overlay" style="${rotStyle("reg_vert_top")}">${escapeHtml(d.registro || "")}</div>
+  ${text("nome", d.nome_completo || "", "max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;")}
+  ${text("primeira_hab", d.data_primeira_hab || "")}
+  ${text("nascimento", d.data_nascimento || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
+  ${text("emissao", d.data_emissao || "")}
+  ${text("validade", d.data_validade || "", "color:#c00;")}
+  ${text("cat_big", d.categoria || "")}
+  ${text("rg", d.rg || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
+  ${text("cpf", d.cpf || "")}
+  ${text("registro", d.registro || "", "color:#c00;")}
+  ${text("cat_hab", d.categoria || "", "color:#c00;")}
+  ${text("nacionalidade", d.nacionalidade || "")}
+  ${text("pai", d.nome_pai || "", ellipsis)}
+  ${text("mae", d.nome_mae || "", ellipsis)}
+  ${buildCatDateOverlays(d.categoria || "", d, "digital", p)}
+  ${text("obs", d.observacoes || "", "max-width:370px;")}
+  ${text("espelho", espelhoClean, "white-space:nowrap;")}
+  ${text("renach", renachClean, "white-space:nowrap;")}
+  ${text("local", d.cidade_estado || "")}
+  ${text("estado", d.estado_extenso || "", "font-weight:bold;")}
+  <div class="overlay" style="${rotStyle("reg_vert_bot")}">${escapeHtml(d.registro || "")}</div>
+  <div class="overlay" style="${base("mrz", "width:420px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
 </html>`;
 }
+
 
 function getEstadoFontSize(estado: string): number {
   const len = estado.length;
@@ -620,7 +655,7 @@ serve(async (req) => {
     }
 
     const isFisica = body.tipo === "fisica";
-    const html = isFisica ? buildCnhFisicaHtml(data) : buildCnhDigitalHtml(data);
+    const html = isFisica ? buildCnhFisicaHtml(data) : buildCnhDigitalHtml(data, body.field_positions);
 
     let pdfBuffer: Uint8Array | null = null;
 

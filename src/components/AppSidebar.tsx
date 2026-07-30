@@ -6,19 +6,11 @@ import {
   FileText,
   History,
   LogOut,
-  Users,
   CreditCard,
-  Crown,
-  Wrench,
-  PenTool,
-  MapPin,
-  Blend,
-  ChevronDown,
   Headphones,
   Palette,
-  ImageIcon,
-  IdCard,
   ShieldBan,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,22 +24,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import logo from "@/assets/logo.png";
 import { SupportDialog } from "@/components/SupportDialog";
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Documentos Digitais", url: "/dashboard/documents", icon: FileText },
+  { title: "Serviços", url: "/dashboard/documents", icon: FileText },
   { title: "Histórico", url: "/dashboard/history", icon: History },
   { title: "Recarregar", url: "/dashboard/recarregar", icon: CreditCard },
-  { title: "Planos", url: "/dashboard/planos", icon: Crown },
-];
-
-const toolItems = [
-  { title: "Gerador de Assinatura", url: "/dashboard/ferramentas/assinatura", icon: PenTool },
-  { title: "Removedor de Fundo", url: "/dashboard/ferramentas/remover-fundo", icon: ImageIcon },
-  { title: "Mesclagem de Rosto", url: "/dashboard/ferramentas/mesclagem-rosto", icon: Blend },
 ];
 
 type ThemeMode = "default" | "dark-blue" | "light";
@@ -129,55 +113,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">FERRAMENTAS</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderMenuItems(toolItems)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <Collapsible>
-            <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 text-muted-foreground text-[10px] tracking-widest font-medium uppercase hover:text-foreground transition-colors">
-              DOCUMENTOS FÍSICOS
-              <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink to="/dashboard/cnh-fisica/todos" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
-                        <MapPin className="mr-2 h-4 w-4" />
-                        {!collapsed && <span>CNH Todos os Estados</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink to="/dashboard/documentos-fisicos/carteirinhas" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
-                        <IdCard className="mr-2 h-4 w-4" />
-                        {!collapsed && <span>Carteirinhas</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton className="hover:bg-secondary/50 opacity-50 cursor-not-allowed">
-                      <Wrench className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {!collapsed && (
-                        <span className="flex items-center gap-2 text-muted-foreground">
-                          RG Todos os Estados
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">EM BREVE</span>
-                        </span>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarGroup>
-
         {/* Admin: only Menu Admin + Alinhamento */}
         {isAdmin && (
           <SidebarGroup>
@@ -195,7 +130,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/dashboard/template-align" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
-                      <Wrench className="mr-2 h-4 w-4" />
+                      <SlidersHorizontal className="mr-2 h-4 w-4" />
                       {!collapsed && <span>Menu de Alinhamento</span>}
                     </NavLink>
                   </SidebarMenuButton>
