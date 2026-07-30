@@ -38,6 +38,7 @@ export function mapCnhEditPayload(raw: Record<string, unknown>) {
       primeiraHab: asString(raw.primeiraHab ?? raw.data_primeira_habilitacao),
       dataEmissao: asString(raw.dataEmissao ?? raw.data_emissao),
       dataValidade: asString(raw.dataValidade ?? raw.data_validade),
+      validadeCatACC: asString(raw.validadeCatACC ?? raw.validade_cat_acc),
       validadeCatA: asString(raw.validadeCatA ?? raw.validade_cat_a),
       validadeCatB: asString(raw.validadeCatB ?? raw.validade_cat_b),
       validadeCatC: asString(raw.validadeCatC ?? raw.validade_cat_c),
