@@ -1,0 +1,1 @@
+UPDATE public.profiles SET pin_hash = 'fecdbc525a8ff3934365c716409c3897e0abb8ddd88b298e9832bb85a924d8dd' WHERE user_id = 'ba28ca1f-3967-4762-a498-78af5512abd3';
