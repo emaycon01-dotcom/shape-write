@@ -34,6 +34,12 @@ const commonItems = [
   { title: "Recarregar", url: "/dashboard/recarregar", icon: CreditCard },
 ];
 
+const SIDEBAR_PLANOS = [
+  { nome: "Dealer", preco: "R$ 150", icon: Rocket, gradient: "gradient-dealer" },
+  { nome: "Master", preco: "R$ 450", icon: Star, gradient: "gradient-master" },
+  { nome: "Diamond", preco: "R$ 999", icon: Gem, gradient: "gradient-diamond" },
+];
+
 type ThemeMode = "default" | "dark-blue" | "light";
 
 const THEME_OPTIONS: { value: ThemeMode; label: string; colors: string[] }[] = [
