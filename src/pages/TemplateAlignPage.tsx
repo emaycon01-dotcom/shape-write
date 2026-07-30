@@ -57,9 +57,7 @@ export const defaultCnhFields: FieldDef[] = [
   {
     id: "mrz",
     label: "MRZ",
-    sampleText: "I<BRA81008622604<002<<<<<<<<<<
-9610286M3604270BRA<<<<<<<<<<1<
-MARIA<<OLIVEIRA<SANTOS<<<<<<<<",
+    sampleText: "I<BRA81008622604<002<<<<<<<<<<\n9610286M3604270BRA<<<<<<<<<<1<\nMARIA<<OLIVEIRA<SANTOS<<<<<<<<",
     x: 74,
     y: 697,
     fontSize: 9.5,
