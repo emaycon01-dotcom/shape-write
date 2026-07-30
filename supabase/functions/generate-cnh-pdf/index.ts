@@ -665,6 +665,7 @@ serve(async (req) => {
       numero_espelho: body.numero_espelho || "",
       cidade_estado: body.cidade_estado || "",
       estado_extenso: body.estado_extenso || "",
+      cnh_definitiva: body.cnh_definitiva || "",
       nome_pai: body.nome_pai || "",
       nome_mae: body.nome_mae || "",
       observacoes: body.observacoes || "",
