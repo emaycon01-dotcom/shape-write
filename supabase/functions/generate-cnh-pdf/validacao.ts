@@ -130,7 +130,7 @@ export function qrSvg(value: string, sizePx: number): string {
   qr.addData(value);
   qr.make();
   const count = qr.getModuleCount();
-  const quiet = 3; // zona de silêncio (mesma moldura branca da referência)
+  const quiet = 0; // zona de silêncio (mesma moldura branca da referência)
   const total = count + quiet * 2;
   let rects = "";
   for (let r = 0; r < count; r++) {

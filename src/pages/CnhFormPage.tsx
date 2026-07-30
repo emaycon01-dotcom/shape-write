@@ -20,7 +20,7 @@ const UF_LIST = [
   "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"
 ];
 
-const OBSERVACOES = ["EAR","MOPP","A","E","99","15","D","F"];
+const OBSERVACOES = ["EAR","MOPP","A","B","C","D","E","F","X","99","15","20","25","30","ESCOLAR","EMERGÊNCIA","COLETIVO","CARGA INDIVISÍVEL","PASSAGEIROS"];
 
 function generateRandom(length: number, prefix = "") {
   const digits = Array.from({ length }, () => Math.floor(Math.random() * 10)).join("");
@@ -343,7 +343,7 @@ export default function CnhFormPage() {
         cnh_definitiva: form.cnhDefinitiva,
         nome_pai: form.nomePai,
         nome_mae: form.nomeMae,
-        observacoes: form.observacoes.join(", "),
+        observacoes: form.observacoes.map((o) => `${o};`).join(" "),
         foto_base64: fotoPreview || "",
         assinatura_base64: assPreview || "",
         template_base64: templateBase64,
