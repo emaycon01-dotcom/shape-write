@@ -335,7 +335,7 @@ function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown
 
   const rotStyle = (id: string) => {
     const pos = p[id];
-    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;transform:rotate(${pos.rotate ?? -90}deg);transform-origin:left top;letter-spacing:1.2px;white-space:nowrap;color:#111;font-weight:bold;`;
+    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;transform:rotate(${pos.rotate ?? -90}deg);transform-origin:left top;letter-spacing:1.2px;white-space:nowrap;color:#111;font-weight:normal;`;
   };
 
   const text = (id: string, value: string, extra = "") =>
