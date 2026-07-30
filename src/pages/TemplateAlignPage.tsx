@@ -35,7 +35,7 @@ export const defaultCnhFields: FieldDef[] = [
   { id: "nascimento", label: "Nascimento", sampleText: "11/03/1989, RIO DE JANEIRO, RJ", x: 192, y: 168, fontSize: 6.5 },
   { id: "emissao", label: "Emissão", sampleText: "14/03/2026", x: 191, y: 187, fontSize: 6.5 },
   { id: "validade", label: "Validade", sampleText: "14/03/2036", x: 253, y: 187, fontSize: 6.5, color: "#c00" },
-  { id: "cat_big", label: "Cat. Grande", sampleText: "AB", x: 338, y: 184, fontSize: 11 },
+  { id: "cat_big", label: "Cat. Grande (D/P)", sampleText: "D", x: 338, y: 184, fontSize: 11 },
   { id: "validade_cat_a", label: "Validade Cat. A", sampleText: "14/03/2036", x: 171, y: 353, fontSize: 4.5 },
   { id: "validade_cat_b", label: "Validade Cat. B", sampleText: "14/03/2036", x: 171, y: 375, fontSize: 4.5 },
   { id: "validade_cat_c", label: "Validade Cat. C", sampleText: "14/03/2036", x: 171, y: 397, fontSize: 4.5 },
