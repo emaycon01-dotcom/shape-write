@@ -1,30 +1,150 @@
 import { useNavigate } from "react-router-dom";
-import { FileText } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight } from "lucide-react";
+import { toast } from "sonner";
+
+type Modulo = {
+  id: string;
+  titulo: string;
+  descricao: string;
+  icon: React.ElementType;
+  rota?: string;
+  creditos?: number;
+  qrcode?: boolean;
+  aplicativo?: boolean;
+  emBreve?: boolean;
+};
+
+const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
+  {
+    grupo: "Digitais",
+    subtitulo: "Documentos digitais com validação online",
+    itens: [
+      {
+        id: "cnh",
+        titulo: "CNH Digital",
+        descricao: "CNH Digital 2026 com login, APK e validação",
+        icon: FileText,
+        rota: "/dashboard/documents/cnh",
+        creditos: 1,
+        qrcode: true,
+        aplicativo: true,
+      },
+      {
+        id: "crlv",
+        titulo: "CRLV Digital",
+        descricao: "Certificado de registro e licenciamento",
+        icon: Car,
+        qrcode: true,
+        emBreve: true,
+      },
+      {
+        id: "rg",
+        titulo: "RG Digital",
+        descricao: "Nova identidade nacional digital (CIN)",
+        icon: IdCard,
+        qrcode: true,
+        aplicativo: true,
+        emBreve: true,
+      },
+    ],
+  },
+  {
+    grupo: "Atestado",
+    subtitulo: "Documentos médicos e declarações",
+    itens: [
+      {
+        id: "atestado-medico",
+        titulo: "Atestado Médico",
+        descricao: "Emissão de atestado com dados do profissional",
+        icon: Stethoscope,
+        emBreve: true,
+      },
+    ],
+  },
+];
+
+function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon"; icon: React.ElementType; children: React.ReactNode }) {
+  const tones = {
+    qr: "border-success/40 bg-success/15 text-success",
+    app: "border-warning/40 bg-warning/15 text-warning",
+    soon: "border-border/70 bg-muted/40 text-muted-foreground",
+  } as const;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${tones[tone]}`}>
+      <Icon className="h-2.5 w-2.5" />
+      {children}
+    </span>
+  );
+}
 
 export default function DocumentsPage() {
   const navigate = useNavigate();
 
-  return (
-    <div>
-      <h1 className="font-display text-3xl font-bold text-foreground mb-1">Serviços</h1>
-      <p className="text-muted-foreground mb-8">Escolha um serviço para começar</p>
+  const abrir = (m: Modulo) => {
+    if (m.rota) navigate(m.rota);
+    else toast.info(`${m.titulo} estará disponível em breve.`);
+  };
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <button
-          onClick={() => navigate("/dashboard/documents/cnh")}
-          className="glass rounded-xl p-6 text-left hover:border-primary/40 transition-colors group"
-        >
-          <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-            <FileText className="w-6 h-6 text-primary" />
-          </div>
-          <h3 className="font-display font-semibold text-foreground mb-1">CNH Digital (2026)</h3>
-          <p className="text-sm text-muted-foreground mb-3">CNH Digital com login, APK e QR Code</p>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-accent font-medium">1 Crédito</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">ATIVO</span>
-          </div>
-        </button>
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">Serviços</h1>
+        <p className="text-sm text-muted-foreground">Módulos disponíveis na plataforma</p>
       </div>
+
+      {MODULOS.map((mod) => (
+        <section key={mod.grupo} className="space-y-3">
+          <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
+            <div>
+              <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">{mod.grupo}</h2>
+              <p className="text-[11px] text-muted-foreground">{mod.subtitulo}</p>
+            </div>
+            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              {mod.itens.length} {mod.itens.length === 1 ? "módulo" : "módulos"}
+            </span>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {mod.itens.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => abrir(m)}
+                className={`group relative overflow-hidden rounded-xl border p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 ${
+                  m.emBreve
+                    ? "border-border/50 bg-card/40"
+                    : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
+                }`}
+              >
+                {!m.emBreve && <div className="absolute inset-0 gradient-primary opacity-[0.08]" />}
+                <div className="relative flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
+                    <m.icon className={`h-5 w-5 ${m.emBreve ? "text-muted-foreground" : "text-primary"}`} />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <p className="truncate text-sm font-semibold text-foreground">{m.titulo}</p>
+                      <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
+                    </div>
+                    <p className="text-[11px] leading-tight text-muted-foreground">{m.descricao}</p>
+                    <div className="flex flex-wrap items-center gap-1">
+                      {m.qrcode && <Badge tone="qr" icon={QrCode}>QR Code</Badge>}
+                      {m.aplicativo && <Badge tone="app" icon={Smartphone}>Aplicativo</Badge>}
+                      {m.emBreve && <Badge tone="soon" icon={Lock}>Em breve</Badge>}
+                      {!m.emBreve && m.creditos != null && (
+                        <span className="text-[10px] font-semibold text-accent">
+                          {m.creditos} crédito{m.creditos > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <p className="text-center text-[11px] text-muted-foreground">Novos módulos serão adicionados em breve.</p>
     </div>
   );
 }
