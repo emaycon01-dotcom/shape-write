@@ -25,33 +25,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
-  // Check if user is blocked
-  const { data: blocked } = await supabase
-    .from("blocked_users")
-    .select("id")
-    .eq("user_id", supabaseUser.id)
-    .eq("status", "bloqueado")
-    .maybeSingle();
+  // Consultas em paralelo (antes eram 3 idas sequenciais ao banco)
+  const [blockedRes, profileRes, rolesRes] = await Promise.all([
+    supabase
+      .from("blocked_users")
+      .select("id")
+      .eq("user_id", supabaseUser.id)
+      .eq("status", "bloqueado")
+      .maybeSingle(),
+    supabase.from("profiles").select("*").eq("user_id", supabaseUser.id).maybeSingle(),
+    supabase.from("user_roles").select("cargo").eq("user_id", supabaseUser.id),
+  ]);
 
-  if (blocked) {
+  if (blockedRes.data) {
     await supabase.auth.signOut();
     throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
   }
 
-  // Fetch profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", supabaseUser.id)
-    .single();
-
-  // Fetch role
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("cargo")
-    .eq("user_id", supabaseUser.id);
-
-  const isAdmin = roles?.some((r) => r.cargo === "admin") ?? false;
+  const profile = profileRes.data as { name?: string; credits?: number; created_at?: string } | null;
+  const isAdmin = rolesRes.data?.some((r) => r.cargo === "admin") ?? false;
 
   return {
     id: supabaseUser.id,
