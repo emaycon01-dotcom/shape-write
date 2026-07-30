@@ -354,7 +354,10 @@ function CnhAlignEditor() {
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
                   background: isSelected ? "hsl(var(--primary) / 0.1)" : "transparent",
                   zIndex: isSelected ? 50 : 10,
-                  transform: f.rotate ? `rotate(${f.rotate}deg)` : undefined,
+                  transform: [
+                    isEstado ? "translateX(-50%)" : "",
+                    f.rotate ? `rotate(${f.rotate}deg)` : "",
+                  ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
                   letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : undefined,
                   lineHeight: f.id === "mrz" ? 1.6 : 1,
