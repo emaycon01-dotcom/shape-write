@@ -164,7 +164,7 @@ function CnhAlignEditor() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length === defaultCnhFields.length) {
+        if (Array.isArray(parsed)) {
           // merge to keep new metadata (labels/colors) while using saved geometry
           return defaultCnhFields.map((def) => {
             const s = parsed.find((p: FieldDef) => p.id === def.id);
