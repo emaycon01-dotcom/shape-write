@@ -64,6 +64,29 @@ export default function DashboardLayout() {
     return <PinGate mode="verify" onSuccess={() => setPinState("verified")} userId={user?.id} userEmail={user?.email} />;
   }
 
+  // Páginas internas abrem sempre em tela cheia (sem dividir com o menu lateral)
+  if (!isHome) {
+    return (
+      <div className="min-h-screen w-full flex flex-col bg-background">
+        <header className="sticky top-0 z-30 h-14 flex items-center gap-3 border-b border-border/60 bg-background/80 px-4 backdrop-blur">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-secondary/60"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </button>
+          <span className="text-sm text-muted-foreground font-display tracking-wider">
+            BELLARUS SISTEMAS
+          </span>
+        </header>
+        <main className="flex-1 w-full p-4 sm:p-6 overflow-auto">
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
