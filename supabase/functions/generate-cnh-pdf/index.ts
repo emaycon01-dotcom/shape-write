@@ -327,6 +327,27 @@ function isDefinitiva(value?: string) {
   return v === "SIM" || v === "S" || v === "TRUE" || v === "DEFINITIVA";
 }
 
+const ESTADO_ACENTOS: Record<string, string> = {
+  "SAO PAULO": "SÃO PAULO",
+  "PARANA": "PARANÁ",
+  "MARANHAO": "MARANHÃO",
+  "GOIAS": "GOIÁS",
+  "PARA": "PARÁ",
+  "PIAUI": "PIAUÍ",
+  "AMAPA": "AMAPÁ",
+  "CEARA": "CEARÁ",
+  "ESPIRITO SANTO": "ESPÍRITO SANTO",
+  "RONDONIA": "RONDÔNIA",
+  "DISTRITO FEDERAL": "DISTRITO FEDERAL",
+};
+
+/** Reaplica acentuação oficial ao nome do estado digitado sem acento. */
+export function estadoAcentuado(value: string): string {
+  const v = (value || "").trim().toUpperCase();
+  const plain = v.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return ESTADO_ACENTOS[plain] || v;
+}
+
 /** Auto-ajuste: reduz a fonte para nomes de estado longos, sem sair da caixa. */
 function estadoFitStyle(estado: string, baseSize: number) {
   const len = estado.trim().length;
@@ -356,7 +377,7 @@ function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown
 
   const rotStyle = (id: string) => {
     const pos = p[id];
-    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;transform:rotate(${pos.rotate ?? -90}deg);transform-origin:left top;letter-spacing:1.2px;white-space:nowrap;color:#111;font-weight:normal;`;
+    return `top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;transform:rotate(${pos.rotate ?? -90}deg);transform-origin:left top;letter-spacing:0;white-space:nowrap;color:#111;font-weight:normal;`;
   };
 
   const text = (id: string, value: string, extra = "") =>
@@ -444,9 +465,9 @@ ${CNH_FONT_FACE}
   ${text("espelho", espelhoClean, "white-space:nowrap;")}
   ${text("renach", renachClean, "white-space:nowrap;")}
   ${text("local", d.cidade_estado || "")}
-  <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;text-align:center;white-space:nowrap;font-weight:normal;font-family:Arial,Helvetica,sans-serif;`)}${estadoFitStyle(d.estado_extenso || "", p.estado.fontSize)}">${escapeHtml(d.estado_extenso || "")}</div>
+  <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;text-align:center;white-space:nowrap;font-weight:normal;font-family:'CNHDigital',Arial,Helvetica,sans-serif;`)}${estadoFitStyle(estadoAcentuado(d.estado_extenso || ""), p.estado.fontSize)}">${escapeHtml(estadoAcentuado(d.estado_extenso || ""))}</div>
   <div class="overlay" style="${rotStyle("reg_vert_bot")}">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay" style="${base("mrz", "width:460px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;font-family:'OCR B','OCRB','Courier New',Courier,monospace;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="${base("mrz", "width:460px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;font-family:'CNHDigital',monospace;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
 </html>`;
