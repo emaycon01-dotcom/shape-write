@@ -88,6 +88,9 @@ export default function RecarregarPage() {
   const [showQr, setShowQr] = useState(false);
   const [qrId, setQrId] = useState("");
   const [qrAmount, setQrAmount] = useState(0);
+  const [pixCode, setPixCode] = useState("");
+  const [txId, setTxId] = useState("");
+  const [paid, setPaid] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
 
