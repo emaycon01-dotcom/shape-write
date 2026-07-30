@@ -321,6 +321,13 @@ function CnhAlignEditor() {
           {fields.map((f) => {
             const isSelected = f.id === selected;
             const isBox = f.id === "photo" || f.id === "signature";
+            const isEstado = f.id === "estado";
+            const estadoSize = isEstado
+              ? f.sampleText.length > 9
+                ? Math.max(f.fontSize * (9 / f.sampleText.length), f.fontSize * 0.55)
+                : f.fontSize
+              : f.fontSize;
+
 
             return (
               <div
