@@ -24,7 +24,6 @@ async function generateWithPdfShift(html: string, apiKey: string) {
       landscape: false,
       use_print: true,
       format: "A4",
-      raster_dpi: 300,
       delay: 800,
       margin: { top: "0", bottom: "0", left: "0", right: "0" },
     }),
