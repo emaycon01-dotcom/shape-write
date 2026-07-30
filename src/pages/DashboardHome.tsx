@@ -1,6 +1,31 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Crown, ArrowUpRight, Sparkle, FileText, CreditCard } from "lucide-react";
+import { Crown, ArrowUpRight, Sparkle, FileText, CreditCard, Gem, Star, Rocket } from "lucide-react";
+
+const PLANOS = [
+  {
+    nome: "Dealer",
+    preco: "R$ 150,00",
+    icon: Rocket,
+    destaque: false,
+    beneficios: ["Acesso ao painel de serviços", "Geração de CNH Digital", "Suporte padrão"],
+  },
+  {
+    nome: "Master",
+    preco: "R$ 450,00",
+    icon: Star,
+    destaque: true,
+    beneficios: ["Tudo do Dealer", "Prioridade na geração", "Suporte prioritário"],
+  },
+  {
+    nome: "Diamond",
+    preco: "R$ 999,99",
+    icon: Gem,
+    destaque: false,
+    beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado"],
+  },
+];
+
 
 const formatDate = () => {
   const d = new Date();
