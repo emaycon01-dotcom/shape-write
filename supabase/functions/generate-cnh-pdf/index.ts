@@ -746,6 +746,9 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         pdfBase64: `data:application/pdf;base64,${pdfBase64}`,
+        documento_id: validacao.documentoId,
+        qr_code_url: validacao.qrCodeUrl,
+        validacao_registrada: validacao.registered,
       }),
       {
         status: 200,
