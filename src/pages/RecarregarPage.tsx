@@ -328,50 +328,76 @@ export default function RecarregarPage() {
           <QrCode className="w-8 h-8 text-primary mx-auto mb-2" />
           <h1 className="font-display text-2xl font-bold text-foreground">Pagamento PIX</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Escaneie o QR Code abaixo para pagar
+            {paid ? "Pagamento confirmado com sucesso" : "Escaneie o QR Code ou copie o código PIX"}
           </p>
         </div>
 
         <div className="glass rounded-xl p-6 flex flex-col items-center gap-4">
-          <div className="bg-white rounded-xl p-4">
-            <QRCodeSVG value={pixPayload} size={200} />
-          </div>
+          {paid ? (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <CheckCircle className="w-14 h-14 text-accent" />
+              <p className="font-semibold text-foreground">Créditos adicionados!</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl p-4">
+              <QRCodeSVG value={pixCode} size={200} />
+            </div>
+          )}
           <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
           <p className="text-xs text-muted-foreground">ID: {qrId.slice(0, 8).toUpperCase()}</p>
+          {!paid && (
+            <Button variant="outline" className="w-full h-11" onClick={handleCopyPix}>
+              <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
+            </Button>
+          )}
         </div>
 
-        {/* Warning notice */}
-        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-semibold text-foreground mb-1">Atenção!</p>
-            <p className="text-muted-foreground">
-              Cancelar sem pagar gera uma <span className="text-yellow-500 font-semibold">advertência</span>.
-              Você possui <span className="text-foreground font-bold">{warningCount}/{MAX_WARNINGS}</span> advertências.
-              Com {MAX_WARNINGS} advertências sua conta será <span className="text-destructive font-semibold">banida permanentemente</span>.
-            </p>
-          </div>
-        </div>
+        {!paid && (
+          <>
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
+              <Loader2 className="w-5 h-5 text-primary shrink-0 mt-0.5 animate-spin" />
+              <p className="text-sm text-muted-foreground">
+                Aguardando confirmação do PIX. Assim que o pagamento cair, seus créditos entram
+                <span className="text-foreground font-semibold"> automaticamente</span>.
+              </p>
+            </div>
+
+            {/* Warning notice */}
+            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-semibold text-foreground mb-1">Atenção!</p>
+                <p className="text-muted-foreground">
+                  Cancelar sem pagar gera uma <span className="text-yellow-500 font-semibold">advertência</span>.
+                  Você possui <span className="text-foreground font-bold">{warningCount}/{MAX_WARNINGS}</span> advertências.
+                  Com {MAX_WARNINGS} advertências sua conta será <span className="text-destructive font-semibold">banida permanentemente</span>.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="flex gap-3">
-          <Button
-            variant="gradient"
-            className="flex-1 h-12 font-semibold"
-            onClick={handleConfirmPayment}
-            disabled={confirmingPayment}
-          >
-            {confirmingPayment ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Confirmando...</>
-            ) : (
-              <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>
-            )}
-          </Button>
+          {!paid && (
+            <Button
+              variant="gradient"
+              className="flex-1 h-12 font-semibold"
+              onClick={handleConfirmPayment}
+              disabled={confirmingPayment}
+            >
+              {confirmingPayment ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</>
+              ) : (
+                <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>
+              )}
+            </Button>
+          )}
           <Button
             variant="outline"
-            className="flex-1 h-12 font-semibold border-destructive/30 text-destructive hover:bg-destructive/10"
+            className={`flex-1 h-12 font-semibold ${paid ? "" : "border-destructive/30 text-destructive hover:bg-destructive/10"}`}
             onClick={handleCancelQr}
           >
-            <XCircle className="w-4 h-4 mr-2" /> Cancelar
+            {paid ? "Voltar" : <><XCircle className="w-4 h-4 mr-2" /> Cancelar</>}
           </Button>
         </div>
       </div>
