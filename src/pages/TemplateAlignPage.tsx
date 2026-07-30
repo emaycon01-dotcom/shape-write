@@ -382,7 +382,7 @@ function CnhAlignEditor() {
                   f.sampleText.split("\n").map((line, i) => (
                     <div
                       key={i}
-                      style={{ width: "100%", textAlign: "justify", textAlignLast: "justify", whiteSpace: "nowrap" }}
+                      style={{ textAlign: "left", whiteSpace: "pre" }}
                     >
                       {line}
                     </div>
