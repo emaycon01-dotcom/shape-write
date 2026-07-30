@@ -14,6 +14,7 @@ import {
   Rocket,
   Star,
   Gem,
+  PenTool,
 } from "lucide-react";
 import {
   Sidebar,
