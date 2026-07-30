@@ -52,7 +52,7 @@ export const defaultCnhFields: FieldDef[] = [
   { id: "espelho", label: "Nº Espelho", sampleText: "77424319856", x: 281, y: 495, fontSize: 6.5 },
   { id: "renach", label: "RENACH", sampleText: "PB527125303", x: 280, y: 509, fontSize: 6.5 },
   { id: "local", label: "Local", sampleText: "RIO DE JANEIRO, RJ", x: 100, y: 505, fontSize: 6 },
-  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 163, y: 531, fontSize: 15 },
+  { id: "estado", label: "Estado", sampleText: "BAHIA", x: 199, y: 530, fontSize: 15 },
   {
     id: "mrz",
     label: "MRZ",
