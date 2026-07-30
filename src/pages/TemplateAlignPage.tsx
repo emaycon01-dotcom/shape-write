@@ -362,7 +362,7 @@ function CnhAlignEditor() {
                     f.rotate ? `rotate(${f.rotate}deg)` : "",
                   ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
-                  letterSpacing: f.id === "mrz" ? `${1.6 * scale}px` : undefined,
+                  ...(f.id === "mrz" ? { width: `${((378 / PAGE_W) * 100).toFixed(4)}%` } : {}),
                   lineHeight: f.id === "mrz" ? 1.6 : 1,
                   ...(isEstado ? { width: `${((170 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
@@ -378,7 +378,20 @@ function CnhAlignEditor() {
                 }}
                 title={`${f.label}: x=${f.x}, y=${f.y}, font=${f.fontSize}`}
               >
-                {isBox ? <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span> : f.sampleText}
+                {isBox ? (
+                  <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
+                ) : f.id === "mrz" ? (
+                  f.sampleText.split("\n").map((line, i) => (
+                    <div
+                      key={i}
+                      style={{ width: "100%", textAlign: "justify", textAlignLast: "justify", whiteSpace: "nowrap" }}
+                    >
+                      {line}
+                    </div>
+                  ))
+                ) : (
+                  f.sampleText
+                )}
               </div>
             );
           })}
