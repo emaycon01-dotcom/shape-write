@@ -204,17 +204,67 @@ export default function DashboardHome() {
                   ))}
                 </ul>
 
-                <Link
-                  to="/dashboard/recarregar"
+                <button
+                  type="button"
+                  onClick={() => setPlanoSelecionado(plano)}
                   className={`mt-1 flex h-8 w-full items-center justify-center rounded-lg text-[11px] font-semibold text-primary-foreground transition-all hover:opacity-90 ${plano.gradient}`}
                 >
                   Assinar
-                </Link>
+                </button>
               </div>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Confirmação de assinatura */}
+      <AlertDialog open={!!planoSelecionado} onOpenChange={(o) => !o && setPlanoSelecionado(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {planoSelecionado && (
+                <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${planoSelecionado.gradient}`}>
+                  <planoSelecionado.icon className="h-4 w-4 text-primary-foreground" />
+                </span>
+              )}
+              Tem certeza que deseja continuar?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-left">
+                <p>
+                  Você está assinando o plano{" "}
+                  <span className="font-semibold text-foreground">{planoSelecionado?.nome}</span> por{" "}
+                  <span className="font-semibold text-foreground">{planoSelecionado?.preco}</span>.
+                </p>
+                <p>{planoSelecionado?.descricao}</p>
+                <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-accent">
+                  <Percent className="h-4 w-4 shrink-0" />
+                  <span className="text-xs font-semibold">
+                    {planoSelecionado?.desconto}% de desconto em todo o sistema enquanto o plano estiver ativo na conta
+                  </span>
+                </div>
+                <ul className="space-y-1">
+                  {planoSelecionado?.beneficios.map((b) => (
+                    <li key={b} className="flex items-start gap-1.5 text-xs">
+                      <Check className="mt-[2px] h-3 w-3 shrink-0 text-accent" />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                navigate(`/dashboard/recarregar?plano=${encodeURIComponent(planoSelecionado?.nome ?? "")}`)
+              }
+            >
+              Sim, continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-  );
-}
+
