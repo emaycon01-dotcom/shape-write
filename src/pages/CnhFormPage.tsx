@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { mapCnhEditPayload } from "@/lib/cnh-history-edit";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
-import templateCnhUrl from "@/assets/template-cnh-bg.jpeg";
+import templateCnhUrl from "@/assets/template-cnh-bg-hq.jpg";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",

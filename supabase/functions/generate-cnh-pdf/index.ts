@@ -24,6 +24,7 @@ async function generateWithPdfShift(html: string, apiKey: string) {
       landscape: false,
       use_print: true,
       format: "A4",
+      delay: 800,
       margin: { top: "0", bottom: "0", left: "0", right: "0" },
     }),
   });
@@ -254,6 +255,8 @@ ${CNH_FONT_FACE}
     font-family: 'CNHDigital', Arial, Helvetica, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
     background: #fff;
     width: 794px;
     margin: 0;
@@ -275,6 +278,7 @@ ${CNH_FONT_FACE}
   .bg-template img {
     width: 100%; height: 100%;
     object-fit: fill;
+    image-rendering: high-quality;
   }
   .overlay {
     position: absolute;
@@ -288,13 +292,13 @@ ${CNH_FONT_FACE}
     width: 82px; height: 110px;
     overflow: hidden;
   }
-  .photo-overlay img { width:100%; height:100%; object-fit:cover; }
+  .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
   .sig-overlay {
     top: 276px; left: 93px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
-  .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; }
+  .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
   .reg-vert-top {
     top: 315px; left: 65px;
     transform: rotate(-90deg);
@@ -406,6 +410,8 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
     font-family: Arial, Helvetica, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
     background: #fff;
     width: 794px;
     margin: 0;
@@ -434,6 +440,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   .bg-template img {
     width: 100%; height: 100%;
     object-fit: fill;
+    image-rendering: high-quality;
   }
   .overlay {
     position: absolute;
@@ -447,13 +454,13 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
     width: 82px; height: 110px;
     overflow: hidden;
   }
-  .photo-overlay img { width:100%; height:100%; object-fit:cover; }
+  .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
   .sig-overlay {
     top: 216px; left: 85px;
     width: 95px; height: 32px;
     display: flex; align-items: center; justify-content: center;
   }
-  .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; }
+  .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
   .reg-vert-top {
     top: 243px; left: 60px;
     transform: rotate(-90deg);

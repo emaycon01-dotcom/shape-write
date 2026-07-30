@@ -9,8 +9,8 @@ import { Eye, Upload, X, User, FileText, Info, Sparkles, Loader2, FlaskConical, 
 import { useToast } from "@/hooks/use-toast";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
-import templateCnhFisicaUrl from "@/assets/template-cnh-fisica-bg.jpg";
-import templateCnhFisicaVersoUrl from "@/assets/template-cnh-fisica-verso.jpg";
+import templateCnhFisicaUrl from "@/assets/template-cnh-fisica-bg-hq.jpg";
+import templateCnhFisicaVersoUrl from "@/assets/template-cnh-fisica-verso-hq.jpg";
 
 const templateCnhFisicaPdfUrl = "/assets/template-cnh-fisica.pdf";
 
