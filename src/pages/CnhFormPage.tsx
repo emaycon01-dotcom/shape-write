@@ -510,12 +510,62 @@ export default function CnhFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel>Categoria</FieldLabel>
-              <Select value={form.categoria} onValueChange={setSelect("categoria")}>
-                <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <Select
+                value={ALL_CATEGORIES.includes(form.categoria) ? form.categoria : ""}
+                onValueChange={setSelect("categoria")}
+              >
+                <SelectTrigger className={inputCls}>
+                  <SelectValue placeholder="Selecione">{form.categoria || "Selecione"}</SelectValue>
+                </SelectTrigger>
                 <SelectContent>
-              {ALL_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {ALL_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {parseCategories(form.categoria).map((c) => (
+                  <span
+                    key={c}
+                    className="inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary"
+                  >
+                    {c}
+                    <button
+                      type="button"
+                      aria-label={`Remover categoria ${c}`}
+                      onClick={() => setForm((p) => ({ ...p, categoria: removeCategory(p.categoria, c) }))}
+                      className="text-primary/70 hover:text-primary"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+                {AVAILABLE_CATEGORY_LETTERS.some((c) => !parseCategories(form.categoria).includes(c)) && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Adicionar categoria"
+                        className="inline-flex items-center gap-1 rounded-md border border-border bg-secondary/50 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                      >
+                        <Plus className="w-3 h-3" /> Categoria
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-2" align="start">
+                      <div className="flex gap-1.5">
+                        {AVAILABLE_CATEGORY_LETTERS.filter((c) => !parseCategories(form.categoria).includes(c)).map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => setForm((p) => ({ ...p, categoria: addCategory(p.categoria, c) }))}
+                            className="w-8 h-8 rounded-md border border-border bg-secondary/50 text-xs font-bold hover:bg-primary/20 hover:text-primary"
+                          >
+                            {c}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
             </div>
             <div className="space-y-1.5">
               <FieldLabel>CNH Definitiva</FieldLabel>
