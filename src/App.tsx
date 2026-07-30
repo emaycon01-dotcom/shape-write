@@ -32,7 +32,6 @@ function SecurityGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
@@ -109,7 +108,7 @@ const App = () => (
               <BrowserRouter>
                 <Suspense fallback={<Loading />}>
                   <Routes>
-                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify/:id" element={<VerifyPage />} />
