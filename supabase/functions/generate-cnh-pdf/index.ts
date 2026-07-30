@@ -420,9 +420,9 @@ ${CNH_FONT_FACE}
   ${text("espelho", espelhoClean, "white-space:nowrap;")}
   ${text("renach", renachClean, "white-space:nowrap;")}
   ${text("local", d.cidade_estado || "")}
-  ${text("estado", d.estado_extenso || "", "font-weight:bold;")}
+  <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;text-align:center;white-space:nowrap;font-weight:normal;font-family:Arial,Helvetica,sans-serif;`)}${estadoFitStyle(d.estado_extenso || "", p.estado.fontSize)}">${escapeHtml(d.estado_extenso || "")}</div>
   <div class="overlay" style="${rotStyle("reg_vert_bot")}">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay" style="${base("mrz", "width:420px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="${base("mrz", "width:460px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;font-family:'OCR B','OCRB','Courier New',Courier,monospace;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
 </div>
 </body>
 </html>`;
