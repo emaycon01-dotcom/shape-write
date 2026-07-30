@@ -26,38 +26,55 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Cleanup old attempts
-    await supabaseAdmin.rpc("cleanup_old_login_attempts");
+    // Limpeza oportunista (não bloqueia a resposta)
+    if (Math.random() < 0.05) {
+      supabaseAdmin.rpc("cleanup_old_login_attempts").then(() => {}, () => {});
+    }
 
-    if (action === "check") {
-      // Check rate limit: max 10 login attempts per 15 min, max 5 register per hour
-      const windowMinutes = identifier.startsWith("register:") ? 60 : 15;
-      const maxAttempts = identifier.startsWith("register:") ? 5 : 10;
+    const isRegister = identifier.startsWith("register:");
+    const windowMinutes = isRegister ? 60 : 15;
+    const maxAttempts = isRegister ? 5 : 10;
 
+    const countAttempts = async () => {
       const { count } = await supabaseAdmin
         .from("login_attempts")
         .select("*", { count: "exact", head: true })
         .eq("identifier", identifier)
         .gte("created_at", new Date(Date.now() - windowMinutes * 60 * 1000).toISOString());
+      return count ?? 0;
+    };
 
-      const allowed = (count ?? 0) < maxAttempts;
-      const remaining = Math.max(0, maxAttempts - (count ?? 0));
-
-      return new Response(JSON.stringify({ allowed, remaining }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const recordAttempt = () =>
+      supabaseAdmin.from("login_attempts").insert({
+        identifier,
+        attempt_type: isRegister ? "register" : "login",
       });
+
+    if (action === "check") {
+      const count = await countAttempts();
+      return new Response(
+        JSON.stringify({ allowed: count < maxAttempts, remaining: Math.max(0, maxAttempts - count) }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    if (action === "check_and_record") {
+      // Uma única viagem de rede: conta e registra em paralelo
+      const [count] = await Promise.all([countAttempts(), recordAttempt()]);
+      return new Response(
+        JSON.stringify({ allowed: count < maxAttempts, remaining: Math.max(0, maxAttempts - count) }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     if (action === "record") {
-      await supabaseAdmin.from("login_attempts").insert({
-        identifier,
-        attempt_type: identifier.startsWith("register:") ? "register" : "login",
-      });
+      await recordAttempt();
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     return new Response(JSON.stringify({ error: "Invalid action" }), {
       status: 400,

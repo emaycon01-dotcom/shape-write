@@ -16,26 +16,27 @@ const DeviceSecurityContext = createContext<DeviceSecurityContextType>({
   reportViolation: async () => false,
 });
 
+const DEVICE_OK_KEY = "device_check_ok_until";
+const DEVICE_OK_TTL = 12 * 60 * 60 * 1000; // 12h
+
 export function DeviceSecurityProvider({ children }: { children: React.ReactNode }) {
-  const [isBanned, setIsBanned] = useState(false);
-  const [fingerprint, setFingerprint] = useState<string | null>(null);
-  const [checkingDevice, setCheckingDevice] = useState(true);
+  const [isBanned, setIsBanned] = useState(() => localStorage.getItem("device_banned") === "true");
+  const [fingerprint, setFingerprint] = useState<string | null>(() => getCachedFingerprint());
+  // Não bloqueia a renderização: o app abre na hora e a checagem roda em background.
+  const [checkingDevice] = useState(false);
 
   useEffect(() => {
+    if (localStorage.getItem("device_banned") === "true") return;
+
+    // Resultado recente em cache — evita chamar a edge function a cada carregamento
+    const okUntil = Number(localStorage.getItem(DEVICE_OK_KEY) || 0);
+    if (Date.now() < okUntil) return;
+
     const checkDevice = async () => {
       try {
-        // Check localStorage ban flag first (instant block)
-        const localBan = localStorage.getItem("device_banned");
-        if (localBan === "true") {
-          setIsBanned(true);
-          setCheckingDevice(false);
-          return;
-        }
-
-        const fp = getCachedFingerprint() || await generateDeviceFingerprint();
+        const fp = getCachedFingerprint() || (await generateDeviceFingerprint());
         setFingerprint(fp);
 
-        // Check against server
         const { data } = await supabase.functions.invoke("device-security", {
           body: { action: "check", fingerprint: fp },
         });
@@ -43,14 +44,17 @@ export function DeviceSecurityProvider({ children }: { children: React.ReactNode
         if (data?.banned) {
           setIsBanned(true);
           localStorage.setItem("device_banned", "true");
+        } else {
+          localStorage.setItem(DEVICE_OK_KEY, String(Date.now() + DEVICE_OK_TTL));
         }
       } catch {
         // If we can't check, allow access (fail open — server-side will still enforce)
       }
-      setCheckingDevice(false);
     };
 
-    checkDevice();
+    // roda depois do primeiro paint
+    const id = window.setTimeout(checkDevice, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   const reportViolation = useCallback(async (userId?: string, email?: string, reason?: string) => {

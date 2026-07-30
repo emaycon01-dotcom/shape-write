@@ -25,33 +25,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
-  // Check if user is blocked
-  const { data: blocked } = await supabase
-    .from("blocked_users")
-    .select("id")
-    .eq("user_id", supabaseUser.id)
-    .eq("status", "bloqueado")
-    .maybeSingle();
+  // Consultas em paralelo (antes eram 3 idas sequenciais ao banco)
+  const [blockedRes, profileRes, rolesRes] = await Promise.all([
+    supabase
+      .from("blocked_users")
+      .select("id")
+      .eq("user_id", supabaseUser.id)
+      .eq("status", "bloqueado")
+      .maybeSingle(),
+    supabase.from("profiles").select("*").eq("user_id", supabaseUser.id).maybeSingle(),
+    supabase.from("user_roles").select("cargo").eq("user_id", supabaseUser.id),
+  ]);
 
-  if (blocked) {
+  if (blockedRes.data) {
     await supabase.auth.signOut();
     throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
   }
 
-  // Fetch profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", supabaseUser.id)
-    .single();
-
-  // Fetch role
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("cargo")
-    .eq("user_id", supabaseUser.id);
-
-  const isAdmin = roles?.some((r) => r.cargo === "admin") ?? false;
+  const profile = profileRes.data as { name?: string; credits?: number; created_at?: string } | null;
+  const isAdmin = rolesRes.data?.some((r) => r.cargo === "admin") ?? false;
 
   return {
     id: supabaseUser.id,
@@ -68,22 +60,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let lastLoadedUserId: string | null = null;
+    let inflight: Promise<void> | null = null;
+
+    const loadProfile = (sessionUser: SupabaseUser) => {
+      // Evita buscar o mesmo perfil duas vezes (getSession + onAuthStateChange)
+      if (lastLoadedUserId === sessionUser.id && inflight) return inflight;
+      lastLoadedUserId = sessionUser.id;
+      inflight = fetchUserProfile(sessionUser)
+        .then((userData) => setUser(userData))
+        .catch((err) => {
+          console.error("Error fetching profile:", err);
+          setUser(null);
+          lastLoadedUserId = null;
+        })
+        .finally(() => setLoading(false));
+      return inflight;
+    };
+
     // Listen to auth state changes FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (session?.user) {
-          // Use setTimeout to avoid potential deadlock with Supabase client
-          setTimeout(async () => {
-            try {
-              const userData = await fetchUserProfile(session.user);
-              setUser(userData);
-            } catch (err) {
-              console.error("Error fetching profile:", err);
-              setUser(null);
-            }
-            setLoading(false);
-          }, 0);
+          // setTimeout evita deadlock com o cliente Supabase
+          setTimeout(() => { void loadProfile(session.user); }, 0);
         } else {
+          lastLoadedUserId = null;
+          inflight = null;
           setUser(null);
           setLoading(false);
         }
@@ -93,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Then check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        fetchUserProfile(session.user).then(setUser).catch(() => setUser(null)).finally(() => setLoading(false));
+        void loadProfile(session.user);
       } else {
         setLoading(false);
       }
