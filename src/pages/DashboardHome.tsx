@@ -80,7 +80,11 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 
 export default function DashboardHome() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
+  const [planoSelecionado, setPlanoSelecionado] = useState<(typeof PLANOS)[number] | null>(null);
+
+
 
   return (
     <div className="space-y-6">
