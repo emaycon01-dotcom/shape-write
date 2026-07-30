@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Tag, Sparkles, Gem, Star, AlertTriangle, Clock, QrCode, CheckCircle, XCircle, Loader2, ShieldAlert } from "lucide-react";
+import { Tag, Sparkles, Gem, Star, AlertTriangle, Clock, QrCode, CheckCircle, XCircle, Loader2, ShieldAlert, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
