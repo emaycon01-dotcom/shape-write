@@ -324,99 +324,19 @@ export default function RecarregarPage() {
     );
   }
 
-  return (
-    <div className="space-y-8 max-w-5xl">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Tag className="w-5 h-5 text-primary" />
-          <h1 className="font-display text-2xl font-bold text-foreground">Pacotes de Créditos</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">Selecione um pacote para recarregar</p>
-      </div>
+  const inGroup = (group: Pacote[]) =>
+    Boolean(selectedPacote && group.some((p) => p.credits === selectedPacote.credits));
 
-      {/* Warning banner */}
-      {warningCount > 0 && (
-        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
-          <p className="text-sm text-muted-foreground">
-            Você possui <span className="text-yellow-500 font-bold">{warningCount}/{MAX_WARNINGS}</span> advertência(s).
-            Gerar QR Code e não pagar resulta em advertência. Com {MAX_WARNINGS}, sua conta será banida.
-          </p>
-        </div>
-      )}
-
-      {/* Populares */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Star className="w-4 h-4 text-yellow-400" />
-          <h2 className="text-sm font-semibold text-foreground tracking-wider">Pacotes Populares</h2>
-          <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">Mais vendidos</span>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {populares.map((p) => (
-            <PacoteCard key={p.credits} p={p} selected={selectedPacote?.credits === p.credits} onSelect={() => setSelectedPacote(p)} />
-          ))}
-        </div>
-      </div>
-
-      {/* Intermediários */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-4 h-4 text-accent" />
-          <h2 className="text-sm font-semibold text-foreground tracking-wider">Pacotes Intermediários</h2>
-          <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full">Melhor custo-benefício</span>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {intermediarios.map((p) => (
-            <PacoteCard key={p.credits} p={p} selected={selectedPacote?.credits === p.credits} onSelect={() => setSelectedPacote(p)} />
-          ))}
-        </div>
-      </div>
-
-      {/* Volumes */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <CreditCardIcon className="w-4 h-4 text-yellow-400" />
-          <h2 className="text-sm font-semibold text-foreground tracking-wider">Grandes Volumes</h2>
-          <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">Máximo desconto</span>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          {volumes.map((p) => (
-            <PacoteCard key={p.credits} p={p} selected={selectedPacote?.credits === p.credits} onSelect={() => setSelectedPacote(p)} />
-          ))}
-        </div>
-      </div>
-
-      {/* Slider */}
-      <div className="glass rounded-xl p-6">
-        <p className="text-sm text-muted-foreground mb-4">Ou arraste para selecionar:</p>
-        <Slider
-          value={sliderValue}
-          onValueChange={(v) => {
-            setSliderValue(v);
-            setSelectedPacote(null);
-          }}
-          min={1}
-          max={4}
-          step={1}
-          className="mb-4"
-        />
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-foreground font-semibold">{sliderValue[0]} créditos</span>
-          <span className="text-sm text-accent font-bold">{formatBRL(sliderPrice)}</span>
-        </div>
-      </div>
-
-      {/* Cooldown indicator */}
+  const GenerateBar = (
+    <div className="space-y-3 pt-4">
       {cooldownLeft > 0 && (
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-center gap-3">
-          <Clock className="w-5 h-5 text-primary shrink-0" />
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 flex items-center gap-3">
+          <Clock className="w-4 h-4 text-primary shrink-0" />
           <p className="text-sm text-muted-foreground">
             Próximo QR Code disponível em <span className="text-foreground font-bold">{cooldownLeft}s</span>
           </p>
         </div>
       )}
-
       <Button
         variant="gradient"
         className="w-full h-14 text-base font-semibold"
@@ -433,6 +353,98 @@ export default function RecarregarPage() {
             : `Gerar PIX — ${sliderValue[0]} créditos por ${formatBRL(sliderPrice)}`
         )}
       </Button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-8 max-w-5xl mx-auto w-full">
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <Tag className="w-5 h-5 text-primary" />
+          <h1 className="font-display text-2xl font-bold text-foreground">Pacotes de Créditos</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">Arraste a barra ou escolha um pacote</p>
+      </div>
+
+      {/* Warning banner */}
+      {warningCount > 0 && (
+        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            Você possui <span className="text-yellow-500 font-bold">{warningCount}/{MAX_WARNINGS}</span> advertência(s).
+            Gerar QR Code e não pagar resulta em advertência. Com {MAX_WARNINGS}, sua conta será banida.
+          </p>
+        </div>
+      )}
+
+      {/* Barra deslizante — sempre no topo */}
+      <div>
+        <div className="glass rounded-xl p-6">
+          <p className="text-sm text-muted-foreground mb-4">Arraste para selecionar a quantidade:</p>
+          <Slider
+            value={sliderValue}
+            onValueChange={(v) => {
+              setSliderValue(v);
+              setSelectedPacote(null);
+            }}
+            min={1}
+            max={4}
+            step={1}
+            className="mb-4"
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-foreground font-semibold">{sliderValue[0]} créditos</span>
+            <span className="text-sm text-accent font-bold">{formatBRL(sliderPrice)}</span>
+          </div>
+        </div>
+        {!selectedPacote && GenerateBar}
+      </div>
+
+      {/* Populares */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Star className="w-4 h-4 text-yellow-400" />
+          <h2 className="text-sm font-semibold text-foreground tracking-wider">Pacotes Populares</h2>
+          <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">Mais vendidos</span>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {populares.map((p) => (
+            <PacoteCard key={p.credits} p={p} selected={selectedPacote?.credits === p.credits} onSelect={() => setSelectedPacote(p)} />
+          ))}
+        </div>
+        {inGroup(populares) && GenerateBar}
+      </div>
+
+      {/* Intermediários */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="w-4 h-4 text-accent" />
+          <h2 className="text-sm font-semibold text-foreground tracking-wider">Pacotes Intermediários</h2>
+          <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full">Melhor custo-benefício</span>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {intermediarios.map((p) => (
+            <PacoteCard key={p.credits} p={p} selected={selectedPacote?.credits === p.credits} onSelect={() => setSelectedPacote(p)} />
+          ))}
+        </div>
+        {inGroup(intermediarios) && GenerateBar}
+      </div>
+
+      {/* Volumes */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <CreditCardIcon className="w-4 h-4 text-yellow-400" />
+          <h2 className="text-sm font-semibold text-foreground tracking-wider">Grandes Volumes</h2>
+          <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">Máximo desconto</span>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          {volumes.map((p) => (
+            <PacoteCard key={p.credits} p={p} selected={selectedPacote?.credits === p.credits} onSelect={() => setSelectedPacote(p)} />
+          ))}
+        </div>
+        {inGroup(volumes) && GenerateBar}
+      </div>
+
 
       {/* Warning dialog */}
       <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
