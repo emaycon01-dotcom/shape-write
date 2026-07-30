@@ -112,6 +112,63 @@ export default function DashboardHome() {
           </div>
         </Link>
       </section>
+
+      {/* Planos */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Crown className="w-4 h-4 text-accent" />
+          <h2 className="font-display text-lg font-bold text-foreground">Planos</h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {PLANOS.map((plano) => (
+            <div
+              key={plano.nome}
+              className={`group relative overflow-hidden rounded-2xl border p-6 backdrop-blur transition-all duration-300 hover:-translate-y-1 ${
+                plano.destaque
+                  ? "border-accent/50 bg-card/80 shadow-[0_22px_50px_-28px_hsl(var(--accent)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.09)]"
+                  : "border-border/60 bg-card/60 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]"
+              }`}
+            >
+              {plano.destaque && (
+                <>
+                  <div className="absolute inset-0 gradient-primary opacity-[0.12]" />
+                  <span className="absolute right-4 top-4 rounded-full gradient-button px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                    POPULAR
+                  </span>
+                </>
+              )}
+              <div className="relative space-y-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/80 ring-1 ring-border/60">
+                  <plano.icon className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <p className="font-display text-lg font-bold text-foreground">{plano.nome}</p>
+                  <p className="font-display text-2xl font-bold text-accent">{plano.preco}</p>
+                </div>
+                <ul className="space-y-1.5">
+                  {plano.beneficios.map((b) => (
+                    <li key={b} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Sparkle className="mt-0.5 h-3 w-3 shrink-0 text-accent" />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  to="/dashboard/recarregar"
+                  className={`flex h-10 w-full items-center justify-center rounded-xl text-sm font-semibold transition-all ${
+                    plano.destaque
+                      ? "gradient-button text-primary-foreground hover:opacity-90"
+                      : "border border-border/70 text-foreground hover:bg-secondary/60"
+                  }`}
+                >
+                  Assinar
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
