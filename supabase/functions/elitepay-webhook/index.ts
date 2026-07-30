@@ -141,6 +141,13 @@ Deno.serve(async (req) => {
         );
       }
 
+      // Depósito confirmado: zera todas as advertências de PIX do usuário
+      await supabaseAdmin
+        .from("pix_warnings")
+        .update({ status: "cleared", resolved_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .in("status", ["warning", "pending"]);
+
       const { data: profile } = await supabaseAdmin
         .from("profiles")
         .select("name, email")
