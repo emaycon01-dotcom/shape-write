@@ -42,6 +42,7 @@ const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
 const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
+const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
 const VerifyPage = lazy(() => import("./pages/VerifyPage"));
 const ConsultaCnhPage = lazy(() => import("./pages/ConsultaCnhPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
