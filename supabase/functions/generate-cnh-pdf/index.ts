@@ -214,6 +214,12 @@ function parseActiveCategories(activeCategory: string) {
   return set;
 }
 
+function normalizeCategoria(cat: string): string {
+  const active = parseActiveCategories(cat);
+  const ordered = ["A", "B", "C", "D", "E"].filter((c) => active.has(c)).join("");
+  return ordered || (cat || "").replace(/\s+/g, "").toUpperCase();
+}
+
 function getCatDate(cat: string, d: Record<string, string>): string {
   const key = `validade_cat_${cat.toLowerCase()}`;
   return d[key] || d.data_validade || "";
@@ -457,7 +463,7 @@ ${CNH_FONT_FACE}
   ${text("rg", d.rg || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
   ${text("cpf", d.cpf || "")}
   ${text("registro", d.registro || "", "color:#c00;")}
-  ${text("cat_hab", d.categoria || "", "color:#c00;")}
+  ${text("cat_hab", normalizeCategoria(d.categoria || ""), "color:#c00;")}
   ${text("nacionalidade", d.nacionalidade || "")}
   ${text("pai", d.nome_pai || "", ellipsis)}
   ${text("mae", d.nome_mae || "", ellipsis)}
@@ -630,7 +636,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay f-rg">${escapeHtml(d.rg || "")}</div>
   <div class="overlay f-cpf">${escapeHtml(d.cpf || "")}</div>
   <div class="overlay f-registro">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay f-cat-hab">${escapeHtml(d.categoria || "")}</div>
+  <div class="overlay f-cat-hab">${escapeHtml(normalizeCategoria(d.categoria || ""))}</div>
   <div class="overlay f-nacionalidade">${escapeHtml(d.nacionalidade || "")}</div>
   <div class="overlay f-pai">${escapeHtml(d.nome_pai || "")}</div>
   <div class="overlay f-mae">${escapeHtml(d.nome_mae || "")}</div>
