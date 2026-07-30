@@ -11,6 +11,9 @@ import {
   Palette,
   ShieldBan,
   SlidersHorizontal,
+  Rocket,
+  Star,
+  Gem,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +35,12 @@ const commonItems = [
   { title: "Serviços", url: "/dashboard/documents", icon: FileText },
   { title: "Histórico", url: "/dashboard/history", icon: History },
   { title: "Recarregar", url: "/dashboard/recarregar", icon: CreditCard },
+];
+
+const SIDEBAR_PLANOS = [
+  { nome: "Dealer", preco: "R$ 150", icon: Rocket, gradient: "gradient-dealer" },
+  { nome: "Master", preco: "R$ 450", icon: Star, gradient: "gradient-master" },
+  { nome: "Diamond", preco: "R$ 999", icon: Gem, gradient: "gradient-diamond" },
 ];
 
 type ThemeMode = "default" | "dark-blue" | "light";
@@ -136,6 +145,33 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {!collapsed && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">PLANOS</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="grid grid-cols-3 gap-1.5 px-2">
+                {SIDEBAR_PLANOS.map((p) => (
+                  <Link
+                    key={p.nome}
+                    to="/dashboard/recarregar"
+                    className="group relative overflow-hidden rounded-lg border border-border/60 bg-card/50 p-2 text-center transition-all hover:-translate-y-0.5"
+                  >
+                    <div className={`absolute inset-x-0 top-0 h-[2px] ${p.gradient}`} />
+                    <div className={`absolute -right-6 -top-6 h-14 w-14 rounded-full ${p.gradient} opacity-20 blur-xl`} />
+                    <div className="relative space-y-1">
+                      <span className={`mx-auto flex h-6 w-6 items-center justify-center rounded-md ${p.gradient}`}>
+                        <p.icon className="h-3 w-3 text-primary-foreground" />
+                      </span>
+                      <p className="text-[9px] font-bold uppercase tracking-wide text-foreground">{p.nome}</p>
+                      <p className="text-[9px] text-muted-foreground">{p.preco}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </SidebarGroupContent>
           </SidebarGroup>
         )}

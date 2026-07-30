@@ -1,553 +1,611 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Users, Eye, CheckCircle, AlertTriangle, DollarSign, ShieldBan,
-  Crown, Plus, Minus, TrendingUp, Unlock, Smartphone, Coins, Calculator,
-  ArrowUp, ArrowDown, Search,
+  Users, Eye, DollarSign, ShieldBan, Crown, Search, Coins, Trash2,
+  LayoutGrid, ScrollText, UserCog, Ban, KeyRound, RefreshCw, Plus, Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 
 // ── Types ──
 interface Profile {
-  id: string;
-  user_id: string;
-  name: string;
-  email: string;
-  credits: number;
-  plano: string;
+  id: string; user_id: string; name: string; email: string;
+  credits: number; plano: string; created_at: string;
 }
-interface UserRole { user_id: string; cargo: string; }
+interface UserRole { user_id: string; cargo: string }
 interface LogEntry {
-  id: string;
-  user_name: string;
-  user_email: string;
-  document_type: string;
-  stage: string;
-  error_message: string | null;
-  created_at: string;
+  id: string; user_name: string; user_email: string; document_type: string;
+  stage: string; error_message: string | null; created_at: string;
 }
 interface Deposit {
-  id: string;
-  user_name: string;
-  user_email: string;
-  amount: number;
-  method: string;
-  created_at: string;
+  id: string; user_name: string; user_email: string; amount: number;
+  method: string; created_at: string;
 }
 interface BlockedUser {
-  id: string;
-  user_id: string;
-  user_name: string;
-  user_email: string;
-  reason: string;
-  blocked_at: string;
-  status: string;
+  id: string; user_id: string; user_name: string; user_email: string;
+  reason: string; blocked_at: string; status: string;
 }
-interface RechargeLog {
-  id: string;
-  amount: number;
-  credits_used: number;
-  created_at: string;
+interface Txn {
+  id: string; user_id: string; actor_id: string | null; kind: string;
+  amount: number; balance_after: number; reason: string; created_at: string;
+}
+interface FinTxn {
+  id: string; user_id: string; type: string; amount: number;
+  credits_amount: number; plan_name: string | null; status: string; created_at: string;
 }
 
 const CARGOS = ["dealer", "master", "diamond", "sub_gerente", "gerente", "admin"] as const;
 const CARGO_LABELS: Record<string, string> = {
-  dealer: "DEALER", master: "MASTER", diamond: "DIAMOND",
-  sub_gerente: "SUB GERENTE", gerente: "GERENTE", admin: "ADMIN",
+  dealer: "Dealer", master: "Master", diamond: "Diamond",
+  sub_gerente: "Sub Gerente", gerente: "Gerente", admin: "Admin",
 };
-const PLANOS = ["free", "basico", "intermediario", "avancado", "premium", "vip"];
+const PLANOS = ["free", "dealer", "master", "diamond"] as const;
+const PLANO_LABELS: Record<string, string> = {
+  free: "Free", dealer: "Dealer", master: "Master", diamond: "Diamond",
+};
 
-type Tab = "usuarios" | "revendedores" | "geracoes" | "financeiro" | "bloqueados";
+type Tab =
+  | "visao" | "usuarios" | "planos" | "equipe"
+  | "financeiro" | "geracoes" | "bloqueados" | "auditoria";
 
 const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
+  { key: "visao", label: "Visão geral", icon: LayoutGrid },
   { key: "usuarios", label: "Usuários", icon: Users },
-  { key: "revendedores", label: "Revendedores", icon: Crown },
-  { key: "geracoes", label: "Gerações", icon: Eye },
+  { key: "planos", label: "Planos", icon: Crown },
+  { key: "equipe", label: "Equipe", icon: UserCog },
   { key: "financeiro", label: "Financeiro", icon: DollarSign },
+  { key: "geracoes", label: "Gerações", icon: Eye },
   { key: "bloqueados", label: "Bloqueados", icon: ShieldBan },
+  { key: "auditoria", label: "Auditoria", icon: ScrollText },
 ];
 
-export default function AdminPanelPage() {
-  const [tab, setTab] = useState<Tab>("usuarios");
-  const { toast } = useToast();
+const brl = (v: number) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const dt = (v: string) => new Date(v).toLocaleString("pt-BR");
 
-  // ── Shared data ──
+function Badge({ children, tone = "muted" }: { children: React.ReactNode; tone?: string }) {
+  const tones: Record<string, string> = {
+    muted: "border-border/70 bg-secondary/50 text-muted-foreground",
+    primary: "border-primary/40 bg-primary/10 text-primary",
+    accent: "border-accent/40 bg-accent/10 text-accent",
+    danger: "border-destructive/40 bg-destructive/10 text-destructive",
+  };
+  return (
+    <span className={`inline-flex items-center rounded-md border px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wide ${tones[tone]}`}>
+      {children}
+    </span>
+  );
+}
+
+function Stat({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur">
+      <div className="absolute inset-0 gradient-primary opacity-[0.07]" />
+      <div className="relative flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/70 ring-1 ring-border/60">
+          <Icon className="h-4 w-4 text-accent" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
+          <p className="truncate font-display text-lg font-bold text-foreground">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminPanelPage() {
+  const [tab, setTab] = useState<Tab>("visao");
+  const { toast } = useToast();
+  const { user: me } = useAuth();
+
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [blocked, setBlocked] = useState<BlockedUser[]>([]);
-  const [rechargeLogs, setRechargeLogs] = useState<RechargeLog[]>([]);
+  const [txns, setTxns] = useState<Txn[]>([]);
+  const [finTxns, setFinTxns] = useState<FinTxn[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // ── Credit/Plan dialog ──
-  const [creditDialog, setCreditDialog] = useState<{ userId: string; type: "add" | "remove" } | null>(null);
-  const [creditAmount, setCreditAmount] = useState("");
-  const [planDialog, setPlanDialog] = useState<{ userId: string; current: string } | null>(null);
-  const [newPlan, setNewPlan] = useState("");
+  const [selected, setSelected] = useState<Profile | null>(null);
+  const [creditInput, setCreditInput] = useState("");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const fetchAll = async () => {
-    setLoading(true);
-    const [p, r, l, d, b, rc] = await Promise.all([
+    const [p, r, l, d, b, ct, ft] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-      supabase.from("user_roles").select("*"),
-      supabase.from("generation_logs").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("deposits").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("user_roles").select("user_id, cargo"),
+      supabase.from("generation_logs").select("*").order("created_at", { ascending: false }).limit(300),
+      supabase.from("deposits").select("*").order("created_at", { ascending: false }).limit(300),
       supabase.from("blocked_users").select("*").order("blocked_at", { ascending: false }),
-      supabase.from("recharge_logs").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("credit_transactions").select("*").order("created_at", { ascending: false }).limit(300),
+      supabase.from("financial_transactions").select("*").order("created_at", { ascending: false }).limit(300),
     ]);
-    if (p.data) setProfiles(p.data as any);
-    if (r.data) setRoles(r.data as any);
-    if (l.data) setLogs(l.data as any);
-    if (d.data) setDeposits(d.data as any);
-    if (b.data) setBlocked(b.data as any);
-    if (rc.data) setRechargeLogs(rc.data as any);
+    if (p.data) setProfiles(p.data as Profile[]);
+    if (r.data) setRoles(r.data as UserRole[]);
+    if (l.data) setLogs(l.data as LogEntry[]);
+    if (d.data) setDeposits(d.data as Deposit[]);
+    if (b.data) setBlocked(b.data as BlockedUser[]);
+    if (ct.data) setTxns(ct.data as Txn[]);
+    if (ft.data) setFinTxns(ft.data as FinTxn[]);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchAll();
-    const ch1 = supabase.channel("admin-gen").on("postgres_changes", { event: "*", schema: "public", table: "generation_logs" }, () => fetchAll()).subscribe();
-    const ch2 = supabase.channel("admin-dep").on("postgres_changes", { event: "*", schema: "public", table: "deposits" }, () => fetchAll()).subscribe();
-    const ch3 = supabase.channel("admin-block").on("postgres_changes", { event: "*", schema: "public", table: "blocked_users" }, () => fetchAll()).subscribe();
-    const ch4 = supabase.channel("admin-profiles").on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchAll()).subscribe();
-    return () => { [ch1, ch2, ch3, ch4].forEach(c => supabase.removeChannel(c)); };
+    const ch = supabase
+      .channel("admin-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "generation_logs" }, () => fetchAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "credit_transactions" }, () => fetchAll())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getUserCargo = (userId: string) => roles.find(r => r.user_id === userId)?.cargo;
+  const roleOf = (userId: string) =>
+    roles.find((r) => r.user_id === userId)?.cargo ?? "";
+  const isBlocked = (userId: string) =>
+    blocked.some((b) => b.user_id === userId && b.status === "bloqueado");
 
-  // ── User actions ──
-  const handleCreditSubmit = async () => {
-    if (!creditDialog || !creditAmount) return;
-    const amt = Number(creditAmount);
-    if (isNaN(amt) || amt <= 0) return;
-    const profile = profiles.find(p => p.user_id === creditDialog.userId);
-    if (!profile) return;
-    const newCredits = creditDialog.type === "add" ? profile.credits + amt : Math.max(0, profile.credits - amt);
-    await supabase.from("profiles").update({ credits: newCredits } as any).eq("user_id", creditDialog.userId);
-    toast({ title: creditDialog.type === "add" ? "Créditos adicionados" : "Créditos removidos" });
-    setCreditDialog(null);
-    setCreditAmount("");
-    fetchAll();
-  };
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return profiles;
+    return profiles.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.email.toLowerCase().includes(q) ||
+        p.user_id.toLowerCase().includes(q),
+    );
+  }, [profiles, search]);
 
-  const handlePlanSubmit = async () => {
-    if (!planDialog || !newPlan) return;
-    await supabase.from("profiles").update({ plano: newPlan } as any).eq("user_id", planDialog.userId);
-    toast({ title: "Plano alterado", description: `Plano alterado para ${newPlan}` });
-    setPlanDialog(null);
-    setNewPlan("");
-    fetchAll();
-  };
+  const totals = useMemo(() => {
+    const totalCredits = profiles.reduce((s, p) => s + Number(p.credits), 0);
+    const paid = finTxns.filter((t) => t.status === "pago");
+    const revenue = paid.reduce((s, t) => s + Number(t.amount), 0) +
+      deposits.reduce((s, d) => s + Number(d.amount), 0);
+    return {
+      users: profiles.length,
+      totalCredits,
+      revenue,
+      geracoes: logs.filter((l) => l.stage !== "preview").length,
+      bloqueados: blocked.filter((b) => b.status === "bloqueado").length,
+    };
+  }, [profiles, finTxns, deposits, logs, blocked]);
 
-  const handlePromote = async (userId: string) => {
-    const current = getUserCargo(userId);
-    const idx = current ? CARGOS.indexOf(current as any) : -1;
-    if (idx >= CARGOS.length - 1) return;
-    const next = CARGOS[idx + 1];
-    await supabase.from("user_roles").delete().eq("user_id", userId);
-    await supabase.from("user_roles").insert({ user_id: userId, cargo: next } as any);
-    toast({ title: "Patente aumentada", description: CARGO_LABELS[next] });
-    fetchAll();
-  };
-
-  const handleDemote = async (userId: string) => {
-    const current = getUserCargo(userId);
-    const idx = current ? CARGOS.indexOf(current as any) : -1;
-    if (idx <= 0) {
-      await supabase.from("user_roles").delete().eq("user_id", userId);
-      toast({ title: "Patente removida" });
-    } else {
-      const prev = CARGOS[idx - 1];
-      await supabase.from("user_roles").delete().eq("user_id", userId);
-      await supabase.from("user_roles").insert({ user_id: userId, cargo: prev } as any);
-      toast({ title: "Patente diminuída", description: CARGO_LABELS[prev] });
+  // ── Ações ──
+  const run = async (fn: () => PromiseLike<{ error: unknown }>, okMsg: string) => {
+    setBusy(true);
+    const { error } = await fn();
+    setBusy(false);
+    if (error) {
+      const msg = (error as { message?: string })?.message ?? "Erro";
+      toast({ title: "Falha na operação", description: msg, variant: "destructive" });
+      return false;
     }
+    toast({ title: okMsg });
+    await fetchAll();
+    return true;
+  };
+
+  const adjustCredits = async (delta: number) => {
+    if (!selected) return;
+    const amount = Number(creditInput);
+    if (!amount || amount <= 0) {
+      toast({ title: "Informe uma quantidade válida", variant: "destructive" });
+      return;
+    }
+    const ok = await run(
+      () => supabase.rpc("admin_adjust_credits", {
+        _target_user_id: selected.user_id,
+        _delta: delta * amount,
+        _reason: reason || (delta > 0 ? "crédito manual" : "remoção manual"),
+      }),
+      delta > 0 ? `${amount} crédito(s) adicionado(s)` : `${amount} crédito(s) removido(s)`,
+    );
+    if (ok) {
+      setCreditInput("");
+      setReason("");
+      setSelected((prev) =>
+        prev ? { ...prev, credits: Math.max(0, prev.credits + delta * amount) } : prev,
+      );
+    }
+  };
+
+  const setPlan = (plano: string) =>
+    selected &&
+    run(() => supabase.rpc("admin_set_plan", { _target_user_id: selected.user_id, _plan: plano }),
+      `Plano alterado para ${PLANO_LABELS[plano]}`).then((ok) => {
+        if (ok) setSelected((p) => (p ? { ...p, plano } : p));
+      });
+
+  const setCargo = (cargo: string) =>
+    selected &&
+    run(() => supabase.rpc("admin_set_role", {
+      _target_user_id: selected.user_id,
+      _cargo: cargo as (typeof CARGOS)[number],
+    }), `Cargo alterado para ${CARGO_LABELS[cargo]}`);
+
+  const banUser = () =>
+    selected &&
+    run(() => supabase.rpc("admin_ban_user", {
+      _target_user_id: selected.user_id,
+      _reason: reason || "Banido pelo administrador",
+    }), "Usuário banido");
+
+  const unbanUser = (userId: string) =>
+    run(() => supabase.rpc("admin_unban_user", { _target_user_id: userId }), "Usuário desbanido");
+
+  const deleteUser = async () => {
+    if (!selected) return;
+    if (!confirm(`Excluir definitivamente a conta de ${selected.email}?`)) return;
+    setBusy(true);
+    const { error } = await supabase.functions.invoke("admin-actions", {
+      body: { action: "delete_user", user_id: selected.user_id },
+    });
+    setBusy(false);
+    if (error) {
+      toast({ title: "Falha ao excluir conta", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Conta excluída" });
+    setSelected(null);
     fetchAll();
   };
 
-  const handleUnblock = async (id: string) => {
-    await supabase.from("blocked_users").delete().eq("id", id);
-    toast({ title: "Desbloqueado" });
-    fetchAll();
+  const resetPin = async () => {
+    if (!selected) return;
+    setBusy(true);
+    const { error } = await supabase.functions.invoke("admin-actions", {
+      body: { action: "reset_pin", user_id: selected.user_id },
+    });
+    setBusy(false);
+    toast({
+      title: error ? "Falha ao resetar PIN" : "PIN resetado",
+      variant: error ? "destructive" : undefined,
+    });
   };
 
-  // ── Derived data ──
-  const totalDeposits = deposits.reduce((s, d) => s + Number(d.amount), 0);
-  const totalRecharges = rechargeLogs.reduce((s, l) => s + Number(l.amount), 0);
-  const totalRechargeCount = rechargeLogs.length;
-
-  const previewLogs = logs.filter(l => l.stage === "preview");
-  const completedLogs = logs.filter(l => l.stage === "completed");
-  const failedLogs = logs.filter(l => l.stage === "failed" || l.stage === "failed_preview");
-  const allGenLogs = [...previewLogs, ...completedLogs, ...failedLogs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  const filteredProfiles = profiles.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.email.toLowerCase().includes(search.toLowerCase())
+  const UserRow = ({ p }: { p: Profile }) => (
+    <button
+      onClick={() => { setSelected(p); setCreditInput(""); setReason(""); }}
+      className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-card/50 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40"
+    >
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary/70 text-xs font-bold uppercase text-accent ring-1 ring-border/60">
+        {(p.name || p.email || "?").slice(0, 2)}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-foreground">{p.name || "Sem nome"}</p>
+        <p className="truncate text-xs text-muted-foreground">{p.email}</p>
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <span className="text-sm font-bold text-foreground">{p.credits}</span>
+        <div className="flex gap-1">
+          <Badge tone={p.plano === "free" ? "muted" : "accent"}>{PLANO_LABELS[p.plano] ?? p.plano}</Badge>
+          {roleOf(p.user_id) && <Badge tone="primary">{CARGO_LABELS[roleOf(p.user_id)]}</Badge>}
+          {isBlocked(p.user_id) && <Badge tone="danger">Banido</Badge>}
+        </div>
+      </div>
+    </button>
   );
-  const revendedores = profiles.filter(p => p.plano !== "free");
+
+  const Table = ({ head, rows }: { head: string[]; rows: React.ReactNode[][] }) => (
+    <div className="overflow-x-auto rounded-xl border border-border/60">
+      <table className="w-full text-sm">
+        <thead className="bg-secondary/40">
+          <tr>
+            {head.map((h) => (
+              <th key={h} className="whitespace-nowrap px-4 py-2 text-left text-[11px] uppercase tracking-wide text-muted-foreground">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 && (
+            <tr><td colSpan={head.length} className="px-4 py-8 text-center text-muted-foreground">Nenhum registro</td></tr>
+          )}
+          {rows.map((r, i) => (
+            <tr key={i} className="border-t border-border/40">
+              {r.map((c, j) => <td key={j} className="whitespace-nowrap px-4 py-2 text-foreground/90">{c}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <h1 className="font-display text-2xl font-bold text-foreground">Menu Admin</h1>
-        <div className="glass rounded-xl p-8 text-center text-muted-foreground">Carregando...</div>
+      <div className="flex justify-center py-20">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-7xl">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Menu Admin</h1>
-        <p className="text-sm text-muted-foreground">Central de gerenciamento do sistema</p>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Painel administrativo</h1>
+          <p className="text-xs text-muted-foreground">Gestão completa de usuários, planos e financeiro</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={fetchAll}>
+          <RefreshCw className="mr-2 h-4 w-4" /> Atualizar
+        </Button>
       </div>
 
-      {/* Tab grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-        {TABS.map(t => (
+      {/* Menus */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {TABS.map((t) => (
           <button
             key={t.key}
-            onClick={() => { setTab(t.key); setSearch(""); }}
-            className={`glass rounded-xl p-4 flex flex-col items-center gap-2 transition-all border ${
-              tab === t.key ? "border-primary bg-primary/5" : "border-transparent hover:border-border"
+            onClick={() => setTab(t.key)}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+              tab === t.key
+                ? "border-primary/50 gradient-button text-primary-foreground"
+                : "border-border/60 bg-card/50 text-muted-foreground hover:border-primary/30"
             }`}
           >
-            <t.icon className={`w-5 h-5 ${tab === t.key ? "text-primary" : "text-muted-foreground"}`} />
-            <span className={`text-xs font-semibold tracking-wider ${tab === t.key ? "text-primary" : "text-muted-foreground"}`}>
-              {t.label.toUpperCase()}
-            </span>
+            <t.icon className="h-3.5 w-3.5" /> {t.label}
           </button>
         ))}
       </div>
 
-      {/* ═══ USUÁRIOS ═══ */}
+      {tab === "visao" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+            <Stat label="Usuários" value={String(totals.users)} icon={Users} />
+            <Stat label="Créditos em circulação" value={String(totals.totalCredits)} icon={Coins} />
+            <Stat label="Receita" value={brl(totals.revenue)} icon={DollarSign} />
+            <Stat label="Gerações" value={String(totals.geracoes)} icon={Eye} />
+            <Stat label="Banidos" value={String(totals.bloqueados)} icon={ShieldBan} />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-sm font-semibold text-foreground">Últimas movimentações</h2>
+            <Table
+              head={["Data", "Usuário", "Tipo", "Qtd", "Saldo", "Motivo"]}
+              rows={txns.slice(0, 12).map((t) => [
+                dt(t.created_at),
+                profiles.find((p) => p.user_id === t.user_id)?.email ?? t.user_id.slice(0, 8),
+                <Badge tone={t.kind === "debit" ? "danger" : "accent"}>{t.kind}</Badge>,
+                String(t.amount),
+                String(t.balance_after),
+                t.reason,
+              ])}
+            />
+          </div>
+        </div>
+      )}
+
+      {(tab === "usuarios" || tab === "planos" || tab === "equipe") && (
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nome, e-mail ou ID"
+            className="pl-9"
+          />
+        </div>
+      )}
+
       {tab === "usuarios" && (
-        <div className="space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground uppercase tracking-wider">
-                  <th className="py-3 px-4">Nome</th>
-                  <th className="py-3 px-4">E-mail</th>
-                  <th className="py-3 px-4">Plano</th>
-                  <th className="py-3 px-4">Créditos</th>
-                  <th className="py-3 px-4">Patente</th>
-                  <th className="py-3 px-4">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProfiles.map(p => {
-                  const cargo = getUserCargo(p.user_id);
-                  return (
-                    <tr key={p.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                      <td className="py-3 px-4 text-foreground font-medium">{p.name || "Sem nome"}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{p.email}</td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium uppercase">{p.plano}</span>
-                      </td>
-                      <td className="py-3 px-4 text-foreground font-semibold">{p.credits}</td>
-                      <td className="py-3 px-4">
-                        {cargo ? (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/20 text-accent font-bold">{CARGO_LABELS[cargo] || cargo}</span>
-                        ) : <span className="text-xs text-muted-foreground">—</span>}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-1 flex-wrap">
-                          <Button size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={() => setCreditDialog({ userId: p.user_id, type: "add" })}>
-                            <Plus className="w-3 h-3 mr-0.5" /> Créd
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={() => setCreditDialog({ userId: p.user_id, type: "remove" })}>
-                            <Minus className="w-3 h-3 mr-0.5" /> Créd
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={() => { setPlanDialog({ userId: p.user_id, current: p.plano }); setNewPlan(p.plano); }}>
-                            Plano
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={() => handlePromote(p.user_id)}>
-                            <ArrowUp className="w-3 h-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={() => handleDemote(p.user_id)}>
-                            <ArrowDown className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        <div className="grid gap-2 md:grid-cols-2">
+          {filtered.map((p) => <UserRow key={p.id} p={p} />)}
         </div>
       )}
 
-      {/* ═══ REVENDEDORES ═══ */}
-      {tab === "revendedores" && (
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">Usuários com planos ativos</p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground uppercase tracking-wider">
-                  <th className="py-3 px-4">Nome</th>
-                  <th className="py-3 px-4">E-mail</th>
-                  <th className="py-3 px-4">Plano</th>
-                  <th className="py-3 px-4">Créditos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {revendedores.length === 0 ? (
-                  <tr><td colSpan={4} className="py-8 text-center text-muted-foreground">Nenhum revendedor encontrado.</td></tr>
-                ) : revendedores.map(p => (
-                  <tr key={p.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="py-3 px-4 text-foreground font-medium">{p.name || "Sem nome"}</td>
-                    <td className="py-3 px-4 text-muted-foreground">{p.email}</td>
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 text-xs text-accent">
-                        <Crown className="w-3 h-3" /> {p.plano}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-foreground font-semibold">{p.credits}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ═══ GERAÇÕES ═══ */}
-      {tab === "geracoes" && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="glass rounded-xl p-4">
-              <p className="text-[10px] tracking-widest text-muted-foreground mb-1">TOTAL GERAÇÕES</p>
-              <p className="text-2xl font-bold text-foreground">{allGenLogs.length}</p>
-            </div>
-            <div className="glass rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className="w-3 h-3 text-success" />
-                <p className="text-[10px] tracking-widest text-muted-foreground">CONCLUÍDAS</p>
+      {tab === "planos" && (
+        <div className="space-y-5">
+          {PLANOS.map((plano) => {
+            const list = filtered.filter((p) => p.plano === plano);
+            return (
+              <div key={plano} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-accent" />
+                  <h2 className="text-sm font-semibold text-foreground">{PLANO_LABELS[plano]}</h2>
+                  <Badge>{list.length}</Badge>
+                </div>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {list.map((p) => <UserRow key={p.id} p={p} />)}
+                  {list.length === 0 && <p className="text-xs text-muted-foreground">Nenhum usuário neste plano.</p>}
+                </div>
               </div>
-              <p className="text-2xl font-bold text-success">{completedLogs.length}</p>
-            </div>
-            <div className="glass rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle className="w-3 h-3 text-destructive" />
-                <p className="text-[10px] tracking-widest text-muted-foreground">FALHAS</p>
-              </div>
-              <p className="text-2xl font-bold text-destructive">{failedLogs.length}</p>
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground uppercase tracking-wider">
-                  <th className="py-3 px-4">Usuário</th>
-                  <th className="py-3 px-4">Documento</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allGenLogs.slice(0, 200).map(l => (
-                  <tr key={l.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="py-3 px-4 text-foreground font-medium">{l.user_name}</td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">{l.document_type}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                        l.stage === "completed" ? "bg-success/10 text-success" :
-                        l.stage === "preview" ? "bg-primary/10 text-primary" :
-                        "bg-destructive/10 text-destructive"
-                      }`}>
-                        {l.stage === "completed" ? "Concluído" : l.stage === "preview" ? "Prévia" : "Falha"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-muted-foreground">{new Date(l.created_at).toLocaleString("pt-BR")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            );
+          })}
         </div>
       )}
 
-      {/* ═══ FINANCEIRO ═══ */}
+      {tab === "equipe" && (
+        <div className="space-y-5">
+          {(["admin", "gerente", "sub_gerente", "diamond", "master", "dealer"] as const).map((cargo) => {
+            const list = filtered.filter((p) => roleOf(p.user_id) === cargo);
+            return (
+              <div key={cargo} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <UserCog className="h-4 w-4 text-primary" />
+                  <h2 className="text-sm font-semibold text-foreground">{CARGO_LABELS[cargo]}</h2>
+                  <Badge>{list.length}</Badge>
+                </div>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {list.map((p) => <UserRow key={p.id} p={p} />)}
+                  {list.length === 0 && <p className="text-xs text-muted-foreground">Ninguém neste cargo.</p>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {tab === "financeiro" && (
-        <div className="space-y-6">
-          <div className="glass rounded-xl p-6 border border-success/20">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="w-6 h-6 text-success" />
-              <div>
-                <p className="text-[10px] tracking-widest text-muted-foreground">TOTAL DE DEPÓSITOS DO SISTEMA</p>
-                <p className="text-3xl font-bold text-foreground">R$ {totalDeposits.toFixed(2)}</p>
-              </div>
-            </div>
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <Stat label="Receita total" value={brl(totals.revenue)} icon={DollarSign} />
+            <Stat label="Cobranças pagas" value={String(finTxns.filter((t) => t.status === "pago").length)} icon={Coins} />
+            <Stat label="Pendentes" value={String(finTxns.filter((t) => t.status !== "pago").length)} icon={ScrollText} />
+            <Stat label="Depósitos" value={String(deposits.length)} icon={Plus} />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="glass rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Smartphone className="w-4 h-4 text-primary" />
-                <span className="text-xs tracking-widest text-muted-foreground font-medium">RECARGAS CELULAR</span>
-              </div>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-xs text-muted-foreground">Valor Total</p>
-                  <p className="text-xl font-bold text-foreground">R$ {totalRecharges.toFixed(2)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Operações</p>
-                  <p className="text-xl font-bold text-foreground">{totalRechargeCount}</p>
-                </div>
-              </div>
-            </div>
-            <div className="glass rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Coins className="w-4 h-4 text-accent" />
-                <span className="text-xs tracking-widest text-muted-foreground font-medium">ESIM DIGITAL</span>
-              </div>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-xs text-muted-foreground">Valor Total</p>
-                  <p className="text-xl font-bold text-foreground">R$ 0.00</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Operações</p>
-                  <p className="text-xl font-bold text-foreground">0</p>
-                </div>
-              </div>
-            </div>
+          <div className="space-y-2">
+            <h2 className="text-sm font-semibold text-foreground">Cobranças PIX</h2>
+            <Table
+              head={["Data", "Usuário", "Tipo", "Valor", "Créditos", "Plano", "Status"]}
+              rows={finTxns.map((t) => [
+                dt(t.created_at),
+                profiles.find((p) => p.user_id === t.user_id)?.email ?? t.user_id.slice(0, 8),
+                t.type,
+                brl(Number(t.amount)),
+                String(t.credits_amount),
+                t.plan_name ?? "—",
+                <Badge tone={t.status === "pago" ? "accent" : "muted"}>{t.status}</Badge>,
+              ])}
+            />
           </div>
-
-          <div className="glass rounded-xl p-5 border border-primary/20">
-            <div className="flex items-center gap-2 mb-2">
-              <Calculator className="w-4 h-4 text-primary" />
-              <span className="text-xs tracking-widest text-muted-foreground font-medium">TOTAL GERAL</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">R$ {(totalRecharges + 0).toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">Soma: Recargas + Esim (atualização em tempo real)</p>
-          </div>
-
-          <div>
-            <h3 className="text-xs tracking-widest text-muted-foreground font-medium mb-3">HISTÓRICO DE DEPÓSITOS</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs text-muted-foreground uppercase tracking-wider">
-                    <th className="py-3 px-4">Nome</th>
-                    <th className="py-3 px-4">E-mail</th>
-                    <th className="py-3 px-4">Valor</th>
-                    <th className="py-3 px-4">Método</th>
-                    <th className="py-3 px-4">Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deposits.map(d => (
-                    <tr key={d.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                      <td className="py-3 px-4 text-foreground font-medium">{d.user_name}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{d.user_email}</td>
-                      <td className="py-3 px-4 text-success font-semibold">R$ {Number(d.amount).toFixed(2)}</td>
-                      <td className="py-3 px-4"><span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium uppercase">{d.method}</span></td>
-                      <td className="py-3 px-4 text-muted-foreground">{new Date(d.created_at).toLocaleString("pt-BR")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-2">
+            <h2 className="text-sm font-semibold text-foreground">Depósitos confirmados</h2>
+            <Table
+              head={["Data", "Usuário", "E-mail", "Valor", "Método"]}
+              rows={deposits.map((d) => [dt(d.created_at), d.user_name, d.user_email, brl(Number(d.amount)), d.method])}
+            />
           </div>
         </div>
       )}
 
-      {/* ═══ BLOQUEADOS ═══ */}
+      {tab === "geracoes" && (
+        <Table
+          head={["Data", "Usuário", "E-mail", "Documento", "Etapa", "Erro"]}
+          rows={logs.map((l) => [
+            dt(l.created_at), l.user_name, l.user_email,
+            l.document_type.toUpperCase(),
+            <Badge tone={l.stage === "preview" ? "muted" : "accent"}>{l.stage}</Badge>,
+            l.error_message ?? "—",
+          ])}
+        />
+      )}
+
       {tab === "bloqueados" && (
-        <div className="space-y-4">
-          {blocked.length === 0 ? (
-            <div className="glass rounded-xl p-8 text-center text-muted-foreground">Nenhum usuário bloqueado.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs text-muted-foreground uppercase tracking-wider">
-                    <th className="py-3 px-4">Nome</th>
-                    <th className="py-3 px-4">E-mail</th>
-                    <th className="py-3 px-4">Motivo</th>
-                    <th className="py-3 px-4">Tipo</th>
-                    <th className="py-3 px-4">Data/Hora</th>
-                    <th className="py-3 px-4">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {blocked.map(b => (
-                    <tr key={b.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                      <td className="py-3 px-4 text-foreground font-medium">{b.user_name}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{b.user_email}</td>
-                      <td className="py-3 px-4 text-destructive text-xs font-semibold">{b.reason}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                          b.status === "bloqueado" ? "bg-destructive/10 text-destructive" : "bg-yellow-500/10 text-yellow-500"
-                        }`}>{b.status}</span>
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground">{new Date(b.blocked_at).toLocaleString("pt-BR")}</td>
-                      <td className="py-3 px-4">
-                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleUnblock(b.id)}>
-                          <Unlock className="w-3 h-3 mr-1" /> Desbloquear
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <Table
+          head={["Data", "Usuário", "E-mail", "Motivo", "Ação"]}
+          rows={blocked.map((b) => [
+            dt(b.blocked_at), b.user_name, b.user_email, b.reason,
+            <Button size="sm" variant="outline" onClick={() => unbanUser(b.user_id)}>Desbanir</Button>,
+          ])}
+        />
       )}
 
-      {/* ── Credit Dialog ── */}
-      <Dialog open={!!creditDialog} onOpenChange={() => setCreditDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{creditDialog?.type === "add" ? "Adicionar Créditos" : "Remover Créditos"}</DialogTitle>
-          </DialogHeader>
-          <Input type="number" placeholder="Quantidade" value={creditAmount} onChange={e => setCreditAmount(e.target.value)} min="1" />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreditDialog(null)}>Cancelar</Button>
-            <Button onClick={handleCreditSubmit}>{creditDialog?.type === "add" ? "Adicionar" : "Remover"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {tab === "auditoria" && (
+        <Table
+          head={["Data", "Usuário", "Operador", "Tipo", "Qtd", "Saldo", "Motivo"]}
+          rows={txns.map((t) => [
+            dt(t.created_at),
+            profiles.find((p) => p.user_id === t.user_id)?.email ?? t.user_id.slice(0, 8),
+            t.actor_id ? (profiles.find((p) => p.user_id === t.actor_id)?.email ?? t.actor_id.slice(0, 8)) : "—",
+            <Badge tone={t.kind === "debit" ? "danger" : "accent"}>{t.kind}</Badge>,
+            String(t.amount), String(t.balance_after), t.reason,
+          ])}
+        />
+      )}
 
-      {/* ── Plan Dialog ── */}
-      <Dialog open={!!planDialog} onOpenChange={() => setPlanDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Alterar Plano</DialogTitle>
-          </DialogHeader>
-          <Select value={newPlan} onValueChange={setNewPlan}>
-            <SelectTrigger><SelectValue placeholder="Selecionar plano" /></SelectTrigger>
-            <SelectContent>
-              {PLANOS.map(p => <SelectItem key={p} value={p}>{p.toUpperCase()}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPlanDialog(null)}>Cancelar</Button>
-            <Button onClick={handlePlanSubmit}>Salvar</Button>
-          </DialogFooter>
+      {/* Dialogo do usuário */}
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="truncate">{selected.name || "Sem nome"}</DialogTitle>
+                <DialogDescription className="truncate">{selected.email}</DialogDescription>
+              </DialogHeader>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="accent">{PLANO_LABELS[selected.plano] ?? selected.plano}</Badge>
+                {roleOf(selected.user_id) && <Badge tone="primary">{CARGO_LABELS[roleOf(selected.user_id)]}</Badge>}
+                {isBlocked(selected.user_id) && <Badge tone="danger">Banido</Badge>}
+                <Badge>Saldo: {selected.credits}</Badge>
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-border/60 p-3">
+                <p className="text-xs font-semibold text-foreground">Créditos</p>
+                <Input
+                  type="number"
+                  min={1}
+                  value={creditInput}
+                  onChange={(e) => setCreditInput(e.target.value)}
+                  placeholder="Quantidade de créditos"
+                />
+                <Input
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Motivo (opcional)"
+                />
+                <div className="flex gap-2">
+                  <Button className="flex-1" disabled={busy} onClick={() => adjustCredits(1)}>
+                    <Plus className="mr-1 h-4 w-4" /> Adicionar
+                  </Button>
+                  <Button className="flex-1" variant="outline" disabled={busy} onClick={() => adjustCredits(-1)}>
+                    <Minus className="mr-1 h-4 w-4" /> Remover
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold text-foreground">Plano</p>
+                  <Select value={selected.plano} onValueChange={setPlan}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {PLANOS.map((p) => <SelectItem key={p} value={p}>{PLANO_LABELS[p]}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold text-foreground">Cargo</p>
+                  <Select value={roleOf(selected.user_id) || undefined} onValueChange={setCargo}>
+                    <SelectTrigger><SelectValue placeholder="Sem cargo" /></SelectTrigger>
+                    <SelectContent>
+                      {CARGOS.map((c) => <SelectItem key={c} value={c}>{CARGO_LABELS[c]}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 border-t border-border/50 pt-3">
+                <Button size="sm" variant="outline" disabled={busy} onClick={resetPin}>
+                  <KeyRound className="mr-1 h-4 w-4" /> Resetar PIN
+                </Button>
+                {isBlocked(selected.user_id) ? (
+                  <Button size="sm" variant="outline" disabled={busy} onClick={() => unbanUser(selected.user_id)}>
+                    <ShieldBan className="mr-1 h-4 w-4" /> Desbanir
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy || selected.user_id === me?.id}
+                    onClick={banUser}
+                  >
+                    <Ban className="mr-1 h-4 w-4" /> Banir
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={busy || selected.user_id === me?.id}
+                  onClick={deleteUser}
+                >
+                  <Trash2 className="mr-1 h-4 w-4" /> Excluir conta
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
