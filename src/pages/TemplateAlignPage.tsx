@@ -63,6 +63,7 @@ export const defaultCnhFields: FieldDef[] = [
   },
   { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 65, y: 315, fontSize: 12, rotate: -90 },
   { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 64, y: 558, fontSize: 11.5, rotate: -90 },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 437, y: 118, fontSize: 8, w: 277, h: 277, color: "#999" },
 ];
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
