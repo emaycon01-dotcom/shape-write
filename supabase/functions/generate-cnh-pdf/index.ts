@@ -204,10 +204,16 @@ function bytesToBase64(bytes: Uint8Array) {
   return btoa(binary);
 }
 
+const CATEGORY_UNITS = ["ACC", "A", "B", "C", "D", "E"];
+
 function parseActiveCategories(activeCategory: string) {
-  const normalized = activeCategory.replace(/\s+/g, "").toUpperCase();
+  let normalized = activeCategory.replace(/[\s;]+/g, "").toUpperCase();
   const set = new Set<string>();
   if (!normalized) return set;
+  if (normalized.includes("ACC")) {
+    set.add("ACC");
+    normalized = normalized.replace(/ACC/g, "");
+  }
   for (const c of ["A", "B", "C", "D", "E"]) {
     if (normalized.includes(c)) set.add(c);
   }
@@ -216,8 +222,9 @@ function parseActiveCategories(activeCategory: string) {
 
 function normalizeCategoria(cat: string): string {
   const active = parseActiveCategories(cat);
-  const ordered = ["A", "B", "C", "D", "E"].filter((c) => active.has(c)).join("");
-  return ordered || (cat || "").replace(/\s+/g, "").toUpperCase();
+  const ordered = CATEGORY_UNITS.filter((c) => active.has(c)).join("");
+  const base = ordered || (cat || "").replace(/[\s;]+/g, "").toUpperCase();
+  return base ? `${base};` : "";
 }
 
 function getCatDate(cat: string, d: Record<string, string>): string {
@@ -237,6 +244,7 @@ const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
   emissao: { x: 191, y: 187, fontSize: 6.5 },
   validade: { x: 253, y: 187, fontSize: 6.5 },
   cat_big: { x: 338, y: 184, fontSize: 11 },
+  validade_cat_acc: { x: 171, y: 331, fontSize: 4.5 },
   validade_cat_a: { x: 171, y: 353, fontSize: 4.5 },
   validade_cat_b: { x: 171, y: 375, fontSize: 4.5 },
   validade_cat_c: { x: 171, y: 397, fontSize: 4.5 },
@@ -300,6 +308,7 @@ function buildCatDateOverlays(
   const isDigital = tipo !== "fisica";
   const catPositions: Record<string, { x: number; y: number; fontSize: number }> = isDigital
     ? {
+        ACC: positions?.validade_cat_acc ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_acc,
         A: positions?.validade_cat_a ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_a,
         B: positions?.validade_cat_b ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_b,
         C: positions?.validade_cat_c ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_c,
@@ -307,6 +316,7 @@ function buildCatDateOverlays(
         E: positions?.validade_cat_e ?? DIGITAL_DEFAULT_POSITIONS.validade_cat_e,
       }
     : {
+        ACC: { x: 169, y: 258, fontSize: 4.5 },
         A: { x: 169, y: 280, fontSize: 4.5 },
         B: { x: 169, y: 302, fontSize: 4.5 },
         C: { x: 169, y: 323, fontSize: 4.5 },
@@ -689,6 +699,7 @@ serve(async (req) => {
       data_primeira_hab: body.data_primeira_habilitacao || "",
       data_emissao: body.data_emissao || "",
       data_validade: body.data_validade || "",
+      validade_cat_acc: body.validade_cat_acc || "",
       validade_cat_a: body.validade_cat_a || "",
       validade_cat_b: body.validade_cat_b || "",
       validade_cat_c: body.validade_cat_c || "",
