@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 import { authenticateRequest } from "../_shared/auth.ts";
 import { CNH_FONT_FACE } from "./cnh-font.ts";
+import { qrSvg, registerValidationDocument } from "./validacao.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
