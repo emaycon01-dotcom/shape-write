@@ -10,7 +10,10 @@ import {
   History,
   CreditCard,
   Crown,
-  BarChart3,
+  ArrowUpRight,
+  Sparkle,
+  ShieldCheck,
+  Headphones,
 } from "lucide-react";
 
 const formatDate = () => {
@@ -25,119 +28,154 @@ export default function DashboardHome() {
   const { documents } = useDocuments();
   const userDocs = documents.filter((d) => d.userId === user?.id);
   const isAdmin = user?.role === "admin";
+  const today = new Date().toISOString().split("T")[0];
 
   const stats = [
-    { label: "CRÉDITOS", value: user?.credits ?? 0, icon: Zap, color: "text-accent" },
-    { label: "TRANSFERÊNCIA", value: 0, icon: Send, color: "text-primary" },
-    { label: "HOJE", value: userDocs.filter(d => d.createdAt.startsWith(new Date().toISOString().split("T")[0])).length, icon: CalendarDays, color: "text-success" },
-    { label: "EQUIPE", value: isAdmin ? 2 : 0, icon: Users, color: "text-accent" },
+    { label: "Créditos", value: user?.credits ?? 0, icon: Zap, tone: "accent" as const },
+    { label: "Transferência", value: 0, icon: Send, tone: "primary" as const },
+    { label: "Hoje", value: userDocs.filter((d) => d.createdAt.startsWith(today)).length, icon: CalendarDays, tone: "success" as const },
+    { label: "Equipe", value: isAdmin ? 2 : 0, icon: Users, tone: "primary" as const },
   ];
 
   const shortcuts = isAdmin
     ? [
-        { title: "Serviços", desc: "Gerar documentos", icon: FileText, url: "/dashboard/documents", color: "text-primary" },
-        { title: "Histórico", desc: "Serviços gerados", icon: History, url: "/dashboard/history", color: "text-yellow-400" },
-        { title: "Revendedores", desc: "Gerenciar equipe", icon: Users, url: "/dashboard/revendedores", color: "text-success" },
-        { title: "Usuários", desc: "Gerenciar usuários", icon: Users, url: "/dashboard/admin/usuarios", color: "text-accent" },
-        { title: "Financeiro", desc: "Depósitos e lucro", icon: CreditCard, url: "/dashboard/admin/financeiro", color: "text-success" },
-        { title: "Recarregar", desc: "Comprar créditos", icon: CreditCard, url: "/dashboard/recarregar", color: "text-primary" },
+        { title: "Serviços", desc: "Gerar documentos", icon: FileText, url: "/dashboard/documents", featured: true },
+        { title: "Histórico", desc: "Serviços gerados", icon: History, url: "/dashboard/history" },
+        { title: "Revendedores", desc: "Gerenciar equipe", icon: Users, url: "/dashboard/revendedores" },
+        { title: "Usuários", desc: "Gerenciar usuários", icon: ShieldCheck, url: "/dashboard/admin/usuarios" },
+        { title: "Financeiro", desc: "Depósitos e lucro", icon: CreditCard, url: "/dashboard/admin/financeiro" },
+        { title: "Recarregar", desc: "Comprar créditos", icon: Zap, url: "/dashboard/recarregar" },
       ]
     : [
-        { title: "Serviços", desc: "Gerar documentos", icon: FileText, url: "/dashboard/documents", color: "text-primary" },
-        { title: "Histórico", desc: "Serviços gerados", icon: History, url: "/dashboard/history", color: "text-yellow-400" },
-        { title: "Recarregar", desc: "Comprar créditos", icon: CreditCard, url: "/dashboard/recarregar", color: "text-primary" },
-        { title: "Planos", desc: "Planos exclusivos", icon: Crown, url: "/dashboard/planos", color: "text-accent" },
+        { title: "Serviços", desc: "Gerar documentos", icon: FileText, url: "/dashboard/documents", featured: true },
+        { title: "Histórico", desc: "Serviços gerados", icon: History, url: "/dashboard/history" },
+        { title: "Recarregar", desc: "Comprar créditos", icon: CreditCard, url: "/dashboard/recarregar" },
+        { title: "Planos", desc: "Planos exclusivos", icon: Crown, url: "/dashboard/planos" },
       ];
 
-  // Metas mockadas
-  const metas = [
-    { label: "DIÁRIA", current: userDocs.filter(d => d.createdAt.startsWith(new Date().toISOString().split("T")[0])).length, total: 3 },
-    { label: "SEMANAL", current: Math.min(userDocs.length, 10), total: 10 },
-    { label: "MENSAL", current: Math.min(userDocs.length, 30), total: 30 },
-  ];
+  const toneRing: Record<string, string> = {
+    accent: "text-accent bg-accent/10 ring-accent/20",
+    primary: "text-primary bg-primary/10 ring-primary/20",
+    success: "text-success bg-success/10 ring-success/20",
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">
-            Olá, {user?.name?.split(" ")[0]}
-          </h1>
-          <p className="text-muted-foreground text-sm">{formatDate()}</p>
+    <div className="space-y-7">
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 p-6 sm:p-8 shadow-[0_24px_60px_-30px_hsl(var(--accent)/0.55),inset_0_1px_0_hsl(var(--foreground)/0.07)]">
+        <div className="absolute inset-0 gradient-primary opacity-[0.14]" />
+        <div className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-accent/25 blur-3xl animate-glow-pulse" />
+        <div className="absolute -bottom-28 -left-10 w-72 h-72 rounded-full bg-primary/20 blur-3xl" />
+
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full gradient-button px-3 py-1 text-[11px] font-semibold tracking-wide text-primary-foreground shadow-[0_8px_20px_-8px_hsl(var(--accent)/0.8)]">
+                <Crown className="w-3.5 h-3.5" />
+                {isAdmin ? "Administrador" : "Cliente"}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-3 py-1 text-[11px] font-medium text-muted-foreground backdrop-blur">
+                <Sparkle className="w-3.5 h-3.5 text-accent" />
+                Conta ativa
+              </span>
+            </div>
+            <div>
+              <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground">
+                Olá, {user?.name?.split(" ")[0]}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1 capitalize">{formatDate()}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:items-end">
+            <div className="rounded-2xl border border-border/60 bg-card/70 px-5 py-4 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.08)]">
+              <p className="text-[10px] tracking-[0.2em] text-muted-foreground">SALDO</p>
+              <p className="font-display text-2xl font-bold text-foreground">
+                {user?.credits ?? 0} <span className="text-sm font-medium text-muted-foreground">créditos</span>
+              </p>
+            </div>
+            <Link
+              to="/dashboard/recarregar"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl gradient-button px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_-12px_hsl(var(--accent)/0.9)] transition-transform duration-300 hover:-translate-y-0.5"
+            >
+              Recarregar <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-medium text-foreground">
-          <Crown className="w-3.5 h-3.5 text-accent" />
-          {isAdmin ? "Admin" : "Cliente"}
-        </span>
-      </div>
+      </section>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map((s) => (
-          <div key={s.label} className="glass rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <s.icon className={`w-4 h-4 ${s.color}`} />
-              <span className="text-[10px] tracking-widest text-muted-foreground font-medium">{s.label}</span>
+          <div
+            key={s.label}
+            className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]"
+          >
+            <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${toneRing[s.tone]}`}>
+              <s.icon className="w-4 h-4" />
             </div>
-            <p className="text-2xl font-bold text-foreground">{s.value}</p>
+            <p className="text-[10px] tracking-[0.18em] text-muted-foreground uppercase">{s.label}</p>
+            <p className="mt-1 font-display text-2xl font-bold text-foreground">{s.value}</p>
           </div>
         ))}
-      </div>
-
-      {/* Metas */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <h2 className="text-sm font-semibold text-foreground tracking-wider">METAS</h2>
-          </div>
-        </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {metas.map((m) => {
-            const pct = m.total > 0 ? Math.round((m.current / m.total) * 100) : 0;
-            return (
-              <div key={m.label} className="glass rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-muted-foreground tracking-wider">{m.label}</span>
-                  <span className="text-sm font-bold text-primary">{m.current}/{m.total}</span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <p className="text-right text-xs text-muted-foreground mt-2">{pct}%</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      </section>
 
       {/* Atalhos */}
-      <div>
-        <h2 className="text-sm font-semibold text-foreground tracking-wider mb-4">ATALHOS</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <section>
+        <div className="mb-4 flex items-center gap-3">
+          <h2 className="text-sm font-semibold tracking-[0.18em] text-foreground">ATALHOS</h2>
+          <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {shortcuts.map((s) => (
             <Link
               key={s.title}
               to={s.url}
-              className="glass rounded-xl p-5 hover:border-primary/30 transition-colors group"
+              className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 ${
+                s.featured
+                  ? "border-primary/40 bg-card/80 shadow-[0_18px_45px_-25px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
+                  : "border-border/60 bg-card/60 hover:border-primary/30 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.05)]"
+              } backdrop-blur`}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                  <s.icon className={`w-5 h-5 ${s.color}`} />
+              {s.featured && <div className="absolute inset-0 gradient-primary opacity-[0.12]" />}
+              <div className="relative flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
+                  <s.icon className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{s.title}</p>
-                  <p className="text-xs text-muted-foreground">{s.desc}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground">{s.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">{s.desc}</p>
                 </div>
+                <ArrowUpRight className="w-4 h-4 shrink-0 text-muted-foreground transition-all duration-300 group-hover:-translate-y-0.5 group-hover:text-primary" />
               </div>
             </Link>
           ))}
         </div>
-      </div>
+      </section>
+
+      {/* Suporte */}
+      <section className="relative overflow-hidden rounded-2xl border border-border/60 p-5 sm:p-6 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]">
+        <div className="absolute inset-0 gradient-primary opacity-[0.08]" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 ring-1 ring-accent/20">
+              <Headphones className="w-5 h-5 text-accent" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Precisa de ajuda?</p>
+              <p className="text-xs text-muted-foreground">Nosso suporte responde rápido no seu horário.</p>
+            </div>
+          </div>
+          <Link
+            to="/dashboard/documents"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/70 bg-card/70 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            Começar agora <ArrowUpRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
