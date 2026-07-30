@@ -97,87 +97,83 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-            Bem-vindo de volta
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            Acesse sua conta para continuar
-          </p>
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
+        <div className="w-full max-w-md relative group">
+          {/* glow atrás do cartão */}
+          <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-accent/50 via-primary/20 to-transparent opacity-60 blur-md transition-all duration-700 group-hover:opacity-90 group-focus-within:opacity-100" />
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-secondary border-border"
-                required
-                autoComplete="email"
-              />
-            </div>
+          <div className="relative rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-8 shadow-[0_20px_60px_-20px_hsl(var(--accent)/0.45),inset_0_1px_0_hsl(var(--foreground)/0.06)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_hsl(var(--accent)/0.6),inset_0_1px_0_hsl(var(--foreground)/0.1)]">
+            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+              Bem-vindo de volta
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              Acesse sua conta para continuar
+            </p>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail</Label>
                 <Input
-                  id="password"
-                  type={showPw ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-secondary border-border pr-10"
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-secondary/70 border-border transition-all duration-300 focus-visible:ring-accent/60"
                   required
-                  autoComplete="current-password"
+                  autoComplete="email"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPw ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-secondary/70 border-border pr-10 transition-all duration-300 focus-visible:ring-accent/60"
+                    required
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <p className="text-sm text-destructive">{error}</p>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full h-12 rounded-lg text-base bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-[0_10px_30px_-10px_hsl(var(--accent)/0.7)] transition-all duration-300 hover:-translate-y-0.5"
+                disabled={loading || isLocked}
+              >
+                {loading ? "Entrando..." : isLocked ? "Bloqueado temporariamente" : "Entrar"}
+              </Button>
+            </form>
+
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent to-border" />
+              <span className="text-sm text-muted-foreground">ou</span>
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent to-border" />
             </div>
 
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-
-            <Button
-              type="submit"
-              className="w-full h-12 rounded-lg text-base bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-              disabled={loading || isLocked}
-            >
-              {loading ? "Entrando..." : isLocked ? "Bloqueado temporariamente" : "Entrar"}
-            </Button>
-          </form>
-
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-sm text-muted-foreground">ou</span>
-            <div className="flex-1 h-px bg-border" />
+            <p className="text-center text-sm text-muted-foreground">
+              Não tem conta?{" "}
+              <Link to="/register" className="text-accent font-medium hover:underline">
+                Criar agora
+              </Link>
+            </p>
           </div>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Não tem conta?{" "}
-            <Link to="/register" className="text-accent font-medium hover:underline">
-              Criar agora
-            </Link>
-          </p>
-
-          <div className="flex items-center justify-center gap-1.5 mt-6 text-xs text-muted-foreground">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Protegido por Bellarus Security</span>
-          </div>
-
-          <p className="text-center text-xs text-muted-foreground mt-4">
-            © 2026 Bellarus Sistemas. Todos os direitos reservados.
-          </p>
         </div>
       </div>
     </div>
