@@ -337,7 +337,7 @@ function estadoFitStyle(estado: string, baseSize: number) {
 
 
 
-function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown) {
+function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
   const mrz = buildMrz(d);
   const espelhoClean = cleanCode(d.numero_espelho || "");
   const renachClean = cleanCode(d.renach || "");
