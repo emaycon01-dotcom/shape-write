@@ -60,22 +60,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let lastLoadedUserId: string | null = null;
+    let inflight: Promise<void> | null = null;
+
+    const loadProfile = (sessionUser: SupabaseUser) => {
+      // Evita buscar o mesmo perfil duas vezes (getSession + onAuthStateChange)
+      if (lastLoadedUserId === sessionUser.id && inflight) return inflight;
+      lastLoadedUserId = sessionUser.id;
+      inflight = fetchUserProfile(sessionUser)
+        .then((userData) => setUser(userData))
+        .catch((err) => {
+          console.error("Error fetching profile:", err);
+          setUser(null);
+          lastLoadedUserId = null;
+        })
+        .finally(() => setLoading(false));
+      return inflight;
+    };
+
     // Listen to auth state changes FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (session?.user) {
-          // Use setTimeout to avoid potential deadlock with Supabase client
-          setTimeout(async () => {
-            try {
-              const userData = await fetchUserProfile(session.user);
-              setUser(userData);
-            } catch (err) {
-              console.error("Error fetching profile:", err);
-              setUser(null);
-            }
-            setLoading(false);
-          }, 0);
+          // setTimeout evita deadlock com o cliente Supabase
+          setTimeout(() => { void loadProfile(session.user); }, 0);
         } else {
+          lastLoadedUserId = null;
+          inflight = null;
           setUser(null);
           setLoading(false);
         }
@@ -85,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Then check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        fetchUserProfile(session.user).then(setUser).catch(() => setUser(null)).finally(() => setLoading(false));
+        void loadProfile(session.user);
       } else {
         setLoading(false);
       }
