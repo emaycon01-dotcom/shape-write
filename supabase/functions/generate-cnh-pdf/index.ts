@@ -128,39 +128,50 @@ function mrzCheckDigit(value: string) {
   return String(sum % 10);
 }
 
+const MRZ_SUFFIXES = ["002", "082", "882"];
+
 function buildMrz(d: Record<string, string>) {
-  const registro = toMrzToken(d.registro || d.numero_espelho || "").replace(/[^A-Z0-9<]/g, "");
-  const docNumber = registro.padEnd(9, "<").slice(0, 9);
+  // Linha 1: I<BRA + nº de registro (11) + "<" + código de 3 dígitos + preenchimento até 30
+  const registro = toMrzToken(d.registro || d.numero_espelho || "")
+    .replace(/[^A-Z0-9]/g, "")
+    .padEnd(11, "0")
+    .slice(0, 11);
 
-  const optionalData = toMrzToken(d.renach || d.numero_espelho || "")
-    .replace(/[^A-Z0-9<]/g, "")
-    .padEnd(15, "<")
-    .slice(0, 15);
+  const digitSum = registro.split("").reduce((acc, c) => acc + (Number(c) || 0), 0);
+  const suffix = MRZ_SUFFIXES[digitSum % MRZ_SUFFIXES.length];
 
+  const line1 = `I<BRA${registro}<${suffix}`.padEnd(30, "<").slice(0, 30);
+
+  // Linha 2: nascimento + dv + sexo + validade + dv + BRA + opcional + dv composto
   const birth = toMrzDate(d.data_nascimento || "");
   const expiry = toMrzDate(d.data_validade || "");
   const birthCheck = mrzCheckDigit(birth);
   const expiryCheck = mrzCheckDigit(expiry);
 
   const gender = normalizeMrzText(d.genero || "");
-  const sex = gender.startsWith("F") ? "F" : gender.startsWith("M") ? "M" : "<";
+  const sex = gender.startsWith("F") ? "F" : "M";
 
-  const personalNumber = "<<<<<<<<<<<";
-
-  const docCheck = mrzCheckDigit(docNumber);
+  const optional = "<<<<<<<<<<";
   const finalCheck = mrzCheckDigit(
-    `${docNumber}${docCheck}${optionalData}${birth}${birthCheck}${expiry}${expiryCheck}${personalNumber}`
+    `${registro}${suffix}${birth}${birthCheck}${expiry}${expiryCheck}${optional}`
   );
 
-  const fullName = toMrzToken(d.nome_completo || "NOME SOBRENOME")
-    .replace(/<+/g, "<<")
+  const line2 = `${birth}${birthCheck}${sex}${expiry}${expiryCheck}BRA${optional}${finalCheck}<`
     .padEnd(30, "<")
     .slice(0, 30);
 
+  // Linha 3: PRIMEIRO<<SEGUNDO<TERCEIRO<<<<
+  const parts = toMrzToken(d.nome_completo || "NOME SOBRENOME")
+    .split("<")
+    .filter(Boolean);
+  const first = parts.shift() || "NOME";
+  const rest = parts.join("<");
+  const line3 = `${first}<<${rest}`.padEnd(30, "<").slice(0, 30);
+
   return {
-    line1: escapeHtml(`I<BRA${docNumber}${docCheck}${optionalData}`),
-    line2: escapeHtml(`${birth}${birthCheck}${sex}${expiry}${expiryCheck}BRA${personalNumber}${finalCheck}`),
-    line3: escapeHtml(fullName),
+    line1: escapeHtml(line1),
+    line2: escapeHtml(line2),
+    line3: escapeHtml(line3),
   };
 }
 
