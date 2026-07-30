@@ -1,9 +1,20 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, Check,
+  ShieldCheck, Zap, Clock, Check, Percent,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const PLANOS = [
   {
@@ -12,7 +23,10 @@ export const PLANOS = [
     icon: Rocket,
     gradient: "gradient-dealer",
     ring: "ring-sky-500/30",
-    beneficios: ["Painel de serviços", "CNH Digital", "Suporte padrão"],
+    desconto: 25,
+    descricao:
+      "Plano de entrada da Bellarus. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Dealer na conta recebe 25% de desconto em todo o sistema.",
+    beneficios: ["Painel de serviços", "CNH Digital", "Suporte padrão", "25% de desconto em todo o sistema"],
   },
   {
     nome: "Master",
@@ -21,7 +35,10 @@ export const PLANOS = [
     gradient: "gradient-master",
     ring: "ring-purple-500/30",
     destaque: true,
-    beneficios: ["Tudo do Dealer", "Fila prioritária", "Suporte prioritário"],
+    desconto: 50,
+    descricao:
+      "Plano intermediário com tudo do Dealer, fila prioritária de geração e suporte prioritário. Quem tem o plano Master na conta recebe 50% de desconto em todo o sistema.",
+    beneficios: ["Tudo do Dealer", "Fila prioritária", "Suporte prioritário", "50% de desconto em todo o sistema"],
   },
   {
     nome: "Diamond",
@@ -29,9 +46,13 @@ export const PLANOS = [
     icon: Gem,
     gradient: "gradient-diamond",
     ring: "ring-amber-500/30",
-    beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado"],
+    desconto: 100,
+    descricao:
+      "Plano máximo da Bellarus: tudo do Master, limites ampliados e atendimento dedicado. Quem tem o plano Diamond na conta recebe 100% de desconto em todo o sistema.",
+    beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado", "100% de desconto em todo o sistema"],
   },
 ];
+
 
 const formatDate = () => {
   const d = new Date();
@@ -59,7 +80,11 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 
 export default function DashboardHome() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
+  const [planoSelecionado, setPlanoSelecionado] = useState<(typeof PLANOS)[number] | null>(null);
+
+
 
   return (
     <div className="space-y-6">
@@ -179,17 +204,70 @@ export default function DashboardHome() {
                   ))}
                 </ul>
 
-                <Link
-                  to="/dashboard/recarregar"
+                <button
+                  type="button"
+                  onClick={() => setPlanoSelecionado(plano)}
                   className={`mt-1 flex h-8 w-full items-center justify-center rounded-lg text-[11px] font-semibold text-primary-foreground transition-all hover:opacity-90 ${plano.gradient}`}
                 >
                   Assinar
-                </Link>
+                </button>
               </div>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Confirmação de assinatura */}
+      <AlertDialog open={!!planoSelecionado} onOpenChange={(o) => !o && setPlanoSelecionado(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {planoSelecionado && (
+                <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${planoSelecionado.gradient}`}>
+                  <planoSelecionado.icon className="h-4 w-4 text-primary-foreground" />
+                </span>
+              )}
+              Tem certeza que deseja continuar?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-left">
+                <p>
+                  Você está assinando o plano{" "}
+                  <span className="font-semibold text-foreground">{planoSelecionado?.nome}</span> por{" "}
+                  <span className="font-semibold text-foreground">{planoSelecionado?.preco}</span>.
+                </p>
+                <p>{planoSelecionado?.descricao}</p>
+                <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-accent">
+                  <Percent className="h-4 w-4 shrink-0" />
+                  <span className="text-xs font-semibold">
+                    {planoSelecionado?.desconto}% de desconto em todo o sistema enquanto o plano estiver ativo na conta
+                  </span>
+                </div>
+                <ul className="space-y-1">
+                  {planoSelecionado?.beneficios.map((b) => (
+                    <li key={b} className="flex items-start gap-1.5 text-xs">
+                      <Check className="mt-[2px] h-3 w-3 shrink-0 text-accent" />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                navigate(`/dashboard/recarregar?plano=${encodeURIComponent(planoSelecionado?.nome ?? "")}`)
+              }
+            >
+              Sim, continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+
+

@@ -14,6 +14,7 @@ import {
   Rocket,
   Star,
   Gem,
+  PenTool,
 } from "lucide-react";
 import {
   Sidebar,
@@ -121,6 +122,28 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Ferramentas */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">FERRAMENTAS</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to="/dashboard/ferramentas/assinaturas"
+                    className="hover:bg-secondary/50"
+                    activeClassName="bg-secondary text-primary font-medium"
+                  >
+                    <PenTool className="mr-2 h-4 w-4" />
+                    {!collapsed && <span>Criador de Assinaturas</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
 
         {/* Admin: only Menu Admin + Alinhamento */}
         {isAdmin && (
