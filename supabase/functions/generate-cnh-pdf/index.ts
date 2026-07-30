@@ -224,7 +224,15 @@ function normalizeCategoria(cat: string): string {
   const active = parseActiveCategories(cat);
   const ordered = CATEGORY_UNITS.filter((c) => active.has(c)).join("");
   const base = ordered || (cat || "").replace(/[\s;]+/g, "").toUpperCase();
-  return base ? `${base};` : "";
+  return base;
+}
+
+function formatObservacoes(value: string): string {
+  const parts = (value || "")
+    .split(/[;,]+/)
+    .map((v) => v.trim().toUpperCase())
+    .filter(Boolean);
+  return parts.length ? parts.map((v) => `${v};`).join(" ") : "";
 }
 
 function getCatDate(cat: string, d: Record<string, string>): string {
@@ -236,35 +244,35 @@ type Pos = { x: number; y: number; fontSize: number; w?: number; h?: number; rot
 
 // Defaults MUST match src/pages/TemplateAlignPage.tsx defaultCnhFields
 const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
-  photo: { x: 98, y: 167, fontSize: 8, w: 82, h: 110 },
+  photo: { x: 98, y: 165, fontSize: 8, w: 82, h: 110 },
   signature: { x: 93, y: 276, fontSize: 7, w: 95, h: 32 },
-  nome: { x: 100, y: 149, fontSize: 6.5 },
+  nome: { x: 102, y: 149, fontSize: 6.5 },
   primeira_hab: { x: 308, y: 149, fontSize: 6.5 },
-  nascimento: { x: 192, y: 168, fontSize: 6.5 },
-  emissao: { x: 191, y: 187, fontSize: 6.5 },
-  validade: { x: 253, y: 187, fontSize: 6.5 },
+  nascimento: { x: 191, y: 168, fontSize: 6.5 },
+  emissao: { x: 194, y: 187, fontSize: 6.5 },
+  validade: { x: 251, y: 187, fontSize: 6.5 },
   cat_big: { x: 338, y: 184, fontSize: 11 },
-  validade_cat_acc: { x: 171, y: 331, fontSize: 4.5 },
+  validade_cat_acc: { x: 171, y: 341, fontSize: 4.5 },
   validade_cat_a: { x: 171, y: 353, fontSize: 4.5 },
   validade_cat_b: { x: 171, y: 375, fontSize: 4.5 },
   validade_cat_c: { x: 171, y: 397, fontSize: 4.5 },
   validade_cat_d: { x: 275, y: 342, fontSize: 4.5 },
   validade_cat_e: { x: 274, y: 375, fontSize: 4.5 },
-  rg: { x: 190, y: 207, fontSize: 6.5 },
-  cpf: { x: 190, y: 226, fontSize: 6.5 },
-  registro: { x: 256, y: 226, fontSize: 6.5 },
-  cat_hab: { x: 319, y: 226, fontSize: 7 },
-  nacionalidade: { x: 190, y: 246, fontSize: 6.5 },
-  pai: { x: 190, y: 266, fontSize: 6.5 },
-  mae: { x: 190, y: 286, fontSize: 6.5 },
-  obs: { x: 97, y: 427, fontSize: 5.5 },
-  espelho: { x: 281, y: 495, fontSize: 6.5 },
-  renach: { x: 280, y: 509, fontSize: 6.5 },
-  local: { x: 100, y: 505, fontSize: 6 },
-  estado: { x: 199, y: 530, fontSize: 15 },
-  mrz: { x: 80, y: 694, fontSize: 9.5 },
-  reg_vert_top: { x: 65, y: 315, fontSize: 12, rotate: -90 },
-  reg_vert_bot: { x: 64, y: 558, fontSize: 11.5, rotate: -90 },
+  rg: { x: 193, y: 207, fontSize: 6.5 },
+  cpf: { x: 192, y: 226, fontSize: 6.5 },
+  registro: { x: 258, y: 226, fontSize: 6.5 },
+  cat_hab: { x: 320, y: 225, fontSize: 7 },
+  nacionalidade: { x: 191, y: 245, fontSize: 6.5 },
+  pai: { x: 192, y: 267, fontSize: 6.5 },
+  mae: { x: 192, y: 278, fontSize: 6.5 },
+  obs: { x: 99, y: 430, fontSize: 5.5 },
+  espelho: { x: 283, y: 498, fontSize: 6.5 },
+  renach: { x: 284, y: 507, fontSize: 6.5 },
+  local: { x: 98, y: 507, fontSize: 6 },
+  estado: { x: 201, y: 534, fontSize: 15 },
+  mrz: { x: 74, y: 697, fontSize: 9.5 },
+  reg_vert_top: { x: 66, y: 302, fontSize: 12, rotate: -90 },
+  reg_vert_bot: { x: 64, y: 546, fontSize: 11.5, rotate: -90 },
   qr: { x: 437, y: 118, fontSize: 8, w: 277, h: 277 },
 };
 
@@ -449,8 +457,9 @@ ${CNH_FONT_FACE}
   }
   .photo-overlay { overflow: hidden; }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
-  .qr-overlay { background:#fff; z-index: 12; box-shadow: 0 0 0 8px #fff; outline: 8px solid #fff; }
+  .qr-overlay { background:#fff; z-index: 12; overflow: hidden; }
   .qr-overlay svg { width:100%; height:100%; display:block; }
+  .mrz-line { display:block; width:100%; text-align:justify; text-align-last:justify; white-space:nowrap; }
   .sig-overlay { display: flex; align-items: center; justify-content: center; }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
 </style>
@@ -478,13 +487,17 @@ ${CNH_FONT_FACE}
   ${text("pai", d.nome_pai || "", ellipsis)}
   ${text("mae", d.nome_mae || "", ellipsis)}
   ${buildCatDateOverlays(d.categoria || "", d, "digital", p)}
-  ${text("obs", d.observacoes || "", "max-width:370px;")}
+  ${text("obs", formatObservacoes(d.observacoes || ""), "max-width:370px;")}
   ${text("espelho", espelhoClean, "white-space:nowrap;")}
   ${text("renach", renachClean, "white-space:nowrap;")}
   ${text("local", d.cidade_estado || "")}
   <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;transform:translateX(-50%);text-align:center;white-space:nowrap;font-weight:normal;font-family:'CNHDigital',Arial,Helvetica,sans-serif;`)}${estadoFitStyle(estadoAcentuado(d.estado_extenso || ""), p.estado.fontSize)}">${escapeHtml(estadoAcentuado(d.estado_extenso || ""))}</div>
   <div class="overlay" style="${rotStyle("reg_vert_bot")}">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay" style="${base("mrz", "width:460px;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;font-family:'CNHDigital',monospace;")}">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="${base("mrz", "width:378px;line-height:1.6;font-family:\'CNHDigital\',monospace;")}">
+    <div class="mrz-line">${mrz.line1}</div>
+    <div class="mrz-line">${mrz.line2}</div>
+    <div class="mrz-line">${mrz.line3}</div>
+  </div>
 </div>
 </body>
 </html>`;
