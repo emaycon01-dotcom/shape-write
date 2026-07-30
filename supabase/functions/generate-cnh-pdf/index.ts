@@ -655,7 +655,7 @@ serve(async (req) => {
     }
 
     const isFisica = body.tipo === "fisica";
-    const html = isFisica ? buildCnhFisicaHtml(data) : buildCnhDigitalHtml(data);
+    const html = isFisica ? buildCnhFisicaHtml(data) : buildCnhDigitalHtml(data, body.field_positions);
 
     let pdfBuffer: Uint8Array | null = null;
 
