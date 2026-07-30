@@ -18,7 +18,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  deductCredit: (amount?: number) => void;
+  deductCredit: (amount?: number, reason?: string) => Promise<{ ok: boolean; error?: string; credits?: number }>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -131,22 +132,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
-  const deductCredit = useCallback(async (amount: number = 1) => {
-    if (!user || user.credits < amount) return;
-
-    const { data, error } = await supabase.functions.invoke("deduct-credit", {
-      body: { amount },
-    });
-
-    if (!error && data?.credits !== undefined) {
-      setUser((prev) => prev ? { ...prev, credits: data.credits } : prev);
+  const refreshUser = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+    try {
+      setUser(await fetchUserProfile(session.user));
+    } catch {
+      /* ignore */
     }
-  }, [user]);
+  }, []);
+
+  const deductCredit = useCallback(
+    async (amount: number = 1, reason: string = "geracao") => {
+      const { data, error } = await supabase.rpc("consume_credits", {
+        _amount: amount,
+        _reason: reason,
+      });
+
+      if (error) {
+        const msg = error.message || "";
+        let friendly = "Não foi possível descontar os créditos.";
+        if (msg.includes("insufficient_credits")) friendly = "Créditos insuficientes.";
+        else if (msg.includes("user_blocked")) friendly = "Sua conta está bloqueada.";
+        else if (msg.includes("not_authenticated")) friendly = "Sessão expirada. Entre novamente.";
+        await refreshUser();
+        return { ok: false, error: friendly };
+      }
+
+      const credits = Number(data ?? 0);
+      setUser((prev) => (prev ? { ...prev, credits } : prev));
+      return { ok: true, credits };
+    },
+    [refreshUser]
+  );
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, loading, login, register, logout, deductCredit }}
+      value={{ user, isAuthenticated: !!user, loading, login, register, logout, deductCredit, refreshUser }}
     >
+
       {children}
     </AuthContext.Provider>
   );

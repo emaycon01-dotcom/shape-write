@@ -138,6 +138,16 @@
   .gradient-button {
     background: var(--gradient-button);
   }
+  .gradient-dealer {
+    background: linear-gradient(135deg, hsl(199 89% 55%), hsl(217 91% 45%));
+  }
+  .gradient-master {
+    background: linear-gradient(135deg, hsl(263 70% 58%), hsl(291 64% 52%));
+  }
+  .gradient-diamond {
+    background: linear-gradient(135deg, hsl(43 96% 56%), hsl(21 90% 52%));
+  }
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }

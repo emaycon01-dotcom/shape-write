@@ -86,7 +86,7 @@ export default function HistoryPage() {
     setEditDoc(doc);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!editDoc || !user) return;
     setEditLoading(true);
 
@@ -98,8 +98,15 @@ export default function HistoryPage() {
       return;
     }
 
-    deductCredit(EDIT_COST);
+    const deduction = await deductCredit(EDIT_COST, "edicao-documento");
+    if (!deduction.ok) {
+      toast({ title: "Não foi possível editar", description: deduction.error, variant: "destructive" });
+      setEditLoading(false);
+      setEditDoc(null);
+      return;
+    }
     toast({ title: "Edição liberada!", description: `${EDIT_COST} crédito(s) descontado(s).` });
+
 
     let formData: Record<string, string> = {};
     try {
@@ -135,9 +142,14 @@ export default function HistoryPage() {
     if (!renewDoc || !user) return;
     setRenewLoading(true);
     try {
+      const deduction = await deductCredit(RENEW_COST, "renovacao-documento");
+      if (!deduction.ok) {
+        toast({ title: "Não foi possível renovar", description: deduction.error, variant: "destructive" });
+        return;
+      }
       await renewDocument(renewDoc.id);
-      deductCredit(RENEW_COST);
       toast({ title: "Documento renovado!", description: `${RENEW_COST} crédito descontado. Válido por mais 45 dias.` });
+
     } catch {
       toast({ title: "Erro ao renovar documento", variant: "destructive" });
     } finally {

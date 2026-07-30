@@ -74,6 +74,39 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_transactions: {
+        Row: {
+          actor_id: string | null
+          amount: number
+          balance_after: number
+          created_at: string
+          id: string
+          kind: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          reason?: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       deposits: {
         Row: {
           amount: number
@@ -376,7 +409,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_credits: {
+        Args: { _delta: number; _reason?: string; _target_user_id: string }
+        Returns: number
+      }
+      admin_ban_user: {
+        Args: { _reason?: string; _target_user_id: string }
+        Returns: undefined
+      }
+      admin_set_plan: {
+        Args: { _plan: string; _target_user_id: string }
+        Returns: undefined
+      }
+      admin_set_role: {
+        Args: {
+          _cargo: Database["public"]["Enums"]["app_cargo"]
+          _target_user_id: string
+        }
+        Returns: undefined
+      }
+      admin_unban_user: {
+        Args: { _target_user_id: string }
+        Returns: undefined
+      }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
+      consume_credits: {
+        Args: { _amount: number; _reason?: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _cargo: Database["public"]["Enums"]["app_cargo"]

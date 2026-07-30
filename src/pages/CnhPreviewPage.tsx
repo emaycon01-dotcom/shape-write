@@ -89,7 +89,17 @@ export default function CnhPreviewPage() {
 
     setLoading(true);
     try {
-      deductCredit();
+      const deduction = await deductCredit(1, "geracao-cnh");
+      if (!deduction.ok) {
+        toast({
+          title: "Não foi possível gerar",
+          description: deduction.error,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
 
       await addDocument({
         name: formData.nome_completo || "",
