@@ -167,7 +167,8 @@ function buildMrz(d: Record<string, string>) {
     .filter(Boolean);
   const first = parts.shift() || "NOME";
   const rest = parts.join("<");
-  const line3 = `${first}<<${rest}`.padEnd(31, "<").slice(0, 31);
+  // Todas as linhas com exatamente 30 caracteres para ficarem perfeitamente alinhadas
+  const line3 = `${first}<<${rest}`.padEnd(30, "<").slice(0, 30);
 
   return {
     line1: escapeHtml(line1),
@@ -246,7 +247,7 @@ const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
   espelho: { x: 281, y: 495, fontSize: 6.5 },
   renach: { x: 280, y: 509, fontSize: 6.5 },
   local: { x: 100, y: 505, fontSize: 6 },
-  estado: { x: 163, y: 531, fontSize: 15 },
+  estado: { x: 199, y: 530, fontSize: 15 },
   mrz: { x: 80, y: 694, fontSize: 9.5 },
   reg_vert_top: { x: 65, y: 315, fontSize: 12, rotate: -90 },
   reg_vert_bot: { x: 64, y: 558, fontSize: 11.5, rotate: -90 },
