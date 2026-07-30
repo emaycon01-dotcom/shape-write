@@ -324,6 +324,7 @@ export default function CnhFormPage() {
         foto_base64: fotoPreview || "",
         assinatura_base64: assPreview || "",
         template_base64: templateBase64,
+        field_positions: loadCnhFieldPositions() ?? undefined,
       };
 
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
