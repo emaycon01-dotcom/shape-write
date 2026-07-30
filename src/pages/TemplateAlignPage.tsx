@@ -6,11 +6,10 @@ import { Slider } from "@/components/ui/slider";
 import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg-hq.jpg";
+import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
-
-export const CNH_ALIGN_STORAGE_KEY = "cnh-field-positions";
 
 const CNH_FONT = "'CNHDigital', Arial, Helvetica, sans-serif";
 
@@ -65,29 +64,6 @@ export const defaultCnhFields: FieldDef[] = [
   { id: "reg_vert_top", label: "Reg. Vertical (topo)", sampleText: "07915888995", x: 65, y: 315, fontSize: 12, rotate: -90, bold: true },
   { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 64, y: 558, fontSize: 11.5, rotate: -90, bold: true },
 ];
-
-export function loadCnhFieldPositions(): Record<string, { x: number; y: number; fontSize: number; w?: number; h?: number; rotate?: number }> | null {
-  try {
-    const raw = localStorage.getItem(CNH_ALIGN_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as FieldDef[];
-    if (!Array.isArray(parsed)) return null;
-    return parsed.reduce((acc, f) => {
-      if (!f?.id) return acc;
-      acc[f.id] = {
-        x: f.x,
-        y: f.y,
-        fontSize: f.fontSize,
-        ...(f.w ? { w: f.w } : {}),
-        ...(f.h ? { h: f.h } : {}),
-        ...(f.rotate !== undefined ? { rotate: f.rotate } : {}),
-      };
-      return acc;
-    }, {} as Record<string, any>);
-  } catch {
-    return null;
-  }
-}
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
   const isBox = field.id === "photo" || field.id === "signature";
