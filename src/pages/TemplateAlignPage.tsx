@@ -457,6 +457,53 @@ function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: 
   );
 }
 
+/** Espelha STYLES de supabase/functions/generate-diploma-pdf/index.ts */
+const DIPLOMA_STYLES: Record<string, { center?: boolean; width?: number; lineHeight?: number; mask?: { w: number; h: number }; italic?: boolean }> = {
+  rep_federativa: { center: true, width: 700 },
+  ministerio: { center: true, width: 700 },
+  inst_l1: { center: true, width: 1000 },
+  inst_l2: { center: true, width: 1000 },
+  corpo: { center: true, width: 1030, lineHeight: 37.7 },
+  cidade_data: { width: 440, lineHeight: 20 },
+  reitor: { center: true, mask: { w: 320, h: 17 }, italic: true },
+  rodape_inst: { center: true, width: 700 },
+  rodape_validacao: { center: true, width: 900 },
+  p2_esq_nome: { width: 620, lineHeight: 17 },
+  p2_esq_razao: { width: 620, lineHeight: 17 },
+  p2_esq_cred: { width: 600, lineHeight: 17 },
+  p2_esq_recred: { width: 600, lineHeight: 17 },
+  p2_curso: { width: 620, lineHeight: 17 },
+  p2_reconhecimento: { width: 600, lineHeight: 17 },
+  p2_renovacao: { width: 600, lineHeight: 17 },
+  p2_dir_recred: { width: 580, lineHeight: 17 },
+  p2_registro: { width: 580, lineHeight: 17 },
+  p2_processo: { width: 580, lineHeight: 17 },
+  p2_cidade_data: { width: 580, lineHeight: 17 },
+  secretario: { center: true, mask: { w: 320, h: 17 }, italic: true },
+  resolucao: { center: true, mask: { w: 260, h: 16 }, italic: true },
+};
+
+function diplomaStyle(f: FieldDef, PW: number, scale: number): React.CSSProperties {
+  const st = DIPLOMA_STYLES[f.id];
+  if (!st) return {};
+  const s: React.CSSProperties = { whiteSpace: "pre-line" };
+  if (st.mask) {
+    s.width = `${((st.mask.w / PW) * 100).toFixed(4)}%`;
+    s.display = "flex";
+    s.alignItems = "center";
+    s.justifyContent = "center";
+  } else if (st.width) {
+    s.width = `${((st.width / PW) * 100).toFixed(4)}%`;
+  }
+  if (st.center) {
+    s.transform = "translateX(-50%)";
+    s.textAlign = "center";
+  }
+  if (st.italic) s.fontStyle = "italic";
+  if (st.lineHeight) s.lineHeight = `${st.lineHeight * scale}px`;
+  return s;
+}
+
 function AlignEditor({ cfg }: { cfg: EditorConfig }) {
   const [fields, setFields] = useState<FieldDef[]>(() => {
     const saved = localStorage.getItem(cfg.storageKey);
