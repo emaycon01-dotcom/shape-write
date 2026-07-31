@@ -84,9 +84,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex bg-background">
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-background">
         <div className="text-center">
-          <img src={logo} alt="MonkeyLab" className="w-64 mx-auto mb-4 drop-shadow-[0_20px_50px_hsl(var(--accent)/0.45)]" />
-          <p className="text-sm tracking-[0.3em] text-accent mt-1">SISTEMAS</p>
+          <img src={logo} alt="MonkeyLab" className="w-72 mx-auto object-contain drop-shadow-[0_20px_50px_hsl(var(--accent)/0.45)]" />
         </div>
+
 
       </div>
 
