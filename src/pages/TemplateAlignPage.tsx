@@ -260,15 +260,15 @@ function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: 
   );
 }
 
-function CnhAlignEditor() {
+function AlignEditor({ cfg }: { cfg: EditorConfig }) {
   const [fields, setFields] = useState<FieldDef[]>(() => {
-    const saved = localStorage.getItem(CNH_ALIGN_STORAGE_KEY);
+    const saved = localStorage.getItem(cfg.storageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
           // merge to keep new metadata (labels/colors) while using saved geometry
-          return defaultCnhFields.map((def) => {
+          return cfg.defaults.map((def) => {
             const s = parsed.find((p: FieldDef) => p.id === def.id);
             return s ? { ...def, x: s.x, y: s.y, fontSize: s.fontSize, w: s.w ?? def.w, h: s.h ?? def.h, rotate: s.rotate ?? def.rotate } : def;
           });
@@ -277,8 +277,9 @@ function CnhAlignEditor() {
         /* ignore */
       }
     }
-    return defaultCnhFields;
+    return cfg.defaults;
   });
+
 
   const [selected, setSelected] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
