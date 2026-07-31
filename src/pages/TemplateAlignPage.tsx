@@ -88,6 +88,7 @@ export const defaultRgFields: FieldDef[] = [
   { id: "data_validade", label: "Data de Validade", sampleText: "23/05/2035", x: 298, y: 302, fontSize: 11 },
   // Verso
   { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 50, y: 437, fontSize: 8, w: 82, h: 82, color: "#999" },
+  { id: "qr2", label: "QR Code grande (lateral)", sampleText: "[QR]", x: 504, y: 94, fontSize: 8, w: 240, h: 240, color: "#999" },
   { id: "photo2", label: "Foto 3x4 (verso)", sampleText: "[FOTO]", x: 397, y: 421, fontSize: 8, w: 36, h: 37, color: "#999" },
   { id: "filiacao1", label: "Filiação 1 (mãe)", sampleText: "MARIA RAIMUNDA DA COSTA DOS SANTOS", x: 153, y: 444, fontSize: 11 },
   { id: "filiacao2", label: "Filiação 2 (pai)", sampleText: "JOSE LUIZ DE SOUZA CASTRO", x: 153, y: 463, fontSize: 11 },

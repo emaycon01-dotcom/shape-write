@@ -177,6 +177,7 @@ export const RG_DEFAULT_POSITIONS: Record<string, Pos> = {
   data_validade: { x: 298, y: 302, fontSize: 11 },
   // Verso
   qr: { x: 50, y: 437, fontSize: 8, w: 82, h: 82 },
+  qr2: { x: 504, y: 94, fontSize: 8, w: 240, h: 240 },
   photo2: { x: 397, y: 421, fontSize: 8, w: 36, h: 37 },
   filiacao1: { x: 153, y: 444, fontSize: 11 },
   filiacao2: { x: 153, y: 463, fontSize: 11 },
@@ -358,6 +359,7 @@ ${RG_FONT_FACE}
 
   <!-- VERSO -->
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 82)}</div>` : ""}
+  ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr2")}">${qrSvg(qrValue, p.qr2?.w ?? 240)}</div>` : ""}
   <div class="overlay photo-overlay" style="${boxStyle("photo2")}">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
   ${text("filiacao1", d.filiacao1 || "", clip(300))}
   ${text("filiacao2", d.filiacao2 || "", clip(300))}
