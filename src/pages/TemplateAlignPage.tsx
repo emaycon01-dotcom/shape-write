@@ -839,6 +839,16 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                     ? { width: `${((232 / PW) * 100).toFixed(4)}%`, textAlign: "center" as const }
                     : {}),
                   ...(isEstado ? { width: `${((cfg.estadoBoxW / PW) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
+                  ...(cfg.key === "hapvida" && f.w && !f.h
+                    ? {
+                        width: `${((f.w / PW) * 100).toFixed(4)}%`,
+                        whiteSpace: "pre-line" as const,
+                        lineHeight: f.id === "corpo" ? 1.72 : 1.2,
+                        textAlign: (["endereco1", "endereco2", "consulte", "link"].includes(f.id)
+                          ? "right"
+                          : "left") as "right" | "left",
+                      }
+                    : {}),
                   ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
                   ...(isBox
                     ? {
