@@ -6,20 +6,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2, ChevronDown } from "lucide-react";
+import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
 
+const MEDICO = "Dr. Abdo";
+const CRM = "CRM/SP 123456";
+const ESPECIALIDADE = "Clínico Geral";
+
 interface AtestadoFormData {
   paciente: string;
-  cpf: string;
-  cns: string;
+  docTipo: "cpf" | "cns";
+  docNumero: string;
   unidade: string;
-  unidadeCurta: string;
-  endereco1: string;
-  endereco2: string;
-  endereco3: string;
+  endereco: string;
   dataAtendimento: string;
   horaAtendimento: string;
   dias: string;
@@ -27,25 +28,14 @@ interface AtestadoFormData {
   cid: string;
   nascimento: string;
   uf: string;
-  medico: string;
-  crm: string;
-  especialidade: string;
-  dataEmissao: string;
-  emitidoEm: string;
-  liberadoData: string;
-  liberadoHora: string;
-  corpo: string;
 }
 
 const initial: AtestadoFormData = {
   paciente: "",
-  cpf: "",
-  cns: "",
-  unidade: "UPA 24h Itaquera - Consultórios",
-  unidadeCurta: "UPA 24h Itaquera",
-  endereco1: "Av. Miguel Ignácio Curi, 41",
-  endereco2: "Vila Carmosina - São Paulo – SP",
-  endereco3: "CEP: 08295-005",
+  docTipo: "cpf",
+  docNumero: "",
+  unidade: "UPA 24h Itaquera",
+  endereco: "Av. Miguel Ignácio Curi, 41\nVila Carmosina - São Paulo – SP\nCEP: 08295-005",
   dataAtendimento: "",
   horaAtendimento: "",
   dias: "1",
@@ -53,14 +43,6 @@ const initial: AtestadoFormData = {
   cid: "",
   nascimento: "",
   uf: "SP",
-  medico: "",
-  crm: "",
-  especialidade: "Clínico Geral",
-  dataEmissao: "",
-  emitidoEm: "",
-  liberadoData: "",
-  liberadoHora: "",
-  corpo: "",
 };
 
 function rnd(len: number) {
@@ -85,7 +67,6 @@ export default function AtestadoFormPage() {
 
   const [form, setForm] = useState<AtestadoFormData>(initial);
   const [loading, setLoading] = useState(false);
-  const [avancadoOpen, setAvancadoOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   const { user } = useAuth();
@@ -105,13 +86,10 @@ export default function AtestadoFormPage() {
         const b = JSON.parse(raw) as Record<string, string>;
         setForm({
           paciente: b.paciente || "",
-          cpf: b.cpf || "",
-          cns: b.cns || "",
-          unidade: b.unidade || initial.unidade,
-          unidadeCurta: b.unidade_curta || initial.unidadeCurta,
-          endereco1: b.endereco1 || "",
-          endereco2: b.endereco2 || "",
-          endereco3: b.endereco3 || "",
+          docTipo: b.cns ? "cns" : "cpf",
+          docNumero: b.cns || b.cpf || "",
+          unidade: b.unidade_curta || b.unidade || initial.unidade,
+          endereco: [b.endereco1, b.endereco2, b.endereco3].filter(Boolean).join("\n"),
           dataAtendimento: b.data_atendimento || "",
           horaAtendimento: b.hora_atendimento || "",
           dias: b.dias || "1",
@@ -119,14 +97,6 @@ export default function AtestadoFormPage() {
           cid: b.cid || "",
           nascimento: b.nascimento || "",
           uf: b.uf || initial.uf,
-          medico: b.medico || "",
-          crm: b.crm || "",
-          especialidade: b.especialidade || initial.especialidade,
-          dataEmissao: b.data_emissao || "",
-          emitidoEm: b.emitido_em || "",
-          liberadoData: b.liberado_data || "",
-          liberadoHora: b.liberado_hora || "",
-          corpo: b.corpo || "",
         });
         setHydrated(true);
       } catch { /* payload inválido */ }
@@ -153,20 +123,13 @@ export default function AtestadoFormPage() {
     setForm({
       ...initial,
       paciente: pick(NOMES),
-      cpf: `${rnd(3)}.${rnd(3)}.${rnd(3)}-${rnd(2)}`,
-      cns: rnd(15),
+      docTipo: "cpf",
+      docNumero: `${rnd(3)}.${rnd(3)}.${rnd(3)}-${rnd(2)}`,
       dataAtendimento: data,
       horaAtendimento: hora,
       dias: String(Math.floor(Math.random() * 3) + 1),
-      motivo: "doença",
       cid: "J11",
       nascimento: "14/05/1990",
-      medico: "Dr. João Pereira",
-      crm: "CRM/SP 123456",
-      dataEmissao: data,
-      emitidoEm: `${data} ${hora}`,
-      liberadoData: data,
-      liberadoHora: "09:38",
     });
     toast({ title: "Formulário preenchido com dados de teste!" });
   };
@@ -188,15 +151,18 @@ export default function AtestadoFormPage() {
     try {
       const templateBase64 = await imgToBase64(templateAtestadoUrl);
 
+      const linhas = form.endereco.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const horaCurta = form.horaAtendimento.slice(0, 5);
+
       const bodyData = {
         paciente: form.paciente,
-        cpf: form.cpf,
-        cns: form.cns,
+        cpf: form.docTipo === "cpf" ? form.docNumero : "",
+        cns: form.docTipo === "cns" ? form.docNumero : "",
         unidade: form.unidade,
-        unidade_curta: form.unidadeCurta,
-        endereco1: form.endereco1,
-        endereco2: form.endereco2,
-        endereco3: form.endereco3,
+        unidade_curta: form.unidade,
+        endereco1: linhas[0] || "",
+        endereco2: linhas[1] || "",
+        endereco3: linhas.slice(2).join(" ") || "",
         data_atendimento: form.dataAtendimento,
         hora_atendimento: form.horaAtendimento,
         dias: form.dias,
@@ -204,14 +170,14 @@ export default function AtestadoFormPage() {
         cid: form.cid,
         nascimento: form.nascimento,
         uf: form.uf,
-        medico: form.medico,
-        crm: form.crm,
-        especialidade: form.especialidade,
-        data_emissao: form.dataEmissao || form.dataAtendimento,
-        emitido_em: form.emitidoEm,
-        liberado_data: form.liberadoData,
-        liberado_hora: form.liberadoHora,
-        corpo: form.corpo,
+        medico: MEDICO,
+        crm: CRM,
+        especialidade: ESPECIALIDADE,
+        data_emissao: form.dataAtendimento,
+        emitido_em: `${form.dataAtendimento} ${form.horaAtendimento}`.trim(),
+        liberado_data: form.dataAtendimento,
+        liberado_hora: horaCurta,
+        corpo: "",
         template_base64: templateBase64,
         field_positions: loadAtestadoFieldPositions() ?? undefined,
       };
@@ -292,15 +258,31 @@ export default function AtestadoFormPage() {
             <Input value={form.paciente} onChange={set("paciente")} placeholder="Ex: TATIANI RODRIGUES MOR" className={inputCls} required />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel required>CPF</FieldLabel>
-              <Input value={form.cpf} onChange={set("cpf")} placeholder="000.000.000-00" className={inputCls} required />
+          <div className="space-y-1.5">
+            <FieldLabel required>Documento</FieldLabel>
+            <div className="flex gap-2">
+              {(["cpf", "cns"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setForm((p) => ({ ...p, docTipo: t }))}
+                  className={`rounded-lg border px-4 py-1.5 text-xs font-semibold uppercase transition ${
+                    form.docTipo === t
+                      ? "border-primary bg-primary/15 text-primary"
+                      : "border-border bg-secondary text-muted-foreground"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
             </div>
-            <div className="space-y-1.5">
-              <FieldLabel>CNS</FieldLabel>
-              <Input value={form.cns} onChange={set("cns")} placeholder="801440458570767" className={inputCls} />
-            </div>
+            <Input
+              value={form.docNumero}
+              onChange={set("docNumero")}
+              placeholder={form.docTipo === "cpf" ? "000.000.000-00" : "801440458570767"}
+              className={inputCls}
+              required
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -312,27 +294,6 @@ export default function AtestadoFormPage() {
               <FieldLabel>UF</FieldLabel>
               <Input value={form.uf} onChange={set("uf")} placeholder="SP" maxLength={2} className={inputCls} />
             </div>
-          </div>
-        </div>
-
-        {/* PROFISSIONAL */}
-        <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={Stethoscope} title="Profissional" />
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel required>Nome do Médico</FieldLabel>
-              <Input value={form.medico} onChange={set("medico")} placeholder="Dr. João Pereira" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>CRM</FieldLabel>
-              <Input value={form.crm} onChange={set("crm")} placeholder="CRM/SP 123456" className={inputCls} required />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Especialidade</FieldLabel>
-            <Input value={form.especialidade} onChange={set("especialidade")} placeholder="Clínico Geral" className={inputCls} />
           </div>
         </div>
 
@@ -350,6 +311,9 @@ export default function AtestadoFormPage() {
               <Input value={form.horaAtendimento} onChange={set("horaAtendimento")} placeholder="05:53:23" className={inputCls} required />
             </div>
           </div>
+          <p className="text-[11px] text-muted-foreground">
+            A data e hora de emissão, o rodapé e a liberação eletrônica são preenchidos automaticamente com estes valores.
+          </p>
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
@@ -365,85 +329,28 @@ export default function AtestadoFormPage() {
               <Input value={form.cid} onChange={set("cid")} placeholder="J11" className={inputCls} required />
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Emitido em</FieldLabel>
-              <Input value={form.emitidoEm} onChange={set("emitidoEm")} placeholder="08/11/2023 05:54:23" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Data de emissão (rodapé)</FieldLabel>
-              <Input value={form.dataEmissao} onChange={set("dataEmissao")} placeholder="08/11/2023" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Liberado em (data)</FieldLabel>
-              <Input value={form.liberadoData} onChange={set("liberadoData")} placeholder="08/11/2023" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Liberado em (hora)</FieldLabel>
-              <Input value={form.liberadoHora} onChange={set("liberadoHora")} placeholder="09:38" className={inputCls} />
-            </div>
-          </div>
         </div>
 
-        {/* UNIDADE / AVANÇADO */}
-        <div className="glass rounded-xl p-6">
-          <button
-            type="button"
-            onClick={() => setAvancadoOpen((v) => !v)}
-            className="flex w-full items-center justify-between gap-3 text-left"
-          >
-            <div className="flex items-center gap-3">
-              <Building2 className="h-5 w-5 text-primary" />
-              <div>
-                <h2 className="text-lg font-bold text-foreground">Unidade e texto (opcional)</h2>
-                <p className="text-[11px] text-muted-foreground">Endereço do cabeçalho e personalização do texto</p>
-              </div>
-            </div>
-            <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${avancadoOpen ? "rotate-180" : ""}`} />
-          </button>
+        {/* UNIDADE */}
+        <div className="glass space-y-4 rounded-xl p-6">
+          <SectionHeader icon={Building2} title="Unidade" />
 
-          {avancadoOpen && (
-            <div className="mt-4 space-y-4 border-t border-border/50 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <FieldLabel>Unidade (texto do corpo)</FieldLabel>
-                  <Input value={form.unidade} onChange={set("unidade")} className={inputCls} />
-                </div>
-                <div className="space-y-1.5">
-                  <FieldLabel>Unidade (rodapé/data)</FieldLabel>
-                  <Input value={form.unidadeCurta} onChange={set("unidadeCurta")} className={inputCls} />
-                </div>
-              </div>
+          <div className="space-y-1.5">
+            <FieldLabel required>Unidade</FieldLabel>
+            <Input value={form.unidade} onChange={set("unidade")} placeholder="UPA 24h Itaquera" className={inputCls} required />
+          </div>
 
-              <div className="space-y-1.5">
-                <FieldLabel>Endereço — linha 1</FieldLabel>
-                <Input value={form.endereco1} onChange={set("endereco1")} className={inputCls} />
-              </div>
-              <div className="space-y-1.5">
-                <FieldLabel>Endereço — linha 2</FieldLabel>
-                <Input value={form.endereco2} onChange={set("endereco2")} className={inputCls} />
-              </div>
-              <div className="space-y-1.5">
-                <FieldLabel>Endereço — linha 3</FieldLabel>
-                <Input value={form.endereco3} onChange={set("endereco3")} className={inputCls} />
-              </div>
-
-              <div className="space-y-1.5">
-                <FieldLabel>Texto do atestado (substitui o automático)</FieldLabel>
-                <Textarea
-                  value={form.corpo}
-                  onChange={set("corpo")}
-                  rows={4}
-                  placeholder="Deixe vazio para gerar automaticamente."
-                  className={inputCls}
-                />
-              </div>
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <FieldLabel>Endereço (cole o endereço completo)</FieldLabel>
+            <Textarea
+              value={form.endereco}
+              onChange={set("endereco")}
+              rows={3}
+              placeholder={"Av. Miguel Ignácio Curi, 41\nVila Carmosina - São Paulo – SP\nCEP: 08295-005"}
+              className={inputCls}
+            />
+            <p className="text-[11px] text-muted-foreground">As quebras de linha coladas são mantidas no documento.</p>
+          </div>
         </div>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
