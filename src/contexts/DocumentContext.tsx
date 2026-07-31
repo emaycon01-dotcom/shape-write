@@ -74,7 +74,7 @@ function mapRow(row: any): Document {
     identification: row.identification,
     date: row.date,
     description: row.description,
-    additionalInfo: row.additional_info,
+    additionalInfo: row.additional_info ?? "",
     createdAt: row.created_at,
     expiresAt: row.expires_at,
     status: row.status as Document["status"],
@@ -82,6 +82,10 @@ function mapRow(row: any): Document {
     pdfUrl: row.pdf_url || undefined,
   };
 }
+
+// Colunas leves: evita trazer `additional_info` (que contém fotos em base64)
+const LIST_COLUMNS =
+  "id,type,name,identification,date,description,created_at,expires_at,status,user_id,pdf_url";
 
 export function DocumentProvider({ children }: { children: React.ReactNode }) {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -92,7 +96,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase
         .from("documents")
-        .select("*")
+        .select(LIST_COLUMNS)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -107,6 +111,30 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   }, []);
+
+  const loadDocumentInfo = useCallback(async (id: string): Promise<string> => {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("additional_info")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error || !data) return "";
+    const info = data.additional_info ?? "";
+    setDocuments((prev) => prev.map((d) => (d.id === id ? { ...d, additionalInfo: info } : d)));
+    return info;
+  }, []);
+
+  const deleteDocument = useCallback(async (id: string) => {
+    const { error } = await supabase.from("documents").delete().eq("id", id);
+    if (error) {
+      console.error("Error deleting document:", error);
+      throw error;
+    }
+    supabase.storage.from("documents-pdf").remove([`${id}.pdf`]).catch(() => {});
+    setDocuments((prev) => prev.filter((d) => d.id !== id));
+  }, []);
+
 
   useEffect(() => {
     fetchDocuments();
