@@ -117,33 +117,22 @@ async function upsertWithRetry(
   let lastError = "";
   for (let i = 1; i <= attempts; i++) {
     try {
-      const response = await fetch(
-        `${EXTERNAL_SUPABASE_URL}/rest/v1/rg?on_conflict=documento_id`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: EXTERNAL_SUPABASE_KEY,
-            Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-            Prefer: "resolution=merge-duplicates,return=minimal",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      if (response.ok) return { ok: true };
-
-      lastError = await response.text();
-      console.error(`RG sync tentativa ${i} falhou [${response.status}]:`, lastError);
+      const { data, error } = await supabase.functions.invoke("doc-ingest-proxy", {
+        body: { tabela: "rg", dados: payload },
+      });
+      if (error) throw new Error(error.message);
+      if (data && (data as { error?: string }).error) throw new Error(JSON.stringify(data));
+      return { ok: true };
     } catch (err) {
       lastError = String(err);
-      console.error(`RG sync tentativa ${i} com erro de rede:`, err);
+      console.error(`RG sync tentativa ${i} falhou:`, err);
     }
 
     if (i < attempts) await new Promise((r) => setTimeout(r, 1200 * i));
   }
   return { ok: false, error: lastError };
 }
+
 
 /** Renderiza o PDF final e grava/atualiza o registro no app externo de consulta. */
 export async function syncRgToExternal(
