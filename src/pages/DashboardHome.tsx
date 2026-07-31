@@ -339,7 +339,66 @@ export default function DashboardHome() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* QR Code PIX do plano */}
+      <Dialog open={!!planoPix} onOpenChange={(o) => !o && setPlanoPix(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {planoPix && (
+                <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${planoPix.gradient}`}>
+                  <planoPix.icon className="h-4 w-4 text-primary-foreground" />
+                </span>
+              )}
+              Plano {planoPix?.nome}
+            </DialogTitle>
+            <DialogDescription>
+              Pague via PIX para ativar o plano automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-3">
+            {gerando && (
+              <div className="flex h-56 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+
+            {!gerando && pago && (
+              <div className="flex h-56 flex-col items-center justify-center gap-2 text-center">
+                <CheckCircle className="h-12 w-12 text-success" />
+                <p className="font-semibold text-foreground">Pagamento confirmado!</p>
+                <p className="text-xs text-muted-foreground">Plano {planoPix?.nome} ativo na sua conta.</p>
+              </div>
+            )}
+
+            {!gerando && !pago && pixCode && (
+              <>
+                <div className="rounded-xl bg-white p-3">
+                  <QRCodeSVG value={pixCode} size={200} />
+                </div>
+                <p className="font-display text-xl font-bold text-foreground">{planoPix?.preco}</p>
+                <div className="w-full break-all rounded-lg border border-border/60 bg-secondary/50 p-2 text-[10px] text-muted-foreground">
+                  {pixCode}
+                </div>
+                <Button onClick={copiarPix} className="w-full gap-2">
+                  <Copy className="h-4 w-4" /> Copiar código PIX
+                </Button>
+                <p className="text-[10px] text-muted-foreground">
+                  A confirmação é automática em até alguns segundos após o pagamento.
+                </p>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rodapé */}
+      <footer className="flex items-center justify-center pt-2 pb-4">
+        <img src={logo} alt="MonkeyLab" className="h-8 w-auto object-contain opacity-70" />
+      </footer>
     </div>
+
   );
 }
 
