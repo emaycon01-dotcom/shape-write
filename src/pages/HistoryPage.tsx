@@ -172,14 +172,17 @@ export default function HistoryPage() {
       return;
     }
 
-    const deduction = await deductCredit(EDIT_COST, "edicao-documento");
+    const deduction = await deductCredit(EDIT_COST_BASE, "edicao-documento");
     if (!deduction.ok) {
       toast({ title: "Não foi possível editar", description: deduction.error, variant: "destructive" });
       setEditLoading(false);
       setEditDoc(null);
       return;
     }
-    toast({ title: "Edição liberada!", description: `${EDIT_COST} crédito(s) descontado(s).` });
+    toast({
+      title: "Edição liberada!",
+      description: EDIT_COST > 0 ? `${formatCredits(EDIT_COST)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
+    });
 
     const id = editDoc.id;
     setEditLoading(false);
