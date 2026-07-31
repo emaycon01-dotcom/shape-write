@@ -25,7 +25,6 @@ interface AtestadoFormData {
   dataAtendimento: string;
   horaAtendimento: string;
   dias: string;
-  motivo: string;
   cid: string;
   nascimento: string;
   uf: string;
@@ -40,7 +39,6 @@ const initial: AtestadoFormData = {
   dataAtendimento: "",
   horaAtendimento: "",
   dias: "1",
-  motivo: "doença",
   cid: "",
   nascimento: "",
   uf: "SP",
@@ -159,7 +157,7 @@ export default function AtestadoFormPage() {
         data_atendimento: form.dataAtendimento,
         hora_atendimento: form.horaAtendimento,
         dias: form.dias,
-        motivo: form.motivo,
+        motivo: "doença",
         cid: form.cid,
         nascimento: form.nascimento,
         uf: form.uf,
@@ -308,14 +306,10 @@ export default function AtestadoFormPage() {
             A data e hora de emissão, o rodapé e a liberação eletrônica são preenchidos automaticamente com estes valores.
           </p>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Dias de Repouso</FieldLabel>
               <Input type="number" min={1} max={30} value={form.dias} onChange={set("dias")} className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Motivo</FieldLabel>
-              <Input value={form.motivo} onChange={set("motivo")} placeholder="doença" className={inputCls} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>CID</FieldLabel>
