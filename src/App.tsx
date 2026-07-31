@@ -8,7 +8,7 @@ import { DocumentProvider } from "@/contexts/DocumentContext";
 import { DeviceSecurityProvider, useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import DeviceBannedScreen from "@/components/DeviceBannedScreen";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
