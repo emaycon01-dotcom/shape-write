@@ -20,6 +20,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DOCUMENT_FORM_ROUTES, DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
+import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,8 +33,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const EDIT_COST = 0.3;
-const RENEW_COST = 1;
+const EDIT_COST_BASE = 0.3;
+const RENEW_COST_BASE = 1;
 const RENEW_DAYS = 30;
 
 function formatCpf(value: string) {
@@ -46,6 +48,9 @@ export default function HistoryPage() {
   const { documents, loading, renewDocument, deleteDocument, loadDocumentInfo } = useDocuments();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const EDIT_COST = planCost(EDIT_COST_BASE, user?.plano);
+  const RENEW_COST = planCost(RENEW_COST_BASE, user?.plano);
 
   const userDocs = useMemo(
     () => documents.filter((d) => d.userId === user?.id),
@@ -86,42 +91,61 @@ export default function HistoryPage() {
   const [deleteDoc, setDeleteDoc] = useState<Document | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const handleView = (doc: Document) => {
-    if (doc.pdfUrl) window.open(doc.pdfUrl, "_blank");
+  // Busca o PDF direto do armazenamento (blob local) — nada de abrir link externo
+  const fetchPdfBlob = async (doc: Document): Promise<Blob | null> => {
+    const { data } = await supabase.storage.from("documents-pdf").download(`${doc.id}.pdf`);
+    if (data) return data;
+    if (doc.pdfUrl) {
+      try {
+        const res = await fetch(doc.pdfUrl);
+        if (res.ok) return await res.blob();
+      } catch {
+        /* ignore */
+      }
+    }
+    return null;
+  };
+
+  const handleView = async (doc: Document) => {
+    const blob = await fetchPdfBlob(doc);
+    if (!blob) {
+      toast({ title: "Não foi possível abrir o PDF", variant: "destructive" });
+      return;
+    }
+    const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+    window.open(blobUrl, "_blank");
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
   };
 
   const handleDownload = async (doc: Document) => {
-    if (!doc.pdfUrl) return;
-    try {
-      const res = await fetch(doc.pdfUrl);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `${doc.type}-${doc.id}.pdf`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-      toast({ title: "PDF baixado com sucesso!" });
-    } catch {
+    const blob = await fetchPdfBlob(doc);
+    if (!blob) {
       toast({ title: "Erro ao baixar PDF", variant: "destructive" });
+      return;
     }
+    const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `${doc.type}-${doc.id}.pdf`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    toast({ title: "PDF baixado com sucesso!" });
   };
 
   const handleShare = async (doc: Document) => {
-    if (!doc.pdfUrl) return;
-    try {
-      const res = await fetch(doc.pdfUrl);
-      const blob = await res.blob();
-      const file = new File([blob], `${doc.type}-${doc.id}.pdf`, { type: "application/pdf" });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: DOCUMENT_TYPE_LABELS[doc.type] || doc.type });
-      } else {
-        handleDownload(doc);
-      }
-    } catch {
+    const blob = await fetchPdfBlob(doc);
+    if (!blob) {
       toast({ title: "Erro ao compartilhar", variant: "destructive" });
+      return;
+    }
+    const file = new File([blob], `${doc.type}-${doc.id}.pdf`, { type: "application/pdf" });
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title: DOCUMENT_TYPE_LABELS[doc.type] || doc.type });
+    } else {
+      handleDownload(doc);
     }
   };
+
 
   const confirmEdit = (doc: Document) => {
     if (!user) return;
@@ -148,14 +172,17 @@ export default function HistoryPage() {
       return;
     }
 
-    const deduction = await deductCredit(EDIT_COST, "edicao-documento");
+    const deduction = await deductCredit(EDIT_COST_BASE, "edicao-documento");
     if (!deduction.ok) {
       toast({ title: "Não foi possível editar", description: deduction.error, variant: "destructive" });
       setEditLoading(false);
       setEditDoc(null);
       return;
     }
-    toast({ title: "Edição liberada!", description: `${EDIT_COST} crédito(s) descontado(s).` });
+    toast({
+      title: "Edição liberada!",
+      description: EDIT_COST > 0 ? `${formatCredits(EDIT_COST)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
+    });
 
     const id = editDoc.id;
     setEditLoading(false);
@@ -180,7 +207,7 @@ export default function HistoryPage() {
     if (!renewDoc || !user) return;
     setRenewLoading(true);
     try {
-      const deduction = await deductCredit(RENEW_COST, "renovacao-documento");
+      const deduction = await deductCredit(RENEW_COST_BASE, "renovacao-documento");
       if (!deduction.ok) {
         toast({ title: "Não foi possível renovar", description: deduction.error, variant: "destructive" });
         return;
@@ -188,7 +215,7 @@ export default function HistoryPage() {
       await renewDocument(renewDoc.id);
       toast({
         title: "Documento renovado!",
-        description: `${RENEW_COST} crédito descontado. Válido por mais ${RENEW_DAYS} dias.`,
+        description: `${RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} crédito descontado. ` : "Gratuito pelo seu plano. "}Válido por mais ${RENEW_DAYS} dias.`,
       });
     } catch {
       toast({ title: "Erro ao renovar documento", variant: "destructive" });
@@ -305,7 +332,7 @@ export default function HistoryPage() {
 
                 {/* Ações */}
                 <div className="flex flex-wrap gap-2 px-4 pb-4 pt-1 border-t border-border/40 mt-1">
-                  {!expired && doc.pdfUrl && (
+                  {!expired && (
                     <>
                       <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
                         <Eye className="w-4 h-4" /> Ver
@@ -328,13 +355,17 @@ export default function HistoryPage() {
                       disabled={!DOCUMENT_FORM_ROUTES[doc.type]}
                     >
                       <Pencil className="w-4 h-4" /> Editar
-                      <span className="text-xs text-muted-foreground">({EDIT_COST})</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({EDIT_COST > 0 ? formatCredits(EDIT_COST) : "grátis"})
+                      </span>
                     </Button>
                   )}
 
                   <Button variant="gradient" size="sm" onClick={() => confirmRenew(doc)} className="gap-1.5">
                     <RefreshCw className="w-4 h-4" /> Renovar
-                    <span className="text-xs opacity-80">({RENEW_COST} créd.)</span>
+                    <span className="text-xs opacity-80">
+                      ({RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} créd.` : "grátis"})
+                    </span>
                   </Button>
 
                   <Button
@@ -360,7 +391,8 @@ export default function HistoryPage() {
               <CreditCard className="w-5 h-5 text-primary" /> Confirmar Edição
             </AlertDialogTitle>
             <AlertDialogDescription>
-              A edição deste documento custará <strong>{EDIT_COST} crédito(s)</strong>.
+              A edição deste documento custará{" "}
+              <strong>{EDIT_COST > 0 ? `${formatCredits(EDIT_COST)} crédito(s)` : "0 crédito (grátis pelo seu plano)"}</strong>.
               <br />
               Seu saldo atual: <strong>{user?.credits ?? 0} crédito(s)</strong>.
             </AlertDialogDescription>
@@ -371,7 +403,7 @@ export default function HistoryPage() {
               {editLoading ? (
                 <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Processando...</>
               ) : (
-                <>Confirmar ({EDIT_COST} créd.)</>
+                <>Confirmar ({EDIT_COST > 0 ? `${formatCredits(EDIT_COST)} créd.` : "grátis"})</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -386,7 +418,8 @@ export default function HistoryPage() {
               <RefreshCw className="w-5 h-5 text-primary" /> Renovar Documento
             </AlertDialogTitle>
             <AlertDialogDescription>
-              A renovação custará <strong>{RENEW_COST} crédito</strong> e o documento ficará mais{" "}
+              A renovação custará{" "}
+              <strong>{RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} crédito` : "0 crédito (grátis pelo seu plano)"}</strong> e o documento ficará mais{" "}
               <strong>{RENEW_DAYS} dias</strong> no sistema.
               <br />
               Seu saldo atual: <strong>{user?.credits ?? 0} crédito(s)</strong>.
@@ -398,7 +431,7 @@ export default function HistoryPage() {
               {renewLoading ? (
                 <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Renovando...</>
               ) : (
-                <>Renovar ({RENEW_COST} créd.)</>
+                <>Renovar ({RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} créd.` : "grátis"})</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

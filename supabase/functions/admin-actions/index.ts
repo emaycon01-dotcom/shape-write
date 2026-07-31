@@ -67,6 +67,17 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (action === "set_password") {
+      const password = String(body.password ?? "");
+      if (password.length < 6) {
+        return json({ error: "A senha deve ter pelo menos 6 caracteres." }, 400);
+      }
+      const { error } = await admin.auth.admin.updateUserById(targetUserId, { password });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+
     return json({ error: "Unknown action" }, 400);
   } catch (_err) {
     return json({ error: "Internal error" }, 500);
