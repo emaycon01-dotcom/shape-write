@@ -91,12 +91,31 @@ function mapRow(row: any): Document {
 const LIST_COLUMNS =
   "id,type,name,identification,date,description,created_at,expires_at,status,user_id,pdf_url";
 
+const DOCS_CACHE_KEY = "documents_cache";
+
+function readCachedDocs(): Document[] {
+  try {
+    const raw = sessionStorage.getItem(DOCS_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as Document[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeCachedDocs(docs: Document[]) {
+  try {
+    sessionStorage.setItem(DOCS_CACHE_KEY, JSON.stringify(docs));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function DocumentProvider({ children }: { children: React.ReactNode }) {
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Mostra imediatamente a última listagem conhecida e atualiza em segundo plano
+  const [documents, setDocuments] = useState<Document[]>(() => readCachedDocs());
+  const [loading, setLoading] = useState(() => readCachedDocs().length === 0);
 
   const fetchDocuments = useCallback(async () => {
-    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("documents")
@@ -108,7 +127,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      setDocuments((data || []).map(mapRow));
+      const mapped = (data || []).map(mapRow);
+      setDocuments(mapped);
+      writeCachedDocs(mapped);
     } catch (err) {
       console.error("Failed to fetch documents:", err);
     } finally {
