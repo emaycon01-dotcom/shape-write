@@ -57,23 +57,50 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
   };
 }
 
+const USER_CACHE_KEY = "auth_user_cache";
+
+function readCachedUser(): User | null {
+  try {
+    const raw = localStorage.getItem(USER_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedUser(user: User | null) {
+  try {
+    if (user) localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
+    else localStorage.removeItem(USER_CACHE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Hidrata instantaneamente com o último perfil conhecido: a interface (créditos,
+  // menu lateral, dashboard) aparece na hora enquanto os dados reais chegam.
+  const [user, setUser] = useState<User | null>(() => readCachedUser());
+  const [loading, setLoading] = useState(() => readCachedUser() === null);
 
   useEffect(() => {
     let lastLoadedUserId: string | null = null;
     let inflight: Promise<void> | null = null;
+
+    const applyUser = (u: User | null) => {
+      setUser(u);
+      writeCachedUser(u);
+    };
 
     const loadProfile = (sessionUser: SupabaseUser) => {
       // Evita buscar o mesmo perfil duas vezes (getSession + onAuthStateChange)
       if (lastLoadedUserId === sessionUser.id && inflight) return inflight;
       lastLoadedUserId = sessionUser.id;
       inflight = fetchUserProfile(sessionUser)
-        .then((userData) => setUser(userData))
+        .then((userData) => applyUser(userData))
         .catch((err) => {
           console.error("Error fetching profile:", err);
-          setUser(null);
+          applyUser(null);
           lastLoadedUserId = null;
         })
         .finally(() => setLoading(false));
