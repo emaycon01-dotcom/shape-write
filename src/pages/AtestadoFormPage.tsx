@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { splitEndereco } from "@/lib/atestado-endereco";
+
 
 const MEDICO = "Dr. Abdo";
 const CRM = "CRM/SP 123456";
