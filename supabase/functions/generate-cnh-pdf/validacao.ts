@@ -96,10 +96,12 @@ export async function registerValidationDocument(
   }
 
   try {
+    // Não deixa o cadastro remoto travar a geração do PDF
     const res = await fetch(REGISTER_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-API-Token": token },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(6000),
     });
 
     const text = await res.text();
