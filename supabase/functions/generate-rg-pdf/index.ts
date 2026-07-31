@@ -467,6 +467,19 @@ serve(async (req) => {
       `Validação RG: preview=${isPreview} id=${validacao.documentoId} registered=${validacao.registered}`,
     );
 
+    // Regra crítica: só imprime o QR Code depois de confirmar o cadastro
+    if (!isPreview && !validacao.registered) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Falha ao registrar o documento na validação. Tente novamente.",
+          detail: validacao.error ?? null,
+        }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+
     const html = buildRgHtml(data, body.field_positions, validacao.qrCodeUrl);
 
     let pdfBuffer: Uint8Array | null = null;
