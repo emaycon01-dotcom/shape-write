@@ -298,9 +298,33 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
 
   // Auto-persist so the PDF always uses the latest alignment (real-time)
   useEffect(() => {
-    localStorage.setItem(CNH_ALIGN_STORAGE_KEY, JSON.stringify(fields));
-    window.dispatchEvent(new CustomEvent("cnh-align-updated"));
-  }, [fields]);
+    localStorage.setItem(cfg.storageKey, JSON.stringify(fields));
+    window.dispatchEvent(new CustomEvent(`${cfg.key}-align-updated`));
+  }, [fields, cfg.storageKey, cfg.key]);
+
+  // Troca de documento: recarrega os campos do editor selecionado
+  useEffect(() => {
+    setSelected(null);
+    const saved = localStorage.getItem(cfg.storageKey);
+    if (!saved) {
+      setFields(cfg.defaults);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return;
+      setFields(
+        cfg.defaults.map((def) => {
+          const s = parsed.find((p: FieldDef) => p.id === def.id);
+          return s ? { ...def, x: s.x, y: s.y, fontSize: s.fontSize, w: s.w ?? def.w, h: s.h ?? def.h, rotate: s.rotate ?? def.rotate } : def;
+        }),
+      );
+    } catch {
+      setFields(cfg.defaults);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg.key]);
+
 
   const updateField = useCallback((id: string, updates: Partial<FieldDef>) => {
     setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
