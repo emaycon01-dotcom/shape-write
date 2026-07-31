@@ -241,7 +241,7 @@ function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, 
     box-shadow: 0 0 0 3px #fff;
   }
   .qr-overlay svg { width: 100%; height: 100%; display: block; }
-  .para-label { font-size: 0.72em; letter-spacing: 0.3px; }
+  .para-label { font-size: 0.8em; }
 </style>
 </head>
 <body>
@@ -257,15 +257,15 @@ function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, 
 
   <div class="overlay arial" style="${base("paciente", "white-space:nowrap;")}"><span class="para-label">PARA:</span> ${escapeHtml(d.paciente || "")}</div>
 
-  <div class="overlay times" style="${base("corpo", "width:762px;line-height:1.43;text-align:left;")}">${escapeHtml(corpo)}</div>
+  <div class="overlay times" style="${base("corpo", "width:758px;line-height:1.103;text-align:left;")}">${escapeHtml(corpo)}</div>
 
   ${text("cid", d.cid ? `CID: ${d.cid}` : "", "times")}
 
   <div class="overlay arial" style="${base("cidade_data", "white-space:nowrap;")}">${escapeHtml(cidadeData)}</div>
 
-  <div class="overlay calibri bold" style="${base("emitido_em", "white-space:nowrap;")}">Emitido em: ${escapeHtml(d.emitido_em || "")}</div>
+  <div class="overlay arial bold" style="${base("emitido_em", "white-space:nowrap;")}">Emitido em: ${escapeHtml(d.emitido_em || "")}</div>
 
-  <div class="overlay calibri bold" style="${base("liberado", "width:232px;text-align:center;line-height:1.32;")}">
+  <div class="overlay arial bold" style="${base("liberado", "width:232px;text-align:center;line-height:1.15;")}">
     Liberado e assinado<br/>eletronicamente em ${escapeHtml(d.liberado_data || "")}<br/>${escapeHtml(d.liberado_hora || "")} por:
   </div>
 </div>
