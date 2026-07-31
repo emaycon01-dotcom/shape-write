@@ -219,7 +219,36 @@ export const defaultChaFields: FieldDef[] = [
   { id: "data_emissao", label: "Data de emissão", sampleText: "07/07/2026", x: 302.4, y: 503.1, fontSize: 10.5 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "crlv" | "cha";
+// Defaults MUST match supabase/functions/generate-diploma-pdf/index.ts DIPLOMA_DEFAULT_POSITIONS
+// Espaço 1288 x 1732: página 1 em y 0–866, página 2 em y 866–1732.
+export const defaultDiplomaFields: FieldDef[] = [
+  { id: "rep_federativa", label: "República Federativa", sampleText: "REPÚBLICA FEDERATIVA DO BRASIL", x: 644, y: 136.7, fontSize: 13.5 },
+  { id: "ministerio", label: "Ministério da Educação", sampleText: "MINISTÉRIO DA EDUCAÇÃO", x: 644, y: 152.4, fontSize: 13.5 },
+  { id: "inst_l1", label: "Instituição - linha 1", sampleText: "CENTRO UNIVERSITÁRIO", x: 644, y: 174, fontSize: 31 },
+  { id: "inst_l2", label: "Instituição - linha 2", sampleText: "ESTÁCIO DO CEARÁ", x: 644, y: 213, fontSize: 31 },
+  { id: "corpo", label: "Texto do diploma", sampleText: "O(A) Reitor(a) do CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ, no uso de suas atribuições, tendo em vista a conclusão do CURSO SUPERIOR DE TECNOLOGIA EM DESIGN DE MODA, na data de 10/07/2015, e a colação de grau na data de 31/08/2015, confere o título de TECNÓLOGO (A) a GUSTAVO AUGUSTO RODRIGUES DA SILVA, nacionalidade BRASILEIRO(A), natural de CEARÁ, nascido(a) em 31/10/1992, portador(a) da Cédula de Identidade 2009010328577, órgão expedidor SSPDS/CE, e outorga-lhe o presente Diploma, a fim de que possa gozar de todos os direitos e prerrogativas legais.", x: 644, y: 283, fontSize: 15.5 },
+  { id: "cidade_data", label: "Cidade e data", sampleText: "Fortaleza - CE, 14 de Junho de 2023.", x: 721, y: 555, fontSize: 15.5 },
+  { id: "reitor", label: "Reitor(a)", sampleText: "JOSUÉ VIANA DE OLIVEIRA NETO", x: 1032, y: 663, fontSize: 12.5 },
+  { id: "rodape_inst", label: "Rodapé - instituição", sampleText: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ", x: 644, y: 751, fontSize: 13 },
+  { id: "rodape_validacao", label: "Rodapé - validação", sampleText: "Código de Validação: 1107.163.e6c296281d3f | https://consultadiploma.estacio.br/diploma/1107.163.e6c296281d3f", x: 644, y: 767, fontSize: 11.5 },
+  { id: "p2_esq_nome", label: "V. Instituição (esq.)", sampleText: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ", x: 30.4, y: 927.8, fontSize: 11.5, bold: true },
+  { id: "p2_esq_razao", label: "V. Mantenedora + CNPJ", sampleText: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA\nCNPJ: 02608755000107", x: 30.4, y: 954.4, fontSize: 11.5 },
+  { id: "p2_esq_cred", label: "V. Credenciamento", sampleText: "Credenciamento: Portaria nº 1097, de 31/8/2012, DOU nº 172, Seção 1, Pág. 97, de 4/9/2012.", x: 30.4, y: 997.8, fontSize: 11.5 },
+  { id: "p2_esq_recred", label: "V. Recredenciamento", sampleText: "Recredenciamento: Portaria nº 684, de 16/7/2018, DOU nº 136, Seção 1, Pág. 12, de 17/7/2018.", x: 30.4, y: 1040.7, fontSize: 11.5 },
+  { id: "p2_curso", label: "V. Curso", sampleText: "Curso de DESIGN DE MODA", x: 30.4, y: 1099.2, fontSize: 11.5, bold: true },
+  { id: "p2_reconhecimento", label: "V. Reconhecimento", sampleText: "Reconhecimento: Portaria MEC n° 13, de 02/03/2012, DOU n° 45,\nSeção 1, Pág. 55, de 06/03/2012.", x: 30.4, y: 1120.4, fontSize: 11.5 },
+  { id: "p2_renovacao", label: "V. Renovação", sampleText: "Renovação: Portaria MEC n° 948, de 30/08/2021, DOU n° 165,\nSeção 1, Pág. 36, de 31/08/2021.", x: 30.4, y: 1159, fontSize: 11.5 },
+  { id: "p2_dir_recred", label: "V. Recred. universidade", sampleText: "Recredenciamento: Portaria nº 1095, de 31/8/2012, DOU nº 172, Seção 1, Pág. 97, de 4/9/2012.", x: 671.4, y: 1063.3, fontSize: 11.5 },
+  { id: "p2_registro", label: "V. Registro do diploma", sampleText: "Diploma registrado sob o n° 11897, Livro 1, fls 2084, em 14/06/2023, por delegação de competência do Ministério da Educação, nos termos da Lei nº 9.394 de 20 de dezembro de 1996, e do Decreto nº 9.235, de 15 de dezembro de 2017.", x: 671.4, y: 1121.6, fontSize: 11.5 },
+  { id: "p2_processo", label: "V. Processo", sampleText: "Processo n° SRD/6351166-IP/2023.", x: 671.4, y: 1189.6, fontSize: 11.5 },
+  { id: "p2_cidade_data", label: "V. Cidade e data", sampleText: "Rio de Janeiro - RJ, 14/06/2023", x: 671.4, y: 1230.1, fontSize: 11.5 },
+  { id: "secretario", label: "V. Secretário(a)", sampleText: "ADRIANA SILVA ARAUJO", x: 958, y: 1309, fontSize: 11.5 },
+  { id: "resolucao", label: "V. Resolução", sampleText: "Resolução 092/GR/2016", x: 958, y: 1343, fontSize: 11 },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 1032, y: 1515, fontSize: 8, w: 110, h: 110, color: "#999" },
+  { id: "serial", label: "V. Nº de série", sampleText: "6070002386077", x: 1144, y: 1636, fontSize: 11, bold: true },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "crlv" | "cha" | "diploma";
 
 
 interface EditorConfig {
@@ -228,6 +257,10 @@ interface EditorConfig {
   storageKey: string;
   defaults: FieldDef[];
   bg: string;
+  /** páginas extras empilhadas verticalmente (ex.: diploma) */
+  bgs?: string[];
+  pageW?: number;
+  pageH?: number;
   font: string;
   mrzFont: string;
   mrzWidth: number;
