@@ -29,17 +29,19 @@ export const PLANOS = [
   {
     nome: "Dealer",
     preco: "R$ 150,00",
+    valor: 150,
     icon: Rocket,
     gradient: "gradient-dealer",
     ring: "ring-sky-500/30",
     desconto: 25,
     descricao:
-      "Plano de entrada da Bellarus. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Dealer na conta recebe 25% de desconto em todo o sistema.",
+      "Plano de entrada da MonkeyLab. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Dealer na conta recebe 25% de desconto em todo o sistema.",
     beneficios: ["Painel de serviços", "CNH Digital", "Suporte padrão", "25% de desconto em todo o sistema"],
   },
   {
     nome: "Master",
     preco: "R$ 450,00",
+    valor: 450,
     icon: Star,
     gradient: "gradient-master",
     ring: "ring-purple-500/30",
@@ -52,12 +54,13 @@ export const PLANOS = [
   {
     nome: "Diamond",
     preco: "R$ 999,99",
+    valor: 999.99,
     icon: Gem,
     gradient: "gradient-diamond",
     ring: "ring-amber-500/30",
     desconto: 100,
     descricao:
-      "Plano máximo da Bellarus: tudo do Master, limites ampliados e atendimento dedicado. Quem tem o plano Diamond na conta recebe 100% de desconto em todo o sistema.",
+      "Plano máximo da MonkeyLab: tudo do Master, limites ampliados e atendimento dedicado. Quem tem o plano Diamond na conta recebe 100% de desconto em todo o sistema.",
     beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado", "100% de desconto em todo o sistema"],
   },
 ];
