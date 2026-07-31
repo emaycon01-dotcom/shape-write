@@ -25,6 +25,11 @@ interface AtestadoFormData {
   dias: string;
   motivo: string;
   cid: string;
+  nascimento: string;
+  uf: string;
+  medico: string;
+  crm: string;
+  especialidade: string;
   dataEmissao: string;
   emitidoEm: string;
   liberadoData: string;
@@ -46,6 +51,11 @@ const initial: AtestadoFormData = {
   dias: "1",
   motivo: "doença",
   cid: "",
+  nascimento: "",
+  uf: "SP",
+  medico: "",
+  crm: "",
+  especialidade: "Clínico Geral",
   dataEmissao: "",
   emitidoEm: "",
   liberadoData: "",
@@ -184,6 +194,11 @@ export default function AtestadoFormPage() {
         dias: form.dias,
         motivo: form.motivo,
         cid: form.cid,
+        nascimento: form.nascimento,
+        uf: form.uf,
+        medico: form.medico,
+        crm: form.crm,
+        especialidade: form.especialidade,
         data_emissao: form.dataEmissao || form.dataAtendimento,
         emitido_em: form.emitidoEm,
         liberado_data: form.liberadoData,
@@ -279,6 +294,38 @@ export default function AtestadoFormPage() {
               <Input value={form.cns} onChange={set("cns")} placeholder="801440458570767" className={inputCls} />
             </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <FieldLabel required>Data de Nascimento</FieldLabel>
+              <Input value={form.nascimento} onChange={set("nascimento")} placeholder="14/05/1990" className={inputCls} required />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel>UF</FieldLabel>
+              <Input value={form.uf} onChange={set("uf")} placeholder="SP" maxLength={2} className={inputCls} />
+            </div>
+          </div>
+        </div>
+
+        {/* PROFISSIONAL */}
+        <div className="glass space-y-4 rounded-xl p-6">
+          <SectionHeader icon={Stethoscope} title="Profissional" />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <FieldLabel required>Nome do Médico</FieldLabel>
+              <Input value={form.medico} onChange={set("medico")} placeholder="Dr. João Pereira" className={inputCls} required />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel required>CRM</FieldLabel>
+              <Input value={form.crm} onChange={set("crm")} placeholder="CRM/SP 123456" className={inputCls} required />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <FieldLabel>Especialidade</FieldLabel>
+            <Input value={form.especialidade} onChange={set("especialidade")} placeholder="Clínico Geral" className={inputCls} />
+          </div>
         </div>
 
         {/* ATENDIMENTO */}
@@ -306,8 +353,8 @@ export default function AtestadoFormPage() {
               <Input value={form.motivo} onChange={set("motivo")} placeholder="doença" className={inputCls} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>CID</FieldLabel>
-              <Input value={form.cid} onChange={set("cid")} placeholder="10" className={inputCls} />
+              <FieldLabel required>CID</FieldLabel>
+              <Input value={form.cid} onChange={set("cid")} placeholder="J11" className={inputCls} required />
             </div>
           </div>
 
