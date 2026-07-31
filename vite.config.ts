@@ -18,15 +18,25 @@ export default defineConfig(({ mode }) => ({
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          supabase: ["@supabase/supabase-js"],
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (/[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id))
+            return "react-vendor";
+          if (id.includes("@supabase")) return "supabase";
+          if (id.includes("pdfjs-dist")) return "pdfjs";
+          if (id.includes("pdf-lib") || id.includes("jspdf")) return "pdf";
+          if (id.includes("@radix-ui")) return "radix";
+          if (id.includes("lucide-react")) return "icons";
+          if (id.includes("recharts") || id.includes("d3-")) return "charts";
+          return "vendor";
         },
       },
     },
+    chunkSizeWarningLimit: 1200,
   },
   optimizeDeps: {
     include: ["react", "react-dom", "react-router-dom", "@supabase/supabase-js"],
+    exclude: ["pdfjs-dist"],
   },
   resolve: {
     alias: {
