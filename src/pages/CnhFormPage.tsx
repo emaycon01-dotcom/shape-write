@@ -120,30 +120,9 @@ function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length
 export default function CnhFormPage() {
   const location = useLocation();
   const editState = location.state as { editFormData?: Record<string, unknown>; editDocId?: string } | null;
-  const { getDocument, updateDocument } = useDocuments();
+  const { getDocument, loadDocumentInfo, updateDocument } = useDocuments();
 
-  const getEditPayload = useCallback(() => {
-    if (editState?.editFormData) {
-      return mapCnhEditPayload(editState.editFormData);
-    }
-
-    if (!editState?.editDocId) {
-      return null;
-    }
-
-    const editDocument = getDocument(editState.editDocId);
-    if (!editDocument?.additionalInfo) {
-      return null;
-    }
-
-    try {
-      return mapCnhEditPayload(JSON.parse(editDocument.additionalInfo) as Record<string, unknown>);
-    } catch {
-      return null;
-    }
-  }, [editState?.editDocId, editState?.editFormData, getDocument]);
-
-  const initialEditPayload = getEditPayload();
+  const initialEditPayload = editState?.editFormData ? mapCnhEditPayload(editState.editFormData) : null;
   const [form, setForm] = useState<CnhFormData>(() => initialEditPayload?.formData ?? initial);
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(initialEditPayload?.fotoPreview ?? null);
@@ -163,15 +142,31 @@ export default function CnhFormPage() {
   useEffect(() => {
     if (editHydrated || editState?.editFormData || !editState?.editDocId) return;
 
-    const payload = getEditPayload();
-    if (!payload) return;
+    let cancelled = false;
+    (async () => {
+      const docId = editState.editDocId!;
+      const raw = getDocument(docId)?.additionalInfo || (await loadDocumentInfo(docId));
+      if (cancelled || !raw) return;
 
-    setForm(payload.formData);
-    setFotoPreview(payload.fotoPreview);
-    setAssPreview(payload.assPreview);
-    setAutoFillDates(false);
-    setEditHydrated(true);
-  }, [editHydrated, editState?.editDocId, editState?.editFormData, getEditPayload]);
+      let payload: ReturnType<typeof mapCnhEditPayload> | null = null;
+      try {
+        payload = mapCnhEditPayload(JSON.parse(raw) as Record<string, unknown>);
+      } catch {
+        return;
+      }
+      if (!payload) return;
+
+      setForm(payload.formData);
+      setFotoPreview(payload.fotoPreview);
+      setAssPreview(payload.assPreview);
+      setAutoFillDates(false);
+      setEditHydrated(true);
+    })();
+
+    return () => { cancelled = true; };
+  }, [editHydrated, editState?.editDocId, editState?.editFormData, getDocument, loadDocumentInfo]);
+
+
 
   // Auto-fill emissão e validade quando preencher 1ª Habilitação
   useEffect(() => {

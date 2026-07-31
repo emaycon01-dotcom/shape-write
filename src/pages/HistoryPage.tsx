@@ -1,8 +1,22 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments, Document, isDocumentExpired, daysUntilExpiry } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Share2, Download, QrCode, CreditCard, Loader2, RefreshCw, Clock, AlertTriangle } from "lucide-react";
+import {
+  Eye,
+  Pencil,
+  Share2,
+  Download,
+  QrCode,
+  CreditCard,
+  Loader2,
+  RefreshCw,
+  Clock,
+  AlertTriangle,
+  Trash2,
+  User,
+  IdCard,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DOCUMENT_FORM_ROUTES, DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
@@ -19,24 +33,61 @@ import {
 
 const EDIT_COST = 0.3;
 const RENEW_COST = 1;
-const HISTORY_EDIT_DOC_TYPES_WITH_LARGE_PAYLOAD = new Set(["cnh"]);
+const RENEW_DAYS = 30;
+
+function formatCpf(value: string) {
+  const digits = (value || "").replace(/\D/g, "");
+  if (digits.length !== 11) return value || "—";
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
 
 export default function HistoryPage() {
   const { user, deductCredit } = useAuth();
-  const { documents, loading, renewDocument } = useDocuments();
+  const { documents, loading, renewDocument, deleteDocument, loadDocumentInfo } = useDocuments();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const userDocs = documents.filter((d) => d.userId === user?.id);
+
+  const userDocs = useMemo(
+    () => documents.filter((d) => d.userId === user?.id),
+    [documents, user?.id]
+  );
+
+  const [photos, setPhotos] = useState<Record<string, string | null>>({});
+  const requested = useRef<Set<string>>(new Set());
+
+  // Carrega as fotos em segundo plano (payload pesado fica fora da listagem)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      for (const doc of userDocs) {
+        if (cancelled) return;
+        if (requested.current.has(doc.id)) continue;
+        requested.current.add(doc.id);
+        try {
+          const raw = doc.additionalInfo || (await loadDocumentInfo(doc.id));
+          if (cancelled) return;
+          const parsed = raw ? JSON.parse(raw) : {};
+          const foto = parsed?.fotoBase64 || parsed?.foto_base64 || null;
+          setPhotos((prev) => ({ ...prev, [doc.id]: typeof foto === "string" && foto ? foto : null }));
+        } catch {
+          setPhotos((prev) => ({ ...prev, [doc.id]: null }));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userDocs, loadDocumentInfo]);
 
   const [editDoc, setEditDoc] = useState<Document | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   const [renewDoc, setRenewDoc] = useState<Document | null>(null);
   const [renewLoading, setRenewLoading] = useState(false);
+  const [deleteDoc, setDeleteDoc] = useState<Document | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleView = (doc: Document) => {
-    if (doc.pdfUrl) {
-      window.open(doc.pdfUrl, "_blank");
-    }
+    if (doc.pdfUrl) window.open(doc.pdfUrl, "_blank");
   };
 
   const handleDownload = async (doc: Document) => {
@@ -61,9 +112,8 @@ export default function HistoryPage() {
     try {
       const res = await fetch(doc.pdfUrl);
       const blob = await res.blob();
-      const fileName = `${doc.type}-${doc.id}.pdf`;
-      const file = new File([blob], fileName, { type: "application/pdf" });
-      if (navigator.share && navigator.canShare({ files: [file] })) {
+      const file = new File([blob], `${doc.type}-${doc.id}.pdf`, { type: "application/pdf" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: DOCUMENT_TYPE_LABELS[doc.type] || doc.type });
       } else {
         handleDownload(doc);
@@ -107,22 +157,10 @@ export default function HistoryPage() {
     }
     toast({ title: "Edição liberada!", description: `${EDIT_COST} crédito(s) descontado(s).` });
 
-
-    let formData: Record<string, string> = {};
-    try {
-      formData = JSON.parse(editDoc.additionalInfo || "{}");
-    } catch { /* ignore */ }
-
-    const shouldLoadEditDataFromDocument = HISTORY_EDIT_DOC_TYPES_WITH_LARGE_PAYLOAD.has(editDoc.type);
-
+    const id = editDoc.id;
     setEditLoading(false);
     setEditDoc(null);
-
-    navigate(route, {
-      state: shouldLoadEditDataFromDocument
-        ? { editDocId: editDoc.id }
-        : { editFormData: formData, editDocId: editDoc.id },
-    });
+    navigate(route, { state: { editDocId: id } });
   };
 
   const confirmRenew = (doc: Document) => {
@@ -148,13 +186,29 @@ export default function HistoryPage() {
         return;
       }
       await renewDocument(renewDoc.id);
-      toast({ title: "Documento renovado!", description: `${RENEW_COST} crédito descontado. Válido por mais 45 dias.` });
-
+      toast({
+        title: "Documento renovado!",
+        description: `${RENEW_COST} crédito descontado. Válido por mais ${RENEW_DAYS} dias.`,
+      });
     } catch {
       toast({ title: "Erro ao renovar documento", variant: "destructive" });
     } finally {
       setRenewLoading(false);
       setRenewDoc(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteDoc) return;
+    setDeleteLoading(true);
+    try {
+      await deleteDocument(deleteDoc.id);
+      toast({ title: "Documento removido" });
+    } catch {
+      toast({ title: "Erro ao remover documento", variant: "destructive" });
+    } finally {
+      setDeleteLoading(false);
+      setDeleteDoc(null);
     }
   };
 
@@ -167,7 +221,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto">
       <h1 className="font-display text-3xl font-bold text-foreground mb-1">Histórico</h1>
       <p className="text-muted-foreground mb-8">{userDocs.length} documento(s) gerado(s)</p>
 
@@ -180,35 +234,64 @@ export default function HistoryPage() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid gap-4">
           {userDocs.map((doc) => {
             const expired = isDocumentExpired(doc);
             const daysLeft = daysUntilExpiry(doc);
+            const photo = photos[doc.id];
 
             return (
-              <div key={doc.id} className={`glass rounded-xl p-5 flex flex-col gap-4 ${expired ? "opacity-75 border border-destructive/30" : ""}`}>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <article
+                key={doc.id}
+                className={`glass rounded-2xl overflow-hidden border transition-colors ${
+                  expired ? "border-destructive/40" : "border-border/60 hover:border-primary/40"
+                }`}
+              >
+                <div className="flex gap-4 p-4">
+                  {/* Foto 3x4 */}
+                  <div className="shrink-0">
+                    <div className="w-[72px] h-[96px] rounded-lg overflow-hidden bg-muted/40 border border-border/60 flex items-center justify-center">
+                      {photo ? (
+                        <img
+                          src={photo}
+                          alt={`Foto 3x4 de ${doc.name}`}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-7 h-7 text-muted-foreground/60" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Dados */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-display font-semibold text-foreground">
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md bg-primary/15 text-primary">
                         {DOCUMENT_TYPE_LABELS[doc.type] || doc.type.toUpperCase()}
                       </span>
                       {expired ? (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/20 text-destructive flex items-center gap-1">
+                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-destructive/20 text-destructive flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" /> Expirado
                         </span>
                       ) : (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-success/20 text-success">
-                          ativo
-                        </span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-success/20 text-success">Ativo</span>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{doc.name} · ID: {doc.id}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(doc.createdAt).toLocaleString("pt-BR")}
+
+                    <h2 className="font-display font-semibold text-foreground truncate">{doc.name || "—"}</h2>
+
+                    <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                      <IdCard className="w-3.5 h-3.5 shrink-0" />
+                      CPF: {formatCpf(doc.identification)}
                     </p>
+
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ID: {doc.id} · {new Date(doc.createdAt).toLocaleDateString("pt-BR")}
+                    </p>
+
                     {!expired && daysLeft <= 10 && (
-                      <p className="text-xs text-warning flex items-center gap-1 mt-1" style={{ color: "hsl(38, 92%, 50%)" }}>
+                      <p className="text-xs flex items-center gap-1 mt-1" style={{ color: "hsl(38, 92%, 50%)" }}>
                         <Clock className="w-3 h-3" /> Expira em {daysLeft} dia(s)
                       </p>
                     )}
@@ -220,52 +303,50 @@ export default function HistoryPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {expired ? (
-                    /* Documento expirado: só mostra botão de renovar */
-                    <Button
-                      variant="gradient"
-                      size="sm"
-                      onClick={() => confirmRenew(doc)}
-                      className="gap-1.5"
-                    >
-                      <RefreshCw className="w-4 h-4" /> Renovar ({RENEW_COST} créd.)
-                    </Button>
-                  ) : (
-                    /* Documento ativo */
+                {/* Ações */}
+                <div className="flex flex-wrap gap-2 px-4 pb-4 pt-1 border-t border-border/40 mt-1">
+                  {!expired && doc.pdfUrl && (
                     <>
-                      {doc.pdfUrl ? (
-                        <>
-                          <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
-                            <Eye className="w-4 h-4" /> Ver PDF
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDownload(doc)} className="gap-1.5">
-                            <Download className="w-4 h-4" /> Baixar
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleShare(doc)} className="gap-1.5">
-                            <Share2 className="w-4 h-4" /> Compartilhar
-                          </Button>
-                        </>
-                      ) : (
-                        <Button variant="outline" size="sm" disabled className="gap-1.5">
-                          <Eye className="w-4 h-4" /> Sem PDF
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => confirmEdit(doc)}
-                        className="gap-1.5"
-                        disabled={!DOCUMENT_FORM_ROUTES[doc.type]}
-                      >
-                        <Pencil className="w-4 h-4" /> Editar
-                        <span className="text-xs text-muted-foreground">({EDIT_COST} créd.)</span>
+                      <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
+                        <Eye className="w-4 h-4" /> Ver
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDownload(doc)} className="gap-1.5">
+                        <Download className="w-4 h-4" /> Baixar
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleShare(doc)} className="gap-1.5">
+                        <Share2 className="w-4 h-4" /> Compartilhar
                       </Button>
                     </>
                   )}
+
+                  {!expired && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => confirmEdit(doc)}
+                      className="gap-1.5"
+                      disabled={!DOCUMENT_FORM_ROUTES[doc.type]}
+                    >
+                      <Pencil className="w-4 h-4" /> Editar
+                      <span className="text-xs text-muted-foreground">({EDIT_COST})</span>
+                    </Button>
+                  )}
+
+                  <Button variant="gradient" size="sm" onClick={() => confirmRenew(doc)} className="gap-1.5">
+                    <RefreshCw className="w-4 h-4" /> Renovar
+                    <span className="text-xs opacity-80">({RENEW_COST} créd.)</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteDoc(doc)}
+                    className="gap-1.5 text-destructive hover:text-destructive border-destructive/40 ml-auto"
+                  >
+                    <Trash2 className="w-4 h-4" /> Remover
+                  </Button>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
@@ -282,8 +363,6 @@ export default function HistoryPage() {
               A edição deste documento custará <strong>{EDIT_COST} crédito(s)</strong>.
               <br />
               Seu saldo atual: <strong>{user?.credits ?? 0} crédito(s)</strong>.
-              <br /><br />
-              Deseja continuar?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -292,7 +371,7 @@ export default function HistoryPage() {
               {editLoading ? (
                 <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Processando...</>
               ) : (
-                <>Confirmar Edição ({EDIT_COST} créd.)</>
+                <>Confirmar ({EDIT_COST} créd.)</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -307,11 +386,10 @@ export default function HistoryPage() {
               <RefreshCw className="w-5 h-5 text-primary" /> Renovar Documento
             </AlertDialogTitle>
             <AlertDialogDescription>
-              A renovação deste documento custará <strong>{RENEW_COST} crédito(s)</strong> e estenderá a validade por mais <strong>45 dias</strong>.
+              A renovação custará <strong>{RENEW_COST} crédito</strong> e o documento ficará mais{" "}
+              <strong>{RENEW_DAYS} dias</strong> no sistema.
               <br />
               Seu saldo atual: <strong>{user?.credits ?? 0} crédito(s)</strong>.
-              <br /><br />
-              Deseja continuar?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -321,6 +399,35 @@ export default function HistoryPage() {
                 <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Renovando...</>
               ) : (
                 <>Renovar ({RENEW_COST} créd.)</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteDoc} onOpenChange={(open) => !open && setDeleteDoc(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-destructive" /> Remover Documento
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é permanente. O documento <strong>{deleteDoc?.name}</strong> (ID: {deleteDoc?.id}) e seu PDF
+              serão excluídos do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteLoading ? (
+                <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Removendo...</>
+              ) : (
+                <>Remover</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
