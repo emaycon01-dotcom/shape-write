@@ -109,13 +109,16 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <HumanCheck onChange={handleHuman} />
+
               {error && <p className="text-sm text-destructive">{error}</p>}
 
               <Button
                 type="submit"
                 className="w-full h-12 rounded-lg text-base bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-[0_10px_30px_-10px_hsl(var(--accent)/0.7)] transition-all duration-300 hover:-translate-y-0.5"
-                disabled={loading}
+                disabled={loading || !human}
               >
+
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
