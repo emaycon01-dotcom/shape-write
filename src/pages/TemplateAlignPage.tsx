@@ -579,14 +579,14 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
 }
 
 export default function TemplateAlignPage() {
-  const [doc, setDoc] = useState<"cnh" | "rg">("cnh");
+  const [doc, setDoc] = useState<DocKey>("cnh");
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
-      <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg"] as const).map((k) => (
+      <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
+        {(["cnh", "rg", "atestado"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
