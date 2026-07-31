@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
 import PinGate from "@/components/PinGate";
+import { syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PIN_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 
@@ -15,6 +16,12 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const isHome = location.pathname === "/dashboard" || location.pathname === "/dashboard/";
   const [pinState, setPinState] = useState<"loading" | "needs_setup" | "needs_verify" | "verified">("loading");
+
+  // Mantém as coordenadas oficiais (salvas no alinhamento) sincronizadas
+  useEffect(() => {
+    if (isAuthenticated) void syncAlignmentsFromDb();
+  }, [isAuthenticated]);
+
 
   useEffect(() => {
     if (!isAuthenticated || !user) {

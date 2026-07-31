@@ -380,6 +380,27 @@ export type Database = {
         }
         Relationships: []
       }
+      template_alignments: {
+        Row: {
+          doc_type: string
+          positions: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          doc_type: string
+          positions: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          doc_type?: string
+          positions?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string

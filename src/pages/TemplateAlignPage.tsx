@@ -13,6 +13,7 @@ import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY, loadCrlvFieldPositions } from "@/lib/crlv-align";
+import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -503,9 +504,44 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [selected]);
 
-  const savePositions = () => {
-    localStorage.setItem(cfg.storageKey, JSON.stringify(fields));
-    toast({ title: "Alinhamento salvo!", description: `O PDF do ${cfg.title} vai usar exatamente estas posições.` });
+  const [saving, setSaving] = useState(false);
+
+  // Carrega o alinhamento oficial (banco) ao abrir o editor
+  useEffect(() => {
+    void syncAlignmentsFromDb().then(() => {
+      const saved = localStorage.getItem(cfg.storageKey);
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed)) return;
+        setFields(
+          cfg.defaults.map((def) => {
+            const s = parsed.find((p: FieldDef) => p.id === def.id);
+            return s ? { ...def, x: s.x, y: s.y, fontSize: s.fontSize, w: s.w ?? def.w, h: s.h ?? def.h, rotate: s.rotate ?? def.rotate } : def;
+          }),
+        );
+      } catch {
+        /* ignore */
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg.key]);
+
+  const savePositions = async () => {
+    setSaving(true);
+    try {
+      await saveAlignmentToDb(cfg.key, fields);
+      toast({ title: "Coordenadas salvas!", description: `Salvo de forma definitiva — o preview e o PDF do ${cfg.title} vão usar exatamente estas posições.` });
+    } catch (e) {
+      localStorage.setItem(cfg.storageKey, JSON.stringify(fields));
+      toast({
+        variant: "destructive",
+        title: "Salvo apenas neste dispositivo",
+        description: "Não foi possível salvar no servidor (apenas administradores podem salvar globalmente).",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const resetPositions = () => {
@@ -532,8 +568,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
           <Button size="sm" variant="outline" onClick={copyCode} className="gap-1.5">
             <Copy className="w-4 h-4" /> Copiar Coords
           </Button>
-          <Button size="sm" onClick={savePositions} className="gap-1.5">
-            <Save className="w-4 h-4" /> Salvar
+          <Button size="sm" onClick={savePositions} disabled={saving} className="gap-1.5">
+            <Save className="w-4 h-4" /> {saving ? "Salvando..." : "Salvar coordenadas"}
           </Button>
         </div>
       </div>
