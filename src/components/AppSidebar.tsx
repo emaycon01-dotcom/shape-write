@@ -10,8 +10,6 @@ import {
   SlidersHorizontal,
   PenTool,
   Smartphone,
-  Download,
-  ExternalLink,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,8 +24,6 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.webp";
-import cnhApk from "@/assets/cnh_do_brasil.apk.asset.json";
-import govApk from "@/assets/gov.apk.asset.json";
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
@@ -36,25 +32,6 @@ const commonItems = [
   { title: "Recarregar", url: "/dashboard/recarregar", icon: CreditCard },
 ];
 
-const APLICATIVOS = [
-  {
-    titulo: "Aplicativo da CNH",
-    arquivo: "cnh_do_brasil.apk",
-    url: cnhApk.url,
-    gradient: "gradient-dealer",
-    links: [{ label: "Site CNH", href: "https://condutor-cnhdigital-vio-webs.info" }],
-  },
-  {
-    titulo: "Aplicativo do RG e CHA",
-    arquivo: "gov.apk",
-    url: govApk.url,
-    gradient: "gradient-master",
-    links: [
-      { label: "Site RG", href: "https://cidadaniagov-info.site/" },
-      { label: "Site CHA", href: "https://senetran-consultacarteira-digital-transito-vio.info" },
-    ],
-  },
-];
 
 
 export function AppSidebar() {
