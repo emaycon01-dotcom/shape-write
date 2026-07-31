@@ -168,7 +168,7 @@ function buildMrz(d: Record<string, string>) {
   const first = parts.shift() || "NOME";
   const rest = parts.join("<");
   // Todas as linhas com exatamente 30 caracteres para ficarem perfeitamente alinhadas
-  const line3 = `${first}<<${rest}`.padEnd(30, "<").slice(0, 30);
+  const line3 = `${first}<<${rest}`.padEnd(31, "<").slice(0, 31);
 
   return {
     line1: escapeHtml(line1),
