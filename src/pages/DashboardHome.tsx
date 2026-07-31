@@ -1,9 +1,13 @@
+import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDocuments, isDocumentExpired, daysUntilExpiry } from "@/contexts/DocumentContext";
+import { DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock,
+  ShieldCheck, Zap, Clock, Car, IdCard, Stethoscope, Anchor,
+  Layers, History, AlertTriangle, PenTool, MessageCircle, Users,
 } from "lucide-react";
 
 
@@ -73,10 +77,50 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
   );
 }
 
+const MODULOS_RAPIDOS = [
+  { titulo: "CNH Digital", icon: FileText, rota: "/dashboard/documents/cnh" },
+  { titulo: "RG Digital", icon: IdCard, rota: "/dashboard/documents/rg" },
+  { titulo: "CRLV Digital", icon: Car, rota: "/dashboard/documents/crlv" },
+  { titulo: "CNH Marítima", icon: Anchor, rota: "/dashboard/documents/cha" },
+  { titulo: "Atestado", icon: Stethoscope, rota: "/dashboard/documents/atestado" },
+  { titulo: "Assinaturas", icon: PenTool, rota: "/dashboard/ferramentas/assinaturas" },
+];
+
+function Stat({ icon: Icon, label, value, tone = "text-primary" }: {
+  icon: React.ElementType; label: string; value: React.ReactNode; tone?: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-3 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
+          <Icon className={`h-4 w-4 ${tone}`} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+          <p className="font-display text-base font-bold leading-tight text-foreground">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardHome() {
   const { user } = useAuth();
+  const { documents } = useDocuments();
 
   const isAdmin = user?.role === "admin";
+
+  const userDocs = useMemo(
+    () => documents.filter((d) => d.userId === user?.id),
+    [documents, user?.id]
+  );
+  const ativos = useMemo(() => userDocs.filter((d) => !isDocumentExpired(d)), [userDocs]);
+  const expirando = useMemo(
+    () => ativos.filter((d) => daysUntilExpiry(d) <= 7).length,
+    [ativos]
+  );
+  const recentes = useMemo(() => userDocs.slice(0, 4), [userDocs]);
+
 
 
 
@@ -155,7 +199,166 @@ export default function DashboardHome() {
         </Link>
       </section>
 
+      {/* Resumo */}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Stat icon={CreditCard} label="Créditos" value={user?.credits ?? 0} tone="text-accent" />
+        <Stat icon={Crown} label="Plano" value={user?.plano ? String(user.plano) : "Nenhum"} tone="text-primary" />
+        <Stat icon={Layers} label="Documentos ativos" value={ativos.length} tone="text-success" />
+        <Stat icon={AlertTriangle} label="Expiram em 7 dias" value={expirando} tone="text-warning" />
+      </section>
 
+      {/* Acesso rápido aos módulos */}
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
+          <div>
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Acesso rápido</h2>
+            <p className="text-[11px] text-muted-foreground">Comece uma geração em um clique</p>
+          </div>
+          <Link to="/dashboard/documents" className="text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline">
+            Ver todos
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {MODULOS_RAPIDOS.map((m) => (
+            <Link
+              key={m.rota}
+              to={m.rota}
+              className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-border/60 bg-card/60 p-3.5 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.05)]"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
+                <m.icon className="h-4 w-4 text-primary" />
+              </div>
+              <p className="text-[12px] font-semibold leading-tight text-foreground">{m.titulo}</p>
+              <ArrowUpRight className="absolute right-3 top-3 h-3.5 w-3.5 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Últimos documentos */}
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
+          <div>
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Últimos documentos</h2>
+            <p className="text-[11px] text-muted-foreground">Gerados recentemente na sua conta</p>
+          </div>
+          <Link to="/dashboard/historico" className="text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline">
+            Histórico
+          </Link>
+        </div>
+
+        {recentes.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border/70 bg-card/40 p-6 text-center">
+            <History className="h-5 w-5 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">Nenhum documento gerado ainda.</p>
+            <Link to="/dashboard/documents" className="text-[11px] font-semibold text-primary hover:underline">
+              Gerar meu primeiro documento
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {recentes.map((d) => {
+              const expirado = isDocumentExpired(d);
+              return (
+                <Link
+                  key={d.id}
+                  to="/dashboard/historico"
+                  className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-3 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary/40"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
+                    <FileText className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[12px] font-semibold text-foreground">
+                      {DOCUMENT_TYPE_LABELS[d.type] || d.type}
+                    </p>
+                    <p className="truncate text-[11px] text-muted-foreground">{d.name || "—"}</p>
+                  </div>
+                  <span
+                    className={`rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${
+                      expirado
+                        ? "border-destructive/40 bg-destructive/15 text-destructive"
+                        : "border-success/40 bg-success/15 text-success"
+                    }`}
+                  >
+                    {expirado ? "Expirado" : `${daysUntilExpiry(d)}d`}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Planos */}
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
+          <div>
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Planos</h2>
+            <p className="text-[11px] text-muted-foreground">Descontos em todo o sistema</p>
+          </div>
+          <Link to="/dashboard/planos" className="text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline">
+            Ver planos
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {PLANOS.map((p) => (
+            <Link
+              key={p.nome}
+              to={`/dashboard/planos?plano=${encodeURIComponent(p.nome)}`}
+              className={`group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 ring-1 ${p.ring} backdrop-blur transition-all hover:-translate-y-0.5`}
+            >
+              <div className={`absolute inset-0 ${p.gradient} opacity-[0.14]`} />
+              <div className="relative flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
+                  <p.icon className="h-4 w-4 text-foreground" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold text-foreground">{p.nome}</p>
+                  <p className="text-[11px] text-muted-foreground">{p.preco}</p>
+                </div>
+              </div>
+              <p className="relative mt-2.5 inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/40 px-1.5 py-[2px] text-[9px] font-bold uppercase tracking-wide text-foreground">
+                <Zap className="h-2.5 w-2.5" /> {p.desconto}% de desconto
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Suporte */}
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <a
+          href="https://wa.me/5581992120805"
+          target="_blank"
+          rel="noreferrer"
+          className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-success/40"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
+            <MessageCircle className="h-4.5 w-4.5 text-success" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">Suporte oficial</p>
+            <p className="text-[11px] text-muted-foreground">Atendimento no WhatsApp</p>
+          </div>
+          <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-success" />
+        </a>
+        <a
+          href="https://wa.me/5581992120805"
+          target="_blank"
+          rel="noreferrer"
+          className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary/40"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
+            <Users className="h-4.5 w-4.5 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">Nossa comunidade</p>
+            <p className="text-[11px] text-muted-foreground">Novidades e atualizações</p>
+          </div>
+          <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+        </a>
+      </section>
 
 
       {/* Rodapé */}
