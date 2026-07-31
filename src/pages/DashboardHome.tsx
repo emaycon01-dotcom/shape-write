@@ -6,7 +6,8 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/logo.webp";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, History, MessageCircle, Users,
+  ShieldCheck, Zap, Clock, History,
+
 } from "lucide-react";
 
 
@@ -171,6 +172,42 @@ export default function DashboardHome() {
 
 
 
+      {/* Planos */}
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
+          <div>
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Planos</h2>
+            <p className="text-[11px] text-muted-foreground">Descontos em todo o sistema</p>
+          </div>
+          <Link to="/dashboard/planos" className="text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline">
+            Ver planos
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {PLANOS.map((p) => (
+            <Link
+              key={p.nome}
+              to={`/dashboard/planos?plano=${encodeURIComponent(p.nome)}`}
+              className={`group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 ring-1 ${p.ring} backdrop-blur transition-all hover:-translate-y-0.5`}
+            >
+              <div className={`absolute inset-0 ${p.gradient} opacity-[0.14]`} />
+              <div className="relative flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
+                  <p.icon className="h-4 w-4 text-foreground" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold text-foreground">{p.nome}</p>
+                  <p className="text-[11px] text-muted-foreground">{p.preco}</p>
+                </div>
+              </div>
+              <p className="relative mt-2.5 inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/40 px-1.5 py-[2px] text-[9px] font-bold uppercase tracking-wide text-foreground">
+                <Zap className="h-2.5 w-2.5" /> {p.desconto}% de desconto
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Últimos documentos */}
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
@@ -226,81 +263,11 @@ export default function DashboardHome() {
         )}
       </section>
 
-      {/* Planos */}
-      <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
-          <div>
-            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Planos</h2>
-            <p className="text-[11px] text-muted-foreground">Descontos em todo o sistema</p>
-          </div>
-          <Link to="/dashboard/planos" className="text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline">
-            Ver planos
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {PLANOS.map((p) => (
-            <Link
-              key={p.nome}
-              to={`/dashboard/planos?plano=${encodeURIComponent(p.nome)}`}
-              className={`group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 ring-1 ${p.ring} backdrop-blur transition-all hover:-translate-y-0.5`}
-            >
-              <div className={`absolute inset-0 ${p.gradient} opacity-[0.14]`} />
-              <div className="relative flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
-                  <p.icon className="h-4 w-4 text-foreground" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[12px] font-bold text-foreground">{p.nome}</p>
-                  <p className="text-[11px] text-muted-foreground">{p.preco}</p>
-                </div>
-              </div>
-              <p className="relative mt-2.5 inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/40 px-1.5 py-[2px] text-[9px] font-bold uppercase tracking-wide text-foreground">
-                <Zap className="h-2.5 w-2.5" /> {p.desconto}% de desconto
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Suporte */}
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <a
-          href="https://wa.me/5581992120805"
-          target="_blank"
-          rel="noreferrer"
-          className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-success/40"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
-            <MessageCircle className="h-4.5 w-4.5 text-success" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Suporte oficial</p>
-            <p className="text-[11px] text-muted-foreground">Atendimento no WhatsApp</p>
-          </div>
-          <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-success" />
-        </a>
-        <a
-          href="https://wa.me/5581992120805"
-          target="_blank"
-          rel="noreferrer"
-          className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary/40"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
-            <Users className="h-4.5 w-4.5 text-primary" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Nossa comunidade</p>
-            <p className="text-[11px] text-muted-foreground">Novidades e atualizações</p>
-          </div>
-          <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-        </a>
-      </section>
-
-
       {/* Rodapé */}
       <footer className="flex items-center justify-center pt-2 pb-4">
         <img src={logo} alt="MonkeyLab" className="h-8 w-auto object-contain opacity-70" />
       </footer>
+
     </div>
 
   );
