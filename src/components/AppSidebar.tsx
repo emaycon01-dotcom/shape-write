@@ -44,37 +44,11 @@ const SIDEBAR_PLANOS = [
   { nome: "Diamond", preco: "R$ 999", icon: Gem, gradient: "gradient-diamond" },
 ];
 
-type ThemeMode = "default" | "dark-blue" | "light";
-
-const THEME_OPTIONS: { value: ThemeMode; label: string; colors: string[] }[] = [
-  { value: "default", label: "Padrão", colors: ["hsl(220 50% 5%)", "hsl(217 91% 60%)"] },
-  { value: "dark-blue", label: "Azul Escuro", colors: ["hsl(220 60% 3%)", "hsl(217 91% 60%)"] },
-  { value: "light", label: "Branco", colors: ["hsl(0 0% 98%)", "hsl(217 91% 50%)"] },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
-  const [supportOpen, setSupportOpen] = useState(false);
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    return (localStorage.getItem("bellarus-theme") as ThemeMode) || "default";
-  });
 
-  const applyTheme = (t: ThemeMode) => {
-    setTheme(t);
-    localStorage.setItem("bellarus-theme", t);
-    document.documentElement.classList.remove("theme-dark-blue", "theme-light");
-    if (t !== "default") {
-      document.documentElement.classList.add(`theme-${t}`);
-    }
-  };
-
-  useState(() => {
-    if (theme !== "default") {
-      document.documentElement.classList.add(`theme-${theme}`);
-    }
-  });
 
   const isAdmin = user?.role === "admin";
 
