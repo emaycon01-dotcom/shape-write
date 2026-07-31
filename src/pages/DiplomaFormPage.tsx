@@ -22,6 +22,7 @@ import {
 } from "@/lib/diploma-cursos";
 import templateP1Url from "@/assets/template-diploma-p1-hq.jpg";
 import templateP2Url from "@/assets/template-diploma-p2-hq.jpg";
+import { loadTemplateBase64 } from "@/lib/template-cache";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -156,15 +157,7 @@ export default function DiplomaFormPage() {
     return () => { cancelled = true; };
   }, [hydrated, editState?.editDocId, getDocument, loadDocumentInfo]);
 
-  const imgToBase64 = async (url: string): Promise<string> => {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  };
+  const imgToBase64 = (url: string) => loadTemplateBase64(url);
 
   const set = (field: keyof DiplomaForm) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>

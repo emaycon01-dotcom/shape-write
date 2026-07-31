@@ -10,6 +10,7 @@ import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2 } from "luc
 import { useToast } from "@/hooks/use-toast";
 import { loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
+import { loadTemplateBase64 } from "@/lib/template-cache";
 
 const MEDICO = "Dr. Abdo";
 const CRM = "CRM/SP 123456";
@@ -24,7 +25,6 @@ interface AtestadoFormData {
   dataAtendimento: string;
   horaAtendimento: string;
   dias: string;
-  motivo: string;
   cid: string;
   nascimento: string;
   uf: string;
@@ -39,7 +39,6 @@ const initial: AtestadoFormData = {
   dataAtendimento: "",
   horaAtendimento: "",
   dias: "1",
-  motivo: "doença",
   cid: "",
   nascimento: "",
   uf: "SP",
@@ -93,7 +92,6 @@ export default function AtestadoFormPage() {
           dataAtendimento: b.data_atendimento || "",
           horaAtendimento: b.hora_atendimento || "",
           dias: b.dias || "1",
-          motivo: b.motivo || "doença",
           cid: b.cid || "",
           nascimento: b.nascimento || "",
           uf: b.uf || initial.uf,
@@ -104,15 +102,7 @@ export default function AtestadoFormPage() {
     return () => { cancelled = true; };
   }, [hydrated, editState?.editDocId, getDocument, loadDocumentInfo]);
 
-  const imgToBase64 = async (url: string): Promise<string> => {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  };
+  const imgToBase64 = (url: string) => loadTemplateBase64(url);
 
   const fillTest = () => {
     const hoje = new Date();
@@ -166,7 +156,7 @@ export default function AtestadoFormPage() {
         data_atendimento: form.dataAtendimento,
         hora_atendimento: form.horaAtendimento,
         dias: form.dias,
-        motivo: form.motivo,
+        motivo: "doença",
         cid: form.cid,
         nascimento: form.nascimento,
         uf: form.uf,
@@ -315,14 +305,10 @@ export default function AtestadoFormPage() {
             A data e hora de emissão, o rodapé e a liberação eletrônica são preenchidos automaticamente com estes valores.
           </p>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Dias de Repouso</FieldLabel>
               <Input type="number" min={1} max={30} value={form.dias} onChange={set("dias")} className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Motivo</FieldLabel>
-              <Input value={form.motivo} onChange={set("motivo")} placeholder="doença" className={inputCls} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>CID</FieldLabel>

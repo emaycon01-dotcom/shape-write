@@ -265,19 +265,6 @@ export default function AdminPanelPage() {
     fetchAll();
   };
 
-  const resetPin = async () => {
-    if (!selected) return;
-    setBusy(true);
-    const { error } = await supabase.functions.invoke("admin-actions", {
-      body: { action: "reset_pin", user_id: selected.user_id },
-    });
-    setBusy(false);
-    toast({
-      title: error ? "Falha ao resetar PIN" : "PIN resetado",
-      variant: error ? "destructive" : undefined,
-    });
-  };
-
   const changePassword = async () => {
     if (!selected) return;
     if (newPassword.trim().length < 6) {
@@ -614,9 +601,6 @@ export default function AdminPanelPage() {
               </div>
 
               <div className="flex flex-wrap gap-2 border-t border-border/50 pt-3">
-                <Button size="sm" variant="outline" disabled={busy} onClick={resetPin}>
-                  <KeyRound className="mr-1 h-4 w-4" /> Resetar PIN
-                </Button>
                 {isBlocked(selected.user_id) ? (
                   <Button size="sm" variant="outline" disabled={busy} onClick={() => unbanUser(selected.user_id)}>
                     <ShieldBan className="mr-1 h-4 w-4" /> Desbanir

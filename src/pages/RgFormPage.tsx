@@ -12,6 +12,7 @@ import { loadRgFieldPositions } from "@/lib/rg-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateRgUrl from "@/assets/template-rg-bg-hq.jpg";
+import { loadTemplateBase64 } from "@/lib/template-cache";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -143,15 +144,7 @@ export default function RgFormPage() {
     return () => { cancelled = true; };
   }, [hydrated, editState?.editDocId, getDocument, loadDocumentInfo]);
 
-  const imgToBase64 = async (url: string): Promise<string> => {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  };
+  const imgToBase64 = (url: string) => loadTemplateBase64(url);
 
   const fillTest = async () => {
     const uf = pick(UF_LIST);

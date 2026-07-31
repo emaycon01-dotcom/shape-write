@@ -62,10 +62,6 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
-    if (action === "reset_pin") {
-      await admin.from("profiles").update({ pin_hash: null }).eq("user_id", targetUserId);
-      return json({ ok: true });
-    }
 
     if (action === "set_password") {
       const password = String(body.password ?? "");
