@@ -6,9 +6,9 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, Car, IdCard, Stethoscope, Anchor,
-  Layers, History, AlertTriangle, PenTool, MessageCircle, Users,
+  ShieldCheck, Zap, Clock, History, MessageCircle, Users,
 } from "lucide-react";
+
 
 
 
@@ -77,33 +77,6 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
   );
 }
 
-const MODULOS_RAPIDOS = [
-  { titulo: "CNH Digital", icon: FileText, rota: "/dashboard/documents/cnh" },
-  { titulo: "RG Digital", icon: IdCard, rota: "/dashboard/documents/rg" },
-  { titulo: "CRLV Digital", icon: Car, rota: "/dashboard/documents/crlv" },
-  { titulo: "CNH Marítima", icon: Anchor, rota: "/dashboard/documents/cha" },
-  { titulo: "Atestado", icon: Stethoscope, rota: "/dashboard/documents/atestado" },
-  { titulo: "Assinaturas", icon: PenTool, rota: "/dashboard/ferramentas/assinaturas" },
-];
-
-function Stat({ icon: Icon, label, value, tone = "text-primary" }: {
-  icon: React.ElementType; label: string; value: React.ReactNode; tone?: string;
-}) {
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-3 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]">
-      <div className="flex items-center gap-2.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
-          <Icon className={`h-4 w-4 ${tone}`} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-          <p className="font-display text-base font-bold leading-tight text-foreground">{value}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function DashboardHome() {
   const { user } = useAuth();
   const { documents } = useDocuments();
@@ -114,11 +87,7 @@ export default function DashboardHome() {
     () => documents.filter((d) => d.userId === user?.id),
     [documents, user?.id]
   );
-  const ativos = useMemo(() => userDocs.filter((d) => !isDocumentExpired(d)), [userDocs]);
-  const expirando = useMemo(
-    () => ativos.filter((d) => daysUntilExpiry(d) <= 7).length,
-    [ativos]
-  );
+
   const recentes = useMemo(() => userDocs.slice(0, 4), [userDocs]);
 
 
@@ -199,41 +168,8 @@ export default function DashboardHome() {
         </Link>
       </section>
 
-      {/* Resumo */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat icon={CreditCard} label="Créditos" value={user?.credits ?? 0} tone="text-accent" />
-        <Stat icon={Crown} label="Plano" value={user?.plano ? String(user.plano) : "Nenhum"} tone="text-primary" />
-        <Stat icon={Layers} label="Documentos ativos" value={ativos.length} tone="text-success" />
-        <Stat icon={AlertTriangle} label="Expiram em 7 dias" value={expirando} tone="text-warning" />
-      </section>
 
-      {/* Acesso rápido aos módulos */}
-      <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
-          <div>
-            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Acesso rápido</h2>
-            <p className="text-[11px] text-muted-foreground">Comece uma geração em um clique</p>
-          </div>
-          <Link to="/dashboard/documents" className="text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline">
-            Ver todos
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {MODULOS_RAPIDOS.map((m) => (
-            <Link
-              key={m.rota}
-              to={m.rota}
-              className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-border/60 bg-card/60 p-3.5 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.05)]"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
-                <m.icon className="h-4 w-4 text-primary" />
-              </div>
-              <p className="text-[12px] font-semibold leading-tight text-foreground">{m.titulo}</p>
-              <ArrowUpRight className="absolute right-3 top-3 h-3.5 w-3.5 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
-            </Link>
-          ))}
-        </div>
-      </section>
+
 
       {/* Últimos documentos */}
       <section className="space-y-3">
