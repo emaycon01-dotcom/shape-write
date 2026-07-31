@@ -172,9 +172,17 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <Turnstile
+                className="flex justify-center"
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                onReady={setCaptchaEnabled}
+              />
+
               {error && (
                 <p className="text-sm text-destructive">{error}</p>
               )}
+
 
               <Button
                 type="submit"
