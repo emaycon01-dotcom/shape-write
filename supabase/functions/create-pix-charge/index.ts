@@ -1,7 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
-
-const ELITEPAY_BASE_URL = "https://api.elitepaybr.com";
+import { ELITEPAY_BASE_URL, applyPaidTransaction, confirmElitepayPayment } from "../_shared/elitepay.ts";
 
 const PLAN_BASE_PRICES: Record<string, number> = { Dealer: 150, Master: 450, Diamond: 999.99 };
 
@@ -26,76 +25,6 @@ function isValidPurchase(type: string, amount: number, creditsAmount?: number, p
   return false;
 }
 
-async function confirmElitepayPayment(chargeId: string, clientId: string, clientSecret: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${ELITEPAY_BASE_URL}/api/v1/transactions`, {
-      method: "GET",
-      headers: { "x-client-id": clientId, "x-client-secret": clientSecret },
-    });
-    if (!res.ok) return false;
-    const data = await res.json().catch(() => null);
-    const list: any[] = data?.transactions || data?.data || [];
-    const match = list.find((t) => t?.id === chargeId || t?.ourId === chargeId || t?.transactionId === chargeId);
-    if (!match) return false;
-    const status = String(match.status || "").toLowerCase();
-    return ["aprovado", "completo", "concluido", "completed", "approved", "paid"].includes(status);
-  } catch {
-    return false;
-  }
-}
-
-export async function applyPaidTransaction(supabaseAdmin: any, transaction: any) {
-  if (transaction.status === "pago") return;
-
-  const { data: updatedTx } = await supabaseAdmin
-    .from("financial_transactions")
-    .update({ status: "pago", paid_at: new Date().toISOString() })
-    .eq("id", transaction.id)
-    .neq("status", "pago")
-    .select("id")
-    .maybeSingle();
-
-  if (!updatedTx) return;
-
-  if (transaction.type === "credito" && Number(transaction.credits_amount) > 0) {
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("credits")
-      .eq("user_id", transaction.user_id)
-      .single();
-
-    if (profile) {
-      await supabaseAdmin
-        .from("profiles")
-        .update({ credits: Number(profile.credits || 0) + Number(transaction.credits_amount) })
-        .eq("user_id", transaction.user_id)
-        .eq("credits", profile.credits);
-    }
-  } else if (transaction.type === "plano" && transaction.plan_name) {
-    const planMap: Record<string, string> = { Dealer: "dealer", Master: "master", Diamond: "diamond" };
-    const planValue = planMap[transaction.plan_name] || String(transaction.plan_name).toLowerCase();
-    await supabaseAdmin.from("profiles").update({ plano: planValue }).eq("user_id", transaction.user_id);
-    await supabaseAdmin.from("user_roles").upsert(
-      { user_id: transaction.user_id, cargo: planValue, assigned_by: "system" },
-      { onConflict: "user_id,cargo" },
-    );
-  }
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("name, email")
-    .eq("user_id", transaction.user_id)
-    .single();
-
-  await supabaseAdmin.from("deposits").insert({
-    user_id: transaction.user_id,
-    user_name: profile?.name || "",
-    user_email: profile?.email || "",
-    amount: transaction.amount,
-    method: "pix_elitepay",
-    status: "completed",
-  });
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
