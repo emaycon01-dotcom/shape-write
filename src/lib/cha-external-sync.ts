@@ -1,16 +1,15 @@
 import * as pdfjsLib from "pdfjs-dist";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Integração da CNH Marítima (CHA) com o app externo de consulta.
- * Todo o processamento (render do PDF -> imagem base64) acontece NO NAVEGADOR.
+ * O render do PDF -> imagem base64 acontece NO NAVEGADOR e o envio é feito
+ * pela edge function `doc-ingest-proxy` (o token de ingestão fica no servidor).
  */
-const EXTERNAL_SUPABASE_URL = "https://hfkckowhrjbpjgniaakl.supabase.co";
-const EXTERNAL_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhma2Nrb3docmpicGpnbmlhYWtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDAxNjMsImV4cCI6MjA5NDE3NjE2M30.mo2y4LjrPLYewR765h-Zaer9Y08r1M-OoNnB49QbMnQ";
-
 const MIN_LONG_SIDE = 1600;
 const TARGET_SCALE = 3;
 const JPEG_QUALITY = 0.94;
+
 
 function onlyDigits(value: string): string {
   return (value || "").replace(/\D/g, "");
