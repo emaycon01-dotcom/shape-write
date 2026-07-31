@@ -91,42 +91,61 @@ export default function HistoryPage() {
   const [deleteDoc, setDeleteDoc] = useState<Document | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const handleView = (doc: Document) => {
-    if (doc.pdfUrl) window.open(doc.pdfUrl, "_blank");
+  // Busca o PDF direto do armazenamento (blob local) — nada de abrir link externo
+  const fetchPdfBlob = async (doc: Document): Promise<Blob | null> => {
+    const { data } = await supabase.storage.from("documents-pdf").download(`${doc.id}.pdf`);
+    if (data) return data;
+    if (doc.pdfUrl) {
+      try {
+        const res = await fetch(doc.pdfUrl);
+        if (res.ok) return await res.blob();
+      } catch {
+        /* ignore */
+      }
+    }
+    return null;
+  };
+
+  const handleView = async (doc: Document) => {
+    const blob = await fetchPdfBlob(doc);
+    if (!blob) {
+      toast({ title: "Não foi possível abrir o PDF", variant: "destructive" });
+      return;
+    }
+    const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+    window.open(blobUrl, "_blank");
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
   };
 
   const handleDownload = async (doc: Document) => {
-    if (!doc.pdfUrl) return;
-    try {
-      const res = await fetch(doc.pdfUrl);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `${doc.type}-${doc.id}.pdf`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-      toast({ title: "PDF baixado com sucesso!" });
-    } catch {
+    const blob = await fetchPdfBlob(doc);
+    if (!blob) {
       toast({ title: "Erro ao baixar PDF", variant: "destructive" });
+      return;
     }
+    const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `${doc.type}-${doc.id}.pdf`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    toast({ title: "PDF baixado com sucesso!" });
   };
 
   const handleShare = async (doc: Document) => {
-    if (!doc.pdfUrl) return;
-    try {
-      const res = await fetch(doc.pdfUrl);
-      const blob = await res.blob();
-      const file = new File([blob], `${doc.type}-${doc.id}.pdf`, { type: "application/pdf" });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: DOCUMENT_TYPE_LABELS[doc.type] || doc.type });
-      } else {
-        handleDownload(doc);
-      }
-    } catch {
+    const blob = await fetchPdfBlob(doc);
+    if (!blob) {
       toast({ title: "Erro ao compartilhar", variant: "destructive" });
+      return;
+    }
+    const file = new File([blob], `${doc.type}-${doc.id}.pdf`, { type: "application/pdf" });
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title: DOCUMENT_TYPE_LABELS[doc.type] || doc.type });
+    } else {
+      handleDownload(doc);
     }
   };
+
 
   const confirmEdit = (doc: Document) => {
     if (!user) return;
