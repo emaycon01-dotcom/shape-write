@@ -156,6 +156,7 @@ const App = () => {
       </DeviceSecurityProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
