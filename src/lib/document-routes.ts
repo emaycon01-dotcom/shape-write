@@ -5,6 +5,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "atestado": "/dashboard/documents/atestado",
   "crlv": "/dashboard/documents/crlv",
   "cha": "/dashboard/documents/cha",
+  "diploma": "/dashboard/documents/diploma",
 
   "cha-amador": "/dashboard/documents/cha-amador",
   "cnh-nautica": "/dashboard/documentos-fisicos/carteirinhas/cnh-nautica",
