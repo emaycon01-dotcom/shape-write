@@ -128,54 +128,27 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {!collapsed && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">APLICATIVOS</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <div className="grid grid-cols-2 gap-2 px-2">
-                {APLICATIVOS.map((app) => (
-                  <div
-                    key={app.arquivo}
-                    className="group relative overflow-hidden rounded-lg border border-border/60 bg-card/50 p-2 transition-all hover:-translate-y-0.5"
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">APLICATIVOS</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink
+                    to="/dashboard/aplicativos"
+                    className="relative overflow-hidden hover:bg-secondary/50"
+                    activeClassName="bg-secondary text-primary font-medium"
                   >
-                    <div className={`absolute inset-x-0 top-0 h-[2px] ${app.gradient}`} />
-                    <div className={`absolute -right-6 -top-6 h-14 w-14 rounded-full ${app.gradient} opacity-20 blur-xl`} />
-                    <div className="relative space-y-1.5">
-                      <span className={`flex h-6 w-6 items-center justify-center rounded-md ${app.gradient}`}>
-                        <Smartphone className="h-3 w-3 text-primary-foreground" />
-                      </span>
-                      <p className="text-[9px] font-bold uppercase leading-tight tracking-wide text-foreground">
-                        {app.titulo}
-                      </p>
-                      <a
-                        href={app.url}
-                        download={app.arquivo}
-                        className="inline-flex items-center gap-1 rounded-md border border-border/60 px-1.5 py-0.5 text-[9px] font-semibold text-primary transition-colors hover:bg-secondary/60"
-                      >
-                        <Download className="h-2.5 w-2.5" />
-                        Baixar APK
-                      </a>
-                      <div className="space-y-0.5 pt-0.5">
-                        {app.links.map((l) => (
-                          <a
-                            key={l.href}
-                            href={l.href}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-1 text-[9px] text-muted-foreground transition-colors hover:text-primary"
-                          >
-                            <ExternalLink className="h-2.5 w-2.5 shrink-0" />
-                            <span className="truncate">{l.label}</span>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+                    <span className="absolute inset-x-0 top-0 h-[2px] gradient-primary" />
+                    <Smartphone className="mr-2 h-4 w-4" />
+                    {!collapsed && <span>Aplicativos (APK)</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
 
 
 
