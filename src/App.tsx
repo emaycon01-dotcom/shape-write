@@ -99,7 +99,9 @@ const Loading = () => (
   </div>
 );
 
-const App = () => (
+const App = () => {
+  useIdlePrefetch();
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <DeviceSecurityProvider>
