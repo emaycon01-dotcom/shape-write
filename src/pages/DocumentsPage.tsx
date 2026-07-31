@@ -44,8 +44,10 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         icon: IdCard,
         qrcode: true,
         aplicativo: true,
-        emBreve: true,
+        rota: "/dashboard/documents/rg",
+        creditos: 1,
       },
+
     ],
   },
   {

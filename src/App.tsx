@@ -39,6 +39,9 @@ const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
 const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
 const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
+const RgFormPage = lazy(() => import("./pages/RgFormPage"));
+const RgPreviewPage = lazy(() => import("./pages/RgPreviewPage"));
+
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
 const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
@@ -80,6 +83,9 @@ const App = () => (
                       <Route path="documents" element={<DocumentsPage />} />
                       <Route path="documents/cnh" element={<CnhFormPage />} />
                       <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
+                      <Route path="documents/rg" element={<RgFormPage />} />
+                      <Route path="documents/rg/preview" element={<RgPreviewPage />} />
+
                       <Route path="history" element={<HistoryPage />} />
                       <Route path="recarregar" element={<RecarregarPage />} />
                       <Route path="template-align" element={<TemplateAlignPage />} />

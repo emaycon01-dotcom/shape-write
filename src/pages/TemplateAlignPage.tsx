@@ -6,12 +6,17 @@ import { Slider } from "@/components/ui/slider";
 import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg-hq.jpg";
+import templateRgBgUrl from "@/assets/template-rg-bg-hq.jpg";
 import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
+import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
 
 const CNH_FONT = "'CNHDigital', Arial, Helvetica, sans-serif";
+const RG_FONT = "'RGDigital', Arial, Helvetica, sans-serif";
+const RG_MRZ_FONT = "'RGOcrb', 'Courier New', monospace";
+
 
 interface FieldDef {
   id: string;
@@ -66,6 +71,101 @@ export const defaultCnhFields: FieldDef[] = [
   { id: "reg_vert_bot", label: "Reg. Vertical (base)", sampleText: "07915888995", x: 64, y: 546, fontSize: 11.5, rotate: -90 },
   { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 437, y: 118, fontSize: 8, w: 277, h: 277, color: "#999" },
 ];
+
+// Defaults MUST match supabase/functions/generate-rg-pdf/index.ts RG_DEFAULT_POSITIONS
+export const defaultRgFields: FieldDef[] = [
+  // Frente
+  { id: "photo", label: "Foto 3x4 (frente)", sampleText: "[FOTO]", x: 53, y: 199, fontSize: 8, w: 89, h: 101, color: "#999" },
+  { id: "signature", label: "Assinatura (frente)", sampleText: "[ASSINATURA]", x: 170, y: 315, fontSize: 8, w: 80, h: 28, color: "#999" },
+  { id: "estado", label: "Estado (cabeçalho)", sampleText: "AMAZONAS", x: 246, y: 131, fontSize: 14 },
+  { id: "nome", label: "Nome", sampleText: "HUELLISON DOS SANTOS CASTRO", x: 155, y: 197, fontSize: 11 },
+  { id: "nome_social", label: "Nome Social", sampleText: "NOME SOCIAL", x: 155, y: 236, fontSize: 11 },
+  { id: "registro_geral", label: "Registro Geral - CPF", sampleText: "02770162233", x: 155, y: 261, fontSize: 15 },
+  { id: "sexo", label: "Sexo", sampleText: "M", x: 298, y: 261, fontSize: 11 },
+  { id: "data_nascimento", label: "Data de Nascimento", sampleText: "23/10/1993", x: 155, y: 283, fontSize: 11 },
+  { id: "nacionalidade", label: "Nacionalidade", sampleText: "BRA", x: 298, y: 283, fontSize: 11 },
+  { id: "naturalidade", label: "Naturalidade", sampleText: "MANAUS - AM", x: 155, y: 304, fontSize: 11 },
+  { id: "data_validade", label: "Data de Validade", sampleText: "23/05/2035", x: 298, y: 302, fontSize: 11 },
+  // Verso
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 50, y: 437, fontSize: 8, w: 82, h: 82, color: "#999" },
+  { id: "photo2", label: "Foto 3x4 (verso)", sampleText: "[FOTO]", x: 397, y: 421, fontSize: 8, w: 36, h: 37, color: "#999" },
+  { id: "filiacao1", label: "Filiação 1 (mãe)", sampleText: "MARIA RAIMUNDA DA COSTA DOS SANTOS", x: 153, y: 444, fontSize: 11 },
+  { id: "filiacao2", label: "Filiação 2 (pai)", sampleText: "JOSE LUIZ DE SOUZA CASTRO", x: 153, y: 463, fontSize: 11 },
+  { id: "orgao_expedidor", label: "Órgão Expedidor", sampleText: "SSP-AM", x: 153, y: 481, fontSize: 11 },
+  { id: "local_emissao", label: "Local de emissão", sampleText: "AM", x: 153, y: 515, fontSize: 11 },
+  { id: "data_emissao", label: "Data de Emissão", sampleText: "23/05/2025", x: 325, y: 515, fontSize: 11 },
+  {
+    id: "mrz",
+    label: "MRZ",
+    sampleText: "IDBRA0277016223302770162233<<0\n931023M350523BRA<<<<<<<<<<<<<2\nHUELLISON<<DOS<SANTOS<CASTRO<<",
+    x: 88,
+    y: 592,
+    fontSize: 17.5,
+  },
+  // Outras informações
+  { id: "titulo_eleitor", label: "Título de eleitor", sampleText: "80977225463859", x: 41, y: 743, fontSize: 11 },
+  { id: "tipo_sanguineo", label: "Tipo sanguíneo", sampleText: "A+", x: 297, y: 743, fontSize: 11 },
+  { id: "estado_civil", label: "Estado civil", sampleText: "SOLTEIRO(A)", x: 41, y: 770, fontSize: 11 },
+  { id: "doador", label: "Doador de Orgãos", sampleText: "NÃO", x: 297, y: 770, fontSize: 11 },
+  { id: "signature2", label: "Assinatura (outras info)", sampleText: "[ASSINATURA]", x: 55, y: 805, fontSize: 8, w: 90, h: 33, color: "#999" },
+  { id: "certidao", label: "Certidão", sampleText: "MANAUS - AM 1.SUBD. CN:LV E672/FLS.180 /N°43474", x: 215, y: 806, fontSize: 9 },
+  { id: "cnh", label: "CNH", sampleText: "78764532553", x: 41, y: 858, fontSize: 11 },
+  { id: "categoria", label: "Categoria", sampleText: "A", x: 179, y: 858, fontSize: 11 },
+  { id: "pis_pasep", label: "PIS / PASEP", sampleText: "35345879603", x: 310, y: 858, fontSize: 11 },
+  { id: "nis", label: "NIS", sampleText: "22146118198", x: 41, y: 885, fontSize: 11 },
+  { id: "nit", label: "NIT", sampleText: "09856951890", x: 179, y: 885, fontSize: 11 },
+  { id: "ctps", label: "Carteira de trabalho", sampleText: "9000611119111", x: 310, y: 891, fontSize: 11 },
+  { id: "dni", label: "DNI", sampleText: "4594798348", x: 41, y: 922, fontSize: 11 },
+  { id: "cns", label: "CNS", sampleText: "221869890104006", x: 297, y: 922, fontSize: 11 },
+  { id: "observacao_saude", label: "Observação de Saúde", sampleText: "-", x: 41, y: 951, fontSize: 11 },
+];
+
+interface EditorConfig {
+  key: "cnh" | "rg";
+  title: string;
+  storageKey: string;
+  defaults: FieldDef[];
+  bg: string;
+  font: string;
+  mrzFont: string;
+  mrzWidth: number;
+  estadoBoxW: number;
+  estadoMaxChars: number;
+  mrzLineHeight: number;
+  copy: () => Record<string, unknown>;
+}
+
+const EDITORS: Record<"cnh" | "rg", EditorConfig> = {
+  cnh: {
+    key: "cnh",
+    title: "CNH Digital",
+    storageKey: CNH_ALIGN_STORAGE_KEY,
+    defaults: defaultCnhFields,
+    bg: templateBgUrl,
+    font: CNH_FONT,
+    mrzFont: CNH_FONT,
+    mrzWidth: 378,
+    estadoBoxW: 170,
+    estadoMaxChars: 9,
+    mrzLineHeight: 1.6,
+    copy: () => loadCnhFieldPositions() ?? {},
+  },
+  rg: {
+    key: "rg",
+    title: "RG Digital",
+    storageKey: RG_ALIGN_STORAGE_KEY,
+    defaults: defaultRgFields,
+    bg: templateRgBgUrl,
+    font: RG_FONT,
+    mrzFont: RG_MRZ_FONT,
+    mrzWidth: 420,
+    estadoBoxW: 220,
+    estadoMaxChars: 12,
+    mrzLineHeight: 1.22,
+    copy: () => loadRgFieldPositions() ?? {},
+  },
+};
+
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
   const isBox = field.id === "photo" || field.id === "signature";
@@ -160,15 +260,15 @@ function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: 
   );
 }
 
-function CnhAlignEditor() {
+function AlignEditor({ cfg }: { cfg: EditorConfig }) {
   const [fields, setFields] = useState<FieldDef[]>(() => {
-    const saved = localStorage.getItem(CNH_ALIGN_STORAGE_KEY);
+    const saved = localStorage.getItem(cfg.storageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
           // merge to keep new metadata (labels/colors) while using saved geometry
-          return defaultCnhFields.map((def) => {
+          return cfg.defaults.map((def) => {
             const s = parsed.find((p: FieldDef) => p.id === def.id);
             return s ? { ...def, x: s.x, y: s.y, fontSize: s.fontSize, w: s.w ?? def.w, h: s.h ?? def.h, rotate: s.rotate ?? def.rotate } : def;
           });
@@ -177,8 +277,9 @@ function CnhAlignEditor() {
         /* ignore */
       }
     }
-    return defaultCnhFields;
+    return cfg.defaults;
   });
+
 
   const [selected, setSelected] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
@@ -197,9 +298,33 @@ function CnhAlignEditor() {
 
   // Auto-persist so the PDF always uses the latest alignment (real-time)
   useEffect(() => {
-    localStorage.setItem(CNH_ALIGN_STORAGE_KEY, JSON.stringify(fields));
-    window.dispatchEvent(new CustomEvent("cnh-align-updated"));
-  }, [fields]);
+    localStorage.setItem(cfg.storageKey, JSON.stringify(fields));
+    window.dispatchEvent(new CustomEvent(`${cfg.key}-align-updated`));
+  }, [fields, cfg.storageKey, cfg.key]);
+
+  // Troca de documento: recarrega os campos do editor selecionado
+  useEffect(() => {
+    setSelected(null);
+    const saved = localStorage.getItem(cfg.storageKey);
+    if (!saved) {
+      setFields(cfg.defaults);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return;
+      setFields(
+        cfg.defaults.map((def) => {
+          const s = parsed.find((p: FieldDef) => p.id === def.id);
+          return s ? { ...def, x: s.x, y: s.y, fontSize: s.fontSize, w: s.w ?? def.w, h: s.h ?? def.h, rotate: s.rotate ?? def.rotate } : def;
+        }),
+      );
+    } catch {
+      setFields(cfg.defaults);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg.key]);
+
 
   const updateField = useCallback((id: string, updates: Partial<FieldDef>) => {
     setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
@@ -271,18 +396,18 @@ function CnhAlignEditor() {
   }, [selected]);
 
   const savePositions = () => {
-    localStorage.setItem(CNH_ALIGN_STORAGE_KEY, JSON.stringify(fields));
-    toast({ title: "Alinhamento salvo!", description: "O PDF da CNH vai usar exatamente estas posições." });
+    localStorage.setItem(cfg.storageKey, JSON.stringify(fields));
+    toast({ title: "Alinhamento salvo!", description: `O PDF do ${cfg.title} vai usar exatamente estas posições.` });
   };
 
   const resetPositions = () => {
-    setFields(defaultCnhFields);
+    setFields(cfg.defaults);
     setSelected(null);
     toast({ title: "Posições resetadas!" });
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(JSON.stringify(loadCnhFieldPositions() ?? {}, null, 2));
+    navigator.clipboard.writeText(JSON.stringify(cfg.copy(), null, 2));
     toast({ title: "Coordenadas copiadas!" });
   };
 
@@ -291,7 +416,7 @@ function CnhAlignEditor() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-lg font-bold text-foreground font-display">Alinhamento - CNH Digital</h2>
+        <h2 className="text-lg font-bold text-foreground font-display">Alinhamento - {cfg.title}</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={resetPositions} className="gap-1.5">
             <RotateCcw className="w-4 h-4" /> Reset
@@ -318,18 +443,18 @@ function CnhAlignEditor() {
           style={{ aspectRatio: `${PAGE_W} / ${PAGE_H}`, maxWidth: PAGE_W }}
           onClick={() => setSelected(null)}
         >
-          <img src={templateBgUrl} alt="Template CNH" className="absolute inset-0 w-full h-full" style={{ objectFit: "fill" }} draggable={false} />
+          <img src={cfg.bg} alt={`Template ${cfg.title}`} className="absolute inset-0 w-full h-full" style={{ objectFit: "fill" }} draggable={false} />
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
-            const isBox = f.id === "photo" || f.id === "signature";
+            const isBox = !!f.w && !!f.h;
             const isEstado = f.id === "estado";
+            const isMrz = f.id === "mrz";
             const estadoSize = isEstado
-              ? f.sampleText.length > 9
-                ? Math.max(f.fontSize * (9 / f.sampleText.length), f.fontSize * 0.55)
+              ? f.sampleText.length > cfg.estadoMaxChars
+                ? Math.max(f.fontSize * (cfg.estadoMaxChars / f.sampleText.length), f.fontSize * 0.55)
                 : f.fontSize
               : f.fontSize;
-
 
             return (
               <div
@@ -349,7 +474,7 @@ function CnhAlignEditor() {
                   left: `${(f.x / PAGE_W) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: CNH_FONT,
+                  fontFamily: isMrz ? cfg.mrzFont : cfg.font,
                   color: f.color || "#111",
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
@@ -360,9 +485,9 @@ function CnhAlignEditor() {
                     f.rotate ? `rotate(${f.rotate}deg)` : "",
                   ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
-                  ...(f.id === "mrz" ? { width: `${((378 / PAGE_W) * 100).toFixed(4)}%` } : {}),
-                  lineHeight: f.id === "mrz" ? 1.6 : 1,
-                  ...(isEstado ? { width: `${((170 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
+                  ...(isMrz ? { width: `${((cfg.mrzWidth / PAGE_W) * 100).toFixed(4)}%` } : {}),
+                  lineHeight: isMrz ? cfg.mrzLineHeight : 1,
+                  ...(isEstado ? { width: `${((cfg.estadoBoxW / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
                     ? {
                         width: `${(((f.w || 80) / PAGE_W) * 100).toFixed(4)}%`,
@@ -378,12 +503,9 @@ function CnhAlignEditor() {
               >
                 {isBox ? (
                   <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
-                ) : f.id === "mrz" ? (
+                ) : isMrz ? (
                   f.sampleText.split("\n").map((line, i) => (
-                    <div
-                      key={i}
-                      style={{ textAlign: "left", whiteSpace: "pre" }}
-                    >
+                    <div key={i} style={{ textAlign: "left", whiteSpace: "pre" }}>
                       {line}
                     </div>
                   ))
@@ -400,10 +522,28 @@ function CnhAlignEditor() {
 }
 
 export default function TemplateAlignPage() {
+  const [doc, setDoc] = useState<"cnh" | "rg">("cnh");
+
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
-      <CnhAlignEditor />
+
+      <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
+        {(["cnh", "rg"] as const).map((k) => (
+          <button
+            key={k}
+            onClick={() => setDoc(k)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              doc === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {EDITORS[k].title}
+          </button>
+        ))}
+      </div>
+
+      <AlignEditor key={doc} cfg={EDITORS[doc]} />
     </div>
   );
 }
+
