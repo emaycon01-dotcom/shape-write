@@ -541,7 +541,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   ...(isMrz ? { width: `${((cfg.mrzWidth / PAGE_W) * 100).toFixed(4)}%` } : {}),
                   lineHeight: isMrz ? cfg.mrzLineHeight : isCorpo ? 1.103 : isLiberado ? 1.15 : 1,
                   ...(f.id === "corpo" && cfg.key === "atestado"
-                    ? { width: `${((758 / PAGE_W) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
+                    ? { width: `${((766 / PAGE_W) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
                     : {}),
                   ...(isLiberado
                     ? { width: `${((232 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const }

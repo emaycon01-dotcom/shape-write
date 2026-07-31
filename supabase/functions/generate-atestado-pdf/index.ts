@@ -257,7 +257,7 @@ function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, 
 
   <div class="overlay arial" style="${base("paciente", "white-space:nowrap;")}"><span class="para-label">PARA:</span> ${escapeHtml(d.paciente || "")}</div>
 
-  <div class="overlay times" style="${base("corpo", "width:758px;line-height:1.103;text-align:left;")}">${escapeHtml(corpo)}</div>
+  <div class="overlay times" style="${base("corpo", "width:766px;line-height:1.103;text-align:left;")}">${escapeHtml(corpo)}</div>
 
   ${text("cid", d.cid ? `CID: ${d.cid}` : "", "times")}
 
