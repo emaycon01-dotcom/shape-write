@@ -34,9 +34,11 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         titulo: "CRLV Digital",
         descricao: "Certificado de registro e licenciamento",
         icon: Car,
+        rota: "/dashboard/documents/crlv",
+        creditos: 1,
         qrcode: true,
-        emBreve: true,
       },
+
       {
         id: "rg",
         titulo: "RG Digital",
