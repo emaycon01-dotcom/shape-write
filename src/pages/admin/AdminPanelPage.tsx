@@ -125,7 +125,7 @@ export default function AdminPanelPage() {
 
   const fetchAll = async () => {
     const [p, r, l, d, b, ct, ft] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, cargo"),
       supabase.from("generation_logs").select("*").order("created_at", { ascending: false }).limit(300),
       supabase.from("deposits").select("*").order("created_at", { ascending: false }).limit(300),

@@ -45,7 +45,7 @@ export default function AdminUsuariosPage() {
   const fetchData = async () => {
     setLoading(true);
     const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
     ]);
     if (profilesRes.data) setProfiles(profilesRes.data as any);

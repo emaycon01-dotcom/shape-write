@@ -6,20 +6,34 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Identificador derivado do IP do chamador (nunca do e-mail enviado pelo cliente),
+// impedindo que um atacante bloqueie a conta de outra pessoa.
+async function clientKey(req: Request, kind: string): Promise<string> {
+  const ip =
+    (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
+    req.headers.get("cf-connecting-ip") ||
+    "unknown";
+  const data = new TextEncoder().encode(`${kind}|${ip}`);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  const hex = Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 32);
+  return `${kind}:${hex}`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { action, identifier } = await req.json();
+    const { action, identifier: rawIdentifier } = await req.json();
 
-    if (!identifier || typeof identifier !== "string") {
-      return new Response(JSON.stringify({ error: "Missing identifier" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const isRegister =
+      typeof rawIdentifier === "string" && rawIdentifier.startsWith("register:");
+    const kind = isRegister ? "register" : "login";
+    const identifier = await clientKey(req, kind);
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -31,9 +45,8 @@ Deno.serve(async (req) => {
       supabaseAdmin.rpc("cleanup_old_login_attempts").then(() => {}, () => {});
     }
 
-    const isRegister = identifier.startsWith("register:");
     const windowMinutes = isRegister ? 60 : 15;
-    const maxAttempts = isRegister ? 5 : 10;
+    const maxAttempts = isRegister ? 5 : 20;
 
     const countAttempts = async () => {
       const { count } = await supabaseAdmin
@@ -47,7 +60,7 @@ Deno.serve(async (req) => {
     const recordAttempt = () =>
       supabaseAdmin.from("login_attempts").insert({
         identifier,
-        attempt_type: isRegister ? "register" : "login",
+        attempt_type: kind,
       });
 
     if (action === "check") {
@@ -59,7 +72,6 @@ Deno.serve(async (req) => {
     }
 
     if (action === "check_and_record") {
-      // Uma única viagem de rede: conta e registra em paralelo
       const [count] = await Promise.all([countAttempts(), recordAttempt()]);
       return new Response(
         JSON.stringify({ allowed: count < maxAttempts, remaining: Math.max(0, maxAttempts - count) }),
@@ -69,12 +81,10 @@ Deno.serve(async (req) => {
 
     if (action === "record") {
       await recordAttempt();
-
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
 
     return new Response(JSON.stringify({ error: "Invalid action" }), {
       status: 400,

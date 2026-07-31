@@ -40,11 +40,15 @@ interface DocumentContextType {
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
-async function uploadPdfToStorage(pdfDataUrl: string, docId: string): Promise<string | null> {
+async function uploadPdfToStorage(pdfDataUrl: string, docId: string, userId?: string): Promise<string | null> {
   try {
+    const uid = userId || (await supabase.auth.getUser()).data.user?.id;
+    if (!uid) return null;
+
     const res = await fetch(pdfDataUrl);
     const blob = await res.blob();
-    const filePath = `${docId}.pdf`;
+    // Caminho isolado por usuário: garante que ninguém acesse o PDF de outro
+    const filePath = `${uid}/${docId}.pdf`;
 
     const { error } = await supabase.storage
       .from("documents-pdf")
@@ -131,7 +135,13 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       console.error("Error deleting document:", error);
       throw error;
     }
-    supabase.storage.from("documents-pdf").remove([`${id}.pdf`]).catch(() => {});
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id;
+      supabase.storage
+        .from("documents-pdf")
+        .remove([uid ? `${uid}/${id}.pdf` : `${id}.pdf`, `${id}.pdf`])
+        .catch(() => {});
+    });
     setDocuments((prev) => prev.filter((d) => d.id !== id));
   }, []);
 
@@ -146,7 +156,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
 
       let pdfUrl: string | null = null;
       if (doc.pdfDataUrl) {
-        pdfUrl = await uploadPdfToStorage(doc.pdfDataUrl, docId);
+        pdfUrl = await uploadPdfToStorage(doc.pdfDataUrl, docId, doc.userId);
       }
 
       const row = {
