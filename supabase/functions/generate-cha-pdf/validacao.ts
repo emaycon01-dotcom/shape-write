@@ -5,11 +5,11 @@ import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
 
 export const VALIDACAO_BASE_URL =
   Deno.env.get("CHA_VALIDACAO_BASE_URL") ||
-  "https://senetran-consultacarteira-digital-transito-vio.info";
+  "https://certificado-qrcode-vio.info";
 
 const REGISTER_ENDPOINT =
   Deno.env.get("CHA_REGISTER_ENDPOINT") ||
-  "https://nqjlmydtlckruwiqtlbe.supabase.co/functions/v1/register-document";
+  "https://nkkvpnnpplezwdxxgpyr.functions.supabase.co/register-document";
 
 function s(v: unknown): string {
   return typeof v === "string" ? v : v == null ? "" : String(v);
@@ -27,8 +27,15 @@ function dateOnly(v: string): string {
 /** ID determinístico: reenviar o mesmo documento atualiza o registro. */
 export function buildDocumentoId(d: Record<string, string>): string {
   const cpf = onlyDigits(s(d.cpf)) || "00000000000";
-  const insc = (s(d.inscricao).toUpperCase().replace(/[^A-Z0-9]/g, "")) || "0";
-  return `CHA-${cpf}-${insc}`;
+  return `CHA-${cpf}`;
+}
+
+async function buildHash(input: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 32);
 }
 
 export interface RegisterResult {
@@ -42,42 +49,42 @@ export async function registerValidationDocument(
   d: Record<string, string>,
 ): Promise<RegisterResult> {
   const documentoId = buildDocumentoId(d);
-  const fallbackUrl = `${VALIDACAO_BASE_URL}/validar?id=${encodeURIComponent(documentoId)}`;
+  const fallbackUrl = `${VALIDACAO_BASE_URL}/validar-cha?id=${encodeURIComponent(documentoId)}`;
+
+  const categoria = [s(d.categoria), s(d.categoria_en)]
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .join(" ")
+    .toUpperCase();
 
   const payload: Record<string, string> = {
+    tipo: "cha",
     documento_id: documentoId,
-    tipo_documento: "CHA",
     nome: s(d.nome).toUpperCase(),
-    nome_civil: s(d.nome).toUpperCase(),
     cpf: s(d.cpf),
     data_nascimento: dateOnly(d.nascimento),
-    categoria: s(d.categoria).toUpperCase(),
-    categoria_en: s(d.categoria_en).toUpperCase(),
-    cat_hab: s(d.categoria).toUpperCase(),
-    validade: dateOnly(d.validade),
-    n_registro: s(d.inscricao).toUpperCase(),
+    categoria,
+    data_validade: dateOnly(d.validade),
     numero_inscricao: s(d.inscricao).toUpperCase(),
     limites_navegacao: s(d.limites).toUpperCase(),
-    requisitos: s(d.requisitos).toUpperCase(),
-    orgao_emissor: s(d.orgao).toUpperCase(),
+    emissor: s(d.orgao).toUpperCase() || "MARINHA DO BRASIL",
     data_emissao: dateOnly(d.data_emissao),
-    nacionalidade: "BRASILEIRA",
+    restricoes_fisicas: s(d.requisitos).toUpperCase(),
     status: "valido",
-    foto: s(d.foto_base64) || s(d.foto),
+    hash: await buildHash(`${documentoId}|${s(d.nome)}|${s(d.inscricao)}`),
   };
 
-  const token = Deno.env.get("VALIDACAO_API_TOKEN") || "";
-  if (!token) {
-    console.warn("VALIDACAO_API_TOKEN ausente — QR gerado sem cadastro remoto");
-    return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: "missing_token" };
-  }
+  const foto = s(d.foto_base64) || s(d.foto);
+  if (foto) payload.foto_base64 = foto;
+
+  const token = Deno.env.get("VALIDACAO_API_TOKEN") || "site1";
 
   try {
     const res = await fetch(REGISTER_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-API-Token": token },
       body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(15000),
     });
 
     const text = await res.text();
