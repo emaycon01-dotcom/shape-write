@@ -316,13 +316,16 @@ serve(async (req) => {
       liberado_hora: body.liberado_hora || "",
       medico: body.medico || "",
       crm: body.crm || "",
+      especialidade: body.especialidade || "",
+      nascimento: body.nascimento || "",
+      uf: body.uf || "",
       template_bg: body.template_base64 || "",
     };
 
     // Modo preview: NÃO cadastra no site de validação (QR só funciona no PDF final)
     const isPreview = body.preview === true || body.preview === "true";
     const validacao = isPreview
-      ? { documentoId: buildDocumentoId(data), qrCodeUrl: "PREVIEW-NAO-VALIDO", registered: false }
+      ? { documentoId: buildDocumentoId(data), qrCodeUrl: "PREVIEW-NAO-VALIDO", token: undefined as string | undefined, registered: false }
       : await registerValidationDocument(data);
 
     console.log(
@@ -340,7 +343,7 @@ serve(async (req) => {
       );
     }
 
-    const html = buildAtestadoHtml(data, body.field_positions, validacao.qrCodeUrl);
+    const html = buildAtestadoHtml(data, body.field_positions, validacao.qrCodeUrl, validacao.token);
 
     let pdfBuffer: Uint8Array | null = null;
 
