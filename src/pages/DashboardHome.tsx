@@ -74,8 +74,8 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 }
 
 export default function DashboardHome() {
-  const { user, refreshUser } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
+
   const isAdmin = user?.role === "admin";
 
 
