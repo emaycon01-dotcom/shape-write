@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.remove-background]
 verify_jwt = false
+
+[functions.rg-foto]
+verify_jwt = false
