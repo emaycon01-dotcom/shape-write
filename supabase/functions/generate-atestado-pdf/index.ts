@@ -194,7 +194,7 @@ function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, 
 
   const corpo = buildCorpoTexto(d);
   const cidadeData = d.cidade_data ||
-    `${d.unidade_curta || d.unidade || ""}, ${dataPorExtenso(d.data_emissao || d.data_atendimento || "")} .`;
+    `${d.unidade_curta || d.unidade || ""}, ${dataPorExtenso(d.data_emissao || d.data_atendimento || "")}`;
 
   return `<!DOCTYPE html>
 <html>
