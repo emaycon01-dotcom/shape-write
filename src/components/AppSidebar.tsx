@@ -100,12 +100,10 @@ export function AppSidebar() {
       <SidebarContent className="flex flex-col h-full">
         {!collapsed && (
           <div className="px-4 py-5 flex items-center gap-3">
-            <img src={logo} alt="Bellarus" className="w-9 h-9" />
-            <div>
-              <span className="font-display font-bold text-lg tracking-wider text-foreground">BELLARUS</span>
-              <span className="block text-[10px] tracking-[0.3em] text-accent -mt-1">SISTEMAS</span>
-            </div>
+            <img src={logo} alt="MonkeyLab" className="h-10 w-auto object-contain" />
+            <span className="block text-[10px] tracking-[0.3em] text-accent">SISTEMAS</span>
           </div>
+
         )}
 
         <SidebarGroup>
