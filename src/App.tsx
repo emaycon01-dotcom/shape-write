@@ -90,6 +90,10 @@ const App = () => {
                       <Route path="documents/atestado" element={<AtestadoFormPage />} />
                       <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
 
+                      <Route path="documents/hapvida" element={<HapvidaFormPage />} />
+                      <Route path="documents/hapvida/preview" element={<HapvidaPreviewPage />} />
+
+
                       <Route path="documents/crlv" element={<CrlvFormPage />} />
                       <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
 
