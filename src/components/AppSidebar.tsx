@@ -7,8 +7,6 @@ import {
   History,
   LogOut,
   CreditCard,
-  Headphones,
-  Palette,
   ShieldBan,
   SlidersHorizontal,
   Rocket,
@@ -29,7 +27,6 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.png";
-import { SupportDialog } from "@/components/SupportDialog";
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
@@ -175,7 +172,6 @@ export function AppSidebar() {
           </button>
         </div>
 
-        <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
       </SidebarContent>
     </Sidebar>
   );
