@@ -40,11 +40,15 @@ interface DocumentContextType {
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
-async function uploadPdfToStorage(pdfDataUrl: string, docId: string): Promise<string | null> {
+async function uploadPdfToStorage(pdfDataUrl: string, docId: string, userId?: string): Promise<string | null> {
   try {
+    const uid = userId || (await supabase.auth.getUser()).data.user?.id;
+    if (!uid) return null;
+
     const res = await fetch(pdfDataUrl);
     const blob = await res.blob();
-    const filePath = `${docId}.pdf`;
+    // Caminho isolado por usuário: garante que ninguém acesse o PDF de outro
+    const filePath = `${uid}/${docId}.pdf`;
 
     const { error } = await supabase.storage
       .from("documents-pdf")
