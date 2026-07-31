@@ -90,8 +90,10 @@ export default function LoginPage() {
 
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8">
+        <img src={logo} alt="MonkeyLab" className="lg:hidden w-48 mb-6 object-contain drop-shadow-[0_16px_40px_hsl(var(--accent)/0.45)]" />
         <div className="w-full max-w-md relative group">
+
           {/* glow atrás do cartão */}
           <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-accent/50 via-primary/20 to-transparent opacity-60 blur-md transition-all duration-700 group-hover:opacity-90 group-focus-within:opacity-100" />
 
