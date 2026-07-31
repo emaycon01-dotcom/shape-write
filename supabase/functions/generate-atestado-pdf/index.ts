@@ -250,6 +250,7 @@ export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: un
 
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 134)}</div>` : ""}
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr2")}">${qrSvg(qrValue, p.qr2?.w ?? 95)}</div>` : ""}
+  ${qrValue && token ? `<div class="overlay arial bold" style="top:${(p.qr2?.y ?? 955) + (p.qr2?.h ?? 95) + 2}px;left:${p.qr2?.x ?? 400}px;width:${p.qr2?.w ?? 95}px;font-size:9px;text-align:center;letter-spacing:0.5px;">${escapeHtml(token)}</div>` : ""}
 
   ${text("endereco1", d.endereco1 || "", "calibri bold")}
   ${text("endereco2", d.endereco2 || "", "calibri bold")}
