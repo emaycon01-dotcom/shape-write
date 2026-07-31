@@ -396,18 +396,18 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
   }, [selected]);
 
   const savePositions = () => {
-    localStorage.setItem(CNH_ALIGN_STORAGE_KEY, JSON.stringify(fields));
-    toast({ title: "Alinhamento salvo!", description: "O PDF da CNH vai usar exatamente estas posições." });
+    localStorage.setItem(cfg.storageKey, JSON.stringify(fields));
+    toast({ title: "Alinhamento salvo!", description: `O PDF do ${cfg.title} vai usar exatamente estas posições.` });
   };
 
   const resetPositions = () => {
-    setFields(defaultCnhFields);
+    setFields(cfg.defaults);
     setSelected(null);
     toast({ title: "Posições resetadas!" });
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(JSON.stringify(loadCnhFieldPositions() ?? {}, null, 2));
+    navigator.clipboard.writeText(JSON.stringify(cfg.copy(), null, 2));
     toast({ title: "Coordenadas copiadas!" });
   };
 
@@ -416,7 +416,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-lg font-bold text-foreground font-display">Alinhamento - CNH Digital</h2>
+        <h2 className="text-lg font-bold text-foreground font-display">Alinhamento - {cfg.title}</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={resetPositions} className="gap-1.5">
             <RotateCcw className="w-4 h-4" /> Reset
@@ -443,18 +443,18 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
           style={{ aspectRatio: `${PAGE_W} / ${PAGE_H}`, maxWidth: PAGE_W }}
           onClick={() => setSelected(null)}
         >
-          <img src={templateBgUrl} alt="Template CNH" className="absolute inset-0 w-full h-full" style={{ objectFit: "fill" }} draggable={false} />
+          <img src={cfg.bg} alt={`Template ${cfg.title}`} className="absolute inset-0 w-full h-full" style={{ objectFit: "fill" }} draggable={false} />
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
-            const isBox = f.id === "photo" || f.id === "signature";
+            const isBox = !!f.w && !!f.h;
             const isEstado = f.id === "estado";
+            const isMrz = f.id === "mrz";
             const estadoSize = isEstado
-              ? f.sampleText.length > 9
-                ? Math.max(f.fontSize * (9 / f.sampleText.length), f.fontSize * 0.55)
+              ? f.sampleText.length > cfg.estadoMaxChars
+                ? Math.max(f.fontSize * (cfg.estadoMaxChars / f.sampleText.length), f.fontSize * 0.55)
                 : f.fontSize
               : f.fontSize;
-
 
             return (
               <div
@@ -474,7 +474,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   left: `${(f.x / PAGE_W) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: CNH_FONT,
+                  fontFamily: isMrz ? cfg.mrzFont : cfg.font,
                   color: f.color || "#111",
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
@@ -485,9 +485,9 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                     f.rotate ? `rotate(${f.rotate}deg)` : "",
                   ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
-                  ...(f.id === "mrz" ? { width: `${((378 / PAGE_W) * 100).toFixed(4)}%` } : {}),
-                  lineHeight: f.id === "mrz" ? 1.6 : 1,
-                  ...(isEstado ? { width: `${((170 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
+                  ...(isMrz ? { width: `${((cfg.mrzWidth / PAGE_W) * 100).toFixed(4)}%` } : {}),
+                  lineHeight: isMrz ? cfg.mrzLineHeight : 1,
+                  ...(isEstado ? { width: `${((cfg.estadoBoxW / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
                     ? {
                         width: `${(((f.w || 80) / PAGE_W) * 100).toFixed(4)}%`,
@@ -503,12 +503,9 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
               >
                 {isBox ? (
                   <span style={{ fontSize: `${10 * scale}px`, color: "#666" }}>{f.label}</span>
-                ) : f.id === "mrz" ? (
+                ) : isMrz ? (
                   f.sampleText.split("\n").map((line, i) => (
-                    <div
-                      key={i}
-                      style={{ textAlign: "left", whiteSpace: "pre" }}
-                    >
+                    <div key={i} style={{ textAlign: "left", whiteSpace: "pre" }}>
                       {line}
                     </div>
                   ))
@@ -525,10 +522,28 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
 }
 
 export default function TemplateAlignPage() {
+  const [doc, setDoc] = useState<"cnh" | "rg">("cnh");
+
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
-      <CnhAlignEditor />
+
+      <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
+        {(["cnh", "rg"] as const).map((k) => (
+          <button
+            key={k}
+            onClick={() => setDoc(k)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              doc === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {EDITORS[k].title}
+          </button>
+        ))}
+      </div>
+
+      <AlignEditor key={doc} cfg={EDITORS[doc]} />
     </div>
   );
 }
+
