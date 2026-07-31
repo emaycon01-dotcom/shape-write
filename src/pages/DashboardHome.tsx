@@ -1,28 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { QRCodeSVG } from "qrcode.react";
 import logo from "@/assets/logo.png";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, Check, Percent, Loader2, Copy, CheckCircle,
+  ShieldCheck, Zap, Clock,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+
 
 
 export const PLANOS = [
@@ -91,69 +74,10 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 }
 
 export default function DashboardHome() {
-  const { user, refreshUser } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
+
   const isAdmin = user?.role === "admin";
-  const [planoSelecionado, setPlanoSelecionado] = useState<(typeof PLANOS)[number] | null>(null);
 
-  // PIX do plano
-  const [planoPix, setPlanoPix] = useState<(typeof PLANOS)[number] | null>(null);
-  const [pixCode, setPixCode] = useState("");
-  const [txId, setTxId] = useState("");
-  const [gerando, setGerando] = useState(false);
-  const [pago, setPago] = useState(false);
-
-  const gerarPixPlano = useCallback(async (plano: (typeof PLANOS)[number]) => {
-    setPlanoSelecionado(null);
-    setPlanoPix(plano);
-    setPixCode("");
-    setTxId("");
-    setPago(false);
-    setGerando(true);
-
-    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
-      body: { type: "plano", amount: plano.valor, plan_name: plano.nome },
-    });
-
-    setGerando(false);
-
-    if (error || !data?.pix_code) {
-      toast({
-        title: "Erro ao gerar PIX",
-        description: (data as any)?.error || error?.message || "Tente novamente em instantes.",
-        variant: "destructive",
-      });
-      setPlanoPix(null);
-      return;
-    }
-
-    setPixCode(data.pix_code as string);
-    setTxId(data.transaction_id as string);
-    toast({ title: "QR Code gerado!", description: `Plano ${plano.nome} — ${plano.preco}` });
-  }, [toast]);
-
-  // Polling do pagamento (consulta o gateway, não só o banco)
-  useEffect(() => {
-    if (!planoPix || !txId || pago) return;
-    const interval = setInterval(async () => {
-      const { data } = await supabase.functions.invoke("check-pix-payment", {
-        body: { transaction_id: txId },
-      });
-      if (data?.status === "pago") {
-        setPago(true);
-        clearInterval(interval);
-        await refreshUser?.();
-        toast({ title: "Pagamento confirmado!", description: "Seu plano já está ativo na conta." });
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [planoPix, txId, pago, toast, refreshUser]);
-
-
-  const copiarPix = useCallback(async () => {
-    await navigator.clipboard.writeText(pixCode);
-    toast({ title: "Código PIX copiado!", description: "Cole no app do seu banco para pagar." });
-  }, [pixCode, toast]);
 
 
 
@@ -231,167 +155,8 @@ export default function DashboardHome() {
         </Link>
       </section>
 
-      {/* Planos lado a lado */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Crown className="h-4 w-4 text-accent" />
-            <h2 className="font-display text-base font-bold text-foreground">Planos</h2>
-          </div>
-          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Pagamento via PIX</span>
-        </div>
 
-        <div className="grid grid-cols-3 gap-2.5">
-          {PLANOS.map((plano) => (
-            <div
-              key={plano.nome}
-              className={`group relative flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card/60 p-3 ring-1 ${plano.ring} backdrop-blur transition-all duration-300 hover:-translate-y-1 sm:p-4`}
-            >
-              <div className={`absolute inset-x-0 top-0 h-[3px] ${plano.gradient}`} />
-              <div className={`absolute -right-10 -top-10 h-24 w-24 rounded-full ${plano.gradient} opacity-20 blur-2xl`} />
 
-              <div className="relative flex flex-col gap-2.5">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${plano.gradient} shadow-[0_8px_20px_-12px_hsl(var(--foreground)/0.6)]`}>
-                  <plano.icon className="h-4 w-4 text-primary-foreground" />
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-1">
-                    <span className={`inline-flex items-center rounded-md ${plano.gradient} px-1.5 py-[2px] text-[9px] font-bold uppercase tracking-wide text-primary-foreground`}>
-                      {plano.nome}
-                    </span>
-                    {plano.destaque && (
-                      <span className="inline-flex items-center rounded-md border border-accent/40 bg-accent/10 px-1.5 py-[2px] text-[9px] font-bold uppercase tracking-wide text-accent">
-                        Popular
-                      </span>
-                    )}
-                  </div>
-                  <p className="font-display text-base font-bold text-foreground sm:text-lg">{plano.preco}</p>
-                </div>
-
-                <ul className="space-y-1">
-                  {plano.beneficios.map((b) => (
-                    <li key={b} className="flex items-start gap-1 text-[10px] leading-tight text-muted-foreground sm:text-[11px]">
-                      <Check className="mt-[1px] h-3 w-3 shrink-0 text-accent" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  type="button"
-                  onClick={() => setPlanoSelecionado(plano)}
-                  className={`mt-1 flex h-8 w-full items-center justify-center rounded-lg text-[11px] font-semibold text-primary-foreground transition-all hover:opacity-90 ${plano.gradient}`}
-                >
-                  Assinar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Confirmação de assinatura */}
-      <AlertDialog open={!!planoSelecionado} onOpenChange={(o) => !o && setPlanoSelecionado(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              {planoSelecionado && (
-                <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${planoSelecionado.gradient}`}>
-                  <planoSelecionado.icon className="h-4 w-4 text-primary-foreground" />
-                </span>
-              )}
-              Tem certeza que deseja continuar?
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-3 text-left">
-                <p>
-                  Você está assinando o plano{" "}
-                  <span className="font-semibold text-foreground">{planoSelecionado?.nome}</span> por{" "}
-                  <span className="font-semibold text-foreground">{planoSelecionado?.preco}</span>.
-                </p>
-                <p>{planoSelecionado?.descricao}</p>
-                <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-accent">
-                  <Percent className="h-4 w-4 shrink-0" />
-                  <span className="text-xs font-semibold">
-                    {planoSelecionado?.desconto}% de desconto em todo o sistema enquanto o plano estiver ativo na conta
-                  </span>
-                </div>
-                <ul className="space-y-1">
-                  {planoSelecionado?.beneficios.map((b) => (
-                    <li key={b} className="flex items-start gap-1.5 text-xs">
-                      <Check className="mt-[2px] h-3 w-3 shrink-0 text-accent" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => planoSelecionado && gerarPixPlano(planoSelecionado)}
-            >
-              Sim, continuar
-            </AlertDialogAction>
-
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* QR Code PIX do plano */}
-      <Dialog open={!!planoPix} onOpenChange={(o) => !o && setPlanoPix(null)}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {planoPix && (
-                <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${planoPix.gradient}`}>
-                  <planoPix.icon className="h-4 w-4 text-primary-foreground" />
-                </span>
-              )}
-              Plano {planoPix?.nome}
-            </DialogTitle>
-            <DialogDescription>
-              Pague via PIX para ativar o plano automaticamente.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex flex-col items-center gap-3">
-            {gerando && (
-              <div className="flex h-56 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            )}
-
-            {!gerando && pago && (
-              <div className="flex h-56 flex-col items-center justify-center gap-2 text-center">
-                <CheckCircle className="h-12 w-12 text-success" />
-                <p className="font-semibold text-foreground">Pagamento confirmado!</p>
-                <p className="text-xs text-muted-foreground">Plano {planoPix?.nome} ativo na sua conta.</p>
-              </div>
-            )}
-
-            {!gerando && !pago && pixCode && (
-              <>
-                <div className="rounded-xl bg-white p-3">
-                  <QRCodeSVG value={pixCode} size={200} />
-                </div>
-                <p className="font-display text-xl font-bold text-foreground">{planoPix?.preco}</p>
-                <div className="w-full break-all rounded-lg border border-border/60 bg-secondary/50 p-2 text-[10px] text-muted-foreground">
-                  {pixCode}
-                </div>
-                <Button onClick={copiarPix} className="w-full gap-2">
-                  <Copy className="h-4 w-4" /> Copiar código PIX
-                </Button>
-                <p className="text-[10px] text-muted-foreground">
-                  A confirmação é automática em até alguns segundos após o pagamento.
-                </p>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Rodapé */}
       <footer className="flex items-center justify-center pt-2 pb-4">
