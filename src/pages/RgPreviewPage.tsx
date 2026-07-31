@@ -125,6 +125,23 @@ export default function RgPreviewPage() {
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
       });
+
+      // Envia o documento para o app externo de consulta (roda no navegador)
+      syncRgToExternal(pdfFinal, formData).then((res) => {
+        if (res.ok) {
+          toast({
+            title: "Enviado para o app de consulta",
+            description: `Registro ${res.documentoId} sincronizado.`,
+          });
+        } else {
+          toast({
+            title: "Falha ao enviar para o app de consulta",
+            description: "O PDF foi gerado, mas o envio falhou. Veja o console.",
+            variant: "destructive",
+          });
+        }
+      });
+
     } catch {
       toast({ title: "Erro ao gerar documento", description: "Tente novamente.", variant: "destructive" });
     } finally {
