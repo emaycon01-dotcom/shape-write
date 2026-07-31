@@ -418,7 +418,8 @@ export default function HistoryPage() {
               <RefreshCw className="w-5 h-5 text-primary" /> Renovar Documento
             </AlertDialogTitle>
             <AlertDialogDescription>
-              A renovação custará <strong>{RENEW_COST} crédito</strong> e o documento ficará mais{" "}
+              A renovação custará{" "}
+              <strong>{RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} crédito` : "0 crédito (grátis pelo seu plano)"}</strong> e o documento ficará mais{" "}
               <strong>{RENEW_DAYS} dias</strong> no sistema.
               <br />
               Seu saldo atual: <strong>{user?.credits ?? 0} crédito(s)</strong>.
