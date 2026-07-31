@@ -189,9 +189,10 @@ export default function AtestadoFormPage() {
         cns: form.docTipo === "cns" ? form.docNumero : "",
         unidade: form.unidade,
         unidade_curta: form.unidade,
-        endereco1: linhas[0] || "",
-        endereco2: linhas[1] || "",
-        endereco3: linhas.slice(2).join(" ") || "",
+        endereco1: end1,
+        endereco2: end2,
+        endereco3: end3,
+
         data_atendimento: form.dataAtendimento,
         hora_atendimento: form.horaAtendimento,
         dias: form.dias,
