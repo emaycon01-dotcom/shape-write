@@ -79,7 +79,7 @@ const MAX_WARNINGS = 4;
 
 export default function RecarregarPage() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { reportViolation } = useDeviceSecurity();
   const [selectedPacote, setSelectedPacote] = useState<Pacote | null>(null);
   const [sliderValue, setSliderValue] = useState([5]);
