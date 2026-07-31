@@ -156,7 +156,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
 
       let pdfUrl: string | null = null;
       if (doc.pdfDataUrl) {
-        pdfUrl = await uploadPdfToStorage(doc.pdfDataUrl, docId);
+        pdfUrl = await uploadPdfToStorage(doc.pdfDataUrl, docId, doc.userId);
       }
 
       const row = {
