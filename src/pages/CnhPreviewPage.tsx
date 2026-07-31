@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { planCost, formatCredits } from "@/lib/plan-pricing";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -144,7 +145,7 @@ export default function CnhPreviewPage() {
       setPaid(true);
       toast({
         title: "Documento gerado com sucesso!",
-        description: "1 crédito foi descontado. Você pode visualizar e compartilhar.",
+        description: `${planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s) descontado(s).` : "Gratuito pelo seu plano."} Você pode visualizar e compartilhar.`,
       });
     } catch {
       toast({
@@ -211,7 +212,7 @@ export default function CnhPreviewPage() {
       <p className="text-muted-foreground text-sm mb-6">
         {paid
           ? "Seu documento está pronto para visualização e compartilhamento."
-          : "Confira o preview abaixo. Para gerar o documento final, clique em Gerar (1 crédito)."}
+          : `Confira o preview abaixo. Para gerar o documento final, clique em Gerar (${planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s)` : "grátis"}).`}
       </p>
 
       {/* PDF Preview area */}
@@ -272,7 +273,7 @@ export default function CnhPreviewPage() {
           <div className="glass rounded-xl p-4 flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-primary shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Custo: 1 crédito</p>
+              <p className="text-sm font-semibold text-foreground">Custo: {planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s)` : "grátis (plano Diamond)"}</p>
               <p className="text-xs text-muted-foreground">
                 Saldo atual: {user?.credits ?? 0} crédito(s)
               </p>
@@ -289,7 +290,7 @@ export default function CnhPreviewPage() {
             {loading ? (
               <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Gerando...</>
             ) : (
-              <><CreditCard className="w-5 h-5 mr-2" /> Gerar Documento (1 crédito)</>
+              <><CreditCard className="w-5 h-5 mr-2" /> Gerar Documento ({planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} créd.` : "grátis"})</>
             )}
           </Button>
         </div>
