@@ -167,9 +167,10 @@ export function buildCorpoTexto(d: Record<string, string>): string {
   const dias = Number(d.dias || "1") || 1;
   const ext = numeroPorExtenso(dias);
   const plural = dias > 1 ? "dias" : "dia";
+  const cpf = d.cpf ? `, CPF: ${d.cpf}` : "";
   const cns = d.cns ? `, CNS: ${d.cns}` : "";
 
-  return `Atesto para os devidos fins, que o(a), ${d.paciente || ""}${cns} ` +
+  return `Atesto para os devidos fins, que o(a), ${d.paciente || ""}${cpf}${cns} ` +
     `foi atendido(a) no(a), ${d.unidade || ""} na data ${d.data_atendimento || ""} ` +
     `ás ${d.hora_atendimento || ""}, necessitando de ${dias} (${ext}) ${plural} de repouso ` +
     `por motivo de ${d.motivo || "doença"}.`;
