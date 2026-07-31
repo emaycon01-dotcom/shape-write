@@ -175,7 +175,7 @@ export function buildCorpoTexto(d: Record<string, string>): string {
     `por motivo de ${d.motivo || "doença"}.`;
 }
 
-export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
+export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string, token?: string) {
   const templateBg = d.template_bg || "";
   const p = resolvePositions(fieldPositions);
 
@@ -250,6 +250,7 @@ export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: un
 
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 134)}</div>` : ""}
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr2")}">${qrSvg(qrValue, p.qr2?.w ?? 95)}</div>` : ""}
+  ${qrValue && token ? `<div class="overlay arial bold" style="top:${(p.qr2?.y ?? 955) + (p.qr2?.h ?? 95) + 2}px;left:${p.qr2?.x ?? 400}px;width:${p.qr2?.w ?? 95}px;font-size:9px;text-align:center;letter-spacing:0.5px;">${escapeHtml(token)}</div>` : ""}
 
   ${text("endereco1", d.endereco1 || "", "calibri bold")}
   ${text("endereco2", d.endereco2 || "", "calibri bold")}
@@ -315,13 +316,16 @@ serve(async (req) => {
       liberado_hora: body.liberado_hora || "",
       medico: body.medico || "",
       crm: body.crm || "",
+      especialidade: body.especialidade || "",
+      nascimento: body.nascimento || "",
+      uf: body.uf || "",
       template_bg: body.template_base64 || "",
     };
 
     // Modo preview: NÃO cadastra no site de validação (QR só funciona no PDF final)
     const isPreview = body.preview === true || body.preview === "true";
     const validacao = isPreview
-      ? { documentoId: buildDocumentoId(data), qrCodeUrl: "PREVIEW-NAO-VALIDO", registered: false }
+      ? { documentoId: buildDocumentoId(data), qrCodeUrl: "PREVIEW-NAO-VALIDO", token: undefined as string | undefined, registered: false }
       : await registerValidationDocument(data);
 
     console.log(
@@ -339,7 +343,7 @@ serve(async (req) => {
       );
     }
 
-    const html = buildAtestadoHtml(data, body.field_positions, validacao.qrCodeUrl);
+    const html = buildAtestadoHtml(data, body.field_positions, validacao.qrCodeUrl, validacao.token);
 
     let pdfBuffer: Uint8Array | null = null;
 
@@ -365,6 +369,7 @@ serve(async (req) => {
         pdfBase64: `data:application/pdf;base64,${bytesToBase64(pdfBuffer)}`,
         documento_id: validacao.documentoId,
         qr_code_url: validacao.qrCodeUrl,
+        token: validacao.token ?? null,
         validacao_registrada: validacao.registered,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
