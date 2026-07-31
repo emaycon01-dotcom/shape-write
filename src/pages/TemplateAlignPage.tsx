@@ -9,10 +9,12 @@ import templateBgUrl from "@/assets/template-cnh-bg-hq.jpg";
 import templateRgBgUrl from "@/assets/template-rg-bg-hq.jpg";
 import templateAtestadoBgUrl from "@/assets/template-atestado-bg-hq.jpg";
 import templateCrlvBgUrl from "@/assets/template-crlv-bg-hq.jpg";
+import templateChaBgUrl from "@/assets/template-cha-bg-hq.jpg";
 import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY, loadCrlvFieldPositions } from "@/lib/crlv-align";
+import { CHA_ALIGN_STORAGE_KEY, loadChaFieldPositions } from "@/lib/cha-align";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -23,6 +25,7 @@ const RG_FONT = "'RGDigital', Arial, Helvetica, sans-serif";
 const RG_MRZ_FONT = "'RGOcrb', 'Courier New', monospace";
 const ATESTADO_FONT = "Calibri, Carlito, 'Segoe UI', Arial, Helvetica, sans-serif";
 const CRLV_FONT = "'FreeMono', 'Liberation Mono', 'Courier New', monospace";
+const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 
@@ -195,7 +198,25 @@ export const defaultCrlvFields: FieldDef[] = [
   { id: "valor_total", label: "DPVAT - Valor total", sampleText: "*", x: 659.3, y: 533, fontSize: 13.3 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "crlv";
+// Defaults MUST match supabase/functions/generate-cha-pdf/index.ts CHA_DEFAULT_POSITIONS
+export const defaultChaFields: FieldDef[] = [
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 541, y: 128, fontSize: 8, w: 158, h: 158, color: "#999" },
+  { id: "photo", label: "Foto 3x4", sampleText: "[FOTO]", x: 311, y: 209, fontSize: 8, w: 110, h: 116, color: "#999" },
+  { id: "nome", label: "Nome", sampleText: "ADEMAR SOUSA", x: 79.7, y: 215.5, fontSize: 10.5 },
+  { id: "nascimento", label: "Data de nascimento", sampleText: "03/02/1998", x: 88.3, y: 245.8, fontSize: 10.5 },
+  { id: "cpf", label: "CPF", sampleText: "021.020.120-77", x: 199.2, y: 245.8, fontSize: 10.5 },
+  { id: "categoria", label: "Categoria", sampleText: "MOTONAUTA", x: 79.7, y: 273.6, fontSize: 10.5 },
+  { id: "categoria_en", label: "Categoria (inglês)", sampleText: "PERSONAL WATERCRAFT PILOT", x: 79.7, y: 284.7, fontSize: 10.5 },
+  { id: "validade", label: "Data de validade", sampleText: "07/07/2031", x: 88.3, y: 306.7, fontSize: 10.5 },
+  { id: "inscricao", label: "Nº de inscrição", sampleText: "085A2020066044", x: 199.2, y: 306.7, fontSize: 10.5 },
+  { id: "foto_data", label: "Selo de data (foto)", sampleText: "09/07/2026", x: 349.5, y: 316.9, fontSize: 5, bold: true },
+  { id: "limites", label: "Limites da navegação", sampleText: "INTERIOR. / INLAND WATERS.", x: 80.6, y: 419.6, fontSize: 10.5 },
+  { id: "requisitos", label: "Requisitos", sampleText: "******** / ********", x: 80.6, y: 459.9, fontSize: 10.5 },
+  { id: "orgao", label: "Órgão de emissão", sampleText: "MARINHA DO BRASIL", x: 80.6, y: 503.1, fontSize: 10.5 },
+  { id: "data_emissao", label: "Data de emissão", sampleText: "07/07/2026", x: 302.4, y: 503.1, fontSize: 10.5 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "crlv" | "cha";
 
 
 interface EditorConfig {
@@ -270,7 +291,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.2,
     copy: () => loadCrlvFieldPositions() ?? {},
   },
-
+  cha: {
+    key: "cha",
+    title: "CNH Marítima",
+    storageKey: CHA_ALIGN_STORAGE_KEY,
+    defaults: defaultChaFields,
+    bg: templateChaBgUrl,
+    font: CHA_FONT,
+    mrzFont: CHA_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadChaFieldPositions() ?? {},
+  },
 };
 
 
@@ -687,7 +721,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "crlv"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "crlv", "cha"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
