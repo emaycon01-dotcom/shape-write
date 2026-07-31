@@ -225,7 +225,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const renewDocument = useCallback(async (id: string) => {
-    const newExpiresAt = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString();
+    const newExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
     const { error } = await supabase
       .from("documents")
@@ -248,7 +248,8 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <DocumentContext.Provider value={{ documents, loading, addDocument, getDocument, renewDocument, updateDocument, refreshDocuments: fetchDocuments }}>
+    <DocumentContext.Provider value={{ documents, loading, addDocument, getDocument, loadDocumentInfo, renewDocument, deleteDocument, updateDocument, refreshDocuments: fetchDocuments }}>
+
       {children}
     </DocumentContext.Provider>
   );
