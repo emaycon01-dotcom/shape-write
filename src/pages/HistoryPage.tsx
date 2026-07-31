@@ -431,7 +431,7 @@ export default function HistoryPage() {
               {renewLoading ? (
                 <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Renovando...</>
               ) : (
-                <>Renovar ({RENEW_COST} créd.)</>
+                <>Renovar ({RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} créd.` : "grátis"})</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
