@@ -332,7 +332,7 @@ export default function HistoryPage() {
 
                 {/* Ações */}
                 <div className="flex flex-wrap gap-2 px-4 pb-4 pt-1 border-t border-border/40 mt-1">
-                  {!expired && doc.pdfUrl && (
+                  {!expired && (
                     <>
                       <Button variant="outline" size="sm" onClick={() => handleView(doc)} className="gap-1.5">
                         <Eye className="w-4 h-4" /> Ver
@@ -355,13 +355,17 @@ export default function HistoryPage() {
                       disabled={!DOCUMENT_FORM_ROUTES[doc.type]}
                     >
                       <Pencil className="w-4 h-4" /> Editar
-                      <span className="text-xs text-muted-foreground">({EDIT_COST})</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({EDIT_COST > 0 ? formatCredits(EDIT_COST) : "grátis"})
+                      </span>
                     </Button>
                   )}
 
                   <Button variant="gradient" size="sm" onClick={() => confirmRenew(doc)} className="gap-1.5">
                     <RefreshCw className="w-4 h-4" /> Renovar
-                    <span className="text-xs opacity-80">({RENEW_COST} créd.)</span>
+                    <span className="text-xs opacity-80">
+                      ({RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} créd.` : "grátis"})
+                    </span>
                   </Button>
 
                   <Button
