@@ -20,6 +20,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DOCUMENT_FORM_ROUTES, DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
+import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
