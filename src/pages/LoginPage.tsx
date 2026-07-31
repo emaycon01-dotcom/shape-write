@@ -68,7 +68,6 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-secondary/70 border-border transition-all duration-300 focus-visible:ring-accent/60"
@@ -83,7 +82,6 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     type={showPw ? "text" : "password"}
-                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="bg-secondary/70 border-border pr-10 transition-all duration-300 focus-visible:ring-accent/60"
