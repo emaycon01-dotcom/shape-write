@@ -175,7 +175,7 @@ export function buildCorpoTexto(d: Record<string, string>): string {
     `por motivo de ${d.motivo || "doença"}.`;
 }
 
-function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
+export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
   const templateBg = d.template_bg || "";
   const p = resolvePositions(fieldPositions);
 
