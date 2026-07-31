@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { QRCodeSVG } from "qrcode.react";
+import logo from "@/assets/logo.png";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, Check, Percent,
+  ShieldCheck, Zap, Clock, Check, Percent, Loader2, Copy, CheckCircle,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
 
 export const PLANOS = [
   {
