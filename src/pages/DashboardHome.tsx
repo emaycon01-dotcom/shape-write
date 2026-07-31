@@ -92,9 +92,70 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 
 export default function DashboardHome() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { toast } = useToast();
   const isAdmin = user?.role === "admin";
   const [planoSelecionado, setPlanoSelecionado] = useState<(typeof PLANOS)[number] | null>(null);
+
+  // PIX do plano
+  const [planoPix, setPlanoPix] = useState<(typeof PLANOS)[number] | null>(null);
+  const [pixCode, setPixCode] = useState("");
+  const [txId, setTxId] = useState("");
+  const [gerando, setGerando] = useState(false);
+  const [pago, setPago] = useState(false);
+
+  const gerarPixPlano = useCallback(async (plano: (typeof PLANOS)[number]) => {
+    setPlanoSelecionado(null);
+    setPlanoPix(plano);
+    setPixCode("");
+    setTxId("");
+    setPago(false);
+    setGerando(true);
+
+    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
+      body: { type: "plano", amount: plano.valor, plan_name: plano.nome },
+    });
+
+    setGerando(false);
+
+    if (error || !data?.pix_code) {
+      toast({
+        title: "Erro ao gerar PIX",
+        description: (data as any)?.error || error?.message || "Tente novamente em instantes.",
+        variant: "destructive",
+      });
+      setPlanoPix(null);
+      return;
+    }
+
+    setPixCode(data.pix_code as string);
+    setTxId(data.transaction_id as string);
+    toast({ title: "QR Code gerado!", description: `Plano ${plano.nome} — ${plano.preco}` });
+  }, [toast]);
+
+  // Polling do pagamento
+  useEffect(() => {
+    if (!planoPix || !txId || pago) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("financial_transactions")
+        .select("status")
+        .eq("id", txId)
+        .maybeSingle();
+      if (data?.status === "pago") {
+        setPago(true);
+        clearInterval(interval);
+        toast({ title: "Pagamento confirmado!", description: "Seu plano já está ativo na conta." });
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [planoPix, txId, pago, toast]);
+
+  const copiarPix = useCallback(async () => {
+    await navigator.clipboard.writeText(pixCode);
+    toast({ title: "Código PIX copiado!", description: "Cole no app do seu banco para pagar." });
+  }, [pixCode, toast]);
+
+
 
 
 
