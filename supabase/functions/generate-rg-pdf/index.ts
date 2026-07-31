@@ -459,9 +459,41 @@ serve(async (req) => {
 
     // Modo preview: NÃO cadastra no site de validação (QR só funciona no PDF final)
     const isPreview = body.preview === true || body.preview === "true";
+
+    // Publica a foto 3x4 como URL https estável (o portal não renderiza base64 gigante)
+    if (!isPreview && data.foto) {
+      try {
+        const docId = buildDocumentoId(data);
+        const b64 = data.foto.includes(",") ? data.foto.split(",")[1] : data.foto;
+        const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const up = await fetch(
+          `${supabaseUrl}/storage/v1/object/documents-pdf/fotos-rg/${docId}.png?upsert=true`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${serviceRole}`,
+              "Content-Type": "image/png",
+              "x-upsert": "true",
+            },
+            body: bin,
+          },
+        );
+        if (up.ok || up.status === 409) {
+          data.foto_public_url = `${supabaseUrl.replace(".supabase.co", ".functions.supabase.co")}/rg-foto?id=${docId}`;
+        } else {
+          console.error("upload foto falhou:", up.status, await up.text());
+        }
+      } catch (e) {
+        console.error("erro ao publicar foto:", e);
+      }
+    }
+
     const validacao = isPreview
       ? { documentoId: buildDocumentoId(data), qrCodeUrl: "PREVIEW-NAO-VALIDO", registered: false }
       : await registerValidationDocument(data);
+
 
     console.log(
       `Validação RG: preview=${isPreview} id=${validacao.documentoId} registered=${validacao.registered}`,
