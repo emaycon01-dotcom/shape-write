@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, X, User, FileText, Info, Loader2, FlaskConical, Trash2, IdCard } from "lucide-react";
+import { Upload, X, User, FileText, Info, Loader2, FlaskConical, Trash2, IdCard, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadRgFieldPositions } from "@/lib/rg-align";
 import testFotoUrl from "@/assets/test-foto.png";
@@ -497,9 +497,25 @@ export default function RgFormPage() {
           </div>
         </div>
 
-        {/* OUTRAS INFORMAÇÕES */}
-        <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={Info} title="Outras Informações" />
+        {/* OUTRAS INFORMAÇÕES (opcional) */}
+        <div className="glass rounded-xl p-6">
+          <button
+            type="button"
+            onClick={() => setOutrasOpen((v) => !v)}
+            className="flex w-full items-center gap-3 text-left"
+          >
+            <Info className="h-5 w-5 text-primary" />
+            <span className="flex-1">
+              <span className="block text-lg font-bold text-foreground">Outras Informações</span>
+              <span className="block text-xs text-muted-foreground">Opcional — toque para {outrasOpen ? "fechar" : "selecionar e preencher"}</span>
+            </span>
+            <span className="rounded-full border border-border/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Opcional
+            </span>
+            <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${outrasOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          <div className={outrasOpen ? "mt-4 space-y-4 border-t border-border/50 pt-4" : "hidden"}>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -588,6 +604,7 @@ export default function RgFormPage() {
           <div className="space-y-1.5">
             <FieldLabel>Observação de Saúde</FieldLabel>
             <Input value={form.observacaoSaude} onChange={set("observacaoSaude")} className={inputCls} />
+          </div>
           </div>
         </div>
 
