@@ -5,8 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DocumentProvider } from "@/contexts/DocumentContext";
-import { DeviceSecurityProvider, useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
-import DeviceBannedScreen from "@/components/DeviceBannedScreen";
+import { DeviceSecurityProvider } from "@/contexts/DeviceSecurityContext";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { lazy, Suspense } from "react";
 import LoginPage from "./pages/LoginPage";
@@ -15,22 +14,6 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user || user.role !== "admin") return <Navigate to="/dashboard" replace />;
-  return <>{children}</>;
-}
-
-function SecurityGate({ children }: { children: React.ReactNode }) {
-  const { isBanned, checkingDevice } = useDeviceSecurity();
-
-  if (checkingDevice) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (isBanned) return <DeviceBannedScreen />;
-
   return <>{children}</>;
 }
 
@@ -82,8 +65,7 @@ const App = () => {
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <DeviceSecurityProvider>
-        <SecurityGate>
-          <AuthProvider>
+        <AuthProvider>
             <DocumentProvider>
               <Toaster />
               <Sonner />
@@ -133,8 +115,7 @@ const App = () => {
                 </Suspense>
               </BrowserRouter>
             </DocumentProvider>
-          </AuthProvider>
-        </SecurityGate>
+        </AuthProvider>
       </DeviceSecurityProvider>
     </TooltipProvider>
   </QueryClientProvider>
