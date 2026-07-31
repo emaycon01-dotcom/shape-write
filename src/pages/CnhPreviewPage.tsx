@@ -81,10 +81,11 @@ export default function CnhPreviewPage() {
 
   const handleGenerate = async () => {
     if (!user) return;
-    if (user.credits < 1) {
+    const cost = planCost(1, user.plano);
+    if (user.credits < cost) {
       toast({
         title: "Créditos insuficientes",
-        description: "Você precisa de pelo menos 1 crédito para gerar o documento.",
+        description: `Você precisa de ${cost} crédito(s) para gerar o documento.`,
         variant: "destructive",
       });
       return;
