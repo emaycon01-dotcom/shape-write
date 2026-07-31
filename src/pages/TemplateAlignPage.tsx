@@ -7,8 +7,10 @@ import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg-hq.jpg";
 import templateRgBgUrl from "@/assets/template-rg-bg-hq.jpg";
+import templateAtestadoBgUrl from "@/assets/template-atestado-bg-hq.jpg";
 import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
+import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -16,6 +18,7 @@ const PAGE_H = 1123;
 const CNH_FONT = "'CNHDigital', Arial, Helvetica, sans-serif";
 const RG_FONT = "'RGDigital', Arial, Helvetica, sans-serif";
 const RG_MRZ_FONT = "'RGOcrb', 'Courier New', monospace";
+const ATESTADO_FONT = "Calibri, Carlito, 'Segoe UI', Arial, Helvetica, sans-serif";
 
 
 interface FieldDef {
@@ -121,8 +124,33 @@ export const defaultRgFields: FieldDef[] = [
   { id: "observacao_saude", label: "Observação de Saúde", sampleText: "-", x: 41, y: 951, fontSize: 11 },
 ];
 
+// Defaults MUST match supabase/functions/generate-atestado-pdf/index.ts ATESTADO_DEFAULT_POSITIONS
+export const defaultAtestadoFields: FieldDef[] = [
+  { id: "qr", label: "QR Code (topo)", sampleText: "[QR]", x: 630, y: 30, fontSize: 8, w: 134, h: 134, color: "#999" },
+  { id: "endereco1", label: "Endereço - linha 1", sampleText: "Av. Miguel Ignácio Curi, 41", x: 386, y: 99, fontSize: 9, bold: true },
+  { id: "endereco2", label: "Endereço - linha 2", sampleText: "Vila Carmosina - São Paulo – SP", x: 386, y: 113, fontSize: 9, bold: true },
+  { id: "endereco3", label: "Endereço - linha 3", sampleText: "CEP: 08295-005", x: 386, y: 127, fontSize: 9, bold: true },
+  { id: "paciente", label: "Paciente (PARA:)", sampleText: "PARA: TATIANI RODRIGUES MOR", x: 118, y: 265, fontSize: 15 },
+  {
+    id: "corpo",
+    label: "Texto do atestado",
+    sampleText:
+      "Atesto para os devidos fins, que o(a), TATIANI RODRIGUES MOR, CNS: 801440458570767 foi atendido(a) no(a), UPA 24h Itaquera - Consultórios na data 08/11/2023 ás 05:53:23, necessitando de 1 (Um) dia de repouso por motivo de doença.",
+    x: 18,
+    y: 336,
+    fontSize: 15.5,
+  },
+  { id: "cid", label: "CID", sampleText: "CID: 10", x: 17, y: 422, fontSize: 18 },
+  { id: "cidade_data", label: "Unidade + data por extenso", sampleText: "UPA 24h Itaquera, 08 de Novembro de 2023 .", x: 364, y: 564, fontSize: 14 },
+  { id: "emitido_em", label: "Emitido em", sampleText: "Emitido em: 08/11/2023 05:54:23", x: 39, y: 897, fontSize: 9, bold: true },
+  { id: "liberado", label: "Liberado e assinado", sampleText: "Liberado e assinado\neletronicamente em 08/11/2023\n09:38 por:", x: 404, y: 900, fontSize: 9.5, bold: true },
+  { id: "qr2", label: "QR Code (rodapé)", sampleText: "[QR]", x: 400, y: 955, fontSize: 8, w: 95, h: 95, color: "#999" },
+];
+
+type DocKey = "cnh" | "rg" | "atestado";
+
 interface EditorConfig {
-  key: "cnh" | "rg";
+  key: DocKey;
   title: string;
   storageKey: string;
   defaults: FieldDef[];
@@ -136,7 +164,7 @@ interface EditorConfig {
   copy: () => Record<string, unknown>;
 }
 
-const EDITORS: Record<"cnh" | "rg", EditorConfig> = {
+const EDITORS: Record<DocKey, EditorConfig> = {
   cnh: {
     key: "cnh",
     title: "CNH Digital",
@@ -165,7 +193,23 @@ const EDITORS: Record<"cnh" | "rg", EditorConfig> = {
     mrzLineHeight: 1.22,
     copy: () => loadRgFieldPositions() ?? {},
   },
+  atestado: {
+    key: "atestado",
+    title: "Atestado Médico",
+    storageKey: ATESTADO_ALIGN_STORAGE_KEY,
+    defaults: defaultAtestadoFields,
+    bg: templateAtestadoBgUrl,
+    font: ATESTADO_FONT,
+    mrzFont: ATESTADO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.32,
+    copy: () => loadAtestadoFieldPositions() ?? {},
+  },
 };
+
+
 
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
@@ -451,6 +495,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
             const isBox = !!f.w && !!f.h;
             const isEstado = f.id === "estado";
             const isMrz = f.id === "mrz";
+            const isCorpo = cfg.key === "atestado" && (f.id === "corpo" || f.id === "cid");
+            const isLiberado = cfg.key === "atestado" && f.id === "liberado";
             const estadoSize = isEstado
               ? f.sampleText.length > cfg.estadoMaxChars
                 ? Math.max(f.fontSize * (cfg.estadoMaxChars / f.sampleText.length), f.fontSize * 0.55)
@@ -475,7 +521,11 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   left: `${(f.x / PAGE_W) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: isMrz ? cfg.mrzFont : cfg.font,
+                  fontFamily: isCorpo
+                    ? "'Times New Roman', 'Liberation Serif', Times, serif"
+                    : isMrz
+                      ? cfg.mrzFont
+                      : cfg.font,
                   color: f.color || "#111",
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
@@ -487,7 +537,13 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
                   ...(isMrz ? { width: `${((cfg.mrzWidth / PAGE_W) * 100).toFixed(4)}%` } : {}),
-                  lineHeight: isMrz ? cfg.mrzLineHeight : 1,
+                  lineHeight: isMrz ? cfg.mrzLineHeight : isCorpo ? 1.43 : isLiberado ? 1.32 : 1,
+                  ...(f.id === "corpo" && cfg.key === "atestado"
+                    ? { width: `${((762 / PAGE_W) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
+                    : {}),
+                  ...(isLiberado
+                    ? { width: `${((232 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const }
+                    : {}),
                   ...(isEstado ? { width: `${((cfg.estadoBoxW / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
                     ? {
@@ -523,14 +579,14 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
 }
 
 export default function TemplateAlignPage() {
-  const [doc, setDoc] = useState<"cnh" | "rg">("cnh");
+  const [doc, setDoc] = useState<DocKey>("cnh");
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
-      <div className="inline-flex rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg"] as const).map((k) => (
+      <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
+        {(["cnh", "rg", "atestado"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}

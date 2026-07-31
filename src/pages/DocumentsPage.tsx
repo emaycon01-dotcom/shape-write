@@ -55,11 +55,13 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
     subtitulo: "Documentos médicos e declarações",
     itens: [
       {
-        id: "atestado-medico",
+        id: "atestado",
         titulo: "Atestado Médico",
-        descricao: "Emissão de atestado com dados do profissional",
+        descricao: "Atestado digital com validação por QR Code",
         icon: Stethoscope,
-        emBreve: true,
+        rota: "/dashboard/documents/atestado",
+        creditos: 1,
+        qrcode: true,
       },
     ],
   },
