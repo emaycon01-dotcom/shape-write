@@ -568,8 +568,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
           <Button size="sm" variant="outline" onClick={copyCode} className="gap-1.5">
             <Copy className="w-4 h-4" /> Copiar Coords
           </Button>
-          <Button size="sm" onClick={savePositions} className="gap-1.5">
-            <Save className="w-4 h-4" /> Salvar
+          <Button size="sm" onClick={savePositions} disabled={saving} className="gap-1.5">
+            <Save className="w-4 h-4" /> {saving ? "Salvando..." : "Salvar coordenadas"}
           </Button>
         </div>
       </div>

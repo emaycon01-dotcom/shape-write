@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
 import PinGate from "@/components/PinGate";
+import { syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PIN_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 
