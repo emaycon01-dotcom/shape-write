@@ -64,6 +64,21 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
     ],
   },
   {
+    grupo: "Acadêmicos",
+    subtitulo: "Diplomas e documentos de ensino superior",
+    itens: [
+      {
+        id: "diploma",
+        titulo: "Diploma Superior",
+        descricao: "Diploma de graduação com verso de registro e QR Code",
+        icon: GraduationCap,
+        rota: "/dashboard/documents/diploma",
+        creditos: 1,
+        qrcode: true,
+      },
+    ],
+  },
+  {
     grupo: "Atestado",
     subtitulo: "Documentos médicos e declarações",
     itens: [
