@@ -1,3 +1,4 @@
+// PIX charge (Elite Pay) — redeploy v2
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
 import { ELITEPAY_BASE_URL, applyPaidTransaction, confirmElitepayPayment } from "../_shared/elitepay.ts";
