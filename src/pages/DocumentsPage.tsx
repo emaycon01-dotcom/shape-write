@@ -76,6 +76,7 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         rota: "/dashboard/documents/diploma",
         creditos: 1,
         qrcode: true,
+        manutencao: true,
       },
     ],
   },
