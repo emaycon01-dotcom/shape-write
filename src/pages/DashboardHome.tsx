@@ -1,9 +1,13 @@
+import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDocuments, isDocumentExpired, daysUntilExpiry } from "@/contexts/DocumentContext";
+import { DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock,
+  ShieldCheck, Zap, Clock, Car, IdCard, Stethoscope, Anchor,
+  Layers, History, AlertTriangle, PenTool, MessageCircle, Users,
 } from "lucide-react";
 
 
