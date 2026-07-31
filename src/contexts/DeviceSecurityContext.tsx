@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { generateDeviceFingerprint, getCachedFingerprint } from "@/lib/device-fingerprint";
 
@@ -15,9 +15,6 @@ const DeviceSecurityContext = createContext<DeviceSecurityContextType>({
   checkingDevice: true,
   reportViolation: async () => false,
 });
-
-const DEVICE_OK_KEY = "device_check_ok_until";
-const DEVICE_OK_TTL = 12 * 60 * 60 * 1000; // 12h
 
 function readStorage(key: string): string | null {
   try {
@@ -37,45 +34,14 @@ function writeStorage(key: string, value: string) {
 
 export function DeviceSecurityProvider({ children }: { children: React.ReactNode }) {
   const [isBanned, setIsBanned] = useState(() => readStorage("device_banned") === "true");
-  const [fingerprint, setFingerprint] = useState<string | null>(() => getCachedFingerprint());
-  // Não bloqueia a renderização: o app abre na hora e a checagem roda em background.
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
+  // Nenhuma verificação ou chamada externa acontece durante a abertura do app.
   const [checkingDevice] = useState(false);
 
-  useEffect(() => {
-    if (readStorage("device_banned") === "true") return;
-
-    // Resultado recente em cache — evita chamar a edge function a cada carregamento
-    const okUntil = Number(readStorage(DEVICE_OK_KEY) || 0);
-    if (Date.now() < okUntil) return;
-
-    const checkDevice = async () => {
-      try {
-        const fp = getCachedFingerprint() || (await generateDeviceFingerprint());
-        setFingerprint(fp);
-
-        const { data } = await supabase.functions.invoke("device-security", {
-          body: { action: "check", fingerprint: fp },
-        });
-
-        if (data?.banned) {
-          setIsBanned(true);
-          writeStorage("device_banned", "true");
-        } else {
-          writeStorage(DEVICE_OK_KEY, String(Date.now() + DEVICE_OK_TTL));
-        }
-      } catch {
-        // If we can't check, allow access (fail open — server-side will still enforce)
-      }
-    };
-
-    // roda depois do primeiro paint
-    const id = window.setTimeout(checkDevice, 0);
-    return () => window.clearTimeout(id);
-  }, []);
-
   const reportViolation = useCallback(async (userId?: string, email?: string, reason?: string) => {
-    const fp = fingerprint || getCachedFingerprint();
+    const fp = fingerprint || getCachedFingerprint() || (await generateDeviceFingerprint().catch(() => null));
     if (!fp) return false;
+    setFingerprint(fp);
 
     try {
       const { data } = await supabase.functions.invoke("device-security", {
