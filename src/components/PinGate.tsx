@@ -4,7 +4,7 @@ import { useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Lock, ShieldCheck, KeyRound, Loader2, AlertTriangle } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 
 interface PinGateProps {
   mode: "setup" | "verify";

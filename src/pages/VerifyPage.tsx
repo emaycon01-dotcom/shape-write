@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { QRCodeSVG } from "qrcode.react";
 import { Shield, CheckCircle, XCircle } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 
 export default function VerifyPage() {
   const { id } = useParams<{ id: string }>();

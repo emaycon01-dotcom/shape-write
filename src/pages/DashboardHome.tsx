@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments, isDocumentExpired, daysUntilExpiry } from "@/contexts/DocumentContext";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
   ShieldCheck, Zap, Clock, History, MessageCircle, Users,
