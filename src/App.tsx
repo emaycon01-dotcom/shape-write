@@ -8,7 +8,7 @@ import { DocumentProvider } from "@/contexts/DocumentContext";
 import { DeviceSecurityProvider, useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import DeviceBannedScreen from "@/components/DeviceBannedScreen";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -71,31 +71,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Pré-carrega os chunks das telas mais usadas quando o navegador está ocioso,
-// deixando a troca de menus praticamente instantânea.
-function useIdlePrefetch() {
-  useEffect(() => {
-    const warm = () => {
-      void import("./pages/DashboardLayout");
-      void import("./pages/DashboardHome");
-      void import("./pages/DocumentsPage");
-      void import("./pages/HistoryPage");
-      void import("./pages/RecarregarPage");
-      void import("./pages/PlanosPage");
-      void import("./pages/LoginPage");
-    };
-    const ric = (window as any).requestIdleCallback as
-      | ((cb: () => void, opts?: { timeout: number }) => number)
-      | undefined;
-    const id = ric ? ric(warm, { timeout: 2500 }) : window.setTimeout(warm, 1200);
-    return () => {
-      const cic = (window as any).cancelIdleCallback;
-      if (ric && cic) cic(id);
-      else window.clearTimeout(id);
-    };
-  }, []);
-}
-
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -103,7 +78,6 @@ const Loading = () => (
 );
 
 const App = () => {
-  useIdlePrefetch();
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
