@@ -70,8 +70,9 @@ export default function DashboardLayout() {
   }
 
   if (pinState === "needs_setup") {
-    return <PinGate mode="setup" onSuccess={() => setPinState("verified")} userId={user?.id} userEmail={user?.email} />;
+    return <PinGate mode="setup" onSuccess={() => { if (user) localStorage.setItem(`pin_has:${user.id}`, "1"); setPinState("verified"); }} userId={user?.id} userEmail={user?.email} />;
   }
+
 
   if (pinState === "needs_verify") {
     return <PinGate mode="verify" onSuccess={() => setPinState("verified")} userId={user?.id} userEmail={user?.email} />;
