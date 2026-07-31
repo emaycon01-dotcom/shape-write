@@ -6,12 +6,17 @@ import { Slider } from "@/components/ui/slider";
 import { Copy, RotateCcw, Save, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import templateBgUrl from "@/assets/template-cnh-bg-hq.jpg";
+import templateRgBgUrl from "@/assets/template-rg-bg-hq.jpg";
 import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
+import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
 
 const CNH_FONT = "'CNHDigital', Arial, Helvetica, sans-serif";
+const RG_FONT = "'RGDigital', Arial, Helvetica, sans-serif";
+const RG_MRZ_FONT = "'RGOcrb', 'Courier New', monospace";
+
 
 interface FieldDef {
   id: string;
