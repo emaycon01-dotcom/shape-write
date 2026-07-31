@@ -48,6 +48,45 @@ function rnd(len: number) {
   return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
 }
 
+/**
+ * Divide o endereço em até 3 linhas.
+ * Respeita quebras de linha digitadas; se o cliente colar tudo em uma linha só,
+ * separa automaticamente: logradouro+nº / bairro - cidade - UF / CEP.
+ */
+export function splitEndereco(raw: string): [string, string, string] {
+  const linhas = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (linhas.length >= 2) {
+    return [linhas[0] || "", linhas[1] || "", linhas.slice(2).join(" ")];
+  }
+
+  let texto = (linhas[0] || "").trim();
+  let cep = "";
+  const cepMatch = texto.match(/(CEP:?\s*)?\d{5}-?\d{3}\s*$/i);
+  if (cepMatch) {
+    const num = cepMatch[0].replace(/CEP:?\s*/i, "").trim();
+    cep = `CEP: ${num}`;
+    texto = texto.slice(0, cepMatch.index).replace(/[\s,;-]+$/, "").trim();
+  }
+
+  // separa logradouro+número do restante no primeiro delimitador após o número
+  let l1 = texto;
+  let l2 = "";
+  const sep = texto.match(/^(.*?\d+[A-Za-z]?)\s*[-–,]\s*(.+)$/);
+  if (sep) {
+    l1 = sep[1].trim();
+    l2 = sep[2].trim();
+  } else {
+    const parts = texto.split(/\s*,\s*/);
+    if (parts.length > 1) {
+      l1 = parts[0].trim();
+      l2 = parts.slice(1).join(", ").trim();
+    }
+  }
+
+  return [l1, l2, cep];
+}
+
+
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -141,7 +180,7 @@ export default function AtestadoFormPage() {
     try {
       const templateBase64 = await imgToBase64(templateAtestadoUrl);
 
-      const linhas = form.endereco.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const [end1, end2, end3] = splitEndereco(form.endereco);
       const horaCurta = form.horaAtendimento.slice(0, 5);
 
       const bodyData = {
@@ -150,9 +189,10 @@ export default function AtestadoFormPage() {
         cns: form.docTipo === "cns" ? form.docNumero : "",
         unidade: form.unidade,
         unidade_curta: form.unidade,
-        endereco1: linhas[0] || "",
-        endereco2: linhas[1] || "",
-        endereco3: linhas.slice(2).join(" ") || "",
+        endereco1: end1,
+        endereco2: end2,
+        endereco3: end3,
+
         data_atendimento: form.dataAtendimento,
         hora_atendimento: form.horaAtendimento,
         dias: form.dias,
