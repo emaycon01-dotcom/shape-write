@@ -44,6 +44,9 @@ const RgFormPage = lazy(() => import("./pages/RgFormPage"));
 const RgPreviewPage = lazy(() => import("./pages/RgPreviewPage"));
 const AtestadoFormPage = lazy(() => import("./pages/AtestadoFormPage"));
 const AtestadoPreviewPage = lazy(() => import("./pages/AtestadoPreviewPage"));
+const CrlvFormPage = lazy(() => import("./pages/CrlvFormPage"));
+const CrlvPreviewPage = lazy(() => import("./pages/CrlvPreviewPage"));
+
 
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
@@ -91,6 +94,10 @@ const App = () => (
                       <Route path="documents/rg/preview" element={<RgPreviewPage />} />
                       <Route path="documents/atestado" element={<AtestadoFormPage />} />
                       <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
+
+                      <Route path="documents/crlv" element={<CrlvFormPage />} />
+                      <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
+
 
 
                       <Route path="history" element={<HistoryPage />} />
