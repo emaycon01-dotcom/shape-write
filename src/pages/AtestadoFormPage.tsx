@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2 } from "lucide-react";
+import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2, History, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
@@ -68,7 +68,11 @@ const NOMES = [
 export default function AtestadoFormPage() {
   const location = useLocation();
   const editState = location.state as { editDocId?: string } | null;
-  const { getDocument, loadDocumentInfo, updateDocument } = useDocuments();
+  const { getDocument, loadDocumentInfo, updateDocument, documents } = useDocuments();
+
+  const previewHistory = documents
+    .filter((d) => d.type === "atestado")
+    .slice(0, 6);
 
   const [form, setForm] = useState<AtestadoFormData>(initial);
   const [loading, setLoading] = useState(false);
@@ -342,9 +346,45 @@ export default function AtestadoFormPage() {
               placeholder={"Av. Miguel Ignácio Curi, 41\nVila Carmosina - São Paulo – SP\nCEP: 08295-005"}
               className={inputCls}
             />
-            <p className="text-[11px] text-muted-foreground">As quebras de linha coladas são mantidas no documento.</p>
+            <p className="text-[11px] text-muted-foreground">
+              O endereço é sempre dividido em 3 linhas no documento: logradouro + número, bairro - cidade – UF e CEP.
+            </p>
           </div>
         </div>
+
+        {/* HISTÓRICO DE PREVIEWS */}
+        <div className="glass space-y-3 rounded-xl p-6">
+          <SectionHeader icon={History} title="Histórico de Previews" />
+          {previewHistory.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum atestado gerado ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {previewHistory.map((d) => (
+                <li
+                  key={d.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-secondary/50 px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">{d.name || "Sem nome"}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {d.identification} · {new Date(d.createdAt).toLocaleDateString("pt-BR")}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0 gap-1.5 text-xs"
+                    onClick={() => navigate("/dashboard/history", { state: { focusDocId: d.id } })}
+                  >
+                    <FileText className="h-3.5 w-3.5" /> Abrir
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
           {loading ? (
