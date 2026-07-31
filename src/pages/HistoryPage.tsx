@@ -93,8 +93,11 @@ export default function HistoryPage() {
 
   // Busca o PDF direto do armazenamento (blob local) — nada de abrir link externo
   const fetchPdfBlob = async (doc: Document): Promise<Blob | null> => {
-    const { data } = await supabase.storage.from("documents-pdf").download(`${doc.id}.pdf`);
-    if (data) return data;
+    const paths = [doc.userId ? `${doc.userId}/${doc.id}.pdf` : null, `${doc.id}.pdf`].filter(Boolean) as string[];
+    for (const path of paths) {
+      const { data } = await supabase.storage.from("documents-pdf").download(path);
+      if (data) return data;
+    }
     if (doc.pdfUrl) {
       try {
         const res = await fetch(doc.pdfUrl);
