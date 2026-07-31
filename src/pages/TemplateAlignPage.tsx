@@ -162,6 +162,36 @@ export const defaultAtestadoFields: FieldDef[] = [
   { id: "qr2", label: "QR Code (rodapé)", sampleText: "[QR]", x: 400, y: 955, fontSize: 8, w: 95, h: 95, color: "#999" },
 ];
 
+// Defaults MUST match supabase/functions/generate-hapvida-pdf/index.ts HAPVIDA_DEFAULT_POSITIONS
+export const defaultHapvidaFields: FieldDef[] = [
+  { id: "endereco1", label: "Endereço - linha 1", sampleText: "Av. Heráclito Graça, 1001 - Centro, Fortaleza-CE,", x: 344, y: 32, fontSize: 13.4, w: 400, color: "#6b6b6b" },
+  { id: "endereco2", label: "Endereço - linha 2", sampleText: "CEP: 60140-090 | Telefone: (85) 9 4002-3633", x: 344, y: 53.6, fontSize: 13.4, w: 400, color: "#6b6b6b" },
+  { id: "consulte", label: "Consulte a prescrição", sampleText: "Consulte a prescrição acessando", x: 486, y: 138, fontSize: 10.4, w: 260, color: "#6b6b6b" },
+  { id: "link", label: "Link da prescrição", sampleText: "https://tinyurl.com/abcdefgh ou", x: 486, y: 151.4, fontSize: 10.4, w: 260, color: "#6b6b6b" },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 658, y: 172, fontSize: 8, w: 87, h: 87, color: "#999" },
+  { id: "paciente", label: "Paciente", sampleText: "PATRICK DE MOURA CARVALHO", x: 42.2, y: 151, fontSize: 12.4, bold: true },
+  { id: "cpf", label: "CPF / CNS", sampleText: "CPF: 701.632.856-08", x: 42.2, y: 174, fontSize: 12.4 },
+  { id: "celular", label: "Celular", sampleText: "Celular: (34) 99649-7562", x: 42.2, y: 194, fontSize: 12.4 },
+  { id: "tipo_atendimento", label: "Tipo de atendimento", sampleText: "Tipo de atendimento:  Urgência", x: 42.2, y: 215.8, fontSize: 12.4 },
+  {
+    id: "corpo",
+    label: "Texto do atestado",
+    sampleText:
+      "Atesto, para os devidos fins, que PATRICK DE MOURA CARVALHO, portador do CPF/CNS nº 701.632.856-08, foi submetido a uma consulta médica na data de hoje, 27/01/2025 09:46 hrs, sendo diagnosticado como portador da afecção CID-M54.",
+    x: 42.2,
+    y: 389.8,
+    fontSize: 14.6,
+    w: 700,
+  },
+  { id: "data_emissao", label: "Data de emissão", sampleText: "Data de emissão: 27/01/2025", x: 42.2, y: 847.3, fontSize: 14.6 },
+  { id: "medico", label: "Médico(a)", sampleText: "CARINE GONÇALVES LOPES PIETRZAKI", x: 42.2, y: 942.1, fontSize: 12.4, bold: true },
+  { id: "crm", label: "CRM + especialidade", sampleText: "CRM 210827SP -  CLÍNICA MÉDICA", x: 42.2, y: 963.1, fontSize: 12.4, color: "#6b6b6b" },
+  { id: "assinatura", label: "Assinatura (nome)", sampleText: "CARINE GONÇALVES LOPES PIETRZAKI", x: 427, y: 936.3, fontSize: 11.1, w: 130, bold: true },
+  { id: "assinatura_info", label: "Assinatura digital (info)", sampleText: "Digitally signed by\nCARINE GONÇALVES LOPES PIETRZAKI", x: 625, y: 935.5, fontSize: 9.1, w: 150, color: "#6b6b6b" },
+];
+
+
+
 // Defaults MUST match supabase/functions/generate-crlv-pdf/index.ts CRLV_DEFAULT_POSITIONS
 export const defaultCrlvFields: FieldDef[] = [
   { id: "detran_uf", label: "DETRAN - UF", sampleText: "DETRAN- PE", x: 41.3, y: 72.6, fontSize: 5.9 },
