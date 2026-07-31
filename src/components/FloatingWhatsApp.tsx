@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, X, Headphones, Users } from "lucide-react";
+import { MessageCircle, X, Headphones } from "lucide-react";
 
 const CONTATOS = [
   {
@@ -8,13 +8,6 @@ const CONTATOS = [
     href: "https://wa.me/5581992120805",
     icon: Headphones,
     gradient: "from-emerald-500 to-green-600",
-  },
-  {
-    label: "Nossa Comunidade",
-    desc: "Entre no grupo oficial",
-    href: "https://chat.whatsapp.com/F8T3ASBFINeEFE2swOcUeQ?s=cl&p=i&ilr=4",
-    icon: Users,
-    gradient: "from-primary to-primary/60",
   },
 ];
 
