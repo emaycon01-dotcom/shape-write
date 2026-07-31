@@ -31,10 +31,18 @@ function loadScript() {
   return scriptPromise;
 }
 
-function isPreviewHost() {
+export function isPreviewHost() {
   const host = window.location.hostname;
-  return host.includes("preview--") || host.endsWith(".lovableproject.com");
+  return (
+    host === "localhost" ||
+    host.includes("preview--") ||
+    host.endsWith(".lovableproject.com") ||
+    host.endsWith(".lovable.app")
+  );
 }
+
+/** Chave de teste oficial da Cloudflare (sempre aprova) para hosts de preview */
+const TEST_SITE_KEY = "1x00000000000000000000AA";
 
 let cachedConfig: { siteKey: string; enabled: boolean } | null = null;
 
