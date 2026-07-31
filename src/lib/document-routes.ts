@@ -3,6 +3,8 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "cnh": "/dashboard/documents/cnh",
   "rg": "/dashboard/documents/rg",
   "atestado": "/dashboard/documents/atestado",
+  "crlv": "/dashboard/documents/crlv",
+
   "cha-amador": "/dashboard/documents/cha-amador",
   "cnh-nautica": "/dashboard/documentos-fisicos/carteirinhas/cnh-nautica",
   "certidao-nascimento": "/dashboard/documents/certidao-nascimento",
