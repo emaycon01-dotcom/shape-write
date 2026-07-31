@@ -6,6 +6,7 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -28,7 +29,7 @@ export default function CnhPreviewPage() {
   const { addDocument } = useDocuments();
   const { toast } = useToast();
 
-  const { pdfBase64, formData } = (location.state as {
+  const { pdfBase64: previewPdf, formData } = (location.state as {
     pdfBase64: string;
     formData: Record<string, string>;
   }) || {};
@@ -38,6 +39,8 @@ export default function CnhPreviewPage() {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [pdfError, setPdfError] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [finalPdf, setFinalPdf] = useState<string | null>(null);
+  const pdfBase64 = finalPdf || previewPdf;
 
   useEffect(() => {
     if (!pdfBase64) return;
@@ -101,6 +104,22 @@ export default function CnhPreviewPage() {
       }
 
 
+      // Gera novamente o PDF final — agora com o QR Code registrado/válido
+      let pdfFinal = previewPdf;
+      try {
+        const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
+          body: { ...formData, preview: false },
+        });
+        if (error) throw error;
+        const result = data?.pdfBase64 || data?.pdfUrl;
+        if (result) {
+          pdfFinal = result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`;
+          setFinalPdf(pdfFinal);
+        }
+      } catch (e) {
+        console.error("Falha ao gerar PDF final com QR válido:", e);
+      }
+
       await addDocument({
         name: formData.nome_completo || "",
         identification: formData.cpf || "",
@@ -109,12 +128,12 @@ export default function CnhPreviewPage() {
         additionalInfo: JSON.stringify(formData),
         type: "cnh",
         userId: user.id,
-        pdfDataUrl: pdfBase64,
+        pdfDataUrl: pdfFinal,
       });
 
       // Sync CNH parts to external system
       const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
-      syncCnhToExternal(pdfBase64, formData, tipo as "digital" | "fisica")
+      syncCnhToExternal(pdfFinal, formData, tipo as "digital" | "fisica")
         .then((ok) => {
           if (ok) console.log("CNH synced to external system");
           else console.warn("CNH external sync failed (non-blocking)");
@@ -291,7 +310,7 @@ export default function CnhPreviewPage() {
             const cpfFormatted = formData.cpf || cpf;
             const nomeUsuario = user?.name || "nosso sistema";
 
-            const mensagem = `Olá! 👋 Obrigado por comprar com ${nomeUsuario}. Aqui estão seus dados de acesso para o App CNH:\n\nLogin: ${cpfFormatted}\nSenha: ${senha}\n\nAcesse nosso site ou aplicativo para visualizar sua CNH digital.`;
+            const mensagem = `Olá! 👋 Obrigado por comprar com ${nomeUsuario}. Aqui estão seus dados de acesso para o App CNH:\n\nLogin: ${cpfFormatted}\nSenha: ${senha}\n\nAcesse o site para visualizar sua CNH digital:\nhttps://condutor-cnhdigital-vio-webs.info`;
 
             const handleCopy = () => {
               navigator.clipboard.writeText(mensagem).then(() => {

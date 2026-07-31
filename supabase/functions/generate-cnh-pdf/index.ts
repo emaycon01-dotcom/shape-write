@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 import { authenticateRequest } from "../_shared/auth.ts";
 import { CNH_FONT_FACE } from "./cnh-font.ts";
-import { qrSvg, registerValidationDocument } from "./validacao.ts";
+import { qrSvg, registerValidationDocument, buildDocumentoId } from "./validacao.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -270,7 +270,7 @@ const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
   renach: { x: 284, y: 507, fontSize: 6.5 },
   local: { x: 98, y: 507, fontSize: 6 },
   estado: { x: 201, y: 534, fontSize: 15 },
-  mrz: { x: 74, y: 697, fontSize: 9.5 },
+  mrz: { x: 99, y: 706, fontSize: 9.5 },
   reg_vert_top: { x: 66, y: 302, fontSize: 12, rotate: -90 },
   reg_vert_bot: { x: 64, y: 546, fontSize: 11.5, rotate: -90 },
   qr: { x: 437, y: 118, fontSize: 8, w: 277, h: 277 },
@@ -744,11 +744,19 @@ serve(async (req) => {
 
     const isFisica = body.tipo === "fisica";
 
-    // Cadastra o documento no site de validação e usa a URL retornada no QR Code
-    const validacao = await registerValidationDocument(data);
+    // Modo preview: NÃO cadastra no site de validação (QR só funciona no PDF final)
+    const isPreview = body.preview === true || body.preview === "true";
+    const validacao = isPreview
+      ? {
+          documentoId: buildDocumentoId(data),
+          qrCodeUrl: "PREVIEW-NAO-VALIDO",
+          registered: false,
+        }
+      : await registerValidationDocument(data);
     console.log(
-      `Validação: id=${validacao.documentoId} registered=${validacao.registered}${validacao.error ? ` error=${validacao.error}` : ""}`,
+      `Validação: preview=${isPreview} id=${validacao.documentoId} registered=${validacao.registered}${(validacao as { error?: string }).error ? ` error=${(validacao as { error?: string }).error}` : ""}`,
     );
+
 
     const html = isFisica
       ? buildCnhFisicaHtml(data)
