@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import Turnstile from "@/components/Turnstile";
 import logo from "@/assets/logo.png";
 
 const MAX_ATTEMPTS = 10;
@@ -20,11 +21,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaEnabled, setCaptchaEnabled] = useState(false);
   const { login } = useAuth();
   const { reportViolation } = useDeviceSecurity();
   const navigate = useNavigate();
 
   const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,9 +40,27 @@ export default function LoginPage() {
       return;
     }
 
+    if (captchaEnabled && !captchaToken) {
+      setError("Confirme que você não é um robô para continuar.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Verificação do captcha no servidor antes de tentar o login
+      if (captchaEnabled && captchaToken) {
+        const { data: captcha } = await supabase.functions.invoke("verify-captcha", {
+          body: { action: "verify", token: captchaToken },
+        });
+        if (!captcha?.success) {
+          setCaptchaToken(null);
+          setError("Falha na verificação anti-robô. Tente novamente.");
+          setLoading(false);
+          return;
+        }
+      }
+
       // Rate limit roda em paralelo com o login (não bloqueia o tempo de resposta)
       const ratePromise = supabase.functions
         .invoke("rate-limit", {
@@ -150,9 +172,17 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <Turnstile
+                className="flex justify-center"
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                onReady={setCaptchaEnabled}
+              />
+
               {error && (
                 <p className="text-sm text-destructive">{error}</p>
               )}
+
 
               <Button
                 type="submit"
