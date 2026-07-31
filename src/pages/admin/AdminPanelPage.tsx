@@ -121,6 +121,7 @@ export default function AdminPanelPage() {
   const [creditInput, setCreditInput] = useState("");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
 
   const fetchAll = async () => {
     const [p, r, l, d, b, ct, ft] = await Promise.all([
@@ -299,7 +300,7 @@ export default function AdminPanelPage() {
 
   const UserRow = ({ p }: { p: Profile }) => (
     <button
-      onClick={() => { setSelected(p); setCreditInput(""); setReason(""); }}
+      onClick={() => { setSelected(p); setCreditInput(""); setReason(""); setNewPassword(""); }}
       className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-card/50 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40"
     >
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary/70 text-xs font-bold uppercase text-accent ring-1 ring-border/60">
@@ -594,6 +595,21 @@ export default function AdminPanelPage() {
                       {CARGOS.map((c) => <SelectItem key={c} value={c}>{CARGO_LABELS[c]}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t border-border/50 pt-3">
+                <label className="text-xs font-medium text-muted-foreground">Alterar senha do usuário</label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Nova senha (mín. 6 caracteres)"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <Button size="sm" variant="outline" disabled={busy} onClick={changePassword}>
+                    <KeyRound className="mr-1 h-4 w-4" /> Alterar
+                  </Button>
                 </div>
               </div>
 
