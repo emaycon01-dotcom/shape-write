@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Turnstile from "@/components/Turnstile";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 
 const MAX_ATTEMPTS = 10;
 const LOCKOUT_MINUTES = 15;
