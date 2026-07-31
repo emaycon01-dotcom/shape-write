@@ -93,6 +93,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         creditos: 1,
         qrcode: true,
       },
+      {
+        id: "hapvida",
+        titulo: "Atestado HapVida",
+        descricao: "Atestado HapVida / NotreDame com prescrição e QR Code",
+        icon: HeartPulse,
+        rota: "/dashboard/documents/hapvida",
+        creditos: 1,
+        qrcode: true,
+      },
     ],
   },
 ];
