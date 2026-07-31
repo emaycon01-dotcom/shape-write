@@ -117,15 +117,15 @@ type Pos = { x: number; y: number; fontSize: number; w?: number; h?: number; rot
 // Defaults MUST match src/pages/TemplateAlignPage.tsx defaultAtestadoFields
 export const ATESTADO_DEFAULT_POSITIONS: Record<string, Pos> = {
   qr: { x: 630, y: 30, fontSize: 8, w: 134, h: 134 },
-  endereco1: { x: 386, y: 99, fontSize: 9 },
-  endereco2: { x: 386, y: 113, fontSize: 9 },
-  endereco3: { x: 386, y: 127, fontSize: 9 },
-  paciente: { x: 118, y: 265, fontSize: 15 },
-  corpo: { x: 18, y: 336, fontSize: 15.5 },
-  cid: { x: 17, y: 422, fontSize: 18 },
-  cidade_data: { x: 364, y: 564, fontSize: 14 },
-  emitido_em: { x: 39, y: 897, fontSize: 9 },
-  liberado: { x: 404, y: 900, fontSize: 9.5 },
+  endereco1: { x: 386, y: 100, fontSize: 14.7 },
+  endereco2: { x: 386, y: 114.5, fontSize: 14.7 },
+  endereco3: { x: 386, y: 128, fontSize: 14.7 },
+  paciente: { x: 118, y: 265.5, fontSize: 20 },
+  corpo: { x: 18, y: 337.5, fontSize: 20 },
+  cid: { x: 17, y: 423, fontSize: 24 },
+  cidade_data: { x: 364, y: 564.5, fontSize: 20 },
+  emitido_em: { x: 39, y: 898, fontSize: 10.2 },
+  liberado: { x: 398, y: 902, fontSize: 12.75 },
   qr2: { x: 400, y: 955, fontSize: 8, w: 95, h: 95 },
 };
 
