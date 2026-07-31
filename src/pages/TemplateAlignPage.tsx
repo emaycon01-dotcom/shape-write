@@ -521,7 +521,11 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   left: `${(f.x / PAGE_W) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: isMrz ? cfg.mrzFont : cfg.font,
+                  fontFamily: isCorpo
+                    ? "'Times New Roman', 'Liberation Serif', Times, serif"
+                    : isMrz
+                      ? cfg.mrzFont
+                      : cfg.font,
                   color: f.color || "#111",
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
