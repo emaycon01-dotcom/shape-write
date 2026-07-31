@@ -103,6 +103,44 @@ function buildPayload(
   };
 }
 
+const REST_HEADERS = {
+  "Content-Type": "application/json",
+  apikey: EXTERNAL_SUPABASE_KEY,
+  Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
+};
+
+/**
+ * A tabela externa `cha` não possui constraint UNIQUE em documento_id,
+ * então o upsert nativo (on_conflict) falha com 42P10.
+ * Estratégia: verifica se já existe -> PATCH; senão -> INSERT.
+ */
+async function saveRecord(payload: Record<string, string>): Promise<void> {
+  const id = encodeURIComponent(payload.documento_id);
+
+  const existingRes = await fetch(
+    `${EXTERNAL_SUPABASE_URL}/rest/v1/cha?select=id&documento_id=eq.${id}&limit=1`,
+    { headers: REST_HEADERS },
+  );
+  const existing = existingRes.ok ? await existingRes.json().catch(() => []) : [];
+
+  const isUpdate = Array.isArray(existing) && existing.length > 0;
+
+  const response = await fetch(
+    isUpdate
+      ? `${EXTERNAL_SUPABASE_URL}/rest/v1/cha?documento_id=eq.${id}`
+      : `${EXTERNAL_SUPABASE_URL}/rest/v1/cha`,
+    {
+      method: isUpdate ? "PATCH" : "POST",
+      headers: { ...REST_HEADERS, Prefer: "return=minimal" },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`[${response.status}] ${await response.text()}`);
+  }
+}
+
 async function upsertWithRetry(
   payload: Record<string, string>,
   attempts = 3,
@@ -110,33 +148,18 @@ async function upsertWithRetry(
   let lastError = "";
   for (let i = 1; i <= attempts; i++) {
     try {
-      const response = await fetch(
-        `${EXTERNAL_SUPABASE_URL}/rest/v1/cha?on_conflict=documento_id`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: EXTERNAL_SUPABASE_KEY,
-            Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-            Prefer: "resolution=merge-duplicates,return=minimal",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      if (response.ok) return { ok: true };
-
-      lastError = await response.text();
-      console.error(`CHA sync tentativa ${i} falhou [${response.status}]:`, lastError);
+      await saveRecord(payload);
+      return { ok: true };
     } catch (err) {
       lastError = String(err);
-      console.error(`CHA sync tentativa ${i} com erro de rede:`, err);
+      console.error(`CHA sync tentativa ${i} falhou:`, err);
     }
 
     if (i < attempts) await new Promise((r) => setTimeout(r, 1200 * i));
   }
   return { ok: false, error: lastError };
 }
+
 
 /** Renderiza o PDF final e grava/atualiza o registro no app externo de consulta. */
 export async function syncChaToExternal(
