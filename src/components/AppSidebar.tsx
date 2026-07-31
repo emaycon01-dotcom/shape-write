@@ -142,7 +142,7 @@ export function AppSidebar() {
                 {SIDEBAR_PLANOS.map((p) => (
                   <Link
                     key={p.nome}
-                    to="/dashboard/recarregar"
+                    to={`/dashboard/planos?plano=${p.nome.toLowerCase()}`}
                     className="group relative overflow-hidden rounded-lg border border-border/60 bg-card/50 p-2 text-center transition-all hover:-translate-y-0.5"
                   >
                     <div className={`absolute inset-x-0 top-0 h-[2px] ${p.gradient}`} />
@@ -160,6 +160,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
 
         <div className="mt-auto p-4 space-y-3">
           {!collapsed && user && (
