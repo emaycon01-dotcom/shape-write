@@ -19,10 +19,7 @@ const APLICATIVOS = [
     url: govApk.url,
     tamanho: govApk.size,
     gradient: "gradient-master",
-    links: [
-      { label: "Site do RG", href: "https://cidadaniagov-info.site/" },
-      { label: "Site do CHA", href: "https://senetran-consultacarteira-digital-transito-vio.info" },
-    ],
+    links: [{ label: "Site do RG e CHA", href: "https://cidadaniagov-info.site/" }],
   },
 ];
 

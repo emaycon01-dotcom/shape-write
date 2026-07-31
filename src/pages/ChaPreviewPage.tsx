@@ -10,7 +10,7 @@ import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { syncChaToExternal } from "@/lib/cha-external-sync";
 
 
-const VALIDACAO_URL = "https://senetran-consultacarteira-digital-transito-vio.info";
+const VALIDACAO_URL = "https://cidadaniagov-info.site/";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {

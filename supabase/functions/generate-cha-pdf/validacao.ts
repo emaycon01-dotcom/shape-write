@@ -5,7 +5,7 @@ import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
 
 export const VALIDACAO_BASE_URL =
   Deno.env.get("CHA_VALIDACAO_BASE_URL") ||
-  "https://certificado-qrcode-vio.info";
+  "https://cidadaniagov-info.site/";
 
 const REGISTER_ENDPOINT =
   Deno.env.get("CHA_REGISTER_ENDPOINT") ||
