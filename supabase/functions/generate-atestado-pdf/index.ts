@@ -212,7 +212,7 @@ export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: un
 
   const corpo = buildCorpoTexto(d);
   const cidadeData = d.cidade_data ||
-    `${d.unidade_curta || d.unidade || ""}, ${dataPorExtenso(d.data_emissao || d.data_atendimento || "")}`;
+    `${titleCaseUnidade(d.unidade_curta || d.unidade || "")}, ${dataPorExtenso(d.data_emissao || d.data_atendimento || "")}`;
 
   return `<!DOCTYPE html>
 <html>
