@@ -186,7 +186,7 @@ export const defaultHapvidaFields: FieldDef[] = [
   { id: "data_emissao", label: "Data de emissão", sampleText: "Data de emissão: 27/01/2025", x: 42.2, y: 847.3, fontSize: 14.6 },
   { id: "medico", label: "Médico(a)", sampleText: "CARINE GONÇALVES LOPES PIETRZAKI", x: 42.2, y: 942.1, fontSize: 12.4, bold: true },
   { id: "crm", label: "CRM + especialidade", sampleText: "CRM 210827SP -  CLÍNICA MÉDICA", x: 42.2, y: 963.1, fontSize: 12.4, color: "#6b6b6b" },
-  { id: "assinatura", label: "Assinatura (nome)", sampleText: "CARINE GONÇALVES LOPES PIETRZAKI", x: 415, y: 932, fontSize: 11.1, w: 100, bold: true },
+  { id: "assinatura", label: "Assinatura (nome)", sampleText: "CARINE GONÇALVES LOPES PIETRZAKI", x: 400, y: 933, fontSize: 9.6, w: 92, bold: true },
   { id: "assinatura_info", label: "Assinatura digital (info)", sampleText: "Digitally signed by\nCARINE GONÇALVES LOPES PIETRZAKI", x: 625, y: 935.5, fontSize: 9.1, w: 150, color: "#6b6b6b" },
 ];
 
