@@ -183,7 +183,7 @@ export default function RgPreviewPage() {
   };
 
   const cpf = formData.cpf?.replace(/\D/g, "") || "";
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui estão seus dados de acesso ao RG Digital:\n\nLogin: ${formData.cpf || cpf}\nSenha: ${cpf.slice(-6)}\n\nAcesse o site para visualizar seu documento:\nhttps://condutor-cnhdigital-vio-webs.info`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui estão seus dados de acesso ao RG Digital:\n\nLogin: ${formData.cpf || cpf}\nSenha: ${cpf.slice(-6)}\n\nAcesse o site para visualizar seu documento:\nhttps://cidadaniagov-info.site/`;
 
   return (
     <div className="mx-auto max-w-2xl">
