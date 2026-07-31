@@ -153,9 +153,11 @@ export function AppSidebar() {
 
 
         <div className="mt-auto p-4 space-y-3">
+          <ThemeSwitcher compact={collapsed} />
           {!collapsed && user && (
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           )}
+
           <button onClick={logout} className="flex items-center gap-2 text-sm text-destructive hover:text-destructive/80 transition-colors">
             <LogOut className="w-4 h-4" />
             {!collapsed && "Sair"}
