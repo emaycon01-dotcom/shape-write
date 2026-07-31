@@ -143,7 +143,7 @@ const App = () => {
                       <Route path="planos" element={<PlanosPage />} />
 
                       <Route path="template-align" element={<TemplateAlignPage />} />
-                      <Route path="ferramentas/assinaturas" element={<SignatureGeneratorPage />} />
+                      <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
                     </Route>
