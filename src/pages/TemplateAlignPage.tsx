@@ -29,6 +29,7 @@ const RG_MRZ_FONT = "'RGOcrb', 'Courier New', monospace";
 const ATESTADO_FONT = "Calibri, Carlito, 'Segoe UI', Arial, Helvetica, sans-serif";
 const CRLV_FONT = "'FreeMono', 'Liberation Mono', 'Courier New', monospace";
 const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const DIPLOMA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 
