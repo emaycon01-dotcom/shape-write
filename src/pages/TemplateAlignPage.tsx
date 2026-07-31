@@ -495,6 +495,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
             const isBox = !!f.w && !!f.h;
             const isEstado = f.id === "estado";
             const isMrz = f.id === "mrz";
+            const isCorpo = cfg.key === "atestado" && (f.id === "corpo" || f.id === "cid");
+            const isLiberado = cfg.key === "atestado" && f.id === "liberado";
             const estadoSize = isEstado
               ? f.sampleText.length > cfg.estadoMaxChars
                 ? Math.max(f.fontSize * (cfg.estadoMaxChars / f.sampleText.length), f.fontSize * 0.55)
