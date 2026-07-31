@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor } from "lucide-react";
 import { toast } from "sonner";
 
 type Modulo = {
@@ -48,6 +48,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         aplicativo: true,
         rota: "/dashboard/documents/rg",
         creditos: 1,
+      },
+      {
+        id: "cha",
+        titulo: "CNH Marítima (CHA)",
+        descricao: "Carteira de Habilitação de Amador — Marinha do Brasil",
+        icon: Anchor,
+        rota: "/dashboard/documents/cha",
+        creditos: 1,
+        qrcode: true,
       },
 
     ],

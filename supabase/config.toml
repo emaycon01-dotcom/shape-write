@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.rg-foto]
 verify_jwt = false
+
+[functions.generate-cha-pdf]
+verify_jwt = false
