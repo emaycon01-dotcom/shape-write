@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DocumentProvider } from "@/contexts/DocumentContext";
 import { DeviceSecurityProvider, useDeviceSecurity } from "@/contexts/DeviceSecurityContext";
 import DeviceBannedScreen from "@/components/DeviceBannedScreen";
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { lazy, Suspense } from "react";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -70,6 +71,7 @@ const App = () => (
             <DocumentProvider>
               <Toaster />
               <Sonner />
+              <FloatingWhatsApp />
               <BrowserRouter>
                 <Suspense fallback={<Loading />}>
                   <Routes>
