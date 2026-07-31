@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.webp";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
