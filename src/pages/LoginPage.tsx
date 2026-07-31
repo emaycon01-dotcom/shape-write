@@ -39,22 +39,29 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Rate limit: verifica e registra numa única chamada
-      const { data: rateCheck } = await supabase.functions.invoke("rate-limit", {
-        body: { action: "check_and_record", identifier: `login:${email}` },
-      });
+      // Rate limit roda em paralelo com o login (não bloqueia o tempo de resposta)
+      const ratePromise = supabase.functions
+        .invoke("rate-limit", {
+          body: { action: "check_and_record", identifier: `login:${email}` },
+        })
+        .catch(() => ({ data: null }));
+
+      const loginPromise = login(email, password);
+
+      const { data: rateCheck } = await ratePromise;
 
       if (rateCheck && !rateCheck.allowed) {
         setLockedUntil(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
         setError(`Muitas tentativas. Aguarde ${LOCKOUT_MINUTES} minutos.`);
-        // Report as violation (em background)
         void reportViolation(undefined, email, "Excesso de tentativas de login");
+        void loginPromise.catch(() => {});
         setLoading(false);
         return;
       }
 
-      await login(email, password);
+      await loginPromise;
       navigate("/dashboard");
+
     } catch (err: any) {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);

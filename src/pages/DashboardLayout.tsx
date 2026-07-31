@@ -28,19 +28,28 @@ export default function DashboardLayout() {
       return;
     }
 
+    // Cache local: evita esperar a edge function para saber se o usuário já tem PIN
+    const cacheKey = `pin_has:${user.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached === "1") setPinState("needs_verify");
+    else if (cached === "0") setPinState("needs_setup");
+
     const checkPin = async () => {
       try {
         const { data } = await supabase.functions.invoke("manage-pin", {
           body: { action: "check" },
         });
-        setPinState(data?.hasPin ? "needs_verify" : "needs_setup");
+        const hasPin = !!data?.hasPin;
+        localStorage.setItem(cacheKey, hasPin ? "1" : "0");
+        setPinState((prev) => (prev === "verified" ? prev : hasPin ? "needs_verify" : "needs_setup"));
       } catch {
-        setPinState("needs_setup");
+        setPinState((prev) => (prev === "loading" ? "needs_setup" : prev));
       }
     };
 
-    checkPin();
+    void checkPin();
   }, [isAuthenticated, user]);
+
 
   if (loading) {
     return (
@@ -61,8 +70,9 @@ export default function DashboardLayout() {
   }
 
   if (pinState === "needs_setup") {
-    return <PinGate mode="setup" onSuccess={() => setPinState("verified")} userId={user?.id} userEmail={user?.email} />;
+    return <PinGate mode="setup" onSuccess={() => { if (user) localStorage.setItem(`pin_has:${user.id}`, "1"); setPinState("verified"); }} userId={user?.id} userEmail={user?.email} />;
   }
+
 
   if (pinState === "needs_verify") {
     return <PinGate mode="verify" onSuccess={() => setPinState("verified")} userId={user?.id} userEmail={user?.email} />;
