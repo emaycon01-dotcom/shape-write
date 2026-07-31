@@ -341,6 +341,23 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.2,
     copy: () => loadChaFieldPositions() ?? {},
   },
+  diploma: {
+    key: "diploma",
+    title: "Diploma",
+    storageKey: DIPLOMA_ALIGN_STORAGE_KEY,
+    defaults: defaultDiplomaFields,
+    bg: templateDiplomaP1Url,
+    bgs: [templateDiplomaP1Url, templateDiplomaP2Url],
+    pageW: 1288,
+    pageH: 1732,
+    font: DIPLOMA_FONT,
+    mrzFont: DIPLOMA_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadDiplomaFieldPositions() ?? {},
+  },
 };
 
 
