@@ -9,6 +9,7 @@ import { DeviceSecurityProvider, useDeviceSecurity } from "@/contexts/DeviceSecu
 import DeviceBannedScreen from "@/components/DeviceBannedScreen";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { lazy, Suspense } from "react";
+import LoginPage from "./pages/LoginPage";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -33,7 +34,6 @@ function SecurityGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));

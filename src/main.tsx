@@ -4,7 +4,11 @@ import "./index.css";
 import { applyStoredTheme } from "./components/ThemeSwitcher";
 import AppErrorBoundary from "./components/AppErrorBoundary";
 
-applyStoredTheme();
+try {
+  applyStoredTheme();
+} catch (error) {
+  console.error("Falha ao aplicar o tema inicial", error);
+}
 
 const root = document.getElementById("root");
 
