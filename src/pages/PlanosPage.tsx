@@ -280,8 +280,8 @@ export default function PlanosPage() {
               Confirmar e gerar PIX
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogFooter>
         </AlertDialogContent>
+
       </AlertDialog>
     </div>
   );
