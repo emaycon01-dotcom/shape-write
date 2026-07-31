@@ -72,6 +72,101 @@ export const defaultCnhFields: FieldDef[] = [
   { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 437, y: 118, fontSize: 8, w: 277, h: 277, color: "#999" },
 ];
 
+// Defaults MUST match supabase/functions/generate-rg-pdf/index.ts RG_DEFAULT_POSITIONS
+export const defaultRgFields: FieldDef[] = [
+  // Frente
+  { id: "photo", label: "Foto 3x4 (frente)", sampleText: "[FOTO]", x: 53, y: 199, fontSize: 8, w: 89, h: 101, color: "#999" },
+  { id: "signature", label: "Assinatura (frente)", sampleText: "[ASSINATURA]", x: 170, y: 315, fontSize: 8, w: 80, h: 28, color: "#999" },
+  { id: "estado", label: "Estado (cabeçalho)", sampleText: "AMAZONAS", x: 246, y: 131, fontSize: 14 },
+  { id: "nome", label: "Nome", sampleText: "HUELLISON DOS SANTOS CASTRO", x: 155, y: 197, fontSize: 11 },
+  { id: "nome_social", label: "Nome Social", sampleText: "NOME SOCIAL", x: 155, y: 236, fontSize: 11 },
+  { id: "registro_geral", label: "Registro Geral - CPF", sampleText: "02770162233", x: 155, y: 261, fontSize: 15 },
+  { id: "sexo", label: "Sexo", sampleText: "M", x: 298, y: 261, fontSize: 11 },
+  { id: "data_nascimento", label: "Data de Nascimento", sampleText: "23/10/1993", x: 155, y: 283, fontSize: 11 },
+  { id: "nacionalidade", label: "Nacionalidade", sampleText: "BRA", x: 298, y: 283, fontSize: 11 },
+  { id: "naturalidade", label: "Naturalidade", sampleText: "MANAUS - AM", x: 155, y: 304, fontSize: 11 },
+  { id: "data_validade", label: "Data de Validade", sampleText: "23/05/2035", x: 298, y: 302, fontSize: 11 },
+  // Verso
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 50, y: 437, fontSize: 8, w: 82, h: 82, color: "#999" },
+  { id: "photo2", label: "Foto 3x4 (verso)", sampleText: "[FOTO]", x: 397, y: 421, fontSize: 8, w: 36, h: 37, color: "#999" },
+  { id: "filiacao1", label: "Filiação 1 (mãe)", sampleText: "MARIA RAIMUNDA DA COSTA DOS SANTOS", x: 153, y: 444, fontSize: 11 },
+  { id: "filiacao2", label: "Filiação 2 (pai)", sampleText: "JOSE LUIZ DE SOUZA CASTRO", x: 153, y: 463, fontSize: 11 },
+  { id: "orgao_expedidor", label: "Órgão Expedidor", sampleText: "SSP-AM", x: 153, y: 481, fontSize: 11 },
+  { id: "local_emissao", label: "Local de emissão", sampleText: "AM", x: 153, y: 515, fontSize: 11 },
+  { id: "data_emissao", label: "Data de Emissão", sampleText: "23/05/2025", x: 325, y: 515, fontSize: 11 },
+  {
+    id: "mrz",
+    label: "MRZ",
+    sampleText: "IDBRA0277016223302770162233<<0\n931023M350523BRA<<<<<<<<<<<<<2\nHUELLISON<<DOS<SANTOS<CASTRO<<",
+    x: 88,
+    y: 592,
+    fontSize: 17.5,
+  },
+  // Outras informações
+  { id: "titulo_eleitor", label: "Título de eleitor", sampleText: "80977225463859", x: 41, y: 743, fontSize: 11 },
+  { id: "tipo_sanguineo", label: "Tipo sanguíneo", sampleText: "A+", x: 297, y: 743, fontSize: 11 },
+  { id: "estado_civil", label: "Estado civil", sampleText: "SOLTEIRO(A)", x: 41, y: 770, fontSize: 11 },
+  { id: "doador", label: "Doador de Orgãos", sampleText: "NÃO", x: 297, y: 770, fontSize: 11 },
+  { id: "signature2", label: "Assinatura (outras info)", sampleText: "[ASSINATURA]", x: 55, y: 805, fontSize: 8, w: 90, h: 33, color: "#999" },
+  { id: "certidao", label: "Certidão", sampleText: "MANAUS - AM 1.SUBD. CN:LV E672/FLS.180 /N°43474", x: 215, y: 806, fontSize: 9 },
+  { id: "cnh", label: "CNH", sampleText: "78764532553", x: 41, y: 858, fontSize: 11 },
+  { id: "categoria", label: "Categoria", sampleText: "A", x: 179, y: 858, fontSize: 11 },
+  { id: "pis_pasep", label: "PIS / PASEP", sampleText: "35345879603", x: 310, y: 858, fontSize: 11 },
+  { id: "nis", label: "NIS", sampleText: "22146118198", x: 41, y: 885, fontSize: 11 },
+  { id: "nit", label: "NIT", sampleText: "09856951890", x: 179, y: 885, fontSize: 11 },
+  { id: "ctps", label: "Carteira de trabalho", sampleText: "9000611119111", x: 310, y: 891, fontSize: 11 },
+  { id: "dni", label: "DNI", sampleText: "4594798348", x: 41, y: 922, fontSize: 11 },
+  { id: "cns", label: "CNS", sampleText: "221869890104006", x: 297, y: 922, fontSize: 11 },
+  { id: "observacao_saude", label: "Observação de Saúde", sampleText: "-", x: 41, y: 951, fontSize: 11 },
+];
+
+interface EditorConfig {
+  key: "cnh" | "rg";
+  title: string;
+  storageKey: string;
+  defaults: FieldDef[];
+  bg: string;
+  font: string;
+  mrzFont: string;
+  mrzWidth: number;
+  estadoBoxW: number;
+  estadoMaxChars: number;
+  mrzLineHeight: number;
+  copy: () => Record<string, unknown>;
+}
+
+const EDITORS: Record<"cnh" | "rg", EditorConfig> = {
+  cnh: {
+    key: "cnh",
+    title: "CNH Digital",
+    storageKey: CNH_ALIGN_STORAGE_KEY,
+    defaults: defaultCnhFields,
+    bg: templateBgUrl,
+    font: CNH_FONT,
+    mrzFont: CNH_FONT,
+    mrzWidth: 378,
+    estadoBoxW: 170,
+    estadoMaxChars: 9,
+    mrzLineHeight: 1.6,
+    copy: () => loadCnhFieldPositions() ?? {},
+  },
+  rg: {
+    key: "rg",
+    title: "RG Digital",
+    storageKey: RG_ALIGN_STORAGE_KEY,
+    defaults: defaultRgFields,
+    bg: templateRgBgUrl,
+    font: RG_FONT,
+    mrzFont: RG_MRZ_FONT,
+    mrzWidth: 420,
+    estadoBoxW: 220,
+    estadoMaxChars: 12,
+    mrzLineHeight: 1.22,
+    copy: () => loadRgFieldPositions() ?? {},
+  },
+};
+
+
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
   const isBox = field.id === "photo" || field.id === "signature";
 
