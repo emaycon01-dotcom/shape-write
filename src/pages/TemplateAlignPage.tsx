@@ -677,7 +677,16 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
           style={{ aspectRatio: `${PW} / ${PH}`, maxWidth: PW }}
           onClick={() => setSelected(null)}
         >
-          <img src={cfg.bg} alt={`Template ${cfg.title}`} className="absolute inset-0 w-full h-full" style={{ objectFit: "fill" }} draggable={false} />
+          {(cfg.bgs ?? [cfg.bg]).map((src, i, arr) => (
+            <img
+              key={i}
+              src={src}
+              alt={`Template ${cfg.title} ${i + 1}`}
+              className="absolute left-0 w-full"
+              style={{ top: `${(i / arr.length) * 100}%`, height: `${100 / arr.length}%`, objectFit: "fill" }}
+              draggable={false}
+            />
+          ))}
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
