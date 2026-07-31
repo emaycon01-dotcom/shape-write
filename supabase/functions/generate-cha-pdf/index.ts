@@ -91,19 +91,19 @@ type Pos = { x: number; y: number; fontSize: number; w?: number; h?: number; rot
 // Defaults MUST match src/pages/TemplateAlignPage.tsx defaultChaFields
 export const CHA_DEFAULT_POSITIONS: Record<string, Pos> = {
   qr: { x: 541, y: 128, fontSize: 8, w: 158, h: 158 },
-  photo: { x: 311, y: 210, fontSize: 8, w: 114, h: 117 },
-  nome: { x: 82, y: 215, fontSize: 9.2 },
-  nascimento: { x: 88, y: 245, fontSize: 9.2 },
-  cpf: { x: 201, y: 245, fontSize: 9.2 },
-  categoria: { x: 82, y: 273, fontSize: 9.2 },
-  categoria_en: { x: 82, y: 284, fontSize: 9.2 },
-  validade: { x: 88, y: 306, fontSize: 9.2 },
-  inscricao: { x: 203, y: 306, fontSize: 9.2 },
-  foto_data: { x: 353, y: 319, fontSize: 5 },
-  limites: { x: 82, y: 421, fontSize: 9.2 },
-  requisitos: { x: 82, y: 460, fontSize: 9.2 },
-  orgao: { x: 82, y: 501, fontSize: 9.2 },
-  data_emissao: { x: 315, y: 500, fontSize: 9.2 },
+  photo: { x: 311, y: 209, fontSize: 8, w: 110, h: 116 },
+  nome: { x: 79.7, y: 215.5, fontSize: 10.5 },
+  nascimento: { x: 88.3, y: 245.8, fontSize: 10.5 },
+  cpf: { x: 199.2, y: 245.8, fontSize: 10.5 },
+  categoria: { x: 79.7, y: 273.6, fontSize: 10.5 },
+  categoria_en: { x: 79.7, y: 284.7, fontSize: 10.5 },
+  validade: { x: 88.3, y: 306.7, fontSize: 10.5 },
+  inscricao: { x: 199.2, y: 306.7, fontSize: 10.5 },
+  foto_data: { x: 349.5, y: 316.9, fontSize: 5 },
+  limites: { x: 80.6, y: 419.6, fontSize: 10.5 },
+  requisitos: { x: 80.6, y: 459.9, fontSize: 10.5 },
+  orgao: { x: 80.6, y: 503.1, fontSize: 10.5 },
+  data_emissao: { x: 302.4, y: 503.1, fontSize: 10.5 },
 };
 
 function resolvePositions(overrides: unknown): Record<string, Pos> {
