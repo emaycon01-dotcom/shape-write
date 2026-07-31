@@ -39,6 +39,9 @@ const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
 const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
 const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
+const RgFormPage = lazy(() => import("./pages/RgFormPage"));
+const RgPreviewPage = lazy(() => import("./pages/RgPreviewPage"));
+
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
 const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
