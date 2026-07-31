@@ -135,7 +135,13 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       console.error("Error deleting document:", error);
       throw error;
     }
-    supabase.storage.from("documents-pdf").remove([`${id}.pdf`]).catch(() => {});
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id;
+      supabase.storage
+        .from("documents-pdf")
+        .remove([uid ? `${uid}/${id}.pdf` : `${id}.pdf`, `${id}.pdf`])
+        .catch(() => {});
+    });
     setDocuments((prev) => prev.filter((d) => d.id !== id));
   }, []);
 
