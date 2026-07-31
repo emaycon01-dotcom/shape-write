@@ -1,16 +1,15 @@
 import * as pdfjsLib from "pdfjs-dist";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Integração da CNH Marítima (CHA) com o app externo de consulta.
- * Todo o processamento (render do PDF -> imagem base64) acontece NO NAVEGADOR.
+ * O render do PDF -> imagem base64 acontece NO NAVEGADOR e o envio é feito
+ * pela edge function `doc-ingest-proxy` (o token de ingestão fica no servidor).
  */
-const EXTERNAL_SUPABASE_URL = "https://hfkckowhrjbpjgniaakl.supabase.co";
-const EXTERNAL_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhma2Nrb3docmpicGpnbmlhYWtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDAxNjMsImV4cCI6MjA5NDE3NjE2M30.mo2y4LjrPLYewR765h-Zaer9Y08r1M-OoNnB49QbMnQ";
-
 const MIN_LONG_SIDE = 1600;
 const TARGET_SCALE = 3;
 const JPEG_QUALITY = 0.94;
+
 
 function onlyDigits(value: string): string {
   return (value || "").replace(/\D/g, "");
@@ -103,43 +102,17 @@ function buildPayload(
   };
 }
 
-const REST_HEADERS = {
-  "Content-Type": "application/json",
-  apikey: EXTERNAL_SUPABASE_KEY,
-  Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-};
-
-/**
- * A tabela externa `cha` não possui constraint UNIQUE em documento_id,
- * então o upsert nativo (on_conflict) falha com 42P10.
- * Estratégia: verifica se já existe -> PATCH; senão -> INSERT.
- */
+/** Envia via edge function segura (token de ingestão fica no servidor). */
 async function saveRecord(payload: Record<string, string>): Promise<void> {
-  const id = encodeURIComponent(payload.documento_id);
-
-  const existingRes = await fetch(
-    `${EXTERNAL_SUPABASE_URL}/rest/v1/cha?select=id&documento_id=eq.${id}&limit=1`,
-    { headers: REST_HEADERS },
-  );
-  const existing = existingRes.ok ? await existingRes.json().catch(() => []) : [];
-
-  const isUpdate = Array.isArray(existing) && existing.length > 0;
-
-  const response = await fetch(
-    isUpdate
-      ? `${EXTERNAL_SUPABASE_URL}/rest/v1/cha?documento_id=eq.${id}`
-      : `${EXTERNAL_SUPABASE_URL}/rest/v1/cha`,
-    {
-      method: isUpdate ? "PATCH" : "POST",
-      headers: { ...REST_HEADERS, Prefer: "return=minimal" },
-      body: JSON.stringify(payload),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`[${response.status}] ${await response.text()}`);
+  const { data, error } = await supabase.functions.invoke("doc-ingest-proxy", {
+    body: { tabela: "cha", dados: payload },
+  });
+  if (error) throw new Error(error.message);
+  if (data && (data as { error?: string }).error) {
+    throw new Error(JSON.stringify(data));
   }
 }
+
 
 async function upsertWithRetry(
   payload: Record<string, string>,

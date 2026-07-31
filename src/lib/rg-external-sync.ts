@@ -1,16 +1,15 @@
 import * as pdfjsLib from "pdfjs-dist";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Integração do RG Digital com o app externo de consulta (Site 2).
- * Todo o processamento (render do PDF -> imagem base64) acontece NO NAVEGADOR.
+ * O render do PDF -> imagem base64 acontece NO NAVEGADOR e o envio é feito
+ * pela edge function `doc-ingest-proxy` (o token de ingestão fica no servidor).
  */
-const EXTERNAL_SUPABASE_URL = "https://hfkckowhrjbpjgniaakl.supabase.co";
-const EXTERNAL_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhma2Nrb3docmpicGpnbmlhYWtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDAxNjMsImV4cCI6MjA5NDE3NjE2M30.mo2y4LjrPLYewR765h-Zaer9Y08r1M-OoNnB49QbMnQ";
-
 const MIN_LONG_SIDE = 1500;
 const TARGET_SCALE = 3;
 const JPEG_QUALITY = 0.94;
+
 
 function onlyDigits(value: string): string {
   return (value || "").replace(/\D/g, "");
@@ -118,33 +117,22 @@ async function upsertWithRetry(
   let lastError = "";
   for (let i = 1; i <= attempts; i++) {
     try {
-      const response = await fetch(
-        `${EXTERNAL_SUPABASE_URL}/rest/v1/rg?on_conflict=documento_id`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: EXTERNAL_SUPABASE_KEY,
-            Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-            Prefer: "resolution=merge-duplicates,return=minimal",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      if (response.ok) return { ok: true };
-
-      lastError = await response.text();
-      console.error(`RG sync tentativa ${i} falhou [${response.status}]:`, lastError);
+      const { data, error } = await supabase.functions.invoke("doc-ingest-proxy", {
+        body: { tabela: "rg", dados: payload },
+      });
+      if (error) throw new Error(error.message);
+      if (data && (data as { error?: string }).error) throw new Error(JSON.stringify(data));
+      return { ok: true };
     } catch (err) {
       lastError = String(err);
-      console.error(`RG sync tentativa ${i} com erro de rede:`, err);
+      console.error(`RG sync tentativa ${i} falhou:`, err);
     }
 
     if (i < attempts) await new Promise((r) => setTimeout(r, 1200 * i));
   }
   return { ok: false, error: lastError };
 }
+
 
 /** Renderiza o PDF final e grava/atualiza o registro no app externo de consulta. */
 export async function syncRgToExternal(
