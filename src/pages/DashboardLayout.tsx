@@ -80,9 +80,7 @@ export default function DashboardLayout() {
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </button>
-          <span className="text-sm text-muted-foreground font-display tracking-wider">
-            BELLARUS SISTEMAS
-          </span>
+
         </header>
         <main className="flex-1 w-full p-4 sm:p-6 overflow-auto">
           <Outlet />
