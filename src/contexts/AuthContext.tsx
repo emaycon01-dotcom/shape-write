@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           lastLoadedUserId = null;
           inflight = null;
-          setUser(null);
+          applyUser(null);
           setLoading(false);
         }
       }
