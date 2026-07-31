@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.protect_profile_credits() FROM PUBLIC, anon, authenticated;
