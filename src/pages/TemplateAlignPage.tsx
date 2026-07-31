@@ -291,7 +291,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.2,
     copy: () => loadCrlvFieldPositions() ?? {},
   },
-
+  cha: {
+    key: "cha",
+    title: "CNH Marítima",
+    storageKey: CHA_ALIGN_STORAGE_KEY,
+    defaults: defaultChaFields,
+    bg: templateChaBgUrl,
+    font: CHA_FONT,
+    mrzFont: CHA_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadChaFieldPositions() ?? {},
+  },
 };
 
 
