@@ -391,7 +391,8 @@ export default function HistoryPage() {
               <CreditCard className="w-5 h-5 text-primary" /> Confirmar Edição
             </AlertDialogTitle>
             <AlertDialogDescription>
-              A edição deste documento custará <strong>{EDIT_COST} crédito(s)</strong>.
+              A edição deste documento custará{" "}
+              <strong>{EDIT_COST > 0 ? `${formatCredits(EDIT_COST)} crédito(s)` : "0 crédito (grátis pelo seu plano)"}</strong>.
               <br />
               Seu saldo atual: <strong>{user?.credits ?? 0} crédito(s)</strong>.
             </AlertDialogDescription>
