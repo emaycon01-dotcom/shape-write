@@ -403,7 +403,7 @@ export default function HistoryPage() {
               {editLoading ? (
                 <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Processando...</>
               ) : (
-                <>Confirmar ({EDIT_COST} créd.)</>
+                <>Confirmar ({EDIT_COST > 0 ? `${formatCredits(EDIT_COST)} créd.` : "grátis"})</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
