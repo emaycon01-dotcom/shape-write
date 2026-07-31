@@ -270,7 +270,7 @@ const DIGITAL_DEFAULT_POSITIONS: Record<string, Pos> = {
   renach: { x: 284, y: 507, fontSize: 6.5 },
   local: { x: 98, y: 507, fontSize: 6 },
   estado: { x: 201, y: 534, fontSize: 15 },
-  mrz: { x: 74, y: 697, fontSize: 9.5 },
+  mrz: { x: 99, y: 706, fontSize: 9.5 },
   reg_vert_top: { x: 66, y: 302, fontSize: 12, rotate: -90 },
   reg_vert_bot: { x: 64, y: 546, fontSize: 11.5, rotate: -90 },
   qr: { x: 437, y: 118, fontSize: 8, w: 277, h: 277 },
