@@ -42,6 +42,8 @@ const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
 const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
 const RgFormPage = lazy(() => import("./pages/RgFormPage"));
 const RgPreviewPage = lazy(() => import("./pages/RgPreviewPage"));
+const AtestadoFormPage = lazy(() => import("./pages/AtestadoFormPage"));
+const AtestadoPreviewPage = lazy(() => import("./pages/AtestadoPreviewPage"));
 
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
