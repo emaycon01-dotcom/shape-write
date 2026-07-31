@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
 
     const applied = await applyPaidTransaction(supabaseAdmin, transaction);
     return json({ ok: true, status: "pago", applied });
-    return json({ ok: true, status: normalizedStatus });
+
   } catch (err) {
     console.error("Webhook error:", err);
     return json({ error: "Erro interno" }, 500);
