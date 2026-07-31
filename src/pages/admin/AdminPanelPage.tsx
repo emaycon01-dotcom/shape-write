@@ -277,6 +277,26 @@ export default function AdminPanelPage() {
     });
   };
 
+  const changePassword = async () => {
+    if (!selected) return;
+    if (newPassword.trim().length < 6) {
+      toast({ title: "A senha deve ter pelo menos 6 caracteres", variant: "destructive" });
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.functions.invoke("admin-actions", {
+      body: { action: "set_password", user_id: selected.user_id, password: newPassword.trim() },
+    });
+    setBusy(false);
+    if (error) {
+      toast({ title: "Falha ao alterar a senha", description: error.message, variant: "destructive" });
+      return;
+    }
+    setNewPassword("");
+    toast({ title: "Senha alterada com sucesso" });
+  };
+
+
   const UserRow = ({ p }: { p: Profile }) => (
     <button
       onClick={() => { setSelected(p); setCreditInput(""); setReason(""); }}
