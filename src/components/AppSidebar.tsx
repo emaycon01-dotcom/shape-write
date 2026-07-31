@@ -111,12 +111,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {renderMenuItems(commonItems)}
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => setSupportOpen(true)} className="hover:bg-secondary/50 cursor-pointer">
-                  <Headphones className="mr-2 h-4 w-4" />
-                  {!collapsed && <span>Suporte</span>}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -198,27 +192,6 @@ export function AppSidebar() {
         )}
 
         <div className="mt-auto p-4 space-y-3">
-          {!collapsed && (
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Palette className="w-3.5 h-3.5" />
-                <span>Cor</span>
-              </div>
-              <div className="flex gap-2">
-                {THEME_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => applyTheme(opt.value)}
-                    title={opt.label}
-                    className={`w-7 h-7 rounded-full border-2 transition-all ${
-                      theme === opt.value ? "border-primary scale-110" : "border-border hover:border-muted-foreground"
-                    }`}
-                    style={{ background: `linear-gradient(135deg, ${opt.colors[0]} 50%, ${opt.colors[1]} 50%)` }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
           {!collapsed && user && (
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           )}
