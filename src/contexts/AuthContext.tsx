@@ -195,7 +195,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const credits = Number(data ?? 0);
-      setUser((prev) => (prev ? { ...prev, credits } : prev));
+      setUser((prev) => {
+        const next = prev ? { ...prev, credits } : prev;
+        writeCachedUser(next);
+        return next;
+      });
       return { ok: true, credits };
     },
     [refreshUser]
