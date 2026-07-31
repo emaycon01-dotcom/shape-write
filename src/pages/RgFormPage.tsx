@@ -100,6 +100,8 @@ export default function RgFormPage() {
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [assPreview, setAssPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [outrasOpen, setOutrasOpen] = useState(false);
+
   const [hydrated, setHydrated] = useState(false);
   const fotoRef = useRef<HTMLInputElement>(null);
   const assRef = useRef<HTMLInputElement>(null);
