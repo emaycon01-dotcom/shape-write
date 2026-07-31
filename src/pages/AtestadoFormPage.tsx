@@ -68,7 +68,11 @@ const NOMES = [
 export default function AtestadoFormPage() {
   const location = useLocation();
   const editState = location.state as { editDocId?: string } | null;
-  const { getDocument, loadDocumentInfo, updateDocument } = useDocuments();
+  const { getDocument, loadDocumentInfo, updateDocument, documents } = useDocuments();
+
+  const previewHistory = documents
+    .filter((d) => d.type === "atestado")
+    .slice(0, 6);
 
   const [form, setForm] = useState<AtestadoFormData>(initial);
   const [loading, setLoading] = useState(false);
