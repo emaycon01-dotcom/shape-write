@@ -43,7 +43,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
   }
 
-  const profile = profileRes.data as { name?: string; credits?: number; created_at?: string } | null;
+  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string } | null;
   const isAdmin = rolesRes.data?.some((r) => r.cargo === "admin") ?? false;
 
   return {
@@ -52,6 +52,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     email: supabaseUser.email || "",
     role: isAdmin ? "admin" : "cliente",
     credits: profile?.credits ?? 0,
+    plano: profile?.plano || "free",
     createdAt: profile?.created_at || supabaseUser.created_at,
   };
 }
