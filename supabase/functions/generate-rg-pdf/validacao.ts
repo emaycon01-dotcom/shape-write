@@ -84,12 +84,15 @@ export async function registerValidationDocument(
     codigo_seguranca: s(d.codigo_seguranca) || s(d.codigo_validacao),
     status: "valido",
     // enviado em vários formatos/chaves para cobrir o que o portal espera
-    foto_base64: fotoDataUrl,
-    foto: fotoDataUrl,
-    foto_url: fotoDataUrl,
-    foto_3x4: fotoDataUrl,
+    foto_base64: fotoUrl,
+    foto: fotoUrl,
+    foto_url: fotoUrl,
+    foto_3x4: fotoUrl,
+    photo_url: fotoUrl,
+    imagem: fotoUrl,
     foto_raw: fotoPura,
   };
+
 
 
   const token = Deno.env.get("VALIDACAO_API_TOKEN") || "site1-integracao";
