@@ -3,6 +3,7 @@ import { CNH_ALIGN_STORAGE_KEY } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY } from "@/lib/crlv-align";
+import { CHA_ALIGN_STORAGE_KEY } from "@/lib/cha-align";
 
 /** Mapeia o tipo de documento para a chave usada no cache local. */
 export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
@@ -10,6 +11,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   rg: RG_ALIGN_STORAGE_KEY,
   atestado: ATESTADO_ALIGN_STORAGE_KEY,
   crlv: CRLV_ALIGN_STORAGE_KEY,
+  cha: CHA_ALIGN_STORAGE_KEY,
 };
 
 /**

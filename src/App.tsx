@@ -46,6 +46,8 @@ const AtestadoFormPage = lazy(() => import("./pages/AtestadoFormPage"));
 const AtestadoPreviewPage = lazy(() => import("./pages/AtestadoPreviewPage"));
 const CrlvFormPage = lazy(() => import("./pages/CrlvFormPage"));
 const CrlvPreviewPage = lazy(() => import("./pages/CrlvPreviewPage"));
+const ChaFormPage = lazy(() => import("./pages/ChaFormPage"));
+const ChaPreviewPage = lazy(() => import("./pages/ChaPreviewPage"));
 
 
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
@@ -97,6 +99,9 @@ const App = () => (
 
                       <Route path="documents/crlv" element={<CrlvFormPage />} />
                       <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
+
+                      <Route path="documents/cha" element={<ChaFormPage />} />
+                      <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
 
 
 
