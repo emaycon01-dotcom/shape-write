@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2 } from "lucide-react";
+import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2, History, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
