@@ -103,7 +103,8 @@ export async function registerValidationDocument(
 
     return {
       documentoId,
-      qrCodeUrl: json.qr_code_url || fallbackUrl,
+      // A API pode devolver um domínio placeholder — usamos sempre o oficial
+      qrCodeUrl: fallbackUrl,
       registered: true,
     };
   } catch (err) {
