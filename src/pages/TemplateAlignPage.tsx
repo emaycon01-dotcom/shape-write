@@ -10,11 +10,14 @@ import templateRgBgUrl from "@/assets/template-rg-bg-hq.jpg";
 import templateAtestadoBgUrl from "@/assets/template-atestado-bg-hq.jpg";
 import templateCrlvBgUrl from "@/assets/template-crlv-bg-hq.jpg";
 import templateChaBgUrl from "@/assets/template-cha-bg-hq.jpg";
+import templateDiplomaP1Url from "@/assets/template-diploma-p1-hq.jpg";
+import templateDiplomaP2Url from "@/assets/template-diploma-p2-hq.jpg";
 import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY, loadCrlvFieldPositions } from "@/lib/crlv-align";
 import { CHA_ALIGN_STORAGE_KEY, loadChaFieldPositions } from "@/lib/cha-align";
+import { DIPLOMA_ALIGN_STORAGE_KEY, loadDiplomaFieldPositions } from "@/lib/diploma-align";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
