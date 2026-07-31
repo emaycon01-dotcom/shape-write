@@ -7,6 +7,8 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { syncChaToExternal } from "@/lib/cha-external-sync";
+
 
 const VALIDACAO_URL = "https://senetran-consultacarteira-digital-transito-vio.info";
 
@@ -127,6 +129,24 @@ export default function ChaPreviewPage() {
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
       });
+
+      // Envio das fotos (4 partes) para o app externo de consulta
+      syncChaToExternal(pdfFinal, formData).then((res) => {
+        if (res.ok) {
+          toast({
+            title: "Fotos enviadas ao app de consulta",
+            description: `Registro ${res.documentoId} sincronizado.`,
+          });
+        } else {
+          console.error("Erro ao enviar CHA:", res.error);
+          toast({
+            title: "Falha ao enviar as fotos",
+            description: "O PDF está pronto, mas a consulta externa não recebeu as imagens.",
+            variant: "destructive",
+          });
+        }
+      });
+
     } catch {
       toast({ title: "Erro ao gerar documento", description: "Tente novamente.", variant: "destructive" });
     } finally {
