@@ -1,4 +1,3 @@
-import * as pdfjsLib from "pdfjs-dist";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -46,6 +45,7 @@ function base64ToBytes(dataUrl: string): Uint8Array {
 
 /** Renderiza TODAS as páginas do PDF, sem recorte e sem rotação, em alta resolução. */
 async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
+  const pdfjsLib = await import("pdfjs-dist");
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
   const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
