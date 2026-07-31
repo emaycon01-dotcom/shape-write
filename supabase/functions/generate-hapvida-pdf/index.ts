@@ -103,7 +103,7 @@ export const HAPVIDA_DEFAULT_POSITIONS: Record<string, Pos> = {
   data_emissao: { x: 42.2, y: 847.3, fontSize: 14.6 },
   medico: { x: 42.2, y: 942.1, fontSize: 12.4 },
   crm: { x: 42.2, y: 963.1, fontSize: 12.4 },
-  assinatura: { x: 427, y: 936.3, fontSize: 11.1, w: 130 },
+  assinatura: { x: 415, y: 932, fontSize: 11.1, w: 100 },
   assinatura_info: { x: 625, y: 935.5, fontSize: 9.1, w: 150 },
 };
 
