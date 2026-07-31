@@ -25,6 +25,8 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "cnh": "CNH Digital",
   "rg": "RG Digital",
   "atestado": "Atestado Médico",
+  "crlv": "CRLV Digital",
+
   "cha-amador": "CHÁ Amador Digital",
   "cnh-nautica": "Arrais Amador Físico",
   "certidao-nascimento": "Certidão de Nascimento",
