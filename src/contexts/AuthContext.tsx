@@ -8,6 +8,7 @@ interface User {
   email: string;
   role: "admin" | "cliente";
   credits: number;
+  plano: string;
   createdAt: string;
 }
 
