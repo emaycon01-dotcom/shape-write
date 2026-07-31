@@ -27,6 +27,8 @@ const RgFormPage = lazy(() => import("./pages/RgFormPage"));
 const RgPreviewPage = lazy(() => import("./pages/RgPreviewPage"));
 const AtestadoFormPage = lazy(() => import("./pages/AtestadoFormPage"));
 const AtestadoPreviewPage = lazy(() => import("./pages/AtestadoPreviewPage"));
+const HapvidaFormPage = lazy(() => import("./pages/HapvidaFormPage"));
+const HapvidaPreviewPage = lazy(() => import("./pages/HapvidaPreviewPage"));
 const CrlvFormPage = lazy(() => import("./pages/CrlvFormPage"));
 const CrlvPreviewPage = lazy(() => import("./pages/CrlvPreviewPage"));
 const ChaFormPage = lazy(() => import("./pages/ChaFormPage"));
