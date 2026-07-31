@@ -745,6 +745,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                     ? { width: `${((232 / PW) * 100).toFixed(4)}%`, textAlign: "center" as const }
                     : {}),
                   ...(isEstado ? { width: `${((cfg.estadoBoxW / PW) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
+                  ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
                   ...(isBox
                     ? {
                         width: `${(((f.w || 80) / PW) * 100).toFixed(4)}%`,
