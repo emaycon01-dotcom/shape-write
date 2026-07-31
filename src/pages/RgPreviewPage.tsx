@@ -7,6 +7,8 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { syncRgToExternal } from "@/lib/rg-external-sync";
+
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
