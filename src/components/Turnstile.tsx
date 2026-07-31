@@ -31,10 +31,18 @@ function loadScript() {
   return scriptPromise;
 }
 
-function isPreviewHost() {
+export function isPreviewHost() {
   const host = window.location.hostname;
-  return host.includes("preview--") || host.endsWith(".lovableproject.com");
+  return (
+    host === "localhost" ||
+    host.includes("preview--") ||
+    host.endsWith(".lovableproject.com") ||
+    host.endsWith(".lovable.app")
+  );
 }
+
+/** Chave de teste oficial da Cloudflare (sempre aprova) para hosts de preview */
+const TEST_SITE_KEY = "1x00000000000000000000AA";
 
 let cachedConfig: { siteKey: string; enabled: boolean } | null = null;
 
@@ -73,26 +81,29 @@ export default function Turnstile({
 
     (async () => {
       try {
-        // Turnstile rejects Lovable's temporary preview hostnames because they
-        // are not part of the production hostname allowlist. Keep previews
-        // usable while retaining CAPTCHA protection on published domains.
-        if (isPreviewHost()) {
-          setEnabled(false);
-          onReady?.(false);
-          return;
+        // Em hosts de preview a Cloudflare rejeita o domínio real, então
+        // usamos a chave de teste oficial: o widget aparece e sempre aprova.
+        let siteKey = TEST_SITE_KEY;
+
+        if (!isPreviewHost()) {
+          const cfg = await getConfig();
+          if (cancelled) return;
+          if (!cfg.enabled || !cfg.siteKey) {
+            setEnabled(false);
+            onReady?.(false);
+            return;
+          }
+          siteKey = cfg.siteKey;
         }
 
-        const cfg = await getConfig();
-        if (cancelled) return;
-        setEnabled(cfg.enabled);
-        onReady?.(cfg.enabled);
-        if (!cfg.enabled || !cfg.siteKey) return;
+        setEnabled(true);
+        onReady?.(true);
 
         await loadScript();
         if (cancelled || !ref.current || !window.turnstile) return;
 
         widgetId.current = window.turnstile.render(ref.current, {
-          sitekey: cfg.siteKey,
+          sitekey: siteKey,
           theme: "dark",
           action: "login",
           appearance: "always",
