@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { QRCodeSVG } from "qrcode.react";
+import logo from "@/assets/logo.png";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, Check, Percent,
+  ShieldCheck, Zap, Clock, Check, Percent, Loader2, Copy, CheckCircle,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,21 +24,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+
 export const PLANOS = [
   {
     nome: "Dealer",
     preco: "R$ 150,00",
+    valor: 150,
     icon: Rocket,
     gradient: "gradient-dealer",
     ring: "ring-sky-500/30",
     desconto: 25,
     descricao:
-      "Plano de entrada da Bellarus. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Dealer na conta recebe 25% de desconto em todo o sistema.",
+      "Plano de entrada da MonkeyLab. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Dealer na conta recebe 25% de desconto em todo o sistema.",
     beneficios: ["Painel de serviços", "CNH Digital", "Suporte padrão", "25% de desconto em todo o sistema"],
   },
   {
     nome: "Master",
     preco: "R$ 450,00",
+    valor: 450,
     icon: Star,
     gradient: "gradient-master",
     ring: "ring-purple-500/30",
@@ -43,12 +54,13 @@ export const PLANOS = [
   {
     nome: "Diamond",
     preco: "R$ 999,99",
+    valor: 999.99,
     icon: Gem,
     gradient: "gradient-diamond",
     ring: "ring-amber-500/30",
     desconto: 100,
     descricao:
-      "Plano máximo da Bellarus: tudo do Master, limites ampliados e atendimento dedicado. Quem tem o plano Diamond na conta recebe 100% de desconto em todo o sistema.",
+      "Plano máximo da MonkeyLab: tudo do Master, limites ampliados e atendimento dedicado. Quem tem o plano Diamond na conta recebe 100% de desconto em todo o sistema.",
     beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado", "100% de desconto em todo o sistema"],
   },
 ];
@@ -80,9 +92,70 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 
 export default function DashboardHome() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { toast } = useToast();
   const isAdmin = user?.role === "admin";
   const [planoSelecionado, setPlanoSelecionado] = useState<(typeof PLANOS)[number] | null>(null);
+
+  // PIX do plano
+  const [planoPix, setPlanoPix] = useState<(typeof PLANOS)[number] | null>(null);
+  const [pixCode, setPixCode] = useState("");
+  const [txId, setTxId] = useState("");
+  const [gerando, setGerando] = useState(false);
+  const [pago, setPago] = useState(false);
+
+  const gerarPixPlano = useCallback(async (plano: (typeof PLANOS)[number]) => {
+    setPlanoSelecionado(null);
+    setPlanoPix(plano);
+    setPixCode("");
+    setTxId("");
+    setPago(false);
+    setGerando(true);
+
+    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
+      body: { type: "plano", amount: plano.valor, plan_name: plano.nome },
+    });
+
+    setGerando(false);
+
+    if (error || !data?.pix_code) {
+      toast({
+        title: "Erro ao gerar PIX",
+        description: (data as any)?.error || error?.message || "Tente novamente em instantes.",
+        variant: "destructive",
+      });
+      setPlanoPix(null);
+      return;
+    }
+
+    setPixCode(data.pix_code as string);
+    setTxId(data.transaction_id as string);
+    toast({ title: "QR Code gerado!", description: `Plano ${plano.nome} — ${plano.preco}` });
+  }, [toast]);
+
+  // Polling do pagamento
+  useEffect(() => {
+    if (!planoPix || !txId || pago) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("financial_transactions")
+        .select("status")
+        .eq("id", txId)
+        .maybeSingle();
+      if (data?.status === "pago") {
+        setPago(true);
+        clearInterval(interval);
+        toast({ title: "Pagamento confirmado!", description: "Seu plano já está ativo na conta." });
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [planoPix, txId, pago, toast]);
+
+  const copiarPix = useCallback(async () => {
+    await navigator.clipboard.writeText(pixCode);
+    toast({ title: "Código PIX copiado!", description: "Cole no app do seu banco para pagar." });
+  }, [pixCode, toast]);
+
+
 
 
 
@@ -258,16 +331,74 @@ export default function DashboardHome() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                navigate(`/dashboard/recarregar?plano=${encodeURIComponent(planoSelecionado?.nome ?? "")}`)
-              }
+              onClick={() => planoSelecionado && gerarPixPlano(planoSelecionado)}
             >
               Sim, continuar
             </AlertDialogAction>
+
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* QR Code PIX do plano */}
+      <Dialog open={!!planoPix} onOpenChange={(o) => !o && setPlanoPix(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {planoPix && (
+                <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${planoPix.gradient}`}>
+                  <planoPix.icon className="h-4 w-4 text-primary-foreground" />
+                </span>
+              )}
+              Plano {planoPix?.nome}
+            </DialogTitle>
+            <DialogDescription>
+              Pague via PIX para ativar o plano automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-3">
+            {gerando && (
+              <div className="flex h-56 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+
+            {!gerando && pago && (
+              <div className="flex h-56 flex-col items-center justify-center gap-2 text-center">
+                <CheckCircle className="h-12 w-12 text-success" />
+                <p className="font-semibold text-foreground">Pagamento confirmado!</p>
+                <p className="text-xs text-muted-foreground">Plano {planoPix?.nome} ativo na sua conta.</p>
+              </div>
+            )}
+
+            {!gerando && !pago && pixCode && (
+              <>
+                <div className="rounded-xl bg-white p-3">
+                  <QRCodeSVG value={pixCode} size={200} />
+                </div>
+                <p className="font-display text-xl font-bold text-foreground">{planoPix?.preco}</p>
+                <div className="w-full break-all rounded-lg border border-border/60 bg-secondary/50 p-2 text-[10px] text-muted-foreground">
+                  {pixCode}
+                </div>
+                <Button onClick={copiarPix} className="w-full gap-2">
+                  <Copy className="h-4 w-4" /> Copiar código PIX
+                </Button>
+                <p className="text-[10px] text-muted-foreground">
+                  A confirmação é automática em até alguns segundos após o pagamento.
+                </p>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rodapé */}
+      <footer className="flex items-center justify-center pt-2 pb-4">
+        <img src={logo} alt="MonkeyLab" className="h-8 w-auto object-contain opacity-70" />
+      </footer>
     </div>
+
   );
 }
 
