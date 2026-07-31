@@ -84,12 +84,10 @@ export default function LoginPage() {
     <div className="min-h-screen flex bg-background">
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-background">
         <div className="text-center">
-          <img src={logo} alt="Bellarus" className="w-40 h-40 mx-auto mb-6" />
-          <h2 className="font-display text-3xl font-bold tracking-wider text-foreground">
-            BELLARUS
-          </h2>
+          <img src={logo} alt="MonkeyLab" className="w-64 mx-auto mb-4 drop-shadow-[0_20px_50px_hsl(var(--accent)/0.45)]" />
           <p className="text-sm tracking-[0.3em] text-accent mt-1">SISTEMAS</p>
         </div>
+
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
