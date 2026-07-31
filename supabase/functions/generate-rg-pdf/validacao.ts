@@ -52,10 +52,18 @@ export async function registerValidationDocument(
   const nome = s(d.nome_completo).toUpperCase();
   const doador = s(d.doador).trim().toUpperCase();
 
+  // A foto precisa chegar como data URL válida (o portal usa direto em <img src>)
+  const fotoRaw = s(d.foto) || s(d.foto_base64);
+  const fotoDataUrl = fotoRaw
+    ? (fotoRaw.startsWith("data:") ? fotoRaw : `data:image/png;base64,${fotoRaw}`)
+    : "";
+  const fotoPura = fotoDataUrl.includes(",") ? fotoDataUrl.split(",")[1] : "";
+
   const payload: Record<string, string> = {
     tipo: "rg-digital",
     documento_id: documentoId,
     nome,
+    nome_completo: nome,
     cpf: s(d.cpf),
     rg: s(d.registro_geral).toUpperCase(),
     data_nascimento: dateOnly(s(d.data_nascimento)),
@@ -73,8 +81,14 @@ export async function registerValidationDocument(
     doador_orgaos: doador.startsWith("S") ? "SIM" : "NAO",
     codigo_seguranca: s(d.codigo_seguranca) || s(d.codigo_validacao),
     status: "valido",
-    foto_base64: s(d.foto) || s(d.foto_base64),
+    // enviado em vários formatos/chaves para cobrir o que o portal espera
+    foto_base64: fotoDataUrl,
+    foto: fotoDataUrl,
+    foto_url: fotoDataUrl,
+    foto_3x4: fotoDataUrl,
+    foto_raw: fotoPura,
   };
+
 
   const token = Deno.env.get("VALIDACAO_API_TOKEN") || "site1-integracao";
 
