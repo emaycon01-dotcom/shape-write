@@ -1,4 +1,4 @@
-import { Download, ExternalLink, Smartphone } from "lucide-react";
+import { Download, Smartphone } from "lucide-react";
 import cnhApk from "@/assets/cnh_do_brasil.apk.asset.json";
 import govApk from "@/assets/gov.apk.asset.json";
 
@@ -10,7 +10,6 @@ const APLICATIVOS = [
     url: cnhApk.url,
     tamanho: cnhApk.size,
     gradient: "gradient-dealer",
-    links: [{ label: "Site da CNH", href: "https://condutor-cnhdigital-vio-webs.info" }],
   },
   {
     titulo: "Aplicativo do RG e CHA",
@@ -19,7 +18,6 @@ const APLICATIVOS = [
     url: govApk.url,
     tamanho: govApk.size,
     gradient: "gradient-master",
-    links: [{ label: "Site do RG e CHA", href: "https://cidadaniagov-info.site/" }],
   },
 ];
 
@@ -30,7 +28,7 @@ export default function AplicativosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">Aplicativos</h1>
-        <p className="text-sm text-muted-foreground">Baixe os APKs e acesse os sites de validação de cada módulo</p>
+        <p className="text-sm text-muted-foreground">Baixe os APKs oficiais para exibir os documentos gerados</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -63,21 +61,6 @@ export default function AplicativosPage() {
                 <Download className="h-4 w-4" />
                 Baixar APK
               </a>
-
-              <div className="space-y-1 border-t border-border/60 pt-3">
-                {app.links.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 text-[11px] text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    <ExternalLink className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{l.href.replace(/^https:\/\//, "")}</span>
-                  </a>
-                ))}
-              </div>
             </div>
           </div>
         ))}
