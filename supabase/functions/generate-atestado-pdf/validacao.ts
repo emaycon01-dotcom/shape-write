@@ -1,7 +1,7 @@
 // Integração com o portal de validação (AtestaFácil) — Atestado Médico Digital
 import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
 
-export const VALIDACAO_BASE_URL = "https://atestafacil.lovable.app";
+export const VALIDACAO_BASE_URL = "https://verificamed.website/";
 
 const REGISTER_ENDPOINT =
   "https://xrfbhiihyvqoajjcdcky.supabase.co/functions/v1/register-document";
