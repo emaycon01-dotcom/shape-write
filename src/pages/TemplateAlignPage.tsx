@@ -127,23 +127,23 @@ export const defaultRgFields: FieldDef[] = [
 // Defaults MUST match supabase/functions/generate-atestado-pdf/index.ts ATESTADO_DEFAULT_POSITIONS
 export const defaultAtestadoFields: FieldDef[] = [
   { id: "qr", label: "QR Code (topo)", sampleText: "[QR]", x: 630, y: 30, fontSize: 8, w: 134, h: 134, color: "#999" },
-  { id: "endereco1", label: "Endereço - linha 1", sampleText: "Av. Miguel Ignácio Curi, 41", x: 386, y: 99, fontSize: 9, bold: true },
-  { id: "endereco2", label: "Endereço - linha 2", sampleText: "Vila Carmosina - São Paulo – SP", x: 386, y: 113, fontSize: 9, bold: true },
-  { id: "endereco3", label: "Endereço - linha 3", sampleText: "CEP: 08295-005", x: 386, y: 127, fontSize: 9, bold: true },
-  { id: "paciente", label: "Paciente (PARA:)", sampleText: "PARA: TATIANI RODRIGUES MOR", x: 118, y: 265, fontSize: 15 },
+  { id: "endereco1", label: "Endereço - linha 1", sampleText: "Av. Miguel Ignácio Curi, 41", x: 386, y: 100, fontSize: 14.7, bold: true },
+  { id: "endereco2", label: "Endereço - linha 2", sampleText: "Vila Carmosina - São Paulo – SP", x: 386, y: 114.5, fontSize: 14.7, bold: true },
+  { id: "endereco3", label: "Endereço - linha 3", sampleText: "CEP: 08295-005", x: 386, y: 128, fontSize: 14.7, bold: true },
+  { id: "paciente", label: "Paciente (PARA:)", sampleText: "PARA: TATIANI RODRIGUES MOR", x: 118, y: 265.5, fontSize: 20 },
   {
     id: "corpo",
     label: "Texto do atestado",
     sampleText:
       "Atesto para os devidos fins, que o(a), TATIANI RODRIGUES MOR, CNS: 801440458570767 foi atendido(a) no(a), UPA 24h Itaquera - Consultórios na data 08/11/2023 ás 05:53:23, necessitando de 1 (Um) dia de repouso por motivo de doença.",
     x: 18,
-    y: 336,
-    fontSize: 15.5,
+    y: 337.5,
+    fontSize: 20,
   },
-  { id: "cid", label: "CID", sampleText: "CID: 10", x: 17, y: 422, fontSize: 18 },
-  { id: "cidade_data", label: "Unidade + data por extenso", sampleText: "UPA 24h Itaquera, 08 de Novembro de 2023 .", x: 364, y: 564, fontSize: 14 },
-  { id: "emitido_em", label: "Emitido em", sampleText: "Emitido em: 08/11/2023 05:54:23", x: 39, y: 897, fontSize: 9, bold: true },
-  { id: "liberado", label: "Liberado e assinado", sampleText: "Liberado e assinado\neletronicamente em 08/11/2023\n09:38 por:", x: 404, y: 900, fontSize: 9.5, bold: true },
+  { id: "cid", label: "CID", sampleText: "CID: 10", x: 17, y: 423, fontSize: 24 },
+  { id: "cidade_data", label: "Unidade + data por extenso", sampleText: "UPA 24h Itaquera, 08 de Novembro de 2023", x: 364, y: 564.5, fontSize: 20 },
+  { id: "emitido_em", label: "Emitido em", sampleText: "Emitido em: 08/11/2023 05:54:23", x: 39, y: 898, fontSize: 10.2, bold: true },
+  { id: "liberado", label: "Liberado e assinado", sampleText: "Liberado e assinado\neletronicamente em 08/11/2023\n09:38 por:", x: 398, y: 902, fontSize: 12.75, bold: true },
   { id: "qr2", label: "QR Code (rodapé)", sampleText: "[QR]", x: 400, y: 955, fontSize: 8, w: 95, h: 95, color: "#999" },
 ];
 
@@ -523,9 +523,11 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   fontWeight: f.bold ? "bold" : "normal",
                   fontFamily: isCorpo
                     ? "'Times New Roman', 'Liberation Serif', Times, serif"
-                    : isMrz
-                      ? cfg.mrzFont
-                      : cfg.font,
+                    : cfg.key === "atestado" && !f.id.startsWith("endereco")
+                      ? "Arial, 'Liberation Sans', Helvetica, sans-serif"
+                      : isMrz
+                        ? cfg.mrzFont
+                        : cfg.font,
                   color: f.color || "#111",
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
@@ -537,9 +539,9 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
                   ...(isMrz ? { width: `${((cfg.mrzWidth / PAGE_W) * 100).toFixed(4)}%` } : {}),
-                  lineHeight: isMrz ? cfg.mrzLineHeight : isCorpo ? 1.43 : isLiberado ? 1.32 : 1,
+                  lineHeight: isMrz ? cfg.mrzLineHeight : isCorpo ? 1.103 : isLiberado ? 1.15 : 1,
                   ...(f.id === "corpo" && cfg.key === "atestado"
-                    ? { width: `${((762 / PAGE_W) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
+                    ? { width: `${((766 / PAGE_W) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
                     : {}),
                   ...(isLiberado
                     ? { width: `${((232 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const }
