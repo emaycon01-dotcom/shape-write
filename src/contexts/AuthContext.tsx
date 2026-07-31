@@ -160,15 +160,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await supabase.auth.signOut();
+    writeCachedUser(null);
     setUser(null);
+    await supabase.auth.signOut();
   }, []);
 
   const refreshUser = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
     try {
-      setUser(await fetchUserProfile(session.user));
+      const fresh = await fetchUserProfile(session.user);
+      setUser(fresh);
+      writeCachedUser(fresh);
     } catch {
       /* ignore */
     }
