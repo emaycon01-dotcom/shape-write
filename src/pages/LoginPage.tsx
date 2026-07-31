@@ -84,14 +84,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex bg-background">
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-background">
         <div className="text-center">
-          <img src={logo} alt="MonkeyLab" className="w-64 mx-auto mb-4 drop-shadow-[0_20px_50px_hsl(var(--accent)/0.45)]" />
-          <p className="text-sm tracking-[0.3em] text-accent mt-1">SISTEMAS</p>
+          <img src={logo} alt="MonkeyLab" className="w-72 mx-auto object-contain drop-shadow-[0_20px_50px_hsl(var(--accent)/0.45)]" />
         </div>
+
 
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8">
+        <img src={logo} alt="MonkeyLab" className="lg:hidden w-48 mb-6 object-contain drop-shadow-[0_16px_40px_hsl(var(--accent)/0.45)]" />
         <div className="w-full max-w-md relative group">
+
           {/* glow atrás do cartão */}
           <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-accent/50 via-primary/20 to-transparent opacity-60 blur-md transition-all duration-700 group-hover:opacity-90 group-focus-within:opacity-100" />
 

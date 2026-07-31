@@ -99,10 +99,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent className="flex flex-col h-full">
         {!collapsed && (
-          <div className="px-4 py-5 flex items-center gap-3">
-            <img src={logo} alt="MonkeyLab" className="h-10 w-auto object-contain" />
-            <span className="block text-[10px] tracking-[0.3em] text-accent">SISTEMAS</span>
+          <div className="px-4 py-5 flex items-center">
+            <img src={logo} alt="MonkeyLab" className="h-12 w-auto object-contain" />
           </div>
+
 
         )}
 
