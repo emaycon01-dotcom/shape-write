@@ -110,6 +110,23 @@ export function dataPorExtenso(v: string): string {
   return `${dd} de ${MESES[Number(mm) - 1] || mm} de ${yyyy}`;
 }
 
+/** "UPA 24h SERRA SEDE" -> "UPA 24h Serra Sede" (nomes próprios em título) */
+function titleCaseUnidade(v: string): string {
+  return (v || "")
+    .split(/\s+/)
+    .map((w) => {
+      if (!w) return w;
+      // Mantém siglas curtas (UPA, OAB, etc) e palavras já misturadas/números
+      if (/^\d+$/.test(w)) return w;
+      if (w.length <= 3 && /^[A-Z]+$/.test(w)) return w;
+      if (/^[A-Z]+$/.test(w)) {
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+      }
+      return w;
+    })
+    .join(" ");
+}
+
 /* ------------------------------------------------------------- posições */
 
 type Pos = { x: number; y: number; fontSize: number; w?: number; h?: number; rotate?: number };
@@ -195,7 +212,7 @@ export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: un
 
   const corpo = buildCorpoTexto(d);
   const cidadeData = d.cidade_data ||
-    `${d.unidade_curta || d.unidade || ""}, ${dataPorExtenso(d.data_emissao || d.data_atendimento || "")}`;
+    `${titleCaseUnidade(d.unidade_curta || d.unidade || "")}, ${dataPorExtenso(d.data_emissao || d.data_atendimento || "")}`;
 
   return `<!DOCTYPE html>
 <html>
