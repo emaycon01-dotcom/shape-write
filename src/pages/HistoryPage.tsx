@@ -207,7 +207,7 @@ export default function HistoryPage() {
     if (!renewDoc || !user) return;
     setRenewLoading(true);
     try {
-      const deduction = await deductCredit(RENEW_COST, "renovacao-documento");
+      const deduction = await deductCredit(RENEW_COST_BASE, "renovacao-documento");
       if (!deduction.ok) {
         toast({ title: "Não foi possível renovar", description: deduction.error, variant: "destructive" });
         return;
@@ -215,7 +215,7 @@ export default function HistoryPage() {
       await renewDocument(renewDoc.id);
       toast({
         title: "Documento renovado!",
-        description: `${RENEW_COST} crédito descontado. Válido por mais ${RENEW_DAYS} dias.`,
+        description: `${RENEW_COST > 0 ? `${formatCredits(RENEW_COST)} crédito descontado. ` : "Gratuito pelo seu plano. "}Válido por mais ${RENEW_DAYS} dias.`,
       });
     } catch {
       toast({ title: "Erro ao renovar documento", variant: "destructive" });
