@@ -60,27 +60,49 @@ export default function HistoryPage() {
   const [photos, setPhotos] = useState<Record<string, string | null>>({});
   const requested = useRef<Set<string>>(new Set());
 
-  // Carrega as fotos em segundo plano (payload pesado fica fora da listagem)
+  // Carrega as fotos em segundo plano, em paralelo (limite de 5 por vez)
+  // e agrupando as atualizações de estado para não re-renderizar a lista inteira a cada foto.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      for (const doc of userDocs) {
-        if (cancelled) return;
-        if (requested.current.has(doc.id)) continue;
-        requested.current.add(doc.id);
+    const pending = userDocs.filter((d) => !requested.current.has(d.id));
+    if (pending.length === 0) return;
+    pending.forEach((d) => requested.current.add(d.id));
+
+    const buffer: Record<string, string | null> = {};
+    let flushTimer: number | null = null;
+    const flush = () => {
+      flushTimer = null;
+      if (cancelled || Object.keys(buffer).length === 0) return;
+      const batch = { ...buffer };
+      for (const k of Object.keys(buffer)) delete buffer[k];
+      setPhotos((prev) => ({ ...prev, ...batch }));
+    };
+    const schedule = () => {
+      if (flushTimer === null) flushTimer = window.setTimeout(flush, 60);
+    };
+
+    const queue = [...pending];
+    const worker = async () => {
+      while (!cancelled) {
+        const doc = queue.shift();
+        if (!doc) return;
         try {
           const raw = doc.additionalInfo || (await loadDocumentInfo(doc.id));
-          if (cancelled) return;
           const parsed = raw ? JSON.parse(raw) : {};
           const foto = parsed?.fotoBase64 || parsed?.foto_base64 || null;
-          setPhotos((prev) => ({ ...prev, [doc.id]: typeof foto === "string" && foto ? foto : null }));
+          buffer[doc.id] = typeof foto === "string" && foto ? foto : null;
         } catch {
-          setPhotos((prev) => ({ ...prev, [doc.id]: null }));
+          buffer[doc.id] = null;
         }
+        schedule();
       }
-    })();
+    };
+
+    void Promise.all(Array.from({ length: Math.min(5, queue.length) }, worker));
+
     return () => {
       cancelled = true;
+      if (flushTimer !== null) window.clearTimeout(flushTimer);
     };
   }, [userDocs, loadDocumentInfo]);
 
