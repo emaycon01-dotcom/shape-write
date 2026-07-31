@@ -17,6 +17,12 @@ export default function DashboardLayout() {
   const isHome = location.pathname === "/dashboard" || location.pathname === "/dashboard/";
   const [pinState, setPinState] = useState<"loading" | "needs_setup" | "needs_verify" | "verified">("loading");
 
+  // Mantém as coordenadas oficiais (salvas no alinhamento) sincronizadas
+  useEffect(() => {
+    if (isAuthenticated) void syncAlignmentsFromDb();
+  }, [isAuthenticated]);
+
+
   useEffect(() => {
     if (!isAuthenticated || !user) {
       setPinState("loading");
