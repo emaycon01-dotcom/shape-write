@@ -92,7 +92,6 @@ export default function AtestadoFormPage() {
           dataAtendimento: b.data_atendimento || "",
           horaAtendimento: b.hora_atendimento || "",
           dias: b.dias || "1",
-          motivo: b.motivo || "doença",
           cid: b.cid || "",
           nascimento: b.nascimento || "",
           uf: b.uf || initial.uf,
