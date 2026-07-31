@@ -185,7 +185,8 @@ export default function ChaPreviewPage() {
     }
   };
 
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Sua CNH Marítima (CHA) está pronta.\n\nNome: ${formData.nome || ""}\nCPF: ${formData.cpf || ""}\nCategoria: ${formData.categoria || ""}\nNº de Inscrição: ${formData.inscricao || ""}\nValidade: ${formData.validade || ""}\n\nSite de validação: ${VALIDACAO_URL}\nVocê também pode validar lendo o QR Code do documento.`;
+  const chaCpf = (formData.cpf || "").replace(/\D/g, "");
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui estão seus dados de acesso à CNH Marítima (CHA):\n\nLogin: ${formData.cpf || ""}\nSenha: ${chaCpf.slice(-6)}\n\nAcesse o site para visualizar seu documento:\n${VALIDACAO_URL}`;
 
   return (
     <div className="mx-auto max-w-2xl">
