@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
 
     if (existingCharge?.pix_code) {
       if (existingCharge.elitepay_charge_id) {
-        const confirmed = await confirmElitepayPayment(existingCharge.elitepay_charge_id, ELITEPAY_CLIENT_ID, ELITEPAY_CLIENT_SECRET);
+        const confirmed = await confirmElitepayPayment(existingCharge.elitepay_charge_id);
         if (confirmed) {
           await applyPaidTransaction(supabaseAdmin, existingCharge);
           existingCharge.status = "pago";
