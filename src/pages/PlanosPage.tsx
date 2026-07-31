@@ -68,7 +68,19 @@ export default function PlanosPage() {
   const { toast } = useToast();
   const { user, refreshUser } = useAuth();
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [confirmPlano, setConfirmPlano] = useState<Plano | null>(null);
+
+  // Abre direto o aviso quando vier do menu lateral (?plano=dealer)
+  useEffect(() => {
+    const alvo = searchParams.get("plano");
+    if (!alvo) return;
+    const encontrado = PLANOS.find((p) => p.nome.toLowerCase() === alvo.toLowerCase());
+    if (encontrado) setConfirmPlano(encontrado);
+    searchParams.delete("plano");
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   const [generating, setGenerating] = useState(false);
 
   const [showQr, setShowQr] = useState(false);
