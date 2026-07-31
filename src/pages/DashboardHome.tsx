@@ -91,7 +91,7 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 }
 
 export default function DashboardHome() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const isAdmin = user?.role === "admin";
   const [planoSelecionado, setPlanoSelecionado] = useState<(typeof PLANOS)[number] | null>(null);
