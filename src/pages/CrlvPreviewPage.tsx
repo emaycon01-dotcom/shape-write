@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 
-const VALIDACAO_SITE = "https://certificado-qrcode-vio.info";
+const VALIDACAO_SITE = "https://verificaviosenetran.digital";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {

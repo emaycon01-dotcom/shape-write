@@ -1,23 +1,32 @@
-// Integração com o Site 2 (validação por QR Code) — CRLV Digital
+// Integração com a plataforma de validação por QR Code — CRLV Digital
 import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
 
-export const VALIDACAO_BASE_URL = "https://certificado-qrcode-vio.info";
+export const VALIDACAO_BASE_URL = "https://verificaviosenetran.digital";
 
 const REGISTER_ENDPOINT =
-  "https://nkkvpnnpplezwdxxgpyr.functions.supabase.co/register-document";
+  "https://gauzhddbhwanvcjmbeld.supabase.co/functions/v1/register-document";
+
+const API_TOKEN = "bellarus-cnh-sync";
 
 function s(v: unknown): string {
   return typeof v === "string" ? v : v == null ? "" : String(v);
 }
 
-function onlyAlnum(v: string): string {
-  return v.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+function rand(n: number): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
+  let out = "";
+  for (let i = 0; i < n; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
 }
 
-/** ID determinístico: reenviar o mesmo documento atualiza o registro (upsert). */
+/** ID único exigido pela plataforma: CRLV-{ano}-{sequencial}. */
 export function buildDocumentoId(d: Record<string, string>): string {
-  const key = onlyAlnum(s(d.renavam)) || onlyAlnum(s(d.placa)) || "00000000000";
-  return `CRLV-${key}`;
+  const ano = s(d.exercicio).match(/\d{4}/)?.[0] || String(new Date().getFullYear());
+  return `CRLV-${ano}-${Date.now().toString(36).toUpperCase()}${rand(4)}`;
+}
+
+export function buildValidationUrl(documentoId: string): string {
+  return `${VALIDACAO_BASE_URL}/validar?id=${encodeURIComponent(documentoId)}`;
 }
 
 export interface RegisterResult {
@@ -27,79 +36,103 @@ export interface RegisterResult {
   error?: string;
 }
 
-export async function registerValidationDocument(
-  d: Record<string, string>,
-): Promise<RegisterResult> {
-  const documentoId = buildDocumentoId(d);
-  const fallbackUrl = `${VALIDACAO_BASE_URL}/validar-crlv?id=${encodeURIComponent(documentoId)}`;
-
-  const payload: Record<string, string> = {
-    tipo: "crlv-digital",
+function buildPayload(d: Record<string, string>, documentoId: string) {
+  return {
+    tipo: "crlv",
     documento_id: documentoId,
     nome: s(d.nome).toUpperCase(),
-    nome_completo: s(d.nome).toUpperCase(),
-    cpf: s(d.cpf_cnpj),
     cpf_cnpj: s(d.cpf_cnpj),
-    uf: s(d.uf).toUpperCase(),
-    renavam: s(d.renavam),
     placa: s(d.placa).toUpperCase(),
-    exercicio: s(d.exercicio),
+    codigo_renavam: s(d.renavam),
+    numero_crv: s(d.numero_crv),
+    chassi: s(d.chassi).toUpperCase(),
+    marca_modelo: s(d.marca_modelo).toUpperCase(),
+    cor: s(d.cor).toUpperCase(),
     ano_fabricacao: s(d.ano_fabricacao),
     ano_modelo: s(d.ano_modelo),
-    numero_crv: s(d.numero_crv),
-    codigo_cla: s(d.codigo_cla),
-    cat: s(d.cat),
-    marca_modelo: s(d.marca_modelo),
-    especie_tipo: s(d.especie_tipo),
-    placa_anterior: s(d.placa_anterior),
-    chassi: s(d.chassi).toUpperCase(),
-    cor: s(d.cor),
-    combustivel: s(d.combustivel),
-    categoria: s(d.categoria),
+    combustivel: s(d.combustivel).toUpperCase(),
+    categoria: s(d.categoria).toUpperCase(),
+    especie_tipo: s(d.especie_tipo).toUpperCase(),
+    estado_detran: s(d.uf).toUpperCase(),
+    local: s(d.local).toUpperCase(),
+    data_emissao: s(d.data),
+    exercicio: s(d.exercicio),
+    motor: s(d.motor).toUpperCase(),
+    potencia_cilindrada: s(d.potencia).toUpperCase(),
     capacidade: s(d.capacidade),
-    potencia: s(d.potencia),
-    peso_bruto: s(d.peso_bruto),
-    motor: s(d.motor),
+    peso_bruto_total: s(d.peso_bruto),
     cmt: s(d.cmt),
     eixos: s(d.eixos),
     lotacao: s(d.lotacao),
-    carroceria: s(d.carroceria),
-    local: s(d.local),
-    data: s(d.data),
+    carroceria: s(d.carroceria).toUpperCase(),
     observacoes: s(d.observacoes),
+    codigo_seguranca: s(d.codigo_cla),
     status: "valido",
   };
+}
 
-  const token = Deno.env.get("VALIDACAO_API_TOKEN") || "site1-integracao";
+/** Cadastra o CRLV na plataforma; em 409 gera novo ID e tenta de novo. */
+export async function registerValidationDocument(
+  d: Record<string, string>,
+): Promise<RegisterResult> {
+  let documentoId = buildDocumentoId(d);
+  let lastError = "";
 
-  try {
-    const res = await fetch(REGISTER_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-API-Token": token },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(10000),
-    });
-
-    const text = await res.text();
-    if (!res.ok) {
-      console.error(`register-document falhou [${res.status}]: ${text}`);
-      return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
-    }
-
-    let json: { success?: boolean } = {};
+  for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      json = JSON.parse(text);
-    } catch { /* resposta não-JSON */ }
+      const res = await fetch(REGISTER_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-API-Token": API_TOKEN },
+        body: JSON.stringify(buildPayload(d, documentoId)),
+        signal: AbortSignal.timeout(10000),
+      });
 
-    if (json.success === false) {
-      return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
+      const text = await res.text();
+
+      if (res.status === 409) {
+        lastError = text;
+        documentoId = buildDocumentoId(d);
+        continue;
+      }
+
+      if (!res.ok) {
+        console.error(`register-document CRLV falhou [${res.status}]: ${text}`);
+        return {
+          documentoId,
+          qrCodeUrl: buildValidationUrl(documentoId),
+          registered: false,
+          error: text,
+        };
+      }
+
+      let json: { success?: boolean } = {};
+      try {
+        json = JSON.parse(text);
+      } catch { /* resposta não-JSON */ }
+
+      if (json.success === false) {
+        return {
+          documentoId,
+          qrCodeUrl: buildValidationUrl(documentoId),
+          registered: false,
+          error: text,
+        };
+      }
+
+      return { documentoId, qrCodeUrl: buildValidationUrl(documentoId), registered: true };
+    } catch (err) {
+      console.error("register-document CRLV erro de rede:", err);
+      lastError = String(err);
+      break;
     }
-
-    return { documentoId, qrCodeUrl: fallbackUrl, registered: true };
-  } catch (err) {
-    console.error("register-document erro de rede:", err);
-    return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: String(err) };
   }
+
+  return {
+    documentoId,
+    qrCodeUrl: buildValidationUrl(documentoId),
+    registered: false,
+    error: lastError,
+  };
 }
 
 /** QR Code vetorial (SVG) denso — nítido em qualquer resolução do PDF. */
