@@ -13,6 +13,7 @@ import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY, loadCrlvFieldPositions } from "@/lib/crlv-align";
+import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
