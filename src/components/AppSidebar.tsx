@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
@@ -7,8 +6,6 @@ import {
   History,
   LogOut,
   CreditCard,
-  Headphones,
-  Palette,
   ShieldBan,
   SlidersHorizontal,
   Rocket,
@@ -29,7 +26,6 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.png";
-import { SupportDialog } from "@/components/SupportDialog";
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
@@ -44,37 +40,11 @@ const SIDEBAR_PLANOS = [
   { nome: "Diamond", preco: "R$ 999", icon: Gem, gradient: "gradient-diamond" },
 ];
 
-type ThemeMode = "default" | "dark-blue" | "light";
-
-const THEME_OPTIONS: { value: ThemeMode; label: string; colors: string[] }[] = [
-  { value: "default", label: "Padrão", colors: ["hsl(220 50% 5%)", "hsl(217 91% 60%)"] },
-  { value: "dark-blue", label: "Azul Escuro", colors: ["hsl(220 60% 3%)", "hsl(217 91% 60%)"] },
-  { value: "light", label: "Branco", colors: ["hsl(0 0% 98%)", "hsl(217 91% 50%)"] },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
-  const [supportOpen, setSupportOpen] = useState(false);
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    return (localStorage.getItem("bellarus-theme") as ThemeMode) || "default";
-  });
 
-  const applyTheme = (t: ThemeMode) => {
-    setTheme(t);
-    localStorage.setItem("bellarus-theme", t);
-    document.documentElement.classList.remove("theme-dark-blue", "theme-light");
-    if (t !== "default") {
-      document.documentElement.classList.add(`theme-${t}`);
-    }
-  };
-
-  useState(() => {
-    if (theme !== "default") {
-      document.documentElement.classList.add(`theme-${theme}`);
-    }
-  });
 
   const isAdmin = user?.role === "admin";
 
@@ -111,12 +81,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {renderMenuItems(commonItems)}
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => setSupportOpen(true)} className="hover:bg-secondary/50 cursor-pointer">
-                  <Headphones className="mr-2 h-4 w-4" />
-                  {!collapsed && <span>Suporte</span>}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -198,27 +162,6 @@ export function AppSidebar() {
         )}
 
         <div className="mt-auto p-4 space-y-3">
-          {!collapsed && (
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Palette className="w-3.5 h-3.5" />
-                <span>Cor</span>
-              </div>
-              <div className="flex gap-2">
-                {THEME_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => applyTheme(opt.value)}
-                    title={opt.label}
-                    className={`w-7 h-7 rounded-full border-2 transition-all ${
-                      theme === opt.value ? "border-primary scale-110" : "border-border hover:border-muted-foreground"
-                    }`}
-                    style={{ background: `linear-gradient(135deg, ${opt.colors[0]} 50%, ${opt.colors[1]} 50%)` }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
           {!collapsed && user && (
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           )}
@@ -228,7 +171,6 @@ export function AppSidebar() {
           </button>
         </div>
 
-        <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
       </SidebarContent>
     </Sidebar>
   );

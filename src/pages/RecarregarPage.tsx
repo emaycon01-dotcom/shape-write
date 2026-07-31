@@ -79,7 +79,7 @@ const MAX_WARNINGS = 4;
 
 export default function RecarregarPage() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { reportViolation } = useDeviceSecurity();
   const [selectedPacote, setSelectedPacote] = useState<Pacote | null>(null);
   const [sliderValue, setSliderValue] = useState([5]);
@@ -222,38 +222,35 @@ export default function RecarregarPage() {
     toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Pague em até 15 minutos.` });
   }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
 
-  // Polling do status do pagamento
+  // Polling do status do pagamento (consulta o gateway, não só o banco)
   useEffect(() => {
     if (!showQr || !txId || paid) return;
     const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from("financial_transactions")
-        .select("status")
-        .eq("id", txId)
-        .maybeSingle();
+      const { data } = await supabase.functions.invoke("check-pix-payment", {
+        body: { transaction_id: txId },
+      });
       if (data?.status === "pago") {
         setPaid(true);
         clearInterval(interval);
         await clearAllWarnings();
+        await refreshUser?.();
         toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [showQr, txId, paid, toast, clearAllWarnings]);
+  }, [showQr, txId, paid, toast, clearAllWarnings, refreshUser]);
 
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
     setConfirmingPayment(true);
 
-    const { data: tx } = await supabase
-      .from("financial_transactions")
-      .select("status")
-      .eq("id", txId)
-      .maybeSingle();
+    const { data } = await supabase.functions.invoke("check-pix-payment", {
+      body: { transaction_id: txId },
+    });
 
     setConfirmingPayment(false);
 
-    if (tx?.status === "pago") {
+    if (data?.status === "pago") {
       setPaid(true);
       await supabase
         .from("pix_warnings")
@@ -261,6 +258,7 @@ export default function RecarregarPage() {
         .eq("qr_code_id", qrId)
         .eq("user_id", user.id);
       await clearAllWarnings();
+      await refreshUser?.();
       toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
       return;
     }
@@ -270,7 +268,8 @@ export default function RecarregarPage() {
       description: "Assim que o PIX for compensado os créditos entram automaticamente.",
       variant: "destructive",
     });
-  }, [user, qrId, txId, toast, clearAllWarnings]);
+  }, [user, qrId, txId, toast, clearAllWarnings, refreshUser]);
+
 
   const handleCopyPix = useCallback(async () => {
     try {
