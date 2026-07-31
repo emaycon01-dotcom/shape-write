@@ -523,9 +523,11 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   fontWeight: f.bold ? "bold" : "normal",
                   fontFamily: isCorpo
                     ? "'Times New Roman', 'Liberation Serif', Times, serif"
-                    : isMrz
-                      ? cfg.mrzFont
-                      : cfg.font,
+                    : cfg.key === "atestado" && !f.id.startsWith("endereco")
+                      ? "Arial, 'Liberation Sans', Helvetica, sans-serif"
+                      : isMrz
+                        ? cfg.mrzFont
+                        : cfg.font,
                   color: f.color || "#111",
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
