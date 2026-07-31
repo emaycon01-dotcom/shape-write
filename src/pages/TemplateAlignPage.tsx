@@ -10,11 +10,14 @@ import templateRgBgUrl from "@/assets/template-rg-bg-hq.jpg";
 import templateAtestadoBgUrl from "@/assets/template-atestado-bg-hq.jpg";
 import templateCrlvBgUrl from "@/assets/template-crlv-bg-hq.jpg";
 import templateChaBgUrl from "@/assets/template-cha-bg-hq.jpg";
+import templateDiplomaP1Url from "@/assets/template-diploma-p1-hq.jpg";
+import templateDiplomaP2Url from "@/assets/template-diploma-p2-hq.jpg";
 import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY, loadCrlvFieldPositions } from "@/lib/crlv-align";
 import { CHA_ALIGN_STORAGE_KEY, loadChaFieldPositions } from "@/lib/cha-align";
+import { DIPLOMA_ALIGN_STORAGE_KEY, loadDiplomaFieldPositions } from "@/lib/diploma-align";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -26,6 +29,7 @@ const RG_MRZ_FONT = "'RGOcrb', 'Courier New', monospace";
 const ATESTADO_FONT = "Calibri, Carlito, 'Segoe UI', Arial, Helvetica, sans-serif";
 const CRLV_FONT = "'FreeMono', 'Liberation Mono', 'Courier New', monospace";
 const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const DIPLOMA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 
@@ -216,7 +220,36 @@ export const defaultChaFields: FieldDef[] = [
   { id: "data_emissao", label: "Data de emissão", sampleText: "07/07/2026", x: 302.4, y: 503.1, fontSize: 10.5 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "crlv" | "cha";
+// Defaults MUST match supabase/functions/generate-diploma-pdf/index.ts DIPLOMA_DEFAULT_POSITIONS
+// Espaço 1288 x 1732: página 1 em y 0–866, página 2 em y 866–1732.
+export const defaultDiplomaFields: FieldDef[] = [
+  { id: "rep_federativa", label: "República Federativa", sampleText: "REPÚBLICA FEDERATIVA DO BRASIL", x: 644, y: 136.7, fontSize: 13.5 },
+  { id: "ministerio", label: "Ministério da Educação", sampleText: "MINISTÉRIO DA EDUCAÇÃO", x: 644, y: 152.4, fontSize: 13.5 },
+  { id: "inst_l1", label: "Instituição - linha 1", sampleText: "CENTRO UNIVERSITÁRIO", x: 644, y: 174, fontSize: 31 },
+  { id: "inst_l2", label: "Instituição - linha 2", sampleText: "ESTÁCIO DO CEARÁ", x: 644, y: 213, fontSize: 31 },
+  { id: "corpo", label: "Texto do diploma", sampleText: "O(A) Reitor(a) do CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ, no uso de suas atribuições, tendo em vista a conclusão do CURSO SUPERIOR DE TECNOLOGIA EM DESIGN DE MODA, na data de 10/07/2015, e a colação de grau na data de 31/08/2015, confere o título de TECNÓLOGO (A) a GUSTAVO AUGUSTO RODRIGUES DA SILVA, nacionalidade BRASILEIRO(A), natural de CEARÁ, nascido(a) em 31/10/1992, portador(a) da Cédula de Identidade 2009010328577, órgão expedidor SSPDS/CE, e outorga-lhe o presente Diploma, a fim de que possa gozar de todos os direitos e prerrogativas legais.", x: 644, y: 283, fontSize: 15.5 },
+  { id: "cidade_data", label: "Cidade e data", sampleText: "Fortaleza - CE, 14 de Junho de 2023.", x: 721, y: 555, fontSize: 15.5 },
+  { id: "reitor", label: "Reitor(a)", sampleText: "JOSUÉ VIANA DE OLIVEIRA NETO", x: 1032, y: 663, fontSize: 12.5 },
+  { id: "rodape_inst", label: "Rodapé - instituição", sampleText: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ", x: 644, y: 751, fontSize: 13 },
+  { id: "rodape_validacao", label: "Rodapé - validação", sampleText: "Código de Validação: 1107.163.e6c296281d3f | https://consultadiploma.estacio.br/diploma/1107.163.e6c296281d3f", x: 644, y: 767, fontSize: 11.5 },
+  { id: "p2_esq_nome", label: "V. Instituição (esq.)", sampleText: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ", x: 30.4, y: 927.8, fontSize: 11.5, bold: true },
+  { id: "p2_esq_razao", label: "V. Mantenedora + CNPJ", sampleText: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA\nCNPJ: 02608755000107", x: 30.4, y: 954.4, fontSize: 11.5 },
+  { id: "p2_esq_cred", label: "V. Credenciamento", sampleText: "Credenciamento: Portaria nº 1097, de 31/8/2012, DOU nº 172, Seção 1, Pág. 97, de 4/9/2012.", x: 30.4, y: 997.8, fontSize: 11.5 },
+  { id: "p2_esq_recred", label: "V. Recredenciamento", sampleText: "Recredenciamento: Portaria nº 684, de 16/7/2018, DOU nº 136, Seção 1, Pág. 12, de 17/7/2018.", x: 30.4, y: 1040.7, fontSize: 11.5 },
+  { id: "p2_curso", label: "V. Curso", sampleText: "Curso de DESIGN DE MODA", x: 30.4, y: 1099.2, fontSize: 11.5, bold: true },
+  { id: "p2_reconhecimento", label: "V. Reconhecimento", sampleText: "Reconhecimento: Portaria MEC n° 13, de 02/03/2012, DOU n° 45,\nSeção 1, Pág. 55, de 06/03/2012.", x: 30.4, y: 1120.4, fontSize: 11.5 },
+  { id: "p2_renovacao", label: "V. Renovação", sampleText: "Renovação: Portaria MEC n° 948, de 30/08/2021, DOU n° 165,\nSeção 1, Pág. 36, de 31/08/2021.", x: 30.4, y: 1159, fontSize: 11.5 },
+  { id: "p2_dir_recred", label: "V. Recred. universidade", sampleText: "Recredenciamento: Portaria nº 1095, de 31/8/2012, DOU nº 172, Seção 1, Pág. 97, de 4/9/2012.", x: 671.4, y: 1063.3, fontSize: 11.5 },
+  { id: "p2_registro", label: "V. Registro do diploma", sampleText: "Diploma registrado sob o n° 11897, Livro 1, fls 2084, em 14/06/2023, por delegação de competência do Ministério da Educação, nos termos da Lei nº 9.394 de 20 de dezembro de 1996, e do Decreto nº 9.235, de 15 de dezembro de 2017.", x: 671.4, y: 1121.6, fontSize: 11.5 },
+  { id: "p2_processo", label: "V. Processo", sampleText: "Processo n° SRD/6351166-IP/2023.", x: 671.4, y: 1189.6, fontSize: 11.5 },
+  { id: "p2_cidade_data", label: "V. Cidade e data", sampleText: "Rio de Janeiro - RJ, 14/06/2023", x: 671.4, y: 1230.1, fontSize: 11.5 },
+  { id: "secretario", label: "V. Secretário(a)", sampleText: "ADRIANA SILVA ARAUJO", x: 958, y: 1309, fontSize: 11.5 },
+  { id: "resolucao", label: "V. Resolução", sampleText: "Resolução 092/GR/2016", x: 958, y: 1343, fontSize: 11 },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 1032, y: 1515, fontSize: 8, w: 110, h: 110, color: "#999" },
+  { id: "serial", label: "V. Nº de série", sampleText: "6070002386077", x: 1144, y: 1636, fontSize: 11, bold: true },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "crlv" | "cha" | "diploma";
 
 
 interface EditorConfig {
@@ -225,6 +258,10 @@ interface EditorConfig {
   storageKey: string;
   defaults: FieldDef[];
   bg: string;
+  /** páginas extras empilhadas verticalmente (ex.: diploma) */
+  bgs?: string[];
+  pageW?: number;
+  pageH?: number;
   font: string;
   mrzFont: string;
   mrzWidth: number;
@@ -304,6 +341,23 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.2,
     copy: () => loadChaFieldPositions() ?? {},
+  },
+  diploma: {
+    key: "diploma",
+    title: "Diploma",
+    storageKey: DIPLOMA_ALIGN_STORAGE_KEY,
+    defaults: defaultDiplomaFields,
+    bg: templateDiplomaP1Url,
+    bgs: [templateDiplomaP1Url, templateDiplomaP2Url],
+    pageW: 1288,
+    pageH: 1732,
+    font: DIPLOMA_FONT,
+    mrzFont: DIPLOMA_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadDiplomaFieldPositions() ?? {},
   },
 };
 
@@ -403,6 +457,53 @@ function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: 
   );
 }
 
+/** Espelha STYLES de supabase/functions/generate-diploma-pdf/index.ts */
+const DIPLOMA_STYLES: Record<string, { center?: boolean; width?: number; lineHeight?: number; mask?: { w: number; h: number }; italic?: boolean }> = {
+  rep_federativa: { center: true, width: 700 },
+  ministerio: { center: true, width: 700 },
+  inst_l1: { center: true, width: 1000 },
+  inst_l2: { center: true, width: 1000 },
+  corpo: { center: true, width: 1030, lineHeight: 37.7 },
+  cidade_data: { width: 440, lineHeight: 20 },
+  reitor: { center: true, mask: { w: 320, h: 17 }, italic: true },
+  rodape_inst: { center: true, width: 700 },
+  rodape_validacao: { center: true, width: 900 },
+  p2_esq_nome: { width: 620, lineHeight: 17 },
+  p2_esq_razao: { width: 620, lineHeight: 17 },
+  p2_esq_cred: { width: 600, lineHeight: 17 },
+  p2_esq_recred: { width: 600, lineHeight: 17 },
+  p2_curso: { width: 620, lineHeight: 17 },
+  p2_reconhecimento: { width: 600, lineHeight: 17 },
+  p2_renovacao: { width: 600, lineHeight: 17 },
+  p2_dir_recred: { width: 580, lineHeight: 17 },
+  p2_registro: { width: 580, lineHeight: 17 },
+  p2_processo: { width: 580, lineHeight: 17 },
+  p2_cidade_data: { width: 580, lineHeight: 17 },
+  secretario: { center: true, mask: { w: 320, h: 17 }, italic: true },
+  resolucao: { center: true, mask: { w: 260, h: 16 }, italic: true },
+};
+
+function diplomaStyle(f: FieldDef, PW: number, scale: number): React.CSSProperties {
+  const st = DIPLOMA_STYLES[f.id];
+  if (!st) return {};
+  const s: React.CSSProperties = { whiteSpace: "pre-line" };
+  if (st.mask) {
+    s.width = `${((st.mask.w / PW) * 100).toFixed(4)}%`;
+    s.display = "flex";
+    s.alignItems = "center";
+    s.justifyContent = "center";
+  } else if (st.width) {
+    s.width = `${((st.width / PW) * 100).toFixed(4)}%`;
+  }
+  if (st.center) {
+    s.transform = "translateX(-50%)";
+    s.textAlign = "center";
+  }
+  if (st.italic) s.fontStyle = "italic";
+  if (st.lineHeight) s.lineHeight = `${st.lineHeight * scale}px`;
+  return s;
+}
+
 function AlignEditor({ cfg }: { cfg: EditorConfig }) {
   const [fields, setFields] = useState<FieldDef[]>(() => {
     const saved = localStorage.getItem(cfg.storageKey);
@@ -423,6 +524,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
     return cfg.defaults;
   });
 
+  const PW = cfg.pageW ?? PAGE_W;
+  const PH = cfg.pageH ?? PAGE_H;
 
   const [selected, setSelected] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
@@ -432,12 +535,12 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
 
   useEffect(() => {
     const updateScale = () => {
-      if (containerRef.current) setScale(containerRef.current.clientWidth / PAGE_W);
+      if (containerRef.current) setScale(containerRef.current.clientWidth / PW);
     };
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, []);
+  }, [PW]);
 
   // Auto-persist so the PDF always uses the latest alignment (real-time)
   useEffect(() => {
@@ -497,7 +600,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
       const x = Math.round((clientX - rect.left) / scale - dragging.offsetX);
       const y = Math.round((clientY - rect.top) / scale - dragging.offsetY);
       setFields((prev) =>
-        prev.map((f) => (f.id === dragging.id ? { ...f, x: Math.max(0, Math.min(PAGE_W, x)), y: Math.max(0, Math.min(PAGE_H, y)) } : f))
+        prev.map((f) => (f.id === dragging.id ? { ...f, x: Math.max(0, Math.min(PW, x)), y: Math.max(0, Math.min(PH, y)) } : f))
       );
     };
     const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
@@ -531,7 +634,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
       if (dx === 0 && dy === 0) return;
       e.preventDefault();
       setFields((prev) =>
-        prev.map((f) => (f.id === selected ? { ...f, x: Math.max(0, Math.min(PAGE_W, f.x + dx)), y: Math.max(0, Math.min(PAGE_H, f.y + dy)) } : f))
+        prev.map((f) => (f.id === selected ? { ...f, x: Math.max(0, Math.min(PW, f.x + dx)), y: Math.max(0, Math.min(PH, f.y + dy)) } : f))
       );
     };
     window.addEventListener("keydown", handleKey);
@@ -618,10 +721,19 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
         <div
           ref={containerRef}
           className="relative select-none w-full"
-          style={{ aspectRatio: `${PAGE_W} / ${PAGE_H}`, maxWidth: PAGE_W }}
+          style={{ aspectRatio: `${PW} / ${PH}`, maxWidth: PW }}
           onClick={() => setSelected(null)}
         >
-          <img src={cfg.bg} alt={`Template ${cfg.title}`} className="absolute inset-0 w-full h-full" style={{ objectFit: "fill" }} draggable={false} />
+          {(cfg.bgs ?? [cfg.bg]).map((src, i, arr) => (
+            <img
+              key={i}
+              src={src}
+              alt={`Template ${cfg.title} ${i + 1}`}
+              className="absolute left-0 w-full"
+              style={{ top: `${(i / arr.length) * 100}%`, height: `${100 / arr.length}%`, objectFit: "fill" }}
+              draggable={false}
+            />
+          ))}
 
           {fields.map((f) => {
             const isSelected = f.id === selected;
@@ -650,8 +762,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                 }}
                 className="absolute cursor-move touch-none"
                 style={{
-                  top: `${(f.y / PAGE_H) * 100}%`,
-                  left: `${(f.x / PAGE_W) * 100}%`,
+                  top: `${(f.y / PH) * 100}%`,
+                  left: `${(f.x / PW) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
                   fontFamily: isCorpo
@@ -671,19 +783,20 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                     f.rotate ? `rotate(${f.rotate}deg)` : "",
                   ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
-                  ...(isMrz ? { width: `${((cfg.mrzWidth / PAGE_W) * 100).toFixed(4)}%` } : {}),
+                  ...(isMrz ? { width: `${((cfg.mrzWidth / PW) * 100).toFixed(4)}%` } : {}),
                   lineHeight: isMrz ? cfg.mrzLineHeight : isCorpo ? 1.103 : isLiberado ? 1.15 : 1,
                   ...(f.id === "corpo" && cfg.key === "atestado"
-                    ? { width: `${((766 / PAGE_W) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
+                    ? { width: `${((766 / PW) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
                     : {}),
                   ...(isLiberado
-                    ? { width: `${((232 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const }
+                    ? { width: `${((232 / PW) * 100).toFixed(4)}%`, textAlign: "center" as const }
                     : {}),
-                  ...(isEstado ? { width: `${((cfg.estadoBoxW / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
+                  ...(isEstado ? { width: `${((cfg.estadoBoxW / PW) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
+                  ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
                   ...(isBox
                     ? {
-                        width: `${(((f.w || 80) / PAGE_W) * 100).toFixed(4)}%`,
-                        height: `${(((f.h || 80) / PAGE_H) * 100).toFixed(4)}%`,
+                        width: `${(((f.w || 80) / PW) * 100).toFixed(4)}%`,
+                        height: `${(((f.h || 80) / PH) * 100).toFixed(4)}%`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -721,7 +834,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "crlv", "cha"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "crlv", "cha", "diploma"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}

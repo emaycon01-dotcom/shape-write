@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
 type Modulo = {
@@ -61,6 +61,21 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
 
       },
 
+    ],
+  },
+  {
+    grupo: "Acadêmicos",
+    subtitulo: "Diplomas e documentos de ensino superior",
+    itens: [
+      {
+        id: "diploma",
+        titulo: "Diploma Superior",
+        descricao: "Diploma de graduação com verso de registro e QR Code",
+        icon: GraduationCap,
+        rota: "/dashboard/documents/diploma",
+        creditos: 1,
+        qrcode: true,
+      },
     ],
   },
   {
