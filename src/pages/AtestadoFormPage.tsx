@@ -180,7 +180,7 @@ export default function AtestadoFormPage() {
     try {
       const templateBase64 = await imgToBase64(templateAtestadoUrl);
 
-      const linhas = form.endereco.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const [end1, end2, end3] = splitEndereco(form.endereco);
       const horaCurta = form.horaAtendimento.slice(0, 5);
 
       const bodyData = {
