@@ -6,9 +6,9 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, Car, IdCard, Stethoscope, Anchor,
-  Layers, History, AlertTriangle, PenTool, MessageCircle, Users,
+  ShieldCheck, Zap, Clock, History, MessageCircle, Users,
 } from "lucide-react";
+
 
 
 
