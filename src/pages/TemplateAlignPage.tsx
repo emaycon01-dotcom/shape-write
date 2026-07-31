@@ -486,7 +486,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
 
   useEffect(() => {
     const updateScale = () => {
-      if (containerRef.current) setScale(containerRef.current.clientWidth / PAGE_W);
+      if (containerRef.current) setScale(containerRef.current.clientWidth / PW);
     };
     updateScale();
     window.addEventListener("resize", updateScale);
@@ -551,7 +551,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
       const x = Math.round((clientX - rect.left) / scale - dragging.offsetX);
       const y = Math.round((clientY - rect.top) / scale - dragging.offsetY);
       setFields((prev) =>
-        prev.map((f) => (f.id === dragging.id ? { ...f, x: Math.max(0, Math.min(PAGE_W, x)), y: Math.max(0, Math.min(PAGE_H, y)) } : f))
+        prev.map((f) => (f.id === dragging.id ? { ...f, x: Math.max(0, Math.min(PW, x)), y: Math.max(0, Math.min(PH, y)) } : f))
       );
     };
     const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
@@ -585,7 +585,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
       if (dx === 0 && dy === 0) return;
       e.preventDefault();
       setFields((prev) =>
-        prev.map((f) => (f.id === selected ? { ...f, x: Math.max(0, Math.min(PAGE_W, f.x + dx)), y: Math.max(0, Math.min(PAGE_H, f.y + dy)) } : f))
+        prev.map((f) => (f.id === selected ? { ...f, x: Math.max(0, Math.min(PW, f.x + dx)), y: Math.max(0, Math.min(PH, f.y + dy)) } : f))
       );
     };
     window.addEventListener("keydown", handleKey);
@@ -672,7 +672,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
         <div
           ref={containerRef}
           className="relative select-none w-full"
-          style={{ aspectRatio: `${PAGE_W} / ${PAGE_H}`, maxWidth: PAGE_W }}
+          style={{ aspectRatio: `${PW} / ${PH}`, maxWidth: PW }}
           onClick={() => setSelected(null)}
         >
           <img src={cfg.bg} alt={`Template ${cfg.title}`} className="absolute inset-0 w-full h-full" style={{ objectFit: "fill" }} draggable={false} />
@@ -704,8 +704,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                 }}
                 className="absolute cursor-move touch-none"
                 style={{
-                  top: `${(f.y / PAGE_H) * 100}%`,
-                  left: `${(f.x / PAGE_W) * 100}%`,
+                  top: `${(f.y / PH) * 100}%`,
+                  left: `${(f.x / PW) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
                   fontFamily: isCorpo
@@ -725,19 +725,19 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                     f.rotate ? `rotate(${f.rotate}deg)` : "",
                   ].filter(Boolean).join(" ") || undefined,
                   transformOrigin: f.rotate ? "left top" : undefined,
-                  ...(isMrz ? { width: `${((cfg.mrzWidth / PAGE_W) * 100).toFixed(4)}%` } : {}),
+                  ...(isMrz ? { width: `${((cfg.mrzWidth / PW) * 100).toFixed(4)}%` } : {}),
                   lineHeight: isMrz ? cfg.mrzLineHeight : isCorpo ? 1.103 : isLiberado ? 1.15 : 1,
                   ...(f.id === "corpo" && cfg.key === "atestado"
-                    ? { width: `${((766 / PAGE_W) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
+                    ? { width: `${((766 / PW) * 100).toFixed(4)}%`, whiteSpace: "normal" as const, textAlign: "left" as const }
                     : {}),
                   ...(isLiberado
-                    ? { width: `${((232 / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const }
+                    ? { width: `${((232 / PW) * 100).toFixed(4)}%`, textAlign: "center" as const }
                     : {}),
-                  ...(isEstado ? { width: `${((cfg.estadoBoxW / PAGE_W) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
+                  ...(isEstado ? { width: `${((cfg.estadoBoxW / PW) * 100).toFixed(4)}%`, textAlign: "center" as const } : {}),
                   ...(isBox
                     ? {
-                        width: `${(((f.w || 80) / PAGE_W) * 100).toFixed(4)}%`,
-                        height: `${(((f.h || 80) / PAGE_H) * 100).toFixed(4)}%`,
+                        width: `${(((f.w || 80) / PW) * 100).toFixed(4)}%`,
+                        height: `${(((f.h || 80) / PH) * 100).toFixed(4)}%`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
