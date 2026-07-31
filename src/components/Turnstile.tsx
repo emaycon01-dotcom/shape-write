@@ -31,6 +31,11 @@ function loadScript() {
   return scriptPromise;
 }
 
+function isPreviewHost() {
+  const host = window.location.hostname;
+  return host.includes("preview--") || host.endsWith(".lovableproject.com");
+}
+
 let cachedConfig: { siteKey: string; enabled: boolean } | null = null;
 
 async function getConfig() {
@@ -68,6 +73,15 @@ export default function Turnstile({
 
     (async () => {
       try {
+        // Turnstile rejects Lovable's temporary preview hostnames because they
+        // are not part of the production hostname allowlist. Keep previews
+        // usable while retaining CAPTCHA protection on published domains.
+        if (isPreviewHost()) {
+          setEnabled(false);
+          onReady?.(false);
+          return;
+        }
+
         const cfg = await getConfig();
         if (cancelled) return;
         setEnabled(cfg.enabled);
@@ -80,6 +94,12 @@ export default function Turnstile({
         widgetId.current = window.turnstile.render(ref.current, {
           sitekey: cfg.siteKey,
           theme: "dark",
+          action: "login",
+          appearance: "always",
+          retry: "auto",
+          "retry-interval": 3000,
+          "refresh-expired": "auto",
+          "refresh-timeout": "auto",
           callback: (token: string) => onVerify(token),
           "expired-callback": () => onExpire?.(),
           "error-callback": () => onExpire?.(),
