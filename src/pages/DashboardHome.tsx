@@ -331,12 +331,11 @@ export default function DashboardHome() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                navigate(`/dashboard/recarregar?plano=${encodeURIComponent(planoSelecionado?.nome ?? "")}`)
-              }
+              onClick={() => planoSelecionado && gerarPixPlano(planoSelecionado)}
             >
               Sim, continuar
             </AlertDialogAction>
+
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
