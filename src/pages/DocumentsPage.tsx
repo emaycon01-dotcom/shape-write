@@ -116,6 +116,10 @@ export default function DocumentsPage() {
   const navigate = useNavigate();
 
   const abrir = (m: Modulo) => {
+    if (m.manutencao) {
+      toast.info(`${m.titulo} está temporariamente em manutenção.`);
+      return;
+    }
     if (m.rota) navigate(m.rota);
     else toast.info(`${m.titulo} estará disponível em breve.`);
   };
