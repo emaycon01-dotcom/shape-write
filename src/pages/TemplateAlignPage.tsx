@@ -477,6 +477,8 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
     return cfg.defaults;
   });
 
+  const PW = cfg.pageW ?? PAGE_W;
+  const PH = cfg.pageH ?? PAGE_H;
 
   const [selected, setSelected] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
@@ -491,7 +493,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, []);
+  }, [PW]);
 
   // Auto-persist so the PDF always uses the latest alignment (real-time)
   useEffect(() => {
