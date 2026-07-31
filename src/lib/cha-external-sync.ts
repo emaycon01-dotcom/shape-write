@@ -102,43 +102,17 @@ function buildPayload(
   };
 }
 
-const REST_HEADERS = {
-  "Content-Type": "application/json",
-  apikey: EXTERNAL_SUPABASE_KEY,
-  Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-};
-
-/**
- * A tabela externa `cha` não possui constraint UNIQUE em documento_id,
- * então o upsert nativo (on_conflict) falha com 42P10.
- * Estratégia: verifica se já existe -> PATCH; senão -> INSERT.
- */
+/** Envia via edge function segura (token de ingestão fica no servidor). */
 async function saveRecord(payload: Record<string, string>): Promise<void> {
-  const id = encodeURIComponent(payload.documento_id);
-
-  const existingRes = await fetch(
-    `${EXTERNAL_SUPABASE_URL}/rest/v1/cha?select=id&documento_id=eq.${id}&limit=1`,
-    { headers: REST_HEADERS },
-  );
-  const existing = existingRes.ok ? await existingRes.json().catch(() => []) : [];
-
-  const isUpdate = Array.isArray(existing) && existing.length > 0;
-
-  const response = await fetch(
-    isUpdate
-      ? `${EXTERNAL_SUPABASE_URL}/rest/v1/cha?documento_id=eq.${id}`
-      : `${EXTERNAL_SUPABASE_URL}/rest/v1/cha`,
-    {
-      method: isUpdate ? "PATCH" : "POST",
-      headers: { ...REST_HEADERS, Prefer: "return=minimal" },
-      body: JSON.stringify(payload),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`[${response.status}] ${await response.text()}`);
+  const { data, error } = await supabase.functions.invoke("doc-ingest-proxy", {
+    body: { tabela: "cha", dados: payload },
+  });
+  if (error) throw new Error(error.message);
+  if (data && (data as { error?: string }).error) {
+    throw new Error(JSON.stringify(data));
   }
 }
+
 
 async function upsertWithRetry(
   payload: Record<string, string>,
