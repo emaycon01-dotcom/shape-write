@@ -55,6 +55,7 @@ const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
 const PlanosPage = lazy(() => import("./pages/PlanosPage"));
 const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
 const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
+const AplicativosPage = lazy(() => import("./pages/AplicativosPage"));
 const VerifyPage = lazy(() => import("./pages/VerifyPage"));
 const ConsultaCnhPage = lazy(() => import("./pages/ConsultaCnhPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -143,6 +144,7 @@ const App = () => {
 
                       <Route path="template-align" element={<TemplateAlignPage />} />
                       <Route path="ferramentas/assinaturas" element={<SignatureGeneratorPage />} />
+                      <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
                     </Route>
