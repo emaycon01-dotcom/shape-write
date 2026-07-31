@@ -131,13 +131,16 @@ export default function RegisterPage() {
               <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
             </div>
 
+            <HumanCheck onChange={handleHuman} />
+
             {error && (
               <p className="text-sm text-destructive">{error}</p>
             )}
 
-            <Button type="submit" variant="gradient" className="w-full h-12 rounded-lg text-base" disabled={loading}>
+            <Button type="submit" variant="gradient" className="w-full h-12 rounded-lg text-base" disabled={loading || !human}>
               {loading ? "Criando..." : "Criar Conta"}
             </Button>
+
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
