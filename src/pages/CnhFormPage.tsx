@@ -351,7 +351,8 @@ export default function CnhFormPage() {
       };
 
       const { data, error } = await supabase.functions.invoke("generate-cnh-pdf", {
-        body: bodyData,
+        // preview: QR Code NÃO é registrado (só funciona no PDF final)
+        body: { ...bodyData, preview: !isEditMode },
       });
 
       if (error) throw error;
