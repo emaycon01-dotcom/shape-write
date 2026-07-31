@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, Wrench } from "lucide-react";
 import { toast } from "sonner";
 
 type Modulo = {
@@ -12,6 +12,7 @@ type Modulo = {
   qrcode?: boolean;
   aplicativo?: boolean;
   emBreve?: boolean;
+  manutencao?: boolean;
 };
 
 const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
@@ -75,6 +76,7 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         rota: "/dashboard/documents/diploma",
         creditos: 1,
         qrcode: true,
+        manutencao: true,
       },
     ],
   },
@@ -95,11 +97,12 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
   },
 ];
 
-function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon"; icon: React.ElementType; children: React.ReactNode }) {
+function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance"; icon: React.ElementType; children: React.ReactNode }) {
   const tones = {
     qr: "border-success/40 bg-success/15 text-success",
     app: "border-warning/40 bg-warning/15 text-warning",
     soon: "border-border/70 bg-muted/40 text-muted-foreground",
+    maintenance: "border-destructive/40 bg-destructive/15 text-destructive",
   } as const;
   return (
     <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${tones[tone]}`}>
@@ -113,6 +116,10 @@ export default function DocumentsPage() {
   const navigate = useNavigate();
 
   const abrir = (m: Modulo) => {
+    if (m.manutencao) {
+      toast.info(`${m.titulo} está temporariamente em manutenção.`);
+      return;
+    }
     if (m.rota) navigate(m.rota);
     else toast.info(`${m.titulo} estará disponível em breve.`);
   };
@@ -138,31 +145,34 @@ export default function DocumentsPage() {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {mod.itens.map((m) => (
-              <button
+            <button
                 key={m.id}
                 onClick={() => abrir(m)}
                 className={`group relative overflow-hidden rounded-xl border p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 ${
-                  m.emBreve
+                  m.emBreve || m.manutencao
                     ? "border-border/50 bg-card/40"
                     : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
                 }`}
               >
-                {!m.emBreve && <div className="absolute inset-0 gradient-primary opacity-[0.08]" />}
+                {!m.emBreve && !m.manutencao && <div className="absolute inset-0 gradient-primary opacity-[0.08]" />}
                 <div className="relative flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
-                    <m.icon className={`h-5 w-5 ${m.emBreve ? "text-muted-foreground" : "text-primary"}`} />
+                    <m.icon className={`h-5 w-5 ${m.emBreve || m.manutencao ? "text-muted-foreground" : "text-primary"}`} />
                   </div>
                   <div className="min-w-0 flex-1 space-y-1.5">
                     <div className="flex items-center gap-1.5">
                       <p className="truncate text-sm font-semibold text-foreground">{m.titulo}</p>
-                      <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
+                      {!m.manutencao && (
+                        <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
+                      )}
                     </div>
                     <p className="text-[11px] leading-tight text-muted-foreground">{m.descricao}</p>
                     <div className="flex flex-wrap items-center gap-1">
-                      {m.qrcode && <Badge tone="qr" icon={QrCode}>QR Code</Badge>}
-                      {m.aplicativo && <Badge tone="app" icon={Smartphone}>Aplicativo</Badge>}
+                      {m.qrcode && !m.manutencao && <Badge tone="qr" icon={QrCode}>QR Code</Badge>}
+                      {m.aplicativo && !m.manutencao && <Badge tone="app" icon={Smartphone}>Aplicativo</Badge>}
                       {m.emBreve && <Badge tone="soon" icon={Lock}>Em breve</Badge>}
-                      {!m.emBreve && m.creditos != null && (
+                      {m.manutencao && <Badge tone="maintenance" icon={Wrench}>Em manutenção</Badge>}
+                      {!m.emBreve && !m.manutencao && m.creditos != null && (
                         <span className="text-[10px] font-semibold text-accent">
                           {m.creditos} crédito{m.creditos > 1 ? "s" : ""}
                         </span>
