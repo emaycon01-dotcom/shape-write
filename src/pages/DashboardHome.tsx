@@ -272,7 +272,7 @@ export default function DashboardHome() {
                     <p className="truncate text-[12px] font-semibold text-foreground">
                       {DOCUMENT_TYPE_LABELS[d.type] || d.type}
                     </p>
-                    <p className="truncate text-[11px] text-muted-foreground">{d.holderName || "—"}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{d.name || "—"}</p>
                   </div>
                   <span
                     className={`rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${
