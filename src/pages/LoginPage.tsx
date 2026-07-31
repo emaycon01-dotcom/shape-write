@@ -40,9 +40,27 @@ export default function LoginPage() {
       return;
     }
 
+    if (captchaEnabled && !captchaToken) {
+      setError("Confirme que você não é um robô para continuar.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Verificação do captcha no servidor antes de tentar o login
+      if (captchaEnabled && captchaToken) {
+        const { data: captcha } = await supabase.functions.invoke("verify-captcha", {
+          body: { action: "verify", token: captchaToken },
+        });
+        if (!captcha?.success) {
+          setCaptchaToken(null);
+          setError("Falha na verificação anti-robô. Tente novamente.");
+          setLoading(false);
+          return;
+        }
+      }
+
       // Rate limit roda em paralelo com o login (não bloqueia o tempo de resposta)
       const ratePromise = supabase.functions
         .invoke("rate-limit", {
