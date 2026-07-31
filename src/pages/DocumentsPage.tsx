@@ -97,11 +97,12 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
   },
 ];
 
-function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon"; icon: React.ElementType; children: React.ReactNode }) {
+function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance"; icon: React.ElementType; children: React.ReactNode }) {
   const tones = {
     qr: "border-success/40 bg-success/15 text-success",
     app: "border-warning/40 bg-warning/15 text-warning",
     soon: "border-border/70 bg-muted/40 text-muted-foreground",
+    maintenance: "border-destructive/40 bg-destructive/15 text-destructive",
   } as const;
   return (
     <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${tones[tone]}`}>
