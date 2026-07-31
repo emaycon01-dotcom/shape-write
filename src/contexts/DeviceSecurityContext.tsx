@@ -19,17 +19,33 @@ const DeviceSecurityContext = createContext<DeviceSecurityContextType>({
 const DEVICE_OK_KEY = "device_check_ok_until";
 const DEVICE_OK_TTL = 12 * 60 * 60 * 1000; // 12h
 
+function readStorage(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // O bloqueio de storage não pode impedir o acesso ao sistema.
+  }
+}
+
 export function DeviceSecurityProvider({ children }: { children: React.ReactNode }) {
-  const [isBanned, setIsBanned] = useState(() => localStorage.getItem("device_banned") === "true");
+  const [isBanned, setIsBanned] = useState(() => readStorage("device_banned") === "true");
   const [fingerprint, setFingerprint] = useState<string | null>(() => getCachedFingerprint());
   // Não bloqueia a renderização: o app abre na hora e a checagem roda em background.
   const [checkingDevice] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("device_banned") === "true") return;
+    if (readStorage("device_banned") === "true") return;
 
     // Resultado recente em cache — evita chamar a edge function a cada carregamento
-    const okUntil = Number(localStorage.getItem(DEVICE_OK_KEY) || 0);
+    const okUntil = Number(readStorage(DEVICE_OK_KEY) || 0);
     if (Date.now() < okUntil) return;
 
     const checkDevice = async () => {
@@ -43,9 +59,9 @@ export function DeviceSecurityProvider({ children }: { children: React.ReactNode
 
         if (data?.banned) {
           setIsBanned(true);
-          localStorage.setItem("device_banned", "true");
+          writeStorage("device_banned", "true");
         } else {
-          localStorage.setItem(DEVICE_OK_KEY, String(Date.now() + DEVICE_OK_TTL));
+          writeStorage(DEVICE_OK_KEY, String(Date.now() + DEVICE_OK_TTL));
         }
       } catch {
         // If we can't check, allow access (fail open — server-side will still enforce)
@@ -74,7 +90,7 @@ export function DeviceSecurityProvider({ children }: { children: React.ReactNode
 
       if (data?.banned) {
         setIsBanned(true);
-        localStorage.setItem("device_banned", "true");
+        writeStorage("device_banned", "true");
         return true; // device was banned
       }
       return false;

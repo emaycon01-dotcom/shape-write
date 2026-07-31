@@ -12,6 +12,22 @@ interface State {
 
 const RECOVERY_KEY = "monkeylab_recovery_attempted";
 
+function hasRecoveryAttempt() {
+  try {
+    return sessionStorage.getItem(RECOVERY_KEY) === "true";
+  } catch {
+    return true;
+  }
+}
+
+function markRecoveryAttempt() {
+  try {
+    sessionStorage.setItem(RECOVERY_KEY, "true");
+  } catch {
+    // Sem armazenamento, exibimos a recuperação manual em vez de recarregar em loop.
+  }
+}
+
 export default class AppErrorBoundary extends Component<Props, State> {
   state: State = { error: null };
 
@@ -23,14 +39,18 @@ export default class AppErrorBoundary extends Component<Props, State> {
     console.error("Falha ao renderizar o aplicativo", error, info);
 
     const isChunkFailure = /chunk|dynamically imported|module script/i.test(error.message);
-    if (isChunkFailure && sessionStorage.getItem(RECOVERY_KEY) !== "true") {
-      sessionStorage.setItem(RECOVERY_KEY, "true");
+    if (isChunkFailure && !hasRecoveryAttempt()) {
+      markRecoveryAttempt();
       window.location.reload();
     }
   }
 
   private reload = () => {
-    sessionStorage.removeItem(RECOVERY_KEY);
+    try {
+      sessionStorage.removeItem(RECOVERY_KEY);
+    } catch {
+      // Navegadores com armazenamento bloqueado ainda podem recarregar.
+    }
     window.location.reload();
   };
 

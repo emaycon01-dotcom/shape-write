@@ -9,21 +9,37 @@ const THEMES = [
 
 const STORAGE_KEY = "app_theme";
 
+function readStoredTheme() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
 export function applyStoredTheme() {
-  const saved = localStorage.getItem(STORAGE_KEY) ?? "";
-  const root = document.documentElement;
-  THEMES.forEach((t) => t.id && root.classList.remove(t.id));
-  if (saved) root.classList.add(saved);
+  try {
+    const saved = readStoredTheme();
+    const root = document.documentElement;
+    THEMES.forEach((t) => t.id && root.classList.remove(t.id));
+    if (saved) root.classList.add(saved);
+  } catch {
+    // O tema nunca deve impedir a inicialização do aplicativo.
+  }
 }
 
 export default function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
-  const [theme, setTheme] = useState<string>(() => localStorage.getItem(STORAGE_KEY) ?? "");
+  const [theme, setTheme] = useState<string>(readStoredTheme);
 
   useEffect(() => {
     const root = document.documentElement;
     THEMES.forEach((t) => t.id && root.classList.remove(t.id));
     if (theme) root.classList.add(theme);
-    localStorage.setItem(STORAGE_KEY, theme);
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // Navegação privada pode bloquear o armazenamento local.
+    }
   }, [theme]);
 
   return (
