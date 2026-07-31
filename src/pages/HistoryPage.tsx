@@ -31,8 +31,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const EDIT_COST = 0.3;
-const RENEW_COST = 1;
+const EDIT_COST_BASE = 0.3;
+const RENEW_COST_BASE = 1;
 const RENEW_DAYS = 30;
 
 function formatCpf(value: string) {
