@@ -124,8 +124,33 @@ export const defaultRgFields: FieldDef[] = [
   { id: "observacao_saude", label: "Observação de Saúde", sampleText: "-", x: 41, y: 951, fontSize: 11 },
 ];
 
+// Defaults MUST match supabase/functions/generate-atestado-pdf/index.ts ATESTADO_DEFAULT_POSITIONS
+export const defaultAtestadoFields: FieldDef[] = [
+  { id: "qr", label: "QR Code (topo)", sampleText: "[QR]", x: 630, y: 30, fontSize: 8, w: 134, h: 134, color: "#999" },
+  { id: "endereco1", label: "Endereço - linha 1", sampleText: "Av. Miguel Ignácio Curi, 41", x: 386, y: 99, fontSize: 9, bold: true },
+  { id: "endereco2", label: "Endereço - linha 2", sampleText: "Vila Carmosina - São Paulo – SP", x: 386, y: 113, fontSize: 9, bold: true },
+  { id: "endereco3", label: "Endereço - linha 3", sampleText: "CEP: 08295-005", x: 386, y: 127, fontSize: 9, bold: true },
+  { id: "paciente", label: "Paciente (PARA:)", sampleText: "PARA: TATIANI RODRIGUES MOR", x: 118, y: 265, fontSize: 15 },
+  {
+    id: "corpo",
+    label: "Texto do atestado",
+    sampleText:
+      "Atesto para os devidos fins, que o(a), TATIANI RODRIGUES MOR, CNS: 801440458570767 foi atendido(a) no(a), UPA 24h Itaquera - Consultórios na data 08/11/2023 ás 05:53:23, necessitando de 1 (Um) dia de repouso por motivo de doença.",
+    x: 18,
+    y: 336,
+    fontSize: 15.5,
+  },
+  { id: "cid", label: "CID", sampleText: "CID: 10", x: 17, y: 422, fontSize: 18 },
+  { id: "cidade_data", label: "Unidade + data por extenso", sampleText: "UPA 24h Itaquera, 08 de Novembro de 2023 .", x: 364, y: 564, fontSize: 14 },
+  { id: "emitido_em", label: "Emitido em", sampleText: "Emitido em: 08/11/2023 05:54:23", x: 39, y: 897, fontSize: 9, bold: true },
+  { id: "liberado", label: "Liberado e assinado", sampleText: "Liberado e assinado\neletronicamente em 08/11/2023\n09:38 por:", x: 404, y: 900, fontSize: 9.5, bold: true },
+  { id: "qr2", label: "QR Code (rodapé)", sampleText: "[QR]", x: 400, y: 955, fontSize: 8, w: 95, h: 95, color: "#999" },
+];
+
+type DocKey = "cnh" | "rg" | "atestado";
+
 interface EditorConfig {
-  key: "cnh" | "rg";
+  key: DocKey;
   title: string;
   storageKey: string;
   defaults: FieldDef[];
@@ -139,7 +164,7 @@ interface EditorConfig {
   copy: () => Record<string, unknown>;
 }
 
-const EDITORS: Record<"cnh" | "rg", EditorConfig> = {
+const EDITORS: Record<DocKey, EditorConfig> = {
   cnh: {
     key: "cnh",
     title: "CNH Digital",
@@ -168,7 +193,23 @@ const EDITORS: Record<"cnh" | "rg", EditorConfig> = {
     mrzLineHeight: 1.22,
     copy: () => loadRgFieldPositions() ?? {},
   },
+  atestado: {
+    key: "atestado",
+    title: "Atestado Médico",
+    storageKey: ATESTADO_ALIGN_STORAGE_KEY,
+    defaults: defaultAtestadoFields,
+    bg: templateAtestadoBgUrl,
+    font: ATESTADO_FONT,
+    mrzFont: ATESTADO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.32,
+    copy: () => loadAtestadoFieldPositions() ?? {},
+  },
 };
+
+
 
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
