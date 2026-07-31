@@ -52,6 +52,7 @@ const ChaPreviewPage = lazy(() => import("./pages/ChaPreviewPage"));
 
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const RecarregarPage = lazy(() => import("./pages/RecarregarPage"));
+const PlanosPage = lazy(() => import("./pages/PlanosPage"));
 const TemplateAlignPage = lazy(() => import("./pages/TemplateAlignPage"));
 const SignatureGeneratorPage = lazy(() => import("./pages/SignatureGeneratorPage"));
 const VerifyPage = lazy(() => import("./pages/VerifyPage"));
