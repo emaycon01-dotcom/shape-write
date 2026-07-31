@@ -136,6 +136,8 @@ const App = () => {
                       <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
 
                       <Route path="documents/cha" element={<ChaFormPage />} />
+                      <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
+
                       <Route path="documents/diploma" element={<DiplomaFormPage />} />
                       <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
 
