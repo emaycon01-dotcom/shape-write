@@ -249,7 +249,7 @@ export const defaultDiplomaFields: FieldDef[] = [
   { id: "serial", label: "V. Nº de série", sampleText: "6070002386077", x: 1144, y: 1636, fontSize: 11, bold: true },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "crlv" | "cha" | "diploma";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "crlv" | "cha" | "diploma";
 
 
 interface EditorConfig {
