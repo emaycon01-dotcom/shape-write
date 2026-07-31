@@ -77,10 +77,50 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
   );
 }
 
+const MODULOS_RAPIDOS = [
+  { titulo: "CNH Digital", icon: FileText, rota: "/dashboard/documents/cnh" },
+  { titulo: "RG Digital", icon: IdCard, rota: "/dashboard/documents/rg" },
+  { titulo: "CRLV Digital", icon: Car, rota: "/dashboard/documents/crlv" },
+  { titulo: "CNH Marítima", icon: Anchor, rota: "/dashboard/documents/cha" },
+  { titulo: "Atestado", icon: Stethoscope, rota: "/dashboard/documents/atestado" },
+  { titulo: "Assinaturas", icon: PenTool, rota: "/dashboard/ferramentas/assinaturas" },
+];
+
+function Stat({ icon: Icon, label, value, tone = "text-primary" }: {
+  icon: React.ElementType; label: string; value: React.ReactNode; tone?: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-3 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06)]">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60">
+          <Icon className={`h-4 w-4 ${tone}`} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+          <p className="font-display text-base font-bold leading-tight text-foreground">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardHome() {
   const { user } = useAuth();
+  const { documents } = useDocuments();
 
   const isAdmin = user?.role === "admin";
+
+  const userDocs = useMemo(
+    () => documents.filter((d) => d.userId === user?.id),
+    [documents, user?.id]
+  );
+  const ativos = useMemo(() => userDocs.filter((d) => !isDocumentExpired(d)), [userDocs]);
+  const expirando = useMemo(
+    () => ativos.filter((d) => daysUntilExpiry(d) <= 7).length,
+    [ativos]
+  );
+  const recentes = useMemo(() => userDocs.slice(0, 4), [userDocs]);
+
 
 
 
