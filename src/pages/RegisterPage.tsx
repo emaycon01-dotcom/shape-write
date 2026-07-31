@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import HumanCheck from "@/components/HumanCheck";
 import logo from "@/assets/logo.webp";
 
 export default function RegisterPage() {
@@ -14,13 +15,22 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [human, setHuman] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const handleHuman = useCallback((v: boolean) => setHuman(v), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    if (!human) {
+      setError("Conclua a verificação de segurança.");
+      setLoading(false);
+      return;
+    }
 
     // Basic validation
     if (name.trim().length < 2) {
@@ -28,6 +38,7 @@ export default function RegisterPage() {
       setLoading(false);
       return;
     }
+
 
     if (password.length < 6) {
       setError("Senha deve ter pelo menos 6 caracteres");
@@ -120,13 +131,16 @@ export default function RegisterPage() {
               <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
             </div>
 
+            <HumanCheck onChange={handleHuman} />
+
             {error && (
               <p className="text-sm text-destructive">{error}</p>
             )}
 
-            <Button type="submit" variant="gradient" className="w-full h-12 rounded-lg text-base" disabled={loading}>
+            <Button type="submit" variant="gradient" className="w-full h-12 rounded-lg text-base" disabled={loading || !human}>
               {loading ? "Criando..." : "Criar Conta"}
             </Button>
+
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">

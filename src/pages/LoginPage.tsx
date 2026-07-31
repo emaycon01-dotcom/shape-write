@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import HumanCheck from "@/components/HumanCheck";
 import logo from "@/assets/logo.webp";
 
 export default function LoginPage() {
@@ -13,12 +14,20 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [human, setHuman] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const handleHuman = useCallback((v: boolean) => setHuman(v), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!human) {
+      setError("Conclua a verificação de segurança.");
+      return;
+    }
 
     setLoading(true);
 
@@ -40,6 +49,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -99,13 +109,16 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <HumanCheck onChange={handleHuman} />
+
               {error && <p className="text-sm text-destructive">{error}</p>}
 
               <Button
                 type="submit"
                 className="w-full h-12 rounded-lg text-base bg-accent hover:bg-accent/90 text-accent-foreground font-semibold shadow-[0_10px_30px_-10px_hsl(var(--accent)/0.7)] transition-all duration-300 hover:-translate-y-0.5"
-                disabled={loading}
+                disabled={loading || !human}
               >
+
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
