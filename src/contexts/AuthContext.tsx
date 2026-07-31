@@ -161,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     writeCachedUser(null);
+    try { sessionStorage.removeItem("documents_cache"); } catch { /* ignore */ }
     setUser(null);
     await supabase.auth.signOut();
   }, []);
