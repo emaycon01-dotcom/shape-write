@@ -132,23 +132,23 @@ export default function DashboardHome() {
     toast({ title: "QR Code gerado!", description: `Plano ${plano.nome} — ${plano.preco}` });
   }, [toast]);
 
-  // Polling do pagamento
+  // Polling do pagamento (consulta o gateway, não só o banco)
   useEffect(() => {
     if (!planoPix || !txId || pago) return;
     const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from("financial_transactions")
-        .select("status")
-        .eq("id", txId)
-        .maybeSingle();
+      const { data } = await supabase.functions.invoke("check-pix-payment", {
+        body: { transaction_id: txId },
+      });
       if (data?.status === "pago") {
         setPago(true);
         clearInterval(interval);
+        await refreshUser?.();
         toast({ title: "Pagamento confirmado!", description: "Seu plano já está ativo na conta." });
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [planoPix, txId, pago, toast]);
+  }, [planoPix, txId, pago, toast, refreshUser]);
+
 
   const copiarPix = useCallback(async () => {
     await navigator.clipboard.writeText(pixCode);
