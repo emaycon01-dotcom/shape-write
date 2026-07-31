@@ -9,10 +9,12 @@ import templateBgUrl from "@/assets/template-cnh-bg-hq.jpg";
 import templateRgBgUrl from "@/assets/template-rg-bg-hq.jpg";
 import templateAtestadoBgUrl from "@/assets/template-atestado-bg-hq.jpg";
 import templateCrlvBgUrl from "@/assets/template-crlv-bg-hq.jpg";
+import templateChaBgUrl from "@/assets/template-cha-bg-hq.jpg";
 import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY, loadCrlvFieldPositions } from "@/lib/crlv-align";
+import { CHA_ALIGN_STORAGE_KEY, loadChaFieldPositions } from "@/lib/cha-align";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -23,6 +25,7 @@ const RG_FONT = "'RGDigital', Arial, Helvetica, sans-serif";
 const RG_MRZ_FONT = "'RGOcrb', 'Courier New', monospace";
 const ATESTADO_FONT = "Calibri, Carlito, 'Segoe UI', Arial, Helvetica, sans-serif";
 const CRLV_FONT = "'FreeMono', 'Liberation Mono', 'Courier New', monospace";
+const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 
