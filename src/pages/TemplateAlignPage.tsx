@@ -151,7 +151,51 @@ export const defaultAtestadoFields: FieldDef[] = [
   { id: "qr2", label: "QR Code (rodapé)", sampleText: "[QR]", x: 400, y: 955, fontSize: 8, w: 95, h: 95, color: "#999" },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado";
+// Defaults MUST match supabase/functions/generate-crlv-pdf/index.ts CRLV_DEFAULT_POSITIONS
+export const defaultCrlvFields: FieldDef[] = [
+  { id: "detran_uf", label: "DETRAN - UF", sampleText: "DETRAN- PE", x: 41.3, y: 72.6, fontSize: 5.9 },
+  { id: "titulo", label: "Título do documento", sampleText: "CERTIFICADO DE REGISTRO E LICENCIAMENTO DE VEÍCULO - DIGITAL", x: 41.3, y: 86.3, fontSize: 8.5, bold: true },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 214.7, y: 115.6, fontSize: 8, w: 146, h: 146, color: "#999" },
+  { id: "renavam", label: "Código RENAVAM", sampleText: "00335436552", x: 41.5, y: 134.6, fontSize: 13.3 },
+  { id: "placa", label: "Placa", sampleText: "NQK8I74", x: 41.5, y: 169.5, fontSize: 13.3 },
+  { id: "exercicio", label: "Exercício", sampleText: "2023", x: 136.9, y: 169.5, fontSize: 13.3 },
+  { id: "ano_fabricacao", label: "Ano de fabricação", sampleText: "2011", x: 41.5, y: 204.6, fontSize: 13.3 },
+  { id: "ano_modelo", label: "Ano do modelo", sampleText: "2011", x: 136.9, y: 204.6, fontSize: 13.3 },
+  { id: "numero_crv", label: "Número do CRV", sampleText: "213012407278", x: 41.5, y: 239.6, fontSize: 13.3 },
+  { id: "codigo_cla", label: "Código de segurança do CLA", sampleText: "02775028150", x: 41.5, y: 343.1, fontSize: 13.3 },
+  { id: "cat", label: "CAT", sampleText: "***", x: 216.5, y: 343.1, fontSize: 13.3 },
+  { id: "marca_modelo", label: "Marca / Modelo / Versão", sampleText: "VW/8.120 EURO3", x: 41.5, y: 390.1, fontSize: 13.3 },
+  { id: "especie_tipo", label: "Espécie / Tipo", sampleText: "CARGA CAMINHAO", x: 41.5, y: 437.1, fontSize: 13.3 },
+  { id: "placa_anterior", label: "Placa anterior / UF", sampleText: "NQK8874/RN", x: 41.5, y: 484.2, fontSize: 13.3 },
+  { id: "chassi", label: "Chassi", sampleText: "9533452R8BR155089", x: 174.2, y: 484.2, fontSize: 13.3 },
+  { id: "cor", label: "Cor predominante", sampleText: "VERMELHA", x: 41.5, y: 531.1, fontSize: 13.3 },
+  { id: "combustivel", label: "Combustível", sampleText: "DIESEL", x: 136.9, y: 531.1, fontSize: 13.3 },
+  { id: "observacoes", label: "Observações", sampleText: "CARGA,", x: 37.5, y: 590, fontSize: 13.3 },
+  { id: "categoria", label: "Categoria", sampleText: "ALUGUEL", x: 421.8, y: 96.3, fontSize: 13.3 },
+  { id: "capacidade", label: "Capacidade", sampleText: "4.74", x: 679.9, y: 116, fontSize: 13.3 },
+  { id: "potencia", label: "Potência / Cilindrada", sampleText: "115CV/4300", x: 421.8, y: 151, fontSize: 13.3 },
+  { id: "peso_bruto", label: "Peso bruto total", sampleText: "7.7", x: 679.9, y: 151, fontSize: 13.3 },
+  { id: "motor", label: "Motor", sampleText: "E2T03816", x: 421.8, y: 186.1, fontSize: 13.3 },
+  { id: "cmt", label: "CMT", sampleText: "10.5", x: 604.9, y: 186.1, fontSize: 13.3 },
+  { id: "eixos", label: "Eixos", sampleText: "2", x: 672.8, y: 186.1, fontSize: 13.3 },
+  { id: "lotacao", label: "Lotação", sampleText: "03P", x: 718.1, y: 186.1, fontSize: 13.3 },
+  { id: "carroceria", label: "Carroceria", sampleText: "CARROCERIA FECHADA", x: 421.8, y: 221, fontSize: 13.3 },
+  { id: "nome", label: "Nome do proprietário", sampleText: "MARIA JOSE RODRIGUES XAVIER", x: 421.8, y: 253.8, fontSize: 13.3 },
+  { id: "cpf_cnpj", label: "CPF / CNPJ", sampleText: "744.088.444-20", x: 617.4, y: 296.1, fontSize: 13.3 },
+  { id: "local", label: "Local", sampleText: "JUREMA PE", x: 421.8, y: 343.1, fontSize: 13.3 },
+  { id: "data", label: "Data", sampleText: "25/04/2023", x: 679.9, y: 343.1, fontSize: 13.3 },
+  { id: "cat_tarif", label: "DPVAT - Cat. tarifária", sampleText: "*", x: 421.8, y: 428.4, fontSize: 13.3 },
+  { id: "data_quitacao", label: "DPVAT - Data de quitação", sampleText: "*", x: 518.9, y: 428.4, fontSize: 13.3 },
+  { id: "repasse_fns", label: "DPVAT - Repasse FNS", sampleText: "*", x: 421.8, y: 478.7, fontSize: 13.3 },
+  { id: "custo_bilhete", label: "DPVAT - Custo do bilhete", sampleText: "*", x: 564.9, y: 478.7, fontSize: 13.3 },
+  { id: "custo_efetivo", label: "DPVAT - Custo efetivo", sampleText: "*", x: 659.3, y: 478.7, fontSize: 13.3 },
+  { id: "repasse_denatran", label: "DPVAT - Repasse DENATRAN", sampleText: "*", x: 421.8, y: 533, fontSize: 13.3 },
+  { id: "valor_iof", label: "DPVAT - Valor do IOF", sampleText: "*", x: 564.9, y: 533, fontSize: 13.3 },
+  { id: "valor_total", label: "DPVAT - Valor total", sampleText: "*", x: 659.3, y: 533, fontSize: 13.3 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "crlv";
+
 
 interface EditorConfig {
   key: DocKey;
