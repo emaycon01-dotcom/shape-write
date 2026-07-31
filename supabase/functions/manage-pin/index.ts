@@ -6,12 +6,46 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-async function hashPin(pin: string, salt: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(salt + pin);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+// PBKDF2-SHA256 com salt aleatório (KDF lento) — substitui o SHA-256 simples
+const PBKDF2_ITER = 210_000;
+
+function toHex(buf: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function legacyHash(pin: string, salt: string): Promise<string> {
+  const data = new TextEncoder().encode(salt + pin);
+  return toHex(await crypto.subtle.digest("SHA-256", data));
+}
+
+async function pbkdf2(pin: string, saltHex: string, iter: number): Promise<string> {
+  const salt = new Uint8Array((saltHex.match(/.{2}/g) || []).map((h) => parseInt(h, 16)));
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: iter }, key, 256);
+  return toHex(bits);
+}
+
+async function hashPin(pin: string): Promise<string> {
+  const saltHex = toHex(crypto.getRandomValues(new Uint8Array(16)).buffer);
+  const hash = await pbkdf2(pin, saltHex, PBKDF2_ITER);
+  return `pbkdf2$${PBKDF2_ITER}$${saltHex}$${hash}`;
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function verifyPin(pin: string, stored: string, userId: string): Promise<{ valid: boolean; needsUpgrade: boolean }> {
+  if (stored.startsWith("pbkdf2$")) {
+    const [, iter, saltHex, hash] = stored.split("$");
+    const calc = await pbkdf2(pin, saltHex, Number(iter));
+    return { valid: timingSafeEqual(calc, hash), needsUpgrade: false };
+  }
+  const legacy = await legacyHash(pin, userId.slice(0, 8));
+  return { valid: timingSafeEqual(legacy, stored), needsUpgrade: true };
 }
 
 Deno.serve(async (req) => {
@@ -96,13 +130,11 @@ Deno.serve(async (req) => {
       attempt_type: "pin",
     });
 
-    const salt = user.id.slice(0, 8);
-    const pinHash = await hashPin(pin, salt);
 
     if (action === "set") {
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
-        .update({ pin_hash: pinHash })
+        .update({ pin_hash: await hashPin(pin) })
         .eq("user_id", user.id);
 
       if (updateError) {
@@ -131,7 +163,12 @@ Deno.serve(async (req) => {
         });
       }
 
-      const valid = profile.pin_hash === pinHash;
+      const { valid, needsUpgrade } = await verifyPin(pin, profile.pin_hash, user.id);
+      if (valid && needsUpgrade) {
+        // Migra hashes antigos (SHA-256) para PBKDF2 no primeiro acerto
+        const upgraded = await hashPin(pin);
+        await supabaseAdmin.from("profiles").update({ pin_hash: upgraded }).eq("user_id", user.id);
+      }
       if (!valid) {
         return new Response(JSON.stringify({ error: "PIN incorreto", valid: false }), {
           status: 401,
