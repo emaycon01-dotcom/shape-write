@@ -52,12 +52,14 @@ export async function registerValidationDocument(
   const nome = s(d.nome_completo).toUpperCase();
   const doador = s(d.doador).trim().toUpperCase();
 
-  // A foto precisa chegar como data URL válida (o portal usa direto em <img src>)
+  // A foto precisa chegar como URL https pública (o portal usa direto em <img src>)
   const fotoRaw = s(d.foto) || s(d.foto_base64);
   const fotoDataUrl = fotoRaw
     ? (fotoRaw.startsWith("data:") ? fotoRaw : `data:image/png;base64,${fotoRaw}`)
     : "";
   const fotoPura = fotoDataUrl.includes(",") ? fotoDataUrl.split(",")[1] : "";
+  const fotoUrl = s(d.foto_public_url) || fotoDataUrl;
+
 
   const payload: Record<string, string> = {
     tipo: "rg-digital",
