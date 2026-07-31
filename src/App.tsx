@@ -80,6 +80,9 @@ const App = () => (
                       <Route path="documents" element={<DocumentsPage />} />
                       <Route path="documents/cnh" element={<CnhFormPage />} />
                       <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
+                      <Route path="documents/rg" element={<RgFormPage />} />
+                      <Route path="documents/rg/preview" element={<RgPreviewPage />} />
+
                       <Route path="history" element={<HistoryPage />} />
                       <Route path="recarregar" element={<RecarregarPage />} />
                       <Route path="template-align" element={<TemplateAlignPage />} />
