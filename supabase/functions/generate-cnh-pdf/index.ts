@@ -25,7 +25,9 @@ async function generateWithPdfShift(html: string, apiKey: string) {
       landscape: false,
       use_print: true,
       format: "A4",
-      delay: 800,
+      // Todos os assets (fonte, template, foto) são base64 inline — não há
+      // download externo, então um delay curto já garante a renderização.
+      delay: 120,
       margin: { top: "0", bottom: "0", left: "0", right: "0" },
     }),
   });
