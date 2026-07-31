@@ -47,6 +47,9 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const EDIT_COST = planCost(EDIT_COST_BASE, user?.plano);
+  const RENEW_COST = planCost(RENEW_COST_BASE, user?.plano);
+
   const userDocs = useMemo(
     () => documents.filter((d) => d.userId === user?.id),
     [documents, user?.id]
