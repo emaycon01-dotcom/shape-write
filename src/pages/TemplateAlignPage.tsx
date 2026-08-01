@@ -249,6 +249,7 @@ export const defaultUnimedFields: FieldDef[] = [
     w: 655,
   },
   { id: "nome_linha", label: "Nome sobre a linha", sampleText: "VICTORIA GABRIELA COSTA PEREIRA", x: 178.2, y: 463.7, fontSize: 10.3 },
+  { id: "assinatura_img", label: "Assinatura (foto enviada)", sampleText: "[Assinatura]", x: 263, y: 470, fontSize: 8, w: 280, h: 100, color: "#999" },
   { id: "assinatura_digital", label: "Assinatura digital (ICP)", sampleText: "MARIA CAROLINA CARIANO DA SILVA: 0121699, AC CNDL RFB v3, 0121699, 11/12/2024 13:00 BRT 11/12/2024", x: 36.2, y: 775, fontSize: 6.2, w: 420 },
   { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 568, y: 718, fontSize: 8, w: 72, h: 72, color: "#999" },
   { id: "rodape_impresso", label: "Rodapé - Impresso em", sampleText: "Impresso em: 11/12/2024 13:00", x: 10.3, y: 1095.1, fontSize: 10.3 },
