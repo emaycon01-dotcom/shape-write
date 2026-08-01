@@ -66,7 +66,8 @@ export default function RegisterPage() {
       });
 
       await register(name.trim(), email.trim(), password);
-      navigate("/dashboard");
+      setSubmitted(true);
+
     } catch (err: any) {
       setError(err?.message || "Erro ao criar conta");
     } finally {
