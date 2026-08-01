@@ -287,7 +287,7 @@ export function buildUnimedHtml(
   <div class="overlay" style="${base("profissional")}">${escapeHtml(d.medico || "")}</div>
 
   <!-- corpo -->
-  <div class="overlay" style="top:161.8px;left:324.7px;font-size:12.4px;">ATESTADO MÉDICO</div>
+  <div class="overlay" style="${base("lbl_titulo")}">ATESTADO MÉDICO</div>
   <div class="overlay txt" style="${base("corpo")}">${escapeHtml(buildCorpoText(d))}</div>
   <div class="overlay txt" style="${base("decreto")}">${escapeHtml(buildDecretoText(d))}</div>
   <div class="overlay txt" style="${base("autorizo")}">${escapeHtml(buildAutorizoText(d))}</div>
