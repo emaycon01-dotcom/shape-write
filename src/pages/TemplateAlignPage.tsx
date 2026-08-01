@@ -337,7 +337,7 @@ export const defaultDiplomaFields: FieldDef[] = [
   { id: "serial", label: "V. Nº de série", sampleText: "6070002386077", x: 1144, y: 1636, fontSize: 11, bold: true },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "crlv" | "cha" | "diploma";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma";
 
 
 interface EditorConfig {
@@ -415,6 +415,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.32,
     copy: () => loadHapvidaFieldPositions() ?? {},
+  },
+  unimed: {
+    key: "unimed",
+    title: "Atestado Unimed",
+    storageKey: UNIMED_ALIGN_STORAGE_KEY,
+    defaults: defaultUnimedFields,
+    bg: templateUnimedBgUrl,
+    font: UNIMED_FONT,
+    mrzFont: UNIMED_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.22,
+    copy: () => loadUnimedFieldPositions() ?? {},
   },
   crlv: {
     key: "crlv",
