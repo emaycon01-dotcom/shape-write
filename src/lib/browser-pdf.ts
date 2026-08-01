@@ -209,6 +209,16 @@ async function adoptFontFaces(doc: Document): Promise<() => void> {
  * preservando integralmente as coordenadas dos campos.
  */
 export async function renderHtmlToPdfBase64(html: string): Promise<string> {
+  return (await renderHtmlToDocument(html)).pdfBase64;
+}
+
+/**
+ * Além do PDF, devolve imagens leves (JPEG) de cada página — usadas no preview
+ * do app, já que muitos navegadores móveis não exibem PDF dentro de <iframe>.
+ */
+export async function renderHtmlToDocument(
+  html: string,
+): Promise<{ pdfBase64: string; previewImages: string[] }> {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas-pro"),
     import("jspdf"),
@@ -216,6 +226,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
 
   const frame = await createHiddenFrame(html);
   let releaseFonts: () => void = () => undefined;
+  const previewImages: string[] = [];
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
@@ -230,6 +241,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
 
     for (const target of targets) {
       const width = target.offsetWidth || 794;
+
       const height = target.offsetHeight || 1123;
 
       const scale = safeScale(width);
