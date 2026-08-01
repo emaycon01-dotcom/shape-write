@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
-
-const VALIDACAO_URL = "https://consultadiploma.estacio.br/diploma/";
+import { supabase } from "@/integrations/supabase/client";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -30,10 +29,12 @@ export default function DiplomaPreviewPage() {
   const { addDocument } = useDocuments();
   const { toast } = useToast();
 
-  const { pdfBase64, formData, codigoValidacao } = (location.state as {
+  const { pdfBase64, formData, codigoValidacao, documentoId, validationUrl } = (location.state as {
     pdfBase64: string;
     formData: Record<string, string>;
     codigoValidacao?: string;
+    documentoId?: string;
+    validationUrl?: string;
   }) || {};
 
   const [paid, setPaid] = useState(false);
@@ -125,6 +126,9 @@ export default function DiplomaPreviewPage() {
         pdfDataUrl: pdfBase64,
       });
 
+      // Registra o diploma no portal de validação (QR Code) — best effort.
+      void registrarNoPortal();
+
       setPaid(true);
       toast({
         title: "Documento gerado com sucesso!",
@@ -134,6 +138,29 @@ export default function DiplomaPreviewPage() {
       toast({ title: "Erro ao gerar documento", description: "Tente novamente.", variant: "destructive" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const registrarNoPortal = async () => {
+    try {
+      const { template_p1_base64, template_p2_base64, field_positions, __form, ...form } =
+        (formData || {}) as Record<string, unknown>;
+      void template_p1_base64; void template_p2_base64; void field_positions; void __form;
+
+      const { data, error } = await supabase.functions.invoke("generate-diploma-pdf", {
+        body: {
+          action: "register_portal",
+          documento_id: documentoId,
+          form,
+          pdf_base64: pdfBase64,
+          pdf_preview_base64: pages[0] || undefined,
+        },
+      });
+      if (error || !data?.success) {
+        console.warn("Falha ao registrar no portal de validação:", error || data?.error);
+      }
+    } catch (e) {
+      console.warn("Erro ao registrar no portal de validação:", e);
     }
   };
 
@@ -168,8 +195,10 @@ export default function DiplomaPreviewPage() {
     }
   };
 
-  const codigo = codigoValidacao || formData.codigo_validacao || "";
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui está o seu Diploma:\n\nCurso: ${formData.curso_completo || ""}\nTítulo: ${formData.titulo || ""}\nCódigo de Validação: ${codigo}\n\nConsulte o diploma em:\n${VALIDACAO_URL}${codigo}`;
+  const codigo = documentoId || codigoValidacao || formData.codigo_validacao || "";
+  const urlValidacao =
+    validationUrl || `https://consultadiplomaestacio.digital/validar?id=${encodeURIComponent(codigo)}`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui está o seu Diploma:\n\nCurso: ${formData.curso_completo || ""}\nTítulo: ${formData.titulo || ""}\nCódigo de Validação: ${codigo}\n\nConsulte o diploma em:\n${urlValidacao}`;
 
   return (
     <div className="mx-auto max-w-3xl">
