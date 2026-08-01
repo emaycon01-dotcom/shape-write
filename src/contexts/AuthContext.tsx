@@ -60,7 +60,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     name: profile?.name || supabaseUser.user_metadata?.name || "",
     email: supabaseUser.email || "",
     role: isAdmin ? "admin" : "cliente",
-    credits: profile?.credits ?? 0,
+    credits: Number(profile?.credits ?? 0) || 0,
     plano: profile?.plano || "free",
     createdAt: profile?.created_at || supabaseUser.created_at,
   };
@@ -141,7 +141,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Mantém os créditos sempre atualizados: ao voltar para a aba/janela e
+    // periodicamente, evitando saldo antigo vindo do cache local.
+    const revalidate = () => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          lastLoadedUserId = null;
+          inflight = null;
+          void loadProfile(session.user);
+        }
+      });
+    };
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") revalidate();
+    };
+
+    window.addEventListener("focus", revalidate);
+    document.addEventListener("visibilitychange", onVisible);
+    const interval = window.setInterval(revalidate, 60_000);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("focus", revalidate);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.clearInterval(interval);
+    };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

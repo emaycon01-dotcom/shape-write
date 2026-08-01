@@ -297,6 +297,8 @@ function buildRgHtml(d: Record<string, string>, fieldPositions?: unknown, qrValu
   return `<!DOCTYPE html>
 <html>
 <head>
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+<style>a,a:link,a:visited{color:inherit !important;text-decoration:none !important;-webkit-text-fill-color:inherit !important;}</style>
 <meta charset="UTF-8">
 <style>
 ${RG_FONT_FACE}
