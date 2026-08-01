@@ -510,6 +510,9 @@ export type Database = {
           plano: string
           status: string
           user_id: string
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -523,6 +526,9 @@ export type Database = {
           plano?: string
           status?: string
           user_id: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -536,6 +542,9 @@ export type Database = {
           plano?: string
           status?: string
           user_id?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -741,6 +750,10 @@ export type Database = {
           _cargo: Database["public"]["Enums"]["app_cargo"]
           _target_user_id: string
         }
+        Returns: undefined
+      }
+      admin_set_verified: {
+        Args: { _target_user_id: string; _verified: boolean }
         Returns: undefined
       }
       admin_unban_user: {
