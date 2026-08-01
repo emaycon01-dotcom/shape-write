@@ -504,9 +504,9 @@ export default function UnimedFormPage() {
           </div>
         </div>
 
-        {/* UNIDADE E PROFISSIONAL */}
+        {/* UNIDADE */}
         <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={Building2} title="Unidade e profissional" />
+          <SectionHeader icon={Building2} title="Unidade" />
 
           <div className="space-y-1.5">
             <FieldLabel required>Unidade</FieldLabel>
@@ -548,27 +548,101 @@ export default function UnimedFormPage() {
               <Input value={form.telefone} onChange={setMask("telefone", maskPhone)} inputMode="numeric" className={inputCls} />
             </div>
           </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel required>Profissional</FieldLabel>
-            <Input value={form.medico} onChange={set("medico")} className={inputCls} required />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel required>CRM (UF)</FieldLabel>
-              <Input value={form.crmUf} onChange={set("crmUf")} placeholder="CRM-RJ" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>Nº do CRM</FieldLabel>
-              <Input value={form.crmNumero} onChange={setMask("crmNumero", maskDigits(7))} inputMode="numeric" placeholder="0121699" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>Especialidade</FieldLabel>
-              <Input value={form.especialidade} onChange={set("especialidade")} className={inputCls} required />
-            </div>
-          </div>
         </div>
+
+        {/* PROFISSIONAL */}
+        <div className="glass space-y-4 rounded-xl p-6">
+          <SectionHeader icon={Stethoscope} title="Profissional" />
+
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-secondary/40 px-3 py-2">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Modo manual</p>
+              <p className="text-[11px] text-muted-foreground">
+                {form.modoManual
+                  ? "Você escolhe o médico, CRM e a assinatura."
+                  : "Médico, CRM e assinatura são preenchidos automaticamente."}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setForm((p) => {
+                  const on = !p.modoManual;
+                  const auto = MEDICOS_AUTO[p.unidadeIdx] ?? MEDICOS_AUTO[0];
+                  return on
+                    ? { ...p, modoManual: true }
+                    : { ...p, modoManual: false, assinaturaBase64: "", ...auto };
+                })
+              }
+              className={`h-7 w-12 shrink-0 rounded-full border transition ${
+                form.modoManual ? "border-primary bg-primary/25" : "border-border bg-secondary"
+              }`}
+            >
+              <span
+                className={`block h-5 w-5 rounded-full bg-primary transition-transform ${
+                  form.modoManual ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          {form.modoManual ? (
+            <>
+              <div className="space-y-1.5">
+                <FieldLabel required>Profissional</FieldLabel>
+                <Input value={form.medico} onChange={set("medico")} className={inputCls} required />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <FieldLabel required>CRM (UF)</FieldLabel>
+                  <Input value={form.crmUf} onChange={set("crmUf")} placeholder="CRM-RJ" className={inputCls} required />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel required>Nº do CRM</FieldLabel>
+                  <Input value={form.crmNumero} onChange={setMask("crmNumero", maskDigits(7))} inputMode="numeric" placeholder="0121699" className={inputCls} required />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel required>Especialidade</FieldLabel>
+                  <Input value={form.especialidade} onChange={set("especialidade")} className={inputCls} required />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <FieldLabel>Assinatura (upload)</FieldLabel>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={onUploadAssinatura}
+                  className="block w-full cursor-pointer rounded-lg border border-border bg-secondary px-3 py-2 text-xs text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary/15 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  A imagem é aplicada exatamente sobre o local da assinatura no atestado. PNG com fundo transparente fica melhor.
+                </p>
+                {form.assinaturaBase64 && (
+                  <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-white p-2">
+                    <img src={form.assinaturaBase64} alt="Assinatura carregada" className="h-16 object-contain" />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="ml-auto gap-1.5 text-xs"
+                      onClick={() => setForm((p) => ({ ...p, assinaturaBase64: "" }))}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Remover
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="rounded-lg border border-border/60 bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+              <p className="font-semibold text-foreground">{prof.medico}</p>
+              <p className="text-[12px]">{prof.crmUf}: {prof.crmNumero} · {prof.especialidade}</p>
+            </div>
+          )}
+        </div>
+
 
         {/* HISTÓRICO */}
         <div className="glass space-y-3 rounded-xl p-6">
