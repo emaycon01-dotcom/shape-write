@@ -289,9 +289,13 @@ export function buildUnimedHtml(
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 63)}</div>` : ""}
 
   <!-- assinatura digital ICP -->
+  ${d.assinatura_base64 ? `<div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
+
+  <!-- assinatura digital ICP -->
   <div class="overlay" style="${base("assinatura_digital", "white-space:nowrap;")}">${escapeHtml(
     `${d.medico || ""}: ${d.crm_numero || ""}, AC CNDL RFB v3, ${d.crm_numero || ""}, ${dataHoraCurta} BRT ${d.data_atendimento || ""}`,
   )}</div>
+
 
   <!-- rodapé -->
   <div class="overlay" style="top:1092.5px;left:699.8px;font-size:7.2px;">ANS - Nº ${escapeHtml(d.ans || "34.388-9")}</div>
