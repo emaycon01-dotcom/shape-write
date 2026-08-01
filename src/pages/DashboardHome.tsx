@@ -85,6 +85,8 @@ export default function DashboardHome() {
   const { documents } = useDocuments();
 
   const isAdmin = user?.role === "admin";
+  const { count: openTickets } = useOpenTickets();
+
 
   const userDocs = useMemo(
     () => documents.filter((d) => d.userId === user?.id),
