@@ -86,6 +86,8 @@ const initial: DiplomaForm = {
   modalidade: "tecnologo",
   curso: "DESIGN DE MODA",
   aluno: "",
+  cpf: "",
+  sexo: "M",
   nacionalidade: "BRASILEIRO(A)",
   naturalidade: "CEARÁ",
   nascimento: "",
