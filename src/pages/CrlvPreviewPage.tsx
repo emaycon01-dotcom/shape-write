@@ -7,6 +7,7 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 const VALIDACAO_SITE = "https://verificaviosenetran.digital";
 
@@ -98,7 +99,7 @@ export default function CrlvPreviewPage() {
       // Gera novamente o PDF final — agora com o QR Code registrado/válido
       let pdfFinal = previewPdf;
       try {
-        const { data, error } = await supabase.functions.invoke("generate-crlv-pdf", {
+        const { data, error } = await invokeGeneratePdf("generate-crlv-pdf", {
           body: { ...formData, preview: false },
         });
         if (error) throw error;

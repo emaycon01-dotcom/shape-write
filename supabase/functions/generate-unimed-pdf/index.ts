@@ -342,11 +342,18 @@ serve(async (req) => {
     const PDFSHIFT_API_KEY = Deno.env.get("PDFSHIFT_API_KEY");
     const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY");
 
-    if (!PDFSHIFT_API_KEY && !PDFCO_API_KEY) {
-      throw new Error("No PDF provider API keys are configured");
-    }
-
     const body = await req.json();
+
+    // Anexa ao registro de validacao o PDF gerado no navegador.
+    if ((body as any).attach_pdf && (body as any).token) {
+      const raw = String((body as any).attach_pdf).split(",").pop() || "";
+      const bin = Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
+      const url = await attachPdf(String((body as any).token), bin);
+      return new Response(
+        JSON.stringify({ success: true, pdf_url: url }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const data: Record<string, string> = {
       paciente: body.paciente || "",
@@ -413,6 +420,21 @@ serve(async (req) => {
 
     const html = buildUnimedHtml(data, body.field_positions, validacao.qrCodeUrl);
 
+    // Renderizacao no proprio navegador (sem servico externo de PDF).
+    if ((body as any).render === "html") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          render: "browser",
+          html,
+          documento_id: validacao.documentoId,
+          qr_code_url: validacao.qrCodeUrl,
+          token: validacao.token ?? null,
+          validacao_registrada: validacao.registered,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     let pdfBuffer: Uint8Array | null = null;
 
     if (PDFSHIFT_API_KEY) {

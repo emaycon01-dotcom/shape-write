@@ -23,6 +23,7 @@ import templateP1Url from "@/assets/template-diploma-p1-hq.jpg";
 import templateP2Url from "@/assets/template-diploma-p2-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskCPF } from "@/lib/masks";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -353,7 +354,7 @@ export default function DiplomaFormPage() {
 
     try {
       const bodyData = await buildBody();
-      const { data, error } = await supabase.functions.invoke("generate-diploma-pdf", { body: bodyData });
+      const { data, error } = await invokeGeneratePdf("generate-diploma-pdf", { body: bodyData });
       if (error) throw error;
 
       const pdfResult = data?.pdfBase64;

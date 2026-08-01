@@ -14,6 +14,7 @@ import testAssUrl from "@/assets/test-assinatura.png";
 import templateRgUrl from "@/assets/template-rg-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -264,7 +265,7 @@ export default function RgFormPage() {
         field_positions: loadRgFieldPositions() ?? undefined,
       };
 
-      const { data, error } = await supabase.functions.invoke("generate-rg-pdf", {
+      const { data, error } = await invokeGeneratePdf("generate-rg-pdf", {
         body: { ...bodyData, preview: !isEditMode },
       });
 

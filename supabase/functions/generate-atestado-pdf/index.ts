@@ -311,10 +311,6 @@ serve(async (req) => {
     const PDFSHIFT_API_KEY = Deno.env.get("PDFSHIFT_API_KEY");
     const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY");
 
-    if (!PDFSHIFT_API_KEY && !PDFCO_API_KEY) {
-      throw new Error("No PDF provider API keys are configured");
-    }
-
     const body = await req.json();
 
     const data: Record<string, string> = {
@@ -368,6 +364,21 @@ serve(async (req) => {
 
     const html = buildAtestadoHtml(data, body.field_positions, validacao.qrCodeUrl, validacao.token);
 
+    // Renderizacao no proprio navegador (sem servico externo de PDF).
+    if ((body as any).render === "html") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          render: "browser",
+          html,
+          documento_id: validacao.documentoId,
+          qr_code_url: validacao.qrCodeUrl,
+          token: validacao.token ?? null,
+          validacao_registrada: validacao.registered,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     let pdfBuffer: Uint8Array | null = null;
 
     if (PDFSHIFT_API_KEY) {

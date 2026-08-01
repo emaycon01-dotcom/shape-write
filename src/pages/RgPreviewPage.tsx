@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { syncRgToExternal } from "@/lib/rg-external-sync";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
@@ -98,7 +99,7 @@ export default function RgPreviewPage() {
       // Gera novamente o PDF final — agora com o QR Code registrado/válido
       let pdfFinal = previewPdf;
       try {
-        const { data, error } = await supabase.functions.invoke("generate-rg-pdf", {
+        const { data, error } = await invokeGeneratePdf("generate-rg-pdf", {
           body: { ...formData, preview: false },
         });
         if (error) throw error;

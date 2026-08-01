@@ -11,6 +11,7 @@ import { loadUnimedFieldPositions } from "@/lib/unimed-align";
 import templateUnimedUrl from "@/assets/template-unimed-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -321,7 +322,7 @@ export default function UnimedFormPage() {
         field_positions: loadUnimedFieldPositions() ?? undefined,
       };
 
-      const { data, error } = await supabase.functions.invoke("generate-unimed-pdf", {
+      const { data, error } = await invokeGeneratePdf("generate-unimed-pdf", {
         body: { ...bodyData, preview: !isEditMode },
       });
 

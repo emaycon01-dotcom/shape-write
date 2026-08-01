@@ -11,6 +11,7 @@ import { loadHapvidaFieldPositions } from "@/lib/hapvida-align";
 import templateHapvidaUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -232,7 +233,7 @@ export default function HapvidaFormPage() {
         field_positions: loadHapvidaFieldPositions() ?? undefined,
       };
 
-      const { data, error } = await supabase.functions.invoke("generate-hapvida-pdf", {
+      const { data, error } = await invokeGeneratePdf("generate-hapvida-pdf", {
         body: { ...bodyData, preview: !isEditMode },
       });
 
