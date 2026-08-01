@@ -608,34 +608,11 @@ export default function DiplomaFormPage() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Reitor(a)</FieldLabel>
-              <Input value={form.reitor} onChange={set("reitor")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Secretário(a) de Registro</FieldLabel>
-              <Input value={form.secretario} onChange={set("secretario")} className={inputCls} />
-            </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Secretário(a) de Registro</FieldLabel>
+            <Input value={form.secretario} onChange={set("secretario")} className={inputCls} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Resolução — número</FieldLabel>
-              <Input value={form.resolucaoNumero} onChange={set("resolucaoNumero")} placeholder="092/GR" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Resolução — ano</FieldLabel>
-              <Select value={form.resolucaoAno} onValueChange={(v) => setForm((p) => ({ ...p, resolucaoAno: v }))}>
-                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 31 }, (_, i) => String(2000 + i)).map((a) => (
-                    <SelectItem key={a} value={a}>{a}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
