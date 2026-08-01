@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
-import { qrSvg, registerValidationDocument, buildDocumentoId } from "./validacao.ts";
+import { qrSvg, registerValidationDocument, buildDocumentoId, attachPdf } from "./validacao.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -424,6 +424,11 @@ serve(async (req) => {
       pdfBuffer = await generateWithPdfCo(html, PDFCO_API_KEY);
     }
 
+    let pdfUrl: string | null = null;
+    if (!isPreview && validacao.token) {
+      pdfUrl = await attachPdf(validacao.token, pdfBuffer);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -431,6 +436,7 @@ serve(async (req) => {
         documento_id: validacao.documentoId,
         qr_code_url: validacao.qrCodeUrl,
         token: validacao.token ?? null,
+        pdf_url: pdfUrl,
         validacao_registrada: validacao.registered,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

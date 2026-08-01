@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      atestados: {
+        Row: {
+          codigo_acesso: string
+          cpf: string
+          created_at: string
+          crm: string
+          crm_uf: string
+          data_nascimento: string
+          emissao_atestado: string
+          endereco: string | null
+          endereco_clinica: string | null
+          genero_medico: string
+          id: string
+          nome_medico: string
+          nome_paciente: string
+          pdf_url: string | null
+          quantidade: number
+          texto_atestado: string
+          token: string
+        }
+        Insert: {
+          codigo_acesso: string
+          cpf: string
+          created_at?: string
+          crm: string
+          crm_uf: string
+          data_nascimento: string
+          emissao_atestado: string
+          endereco?: string | null
+          endereco_clinica?: string | null
+          genero_medico: string
+          id?: string
+          nome_medico: string
+          nome_paciente: string
+          pdf_url?: string | null
+          quantidade?: number
+          texto_atestado: string
+          token: string
+        }
+        Update: {
+          codigo_acesso?: string
+          cpf?: string
+          created_at?: string
+          crm?: string
+          crm_uf?: string
+          data_nascimento?: string
+          emissao_atestado?: string
+          endereco?: string | null
+          endereco_clinica?: string | null
+          genero_medico?: string
+          id?: string
+          nome_medico?: string
+          nome_paciente?: string
+          pdf_url?: string | null
+          quantidade?: number
+          texto_atestado?: string
+          token?: string
+        }
+        Relationships: []
+      }
       banned_devices: {
         Row: {
           banned_at: string
@@ -494,6 +554,34 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      verify_atestado: {
+        Args: { _token: string }
+        Returns: {
+          codigo_acesso: string
+          cpf: string
+          created_at: string
+          crm: string
+          crm_uf: string
+          data_nascimento: string
+          emissao_atestado: string
+          endereco: string | null
+          endereco_clinica: string | null
+          genero_medico: string
+          id: string
+          nome_medico: string
+          nome_paciente: string
+          pdf_url: string | null
+          quantidade: number
+          texto_atestado: string
+          token: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "atestados"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {
