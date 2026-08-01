@@ -40,14 +40,25 @@ function detectMaxCanvasDimension(): number {
   return 4096;
 }
 
-/** Maior escala segura para a página, respeitando dimensão e área máximas. */
-function safeScale(width: number, height: number): number {
+/**
+ * Maior escala segura para a página. Como a rasterização é feita em FAIXAS
+ * horizontais, apenas a LARGURA precisa caber no limite do dispositivo — a
+ * altura é fatiada. Isso mantém ~576 DPI também no iOS.
+ */
+function safeScale(width: number): number {
+  const maxDim = detectMaxCanvasDimension();
+  return Math.max(2, Math.min(RENDER_SCALE, maxDim / width));
+}
+
+/** Altura (em px CSS) de cada faixa, respeitando dimensão e área máximas. */
+function bandCssHeight(width: number, scale: number): number {
   const maxDim = detectMaxCanvasDimension();
   const maxArea = maxDim >= 8192 ? 268_000_000 : 16_700_000; // iOS ~16.7 MP
-  const byDim = maxDim / Math.max(width, height);
-  const byArea = Math.sqrt(maxArea / (width * height));
-  return Math.max(2, Math.min(RENDER_SCALE, byDim, byArea));
+  const maxPxByArea = Math.floor(maxArea / (width * scale));
+  const maxPx = Math.min(maxDim, maxPxByArea);
+  return Math.max(64, Math.floor(maxPx / scale));
 }
+
 
 /** Garante que as @font-face (base64) estejam carregadas antes de rasterizar. */
 async function ensureFontsLoaded(doc: Document) {
