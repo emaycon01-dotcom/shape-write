@@ -10,6 +10,7 @@ import {
   SlidersHorizontal,
   PenTool,
   Smartphone,
+  UserCheck,
 } from "lucide-react";
 import {
   Sidebar,
