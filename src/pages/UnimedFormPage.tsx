@@ -109,6 +109,8 @@ const initial: UnimedFormData = {
   crmNumero: "0121699",
   crmUf: "CRM-RJ",
   especialidade: "CLÍNICA MÉDICA",
+  modoManual: false,
+  assinaturaBase64: "",
 };
 
 function rnd(len: number) {
