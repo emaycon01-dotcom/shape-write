@@ -4,11 +4,13 @@ import { useDocuments, isDocumentExpired, daysUntilExpiry } from "@/contexts/Doc
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.webp";
+import { useOpenTickets } from "@/hooks/use-open-tickets";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, History,
+  ShieldCheck, Zap, Clock, History, Headphones,
 
 } from "lucide-react";
+
 
 
 
