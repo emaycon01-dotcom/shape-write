@@ -345,6 +345,14 @@ ${RG_FONT_FACE}
   .sig-overlay { display: flex; align-items: center; justify-content: center; }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
   .mrz-line { display:block; text-align:left; white-space:pre; }
+  .mrz-block {
+    white-space: pre;
+    text-align: left;
+    font-variant-ligatures: none;
+    font-feature-settings: "kern" 0, "liga" 0;
+    font-kerning: none;
+  }
+
 </style>
 </head>
 <body>
@@ -373,11 +381,10 @@ ${RG_FONT_FACE}
   ${text("orgao_expedidor", d.orgao_expedidor || "")}
   ${text("local_emissao", d.local_emissao || "")}
   ${text("data_emissao", d.data_emissao || "")}
-  <div class="overlay" style="${base("mrz", "width:420px;line-height:1.22;font-family:'RGOcrb',monospace;letter-spacing:0;")}">
-    <div class="mrz-line">${mrz.line1}</div>
-    <div class="mrz-line">${mrz.line2}</div>
-    <div class="mrz-line">${mrz.line3}</div>
-  </div>
+  <div class="overlay mrz-block" style="${base("mrz", `font-family:'RGOcrb','Courier New',monospace;letter-spacing:0;word-spacing:0;line-height:${(p.mrz.fontSize * 1.22).toFixed(2)}px;`)}">${mrz.line1}
+${mrz.line2}
+${mrz.line3}</div>
+
 
   <!-- OUTRAS INFORMAÇÕES -->
   ${text("titulo_eleitor", d.titulo_eleitor || "")}
