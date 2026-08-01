@@ -176,6 +176,34 @@ async function waitForAssets(doc: Document) {
 }
 
 /**
+ * O html2canvas desenha o texto num canvas do documento PRINCIPAL — as
+ * @font-face declaradas apenas dentro do iframe não existem lá e o texto sai
+ * com a fonte de fallback. Copiamos as regras para o documento principal.
+ */
+async function adoptFontFaces(doc: Document): Promise<() => void> {
+  let css = "";
+  for (const sheet of Array.from(doc.styleSheets)) {
+    let rules: CSSRule[] = [];
+    try {
+      rules = Array.from(sheet.cssRules || []);
+    } catch {
+      continue;
+    }
+    for (const rule of rules) {
+      if (rule.cssText.trim().startsWith("@font-face")) css += rule.cssText + "\n";
+    }
+  }
+  if (!css) return () => undefined;
+
+  const style = document.createElement("style");
+  style.setAttribute("data-pdf-fonts", "1");
+  style.textContent = css;
+  document.head.appendChild(style);
+  await ensureFontsLoaded(document);
+  return () => style.remove();
+}
+
+/**
  * Converte o HTML do documento (com uma ou mais `.page`) em um PDF base64.
  * Cada `.page` vira uma página do PDF com o tamanho exato em que foi montada,
  * preservando integralmente as coordenadas dos campos.
@@ -187,10 +215,13 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
   ]);
 
   const frame = await createHiddenFrame(html);
+  let releaseFonts: () => void = () => undefined;
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
     await waitForAssets(doc);
+    releaseFonts = await adoptFontFaces(doc);
+
 
     const pages = Array.from(doc.querySelectorAll<HTMLElement>(".page"));
     const targets = pages.length > 0 ? pages : [doc.body];
