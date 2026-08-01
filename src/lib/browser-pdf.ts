@@ -352,9 +352,10 @@ export async function invokeGeneratePdf(
   if (typeof payload.html !== "string") return { data: payload, error: null };
 
   try {
-    const pdfBase64 = await renderHtmlToPdfBase64(payload.html);
-    const result: Record<string, unknown> = { ...payload, pdfBase64 };
+    const { pdfBase64, previewImages } = await renderHtmlToDocument(payload.html);
+    const result: Record<string, unknown> = { ...payload, pdfBase64, previewImages };
     delete result.html;
+
 
     // Unimed: o portal de validação precisa do arquivo hospedado.
     if (functionName === "generate-unimed-pdf" && payload.token && body.preview !== true) {
