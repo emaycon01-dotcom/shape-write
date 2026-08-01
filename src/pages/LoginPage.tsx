@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import HumanCheck from "@/components/HumanCheck";
+import Turnstile, { verifyCaptchaToken } from "@/components/Turnstile";
 import logo from "@/assets/logo.webp";
 
 export default function LoginPage() {
@@ -14,11 +14,15 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [human, setHuman] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaEnabled, setCaptchaEnabled] = useState(true);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleHuman = useCallback((v: boolean) => setHuman(v), []);
+  const handleVerify = useCallback((t: string) => setCaptchaToken(t), []);
+  const handleExpire = useCallback(() => setCaptchaToken(""), []);
+  const handleReady = useCallback((v: boolean) => setCaptchaEnabled(v), []);
+  const human = !captchaEnabled || Boolean(captchaToken);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +36,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      if (captchaEnabled && captchaToken) {
+        const ok = await verifyCaptchaToken(captchaToken);
+        if (!ok) {
+          setCaptchaToken("");
+          setError("Verificação de segurança falhou. Tente novamente.");
+          setLoading(false);
+          return;
+        }
+      }
+
       await login(email, password);
       navigate("/dashboard");
     } catch (err: any) {
@@ -112,7 +126,12 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <HumanCheck onChange={handleHuman} />
+              <Turnstile
+                onVerify={handleVerify}
+                onExpire={handleExpire}
+                onReady={handleReady}
+                className="flex justify-center"
+              />
 
               {error && <p className="text-sm text-destructive">{error}</p>}
 

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import HumanCheck from "@/components/HumanCheck";
+import Turnstile, { verifyCaptchaToken } from "@/components/Turnstile";
 import logo from "@/assets/logo.webp";
 
 export default function RegisterPage() {
@@ -15,12 +15,16 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [human, setHuman] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaEnabled, setCaptchaEnabled] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleHuman = useCallback((v: boolean) => setHuman(v), []);
+  const handleVerify = useCallback((t: string) => setCaptchaToken(t), []);
+  const handleExpire = useCallback(() => setCaptchaToken(""), []);
+  const handleReady = useCallback((v: boolean) => setCaptchaEnabled(v), []);
+  const human = !captchaEnabled || Boolean(captchaToken);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +36,16 @@ export default function RegisterPage() {
       setError("Conclua a verificação de segurança.");
       setLoading(false);
       return;
+    }
+
+    if (captchaEnabled && captchaToken) {
+      const ok = await verifyCaptchaToken(captchaToken);
+      if (!ok) {
+        setCaptchaToken("");
+        setError("Verificação de segurança falhou. Tente novamente.");
+        setLoading(false);
+        return;
+      }
     }
 
     // Basic validation
@@ -153,7 +167,12 @@ export default function RegisterPage() {
               <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
             </div>
 
-            <HumanCheck onChange={handleHuman} />
+            <Turnstile
+              onVerify={handleVerify}
+              onExpire={handleExpire}
+              onReady={handleReady}
+              className="flex justify-center"
+            />
 
             {error && (
               <p className="text-sm text-destructive">{error}</p>
