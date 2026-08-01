@@ -108,7 +108,7 @@ export const UNIMED_DEFAULT_POSITIONS: Record<string, Pos> = {
   autorizo: { x: 58.4, y: 327.9, fontSize: 12.4, w: 655 },
   nome_linha: { x: 178.2, y: 463.7, fontSize: 10.3 },
   assinatura_digital: { x: 36.2, y: 769.4, fontSize: 6.2, w: 420 },
-  qr: { x: 428, y: 718, fontSize: 8, w: 63, h: 63 },
+  qr: { x: 603, y: 721, fontSize: 8, w: 58, h: 58 },
   rodape_impresso: { x: 10.3, y: 1095.1, fontSize: 10.3 },
   rodape_criado: { x: 198.1, y: 1095.1, fontSize: 10.3 },
   rodape_crm: { x: 565.4, y: 1095.1, fontSize: 10.3 },
@@ -199,6 +199,7 @@ export function buildUnimedHtml(
   };
 
   const dataHoraAssinatura = `${d.data_atendimento || ""} ${d.hora_assinatura || d.hora_atendimento || ""}`.trim();
+  const dataHoraCurta = `${d.data_atendimento || ""} ${(d.hora_atendimento || "").slice(0, 5)}`.trim();
   const linkValidacao = qrValue && qrValue !== "PREVIEW-NAO-VALIDO"
     ? qrValue
     : "https://www.unimed.coop.br/site/";
@@ -237,9 +238,9 @@ export function buildUnimedHtml(
   <div class="bg-template">${templateBg ? `<img src="${escapeHtml(templateBg)}" />` : ""}</div>
 
   <!-- linhas internas do quadro do cabeçalho -->
-  <div class="rule" style="top:69.5px;left:20.5px;width:1055px;max-width:1055px;"></div>
-  <div class="rule" style="top:90.2px;left:20.5px;width:1055px;"></div>
-  <div class="rule" style="top:110.9px;left:20.5px;width:1055px;"></div>
+  <div class="rule" style="top:69.5px;left:20.5px;width:759px;"></div>
+  <div class="rule" style="top:90.2px;left:20.5px;width:759px;"></div>
+  <div class="rule" style="top:110.9px;left:20.5px;width:759px;"></div>
 
   <!-- cabeçalho: unidade -->
   <div class="overlay" style="${base("unidade")}">${escapeHtml(d.unidade || "")}</div>
@@ -288,12 +289,12 @@ export function buildUnimedHtml(
 
   <!-- assinatura digital ICP -->
   <div class="overlay" style="${base("assinatura_digital", "white-space:nowrap;")}">${escapeHtml(
-    `${d.medico || ""}: ${d.crm_numero || ""}, AC CNDL RFB v3, ${d.crm_numero || ""}, ${dataHoraAssinatura} BRT ${d.data_atendimento || ""}`,
+    `${d.medico || ""}: ${d.crm_numero || ""}, AC CNDL RFB v3, ${d.crm_numero || ""}, ${dataHoraCurta} BRT ${d.data_atendimento || ""}`,
   )}</div>
 
   <!-- rodapé -->
   <div class="overlay" style="top:1092.5px;left:699.8px;font-size:7.2px;">ANS - Nº ${escapeHtml(d.ans || "34.388-9")}</div>
-  <div class="overlay" style="${base("rodape_impresso")}">Impresso em: ${escapeHtml(dataHoraAssinatura)}</div>
+  <div class="overlay" style="${base("rodape_impresso")}">Impresso em: ${escapeHtml(dataHoraCurta)}</div>
   <div class="overlay" style="${base("rodape_criado")}">Criado por: ${escapeHtml(d.medico || "")}</div>
   <div class="overlay" style="${base("rodape_crm")}">${escapeHtml(d.crm_uf || "CRM-RJ")}: ${escapeHtml(d.crm_numero || "")}</div>
 </div>
