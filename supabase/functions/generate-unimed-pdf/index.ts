@@ -303,7 +303,7 @@ export function buildUnimedHtml(
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 63)}</div>` : ""}
 
   <!-- assinatura manuscrita (upload, modo manual): cobre a assinatura do template com branco e aplica a nova por cima -->
-  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="${boxStyle("assinatura_img", "")}"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
+  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="${boxStyle("assinatura_img", "height:78px;")}"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
 
   <!-- assinatura digital ICP -->
   <div class="overlay" style="${base("assinatura_digital", "white-space:nowrap;")}">${escapeHtml(
