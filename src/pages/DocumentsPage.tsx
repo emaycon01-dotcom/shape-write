@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, Wrench, HeartPulse } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, Wrench, HeartPulse, ShieldPlus } from "lucide-react";
 import { toast } from "sonner";
 
 type Modulo = {
@@ -99,6 +99,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         descricao: "Atestado HapVida / NotreDame com prescrição e QR Code",
         icon: HeartPulse,
         rota: "/dashboard/documents/hapvida",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
+        id: "unimed",
+        titulo: "Atestado Unimed",
+        descricao: "Atestado médico Unimed com assinatura ICP-Brasil e QR Code",
+        icon: ShieldPlus,
+        rota: "/dashboard/documents/unimed",
         creditos: 1,
         qrcode: true,
       },
