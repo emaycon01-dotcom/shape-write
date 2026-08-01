@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DocumentProvider } from "@/contexts/DocumentContext";
 import { DeviceSecurityProvider } from "@/contexts/DeviceSecurityContext";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import SupportWidget from "@/components/SupportWidget";
 import { lazy, Suspense } from "react";
 import LoginPage from "./pages/LoginPage";
 
@@ -52,6 +52,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Admin pages
 const AdminPanelPage = lazy(() => import("./pages/admin/AdminPanelPage"));
 const AdminAprovacoesPage = lazy(() => import("./pages/admin/AdminAprovacoesPage"));
+const AdminChamadosPage = lazy(() => import("./pages/admin/AdminChamadosPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,7 +75,7 @@ const App = () => {
             <DocumentProvider>
               <Toaster />
               <Sonner />
-              <FloatingWhatsApp />
+              <SupportWidget />
               <BrowserRouter>
                 <Suspense fallback={<Loading />}>
                   <Routes>
@@ -122,6 +123,7 @@ const App = () => {
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
                       <Route path="admin/aprovacoes" element={<AdminRoute><AdminAprovacoesPage /></AdminRoute>} />
+                      <Route path="admin/chamados" element={<AdminRoute><AdminChamadosPage /></AdminRoute>} />
                     </Route>
 
                     <Route path="*" element={<NotFound />} />
