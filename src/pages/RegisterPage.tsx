@@ -16,10 +16,12 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [human, setHuman] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleHuman = useCallback((v: boolean) => setHuman(v), []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
