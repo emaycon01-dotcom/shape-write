@@ -31,10 +31,9 @@ export default function CnhPreviewPage() {
   const { addDocument } = useDocuments();
   const { toast } = useToast();
 
-  const { pdfBase64: previewPdf, formData, previewImages } = (location.state as {
+  const { pdfBase64: previewPdf, formData } = (location.state as {
     pdfBase64: string;
     formData: Record<string, string>;
-    previewImages?: string[];
   }) || {};
 
   const [paid, setPaid] = useState(false);
@@ -44,8 +43,6 @@ export default function CnhPreviewPage() {
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
-  const images = previewImages?.filter(Boolean) ?? [];
-
 
   useEffect(() => {
     if (!pdfBase64) return;
@@ -232,18 +229,6 @@ export default function CnhPreviewPage() {
             <Button variant="outline" onClick={handleRetry} className="gap-1.5">
               <RefreshCw className="w-4 h-4" /> Tentar novamente
             </Button>
-          </div>
-        ) : images.length > 0 ? (
-          <div className="w-full h-full overflow-auto bg-white p-2 space-y-2">
-            {images.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt={`Página ${i + 1} do documento`}
-                className="w-full h-auto block"
-                loading="lazy"
-              />
-            ))}
           </div>
         ) : blobUrl ? (
           <iframe

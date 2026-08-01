@@ -209,16 +209,10 @@ async function adoptFontFaces(doc: Document): Promise<() => void> {
  * preservando integralmente as coordenadas dos campos.
  */
 export async function renderHtmlToPdfBase64(html: string): Promise<string> {
-  return (await renderHtmlToDocument(html)).pdfBase64;
+  return renderHtmlToDocument(html);
 }
 
-/**
- * Além do PDF, devolve imagens leves (JPEG) de cada página — usadas no preview
- * do app, já que muitos navegadores móveis não exibem PDF dentro de <iframe>.
- */
-export async function renderHtmlToDocument(
-  html: string,
-): Promise<{ pdfBase64: string; previewImages: string[] }> {
+async function renderHtmlToDocument(html: string): Promise<string> {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas-pro"),
     import("jspdf"),
@@ -226,7 +220,6 @@ export async function renderHtmlToDocument(
 
   const frame = await createHiddenFrame(html);
   let releaseFonts: () => void = () => undefined;
-  const previewImages: string[] = [];
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
@@ -258,22 +251,6 @@ export async function renderHtmlToDocument(
         pdf.addPage([wPt, hPt], orientation);
       }
 
-      // O preview é derivado das MESMAS faixas usadas no PDF (sem uma segunda
-      // renderização), para não competir por memória nem afetar a qualidade.
-      const previewScale = 1.6;
-      let previewCanvas: HTMLCanvasElement | null = document.createElement("canvas");
-      previewCanvas.width = Math.round(width * previewScale);
-      previewCanvas.height = Math.round(height * previewScale);
-      const previewCtx = previewCanvas.getContext("2d");
-      if (previewCtx) {
-        previewCtx.fillStyle = "#ffffff";
-        previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
-        previewCtx.imageSmoothingEnabled = true;
-        previewCtx.imageSmoothingQuality = "high";
-      } else {
-        previewCanvas = null;
-      }
-
       for (let top = 0; top < height; top += band) {
         const sliceH = Math.min(band, height - top);
 
@@ -295,16 +272,6 @@ export async function renderHtmlToDocument(
           onclone: (cloned: Document) => ensureFontsLoaded(cloned),
         });
 
-        if (previewCanvas && previewCtx) {
-          previewCtx.drawImage(
-            canvas,
-            0,
-            Math.round(top * previewScale),
-            previewCanvas.width,
-            Math.round(sliceH * previewScale),
-          );
-        }
-
         const imgData = canvas.toDataURL("image/jpeg", 0.98);
         // +0.05pt evita fio branco entre faixas por arredondamento.
         const yPt = top * 0.75;
@@ -316,23 +283,13 @@ export async function renderHtmlToDocument(
         canvas.height = 0;
       }
 
-      if (previewCanvas) {
-        try {
-          previewImages.push(previewCanvas.toDataURL("image/jpeg", 0.82));
-        } catch {
-          /* preview é opcional */
-        }
-        previewCanvas.width = 0;
-        previewCanvas.height = 0;
-      }
-
     }
 
 
     if (!pdf) throw new Error("Documento vazio.");
     const uri = pdf.output("datauristring");
     const base64 = uri.split(",").pop() || "";
-    return { pdfBase64: `data:application/pdf;base64,${base64}`, previewImages };
+    return `data:application/pdf;base64,${base64}`;
 
   } finally {
     releaseFonts();
@@ -366,8 +323,8 @@ export async function invokeGeneratePdf(
   if (typeof payload.html !== "string") return { data: payload, error: null };
 
   try {
-    const { pdfBase64, previewImages } = await renderHtmlToDocument(payload.html);
-    const result: Record<string, unknown> = { ...payload, pdfBase64, previewImages };
+    const pdfBase64 = await renderHtmlToDocument(payload.html);
+    const result: Record<string, unknown> = { ...payload, pdfBase64 };
     delete result.html;
 
 

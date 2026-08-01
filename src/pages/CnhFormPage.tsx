@@ -372,7 +372,6 @@ export default function CnhFormPage() {
         navigate("/dashboard/documents/cnh/preview", {
           state: {
             pdfBase64: pdfResult,
-            previewImages: data?.previewImages ?? [],
             formData: bodyData,
           },
         });
