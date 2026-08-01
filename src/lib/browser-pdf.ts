@@ -23,21 +23,39 @@ function createHiddenFrame(html: string): Promise<HTMLIFrameElement> {
     frame.style.opacity = "0";
     frame.style.pointerEvents = "none";
 
-    const timeout = window.setTimeout(() => reject(new Error("Tempo esgotado ao preparar o documento.")), 60_000);
-
-    frame.onload = () => {
-      window.clearTimeout(timeout);
-      resolve(frame);
-    };
-    frame.onerror = () => {
-      window.clearTimeout(timeout);
-      reject(new Error("Falha ao preparar o documento para impressão."));
-    };
-
     document.body.appendChild(frame);
-    frame.srcdoc = html;
+
+    const doc = frame.contentDocument;
+    if (!doc || !frame.contentWindow) {
+      frame.remove();
+      reject(new Error("Não foi possível preparar o documento."));
+      return;
+    }
+
+    // document.write mantém o mesmo Document/Window do iframe já anexado,
+    // evitando o descolamento de contexto que ocorre com `srcdoc`.
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    const start = Date.now();
+    const check = () => {
+      const d = frame.contentDocument;
+      if (d && d.defaultView && d.readyState === "complete") {
+        resolve(frame);
+        return;
+      }
+      if (Date.now() - start > 60_000) {
+        frame.remove();
+        reject(new Error("Tempo esgotado ao preparar o documento."));
+        return;
+      }
+      window.setTimeout(check, 60);
+    };
+    check();
   });
 }
+
 
 async function waitForAssets(doc: Document) {
   // Fontes embutidas (@font-face base64)
