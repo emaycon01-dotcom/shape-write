@@ -149,6 +149,26 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard/admin/verificacoes" className="relative hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                      <BadgeCheck className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Verificar Contas</span>}
+                      {unverified > 0 && (
+                        <span
+                          className={
+                            collapsed
+                              ? "absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground"
+                              : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-bold leading-none text-destructive-foreground"
+                          }
+                        >
+                          {unverified > 99 ? "99+" : unverified}
+                        </span>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+
+                  <SidebarMenuButton asChild>
                     <NavLink to="/dashboard/admin/chamados" className="relative hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
                       <Headphones className="mr-2 h-4 w-4" />
                       {!collapsed && <span>Chamados</span>}
