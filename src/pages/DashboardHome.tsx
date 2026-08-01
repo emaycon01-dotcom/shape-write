@@ -144,9 +144,8 @@ export default function DashboardHome() {
         </div>
       </section>
 
-      {/* Aviso de chamados abertos (admin) */}
-      {isStaff && openTickets > 0 && (
       {/* Aviso para contas ainda não verificadas */}
+
       {user?.verified === false && (
         <div className="flex items-center gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4 backdrop-blur">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-warning/20 ring-1 ring-warning/40">
