@@ -11,7 +11,9 @@ import {
   PenTool,
   Smartphone,
   UserCheck,
+  BadgeCheck,
   Headphones,
+
 } from "lucide-react";
 import {
   Sidebar,
