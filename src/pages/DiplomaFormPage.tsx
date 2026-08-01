@@ -566,31 +566,10 @@ export default function DiplomaFormPage() {
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Cabeçalho, mantenedora, CNPJ e reitor são preenchidos automaticamente.
+              Cabeçalho, mantenedora, CNPJ, reitor e portarias de credenciamento/reconhecimento são preenchidos automaticamente.
             </p>
           </div>
 
-
-          <div className="space-y-1.5">
-            <FieldLabel>Credenciamento</FieldLabel>
-            <Textarea value={form.credenciamento} onChange={set("credenciamento")} rows={2} className={inputCls} />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel>Recredenciamento</FieldLabel>
-            <Textarea value={form.recredenciamento} onChange={set("recredenciamento")} rows={2} className={inputCls} />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel>Reconhecimento do curso</FieldLabel>
-            <Textarea value={form.reconhecimento} onChange={set("reconhecimento")} rows={2} className={inputCls} />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel>Renovação de reconhecimento</FieldLabel>
-            <Textarea value={form.renovacao} onChange={set("renovacao")} rows={2} className={inputCls} />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel>Recredenciamento (universidade — quadro da direita)</FieldLabel>
-            <Textarea value={form.recredenciamentoUniversidade} onChange={set("recredenciamentoUniversidade")} rows={2} className={inputCls} />
-          </div>
         </div>
 
         {/* EXPEDIÇÃO E REGISTRO */}
