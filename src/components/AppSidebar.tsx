@@ -41,9 +41,11 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
+  const { count: openTickets } = useOpenTickets();
 
 
   const isAdmin = user?.role === "admin";
+
 
   const renderMenuItems = (items: typeof commonItems) =>
     items.map((item) => (
