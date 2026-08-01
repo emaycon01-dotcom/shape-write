@@ -13,6 +13,7 @@ const PDFCO_API_URL = "https://api.pdf.co/v1/pdf/convert/from/html";
 
 async function generateWithPdfShift(html: string, apiKey: string) {
   const pdfRes = await fetch(PDFSHIFT_API_URL, {
+    signal: AbortSignal.timeout(60_000),
     method: "POST",
     headers: {
       Authorization: `Basic ${btoa(`api:${apiKey}`)}`,
@@ -30,6 +31,9 @@ async function generateWithPdfShift(html: string, apiKey: string) {
 
   if (!pdfRes.ok) {
     const errText = await pdfRes.text();
+    if (pdfRes.status === 402 || /remaining credits/i.test(errText)) {
+      throw new Error("PDFSHIFT_NO_CREDITS");
+    }
     throw new Error(`PDFShift error [${pdfRes.status}]: ${errText}`);
   }
 
@@ -38,6 +42,7 @@ async function generateWithPdfShift(html: string, apiKey: string) {
 
 async function generateWithPdfCo(html: string, apiKey: string) {
   const pdfRes = await fetch(PDFCO_API_URL, {
+    signal: AbortSignal.timeout(60_000),
     method: "POST",
     headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -62,7 +67,7 @@ async function generateWithPdfCo(html: string, apiKey: string) {
     );
   }
 
-  const fileRes = await fetch(payload.url);
+  const fileRes = await fetch(payload.url, { signal: AbortSignal.timeout(45_000) });
   if (!fileRes.ok) {
     const errText = await fileRes.text();
     throw new Error(`PDF.co file download error [${fileRes.status}]: ${errText}`);
@@ -388,7 +393,12 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error("Error generating HapVida PDF:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
+    let msg = error instanceof Error ? error.message : "Unknown error";
+    if (/PDFSHIFT_NO_CREDITS|remaining credits/i.test(msg)) {
+      msg = "O servico de geracao de PDF esta sem creditos. Avise o administrador para recarregar.";
+    } else if (/TimeoutError|timed out|aborted/i.test(msg)) {
+      msg = "A geracao demorou demais e foi cancelada. Tente novamente em instantes.";
+    }
     return new Response(JSON.stringify({ success: false, error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
