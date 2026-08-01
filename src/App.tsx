@@ -105,15 +105,8 @@ const App = () => {
                     <Route path="/dashboard" element={<DashboardLayout />}>
                       <Route index element={<DashboardHome />} />
                       <Route path="documents" element={<DocumentsPage />} />
-                      <Route path="documents/cnh" element={<CnhFormPage />} />
-                      <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
-                      <Route path="documents/rg" element={<RgFormPage />} />
-                      <Route path="documents/rg/preview" element={<RgPreviewPage />} />
-                      <Route path="documents/atestado" element={<AtestadoFormPage />} />
-                      <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
-
-                      <Route path="documents" element={<DocumentsPage />} />
                       <Route element={<VerifiedGate />}>
+
                         <Route path="documents/cnh" element={<CnhFormPage />} />
                         <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
                         <Route path="documents/rg" element={<RgFormPage />} />
