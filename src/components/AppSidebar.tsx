@@ -27,6 +27,8 @@ import {
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.webp";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { useOpenTickets } from "@/hooks/use-open-tickets";
+
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
