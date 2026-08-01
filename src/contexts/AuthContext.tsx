@@ -25,6 +25,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+export const PENDING_MSG = "Sua conta está em análise. Aguarde a aprovação de um administrador.";
+export const REJECTED_MSG = "Seu acesso foi recusado pela administração.";
+
 async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
   // Consultas em paralelo (antes eram 3 idas sequenciais ao banco)
   const [blockedRes, profileRes, rolesRes] = await Promise.all([
@@ -34,7 +37,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
       .eq("user_id", supabaseUser.id)
       .eq("status", "bloqueado")
       .maybeSingle(),
-    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at").eq("user_id", supabaseUser.id).maybeSingle(),
+    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at, status").eq("user_id", supabaseUser.id).maybeSingle(),
     supabase.from("user_roles").select("cargo").eq("user_id", supabaseUser.id),
   ]);
 
@@ -43,8 +46,14 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
   }
 
-  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string } | null;
+  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string; status?: string } | null;
   const isAdmin = rolesRes.data?.some((r) => r.cargo === "admin") ?? false;
+
+  const status = profile?.status ?? "pendente";
+  if (!isAdmin && status !== "aprovado") {
+    await supabase.auth.signOut();
+    throw new Error(status === "rejeitado" ? REJECTED_MSG : PENDING_MSG);
+  }
 
   return {
     id: supabaseUser.id,
@@ -56,6 +65,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     createdAt: profile?.created_at || supabaseUser.created_at,
   };
 }
+
 
 const USER_CACHE_KEY = "auth_user_cache";
 
