@@ -362,6 +362,9 @@ serve(async (req) => {
       especialidade: body.especialidade || "CLÍNICA MÉDICA",
       uf: body.uf || "",
       template_bg: body.template_base64 || "",
+      assinatura_base64: typeof body.assinatura_base64 === "string" && body.assinatura_base64.startsWith("data:image/")
+        ? body.assinatura_base64
+        : "",
     };
 
     const isPreview = body.preview === true || body.preview === "true";
