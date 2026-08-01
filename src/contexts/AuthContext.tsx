@@ -10,7 +10,10 @@ interface User {
   credits: number;
   plano: string;
   createdAt: string;
+  /** Conta liberada pelo staff para ver e gerar documentos. */
+  verified: boolean;
 }
+
 
 interface AuthContextType {
   user: User | null;
