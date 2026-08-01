@@ -198,8 +198,17 @@ export default function DiplomaPreviewPage() {
               <RefreshCw className="h-4 w-4" /> Tentar novamente
             </Button>
           </div>
-        ) : blobUrl ? (
-          <iframe src={blobUrl} className="h-full w-full border-0 bg-white" title="PDF Preview" />
+        ) : pages.length ? (
+          <div className="h-full w-full overflow-auto bg-white p-2">
+            {pages.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`Diploma página ${i + 1}`}
+                className="mb-3 w-full rounded shadow-sm last:mb-0"
+              />
+            ))}
+          </div>
         ) : (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
