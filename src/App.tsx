@@ -71,6 +71,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Admin pages
 const AdminPanelPage = lazy(() => import("./pages/admin/AdminPanelPage"));
 const AdminAprovacoesPage = lazy(() => import("./pages/admin/AdminAprovacoesPage"));
+const AdminVerificacoesPage = lazy(() => import("./pages/admin/AdminVerificacoesPage"));
+
 const AdminChamadosPage = lazy(() => import("./pages/admin/AdminChamadosPage"));
 
 const queryClient = new QueryClient({
