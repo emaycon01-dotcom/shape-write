@@ -23,7 +23,7 @@ import {
 import templateP1Url from "@/assets/template-diploma-p1-hq.jpg";
 import templateP2Url from "@/assets/template-diploma-p2-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
-import { maskDate, maskDigits } from "@/lib/masks";
+import { maskDate, maskDigits, maskCPF } from "@/lib/masks";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -44,6 +44,8 @@ interface DiplomaForm {
   modalidade: Modalidade;
   curso: string;
   aluno: string;
+  cpf: string;
+  sexo: string;
   nacionalidade: string;
   naturalidade: string;
   nascimento: string;
@@ -84,6 +86,8 @@ const initial: DiplomaForm = {
   modalidade: "tecnologo",
   curso: "DESIGN DE MODA",
   aluno: "",
+  cpf: "",
+  sexo: "M",
   nacionalidade: "BRASILEIRO(A)",
   naturalidade: "CEARÁ",
   nascimento: "",
@@ -227,6 +231,17 @@ export default function DiplomaFormPage() {
       processo: `Processo n° ${form.processo}.`,
       registro_cidade_data: `${form.registroCidade}, ${form.registroData}`,
       serial: form.serial,
+      // ---- campos crus p/ o portal de validação ----
+      cpf: form.cpf,
+      sexo: form.sexo,
+      modalidade: form.modalidade,
+      cidade_expedicao: form.cidadeExpedicao,
+      registro_numero: form.registroNumero,
+      registro_livro: form.registroLivro,
+      registro_folha: form.registroFolha,
+      registro_data: form.registroData,
+      registro_cidade: form.registroCidade,
+      processo_numero: form.processo,
       ...(form.codigoValidacao ? { codigo_validacao: form.codigoValidacao } : {}),
       field_positions: loadDiplomaFieldPositions() ?? undefined,
       template_p1_base64,
@@ -257,7 +272,13 @@ export default function DiplomaFormPage() {
         navigate("/dashboard/history");
       } else {
         navigate("/dashboard/documents/diploma/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData, codigoValidacao: data?.codigo_validacao },
+          state: {
+            pdfBase64: pdfResult,
+            formData: bodyData,
+            codigoValidacao: data?.codigo_validacao,
+            documentoId: data?.documento_id,
+            validationUrl: data?.validation_url,
+          },
         });
       }
     } catch (err) {
@@ -388,6 +409,24 @@ export default function DiplomaFormPage() {
           <div className="space-y-1.5">
             <FieldLabel required>Nome completo</FieldLabel>
             <Input value={form.aluno} onChange={set("aluno")} placeholder="GUSTAVO AUGUSTO RODRIGUES DA SILVA" className={inputCls} required />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <FieldLabel>CPF (portal de validação)</FieldLabel>
+              <Input value={form.cpf} onChange={setMask("cpf", maskCPF)} inputMode="numeric" placeholder="123.456.789-00" className={inputCls} />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel>Sexo</FieldLabel>
+              <Select value={form.sexo} onValueChange={(v) => setForm((p) => ({ ...p, sexo: v }))}>
+                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="M">Masculino</SelectItem>
+                  <SelectItem value="F">Feminino</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
           </div>
 
           <div className="grid grid-cols-2 gap-4">

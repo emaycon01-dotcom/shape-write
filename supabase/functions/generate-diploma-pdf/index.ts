@@ -1,6 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
-import { qrSvg, buildCodigoValidacao } from "./validacao.ts";
+import {
+  qrSvg,
+  
+  buildDocumentoId,
+  buildValidationUrl,
+  registerDiplomaPortal,
+  toIsoDate,
+  maskCpf,
+  maskCnpj,
+  flexTitulo,
+} from "./validacao.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -345,6 +355,96 @@ ${sheet(d.template_p2 || "", page2, true)}
 </html>`;
 }
 
+/* ------------------------------------------------ payload do portal */
+
+function buildPortalPayload(
+  b: Record<string, string>,
+  documentoId: string,
+): Record<string, unknown> {
+  const sexo = /^f/i.test(b.sexo || "") ? "Feminino" : "Masculino";
+  const titulo = flexTitulo(b.titulo || "", sexo);
+
+  return {
+    documento_id: documentoId,
+    codigo_validacao: documentoId,
+    tipo_documento: "diploma-estacio",
+    modelo: b.modelo || "",
+
+    nome_aluno: (b.aluno || "").toUpperCase(),
+    cpf: maskCpf(b.cpf || ""),
+    rg: b.identidade || "",
+    data_nascimento: toIsoDate(b.nascimento || ""),
+    sexo,
+
+    curso_nome: (b.curso || "").toUpperCase(),
+    curso_nome_completo: (b.curso_completo || "").toUpperCase(),
+    grau: titulo,
+    data_colacao: toIsoDate(b.data_colacao || ""),
+    data_expedicao: toIsoDate(b.data_expedicao || b.registro_data || ""),
+
+    unidade_nome: b.instituicao || "",
+    unidade_cidade: b.registro_cidade || b.cidade_expedicao || "",
+    unidade_uf: b.uf || "",
+
+    numero_registro: b.registro_numero || "",
+    numero_livro: b.registro_livro || "",
+    numero_folha: b.registro_folha || "",
+    numero_processo: b.processo_numero || "",
+    data_registro: toIsoDate(b.registro_data || ""),
+
+    dados_completos: {
+      sexo,
+      aluno: {
+        nome: (b.aluno || "").toUpperCase(),
+        cpf: maskCpf(b.cpf || ""),
+        rg: b.identidade || "",
+        sexo,
+        nascimento: toIsoDate(b.nascimento || ""),
+        naturalidade: b.naturalidade || "",
+        nacionalidade: b.nacionalidade || "Brasileira",
+        mae: b.mae || "",
+      },
+      ies: {
+        razao_social: b.instituicao || "",
+        cnpj: maskCnpj(b.cnpj || ""),
+        codigo_mec: b.codigo_mec || "",
+        municipio: b.registro_cidade || b.cidade_expedicao || "",
+        uf: b.uf || "",
+        credenciamento_texto: b.credenciamento || "",
+        recredenciamento_texto: b.recredenciamento || "",
+      },
+      mantenedora: {
+        razao_social: b.mantenedora || "",
+        cnpj: maskCnpj(b.cnpj || ""),
+      },
+      curso: {
+        nome: (b.curso || "").toUpperCase(),
+        nome_completo: (b.curso_completo || "").toUpperCase(),
+        codigo_emec: b.codigo_emec || "",
+        grau: titulo,
+        modalidade: b.modalidade || "",
+        titulo_conferido: titulo,
+        carga_horaria: b.carga_horaria || "",
+        conclusao: toIsoDate(b.data_conclusao || ""),
+        colacao: toIsoDate(b.data_colacao || ""),
+        reconhecimento_texto: b.reconhecimento || "",
+        renovacao_texto: b.renovacao || "",
+      },
+      registro: {
+        numero: b.registro_numero || "",
+        livro: b.registro_livro || "",
+        folha: b.registro_folha || "",
+        processo: b.processo_numero || "",
+        data: toIsoDate(b.registro_data || ""),
+        responsavel: b.secretario || "",
+        texto: b.registro_texto || "",
+      },
+      reitor: b.reitor || "",
+      serial: b.serial || "",
+    },
+  };
+}
+
 /* ---------------------------------------------------------------- serve */
 
 serve(async (req) => {
@@ -354,21 +454,50 @@ serve(async (req) => {
   if (authResult instanceof Response) return authResult;
 
   try {
+    const body = await req.json();
+
+    /* ---- registro no portal (chamado após a geração, com PDF + preview) ---- */
+    if (body.action === "register_portal") {
+      const form = (body.form || {}) as Record<string, string>;
+      const documentoId =
+        body.documento_id ||
+        (await buildDocumentoId(
+          `${form.aluno || ""}|${form.curso || ""}|${form.identidade || ""}`,
+          form.data_colacao,
+        ));
+
+      const payload = buildPortalPayload(form, documentoId);
+      if (body.pdf_base64) payload.pdf_base64 = body.pdf_base64;
+      if (body.pdf_preview_base64) payload.pdf_preview_base64 = body.pdf_preview_base64;
+
+      const result = await registerDiplomaPortal(documentoId, payload);
+      return new Response(
+        JSON.stringify({
+          success: result.registered,
+          documento_id: result.documentoId,
+          validation_url: result.validationUrl,
+          error: result.error,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const PDFSHIFT_API_KEY = Deno.env.get("PDFSHIFT_API_KEY");
     const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY");
     if (!PDFSHIFT_API_KEY && !PDFCO_API_KEY) {
       throw new Error("No PDF provider API keys are configured");
     }
 
-    const body = await req.json();
-
-    const codigo =
-      body.codigo_validacao ||
-      (await buildCodigoValidacao(`${body.aluno || ""}|${body.curso || ""}|${body.identidade || ""}`));
-    const urlBase = (body.url_validacao_base || "https://consultadiploma.estacio.br/diploma/").replace(/\/?$/, "/");
-    const urlValidacao = `${urlBase}${codigo}`;
+    // documento_id determinístico → a URL do QR é conhecida antes do registro.
+    const documentoId = await buildDocumentoId(
+      `${body.aluno || ""}|${body.curso || ""}|${body.identidade || ""}`,
+      body.data_colacao,
+    );
+    const urlValidacao = buildValidationUrl(documentoId);
+    const codigo = body.codigo_validacao || documentoId;
 
     const data: Record<string, string> = {
+
       instituicao: body.instituicao || "",
       instituicao_l1: body.instituicao_l1 || "",
       instituicao_l2: body.instituicao_l2 || "",
@@ -425,7 +554,10 @@ serve(async (req) => {
         success: true,
         pdfBase64: `data:application/pdf;base64,${bytesToBase64(pdfBuffer)}`,
         codigo_validacao: codigo,
+        documento_id: documentoId,
+        validation_url: urlValidacao,
         qr_code_url: urlValidacao,
+
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
