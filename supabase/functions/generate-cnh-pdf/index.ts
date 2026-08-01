@@ -480,8 +480,8 @@ ${CNH_FONT_FACE}
   .qr-overlay { background:#fff; z-index: 12; overflow: hidden; }
   .qr-overlay svg { width:100%; height:100%; display:block; }
   .mrz-line { display:block; text-align:left; white-space:pre; }
-  .sig-overlay { display: flex; align-items: center; justify-content: center; overflow: hidden; box-sizing: border-box; }
-  .sig-overlay img { width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:center; image-rendering: high-quality; }
+  .sig-overlay { display:block; overflow:hidden !important; clip-path:inset(0); contain:strict; box-sizing:border-box; }
+  .sig-overlay img { position:absolute; inset:0; display:block; width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:contain; object-position:center; image-rendering:high-quality; }
 </style>
 </head>
 <body>
@@ -601,10 +601,10 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   .sig-overlay {
     top: 216px; left: 85px;
     width: 95px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; box-sizing: border-box;
+    display:block; overflow:hidden !important; clip-path:inset(0);
+    contain:strict; box-sizing:border-box;
   }
-  .sig-overlay img { width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:center; image-rendering: high-quality; }
+  .sig-overlay img { position:absolute; inset:0; display:block; width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:contain; object-position:center; image-rendering:high-quality; }
   .reg-vert-top {
     top: 243px; left: 60px;
     transform: rotate(-90deg);

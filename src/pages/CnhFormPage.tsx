@@ -17,6 +17,7 @@ import templateCnhUrl from "@/assets/template-cnh-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { normalizeSignatureImage } from "@/lib/signature-image";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -310,6 +311,9 @@ export default function CnhFormPage() {
     try {
       // Convert template to base64
       const templateBase64 = await imgToBase64(templateCnhUrl);
+      const assinaturaNormalizada = assPreview
+        ? await normalizeSignatureImage(assPreview)
+        : "";
 
         const bodyData = {
         nome_completo: form.nomeCompleto,
@@ -339,7 +343,7 @@ export default function CnhFormPage() {
         nome_mae: form.nomeMae,
         observacoes: form.observacoes.map((o) => `${o};`).join(" "),
         foto_base64: fotoPreview || "",
-        assinatura_base64: assPreview || "",
+        assinatura_base64: assinaturaNormalizada,
         template_base64: templateBase64,
         field_positions: loadCnhFieldPositions() ?? undefined,
       };
