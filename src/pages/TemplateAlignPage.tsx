@@ -390,7 +390,7 @@ const EDITORS: Record<DocKey, EditorConfig> = {
   },
   atestado: {
     key: "atestado",
-    title: "Atestado Médico",
+    title: "Atestado UPA24h",
     storageKey: ATESTADO_ALIGN_STORAGE_KEY,
     defaults: defaultAtestadoFields,
     bg: templateAtestadoBgUrl,

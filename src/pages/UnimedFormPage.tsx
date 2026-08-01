@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadUnimedFieldPositions } from "@/lib/unimed-align";
 import templateUnimedUrl from "@/assets/template-unimed-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -221,6 +222,10 @@ export default function UnimedFormPage() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((p) => ({ ...p, [field]: e.target.value }));
 
+  const setMask = (field: keyof UnimedFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
   const selecionarUnidade = (idx: number) => {
     setForm((p) => ({
       ...p,
@@ -382,7 +387,7 @@ export default function UnimedFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data de Nascimento</FieldLabel>
-              <Input value={form.nascimento} onChange={set("nascimento")} placeholder="14/08/2000" className={inputCls} required />
+              <Input value={form.nascimento} onChange={setMask("nascimento", maskDate)} inputMode="numeric" placeholder="14/08/2000" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Idade (automática)</FieldLabel>
@@ -425,11 +430,11 @@ export default function UnimedFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data do Atendimento</FieldLabel>
-              <Input value={form.dataAtendimento} onChange={set("dataAtendimento")} placeholder="11/12/2024" className={inputCls} required />
+              <Input value={form.dataAtendimento} onChange={setMask("dataAtendimento", maskDate)} inputMode="numeric" placeholder="11/12/2024" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Hora do Atendimento</FieldLabel>
-              <Input value={form.horaAtendimento} onChange={set("horaAtendimento")} placeholder="13:00" className={inputCls} required />
+              <Input value={form.horaAtendimento} onChange={setMask("horaAtendimento", maskTime)} inputMode="numeric" placeholder="13:00" className={inputCls} required />
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">
@@ -500,7 +505,7 @@ export default function UnimedFormPage() {
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Telefone de contato</FieldLabel>
-              <Input value={form.telefone} onChange={set("telefone")} className={inputCls} />
+              <Input value={form.telefone} onChange={setMask("telefone", maskPhone)} inputMode="numeric" className={inputCls} />
             </div>
           </div>
 
@@ -516,7 +521,7 @@ export default function UnimedFormPage() {
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Nº do CRM</FieldLabel>
-              <Input value={form.crmNumero} onChange={set("crmNumero")} placeholder="0121699" className={inputCls} required />
+              <Input value={form.crmNumero} onChange={setMask("crmNumero", maskDigits(7))} inputMode="numeric" placeholder="0121699" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Especialidade</FieldLabel>

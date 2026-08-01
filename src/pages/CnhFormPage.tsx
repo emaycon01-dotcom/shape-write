@@ -15,6 +15,7 @@ import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateCnhUrl from "@/assets/template-cnh-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -260,6 +261,10 @@ export default function CnhFormPage() {
   const set = (field: keyof CnhFormData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
 
+  const setMask = (field: keyof CnhFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
   const setSelect = (field: keyof CnhFormData) => (v: string) =>
     setForm((p) => ({ ...p, [field]: v }));
 
@@ -422,7 +427,7 @@ export default function CnhFormPage() {
 
           <div className="space-y-1.5">
             <FieldLabel>CPF</FieldLabel>
-            <Input value={form.cpf} onChange={set("cpf")} placeholder="000.000.000-00" className={inputCls} required />
+            <Input value={form.cpf} onChange={setMask("cpf", maskCPF)} inputMode="numeric" placeholder="000.000.000-00" className={inputCls} required />
           </div>
 
           <div className="space-y-1.5">
@@ -512,7 +517,7 @@ export default function CnhFormPage() {
           <div className="space-y-1.5">
             <FieldLabel>Registro da CNH (11 dígitos)</FieldLabel>
             <div className="flex gap-2">
-              <Input value={form.registro} onChange={set("registro")} placeholder="00000000000" className={inputCls + " flex-1"} required />
+              <Input value={form.registro} onChange={setMask("registro", maskDigits(11))} inputMode="numeric" placeholder="00000000000" className={inputCls + " flex-1"} required />
               <GenerateBtn onClick={() => setForm((p) => ({ ...p, registro: generateRandom(11) }))} />
             </div>
           </div>
@@ -603,11 +608,11 @@ export default function CnhFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel>Data de Emissão</FieldLabel>
-              <Input value={form.dataEmissao} onChange={set("dataEmissao")} placeholder="DD/MM/AAAA" className={inputCls} required />
+              <Input value={form.dataEmissao} onChange={setMask("dataEmissao", maskDate)} inputMode="numeric" placeholder="DD/MM/AAAA" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Data de Validade</FieldLabel>
-              <Input value={form.dataValidade} onChange={set("dataValidade")} placeholder="DD/MM/AAAA" className={inputCls} required />
+              <Input value={form.dataValidade} onChange={setMask("dataValidade", maskDate)} inputMode="numeric" placeholder="DD/MM/AAAA" className={inputCls} required />
             </div>
           </div>
 
@@ -672,7 +677,7 @@ export default function CnhFormPage() {
           <div className="space-y-1.5">
             <FieldLabel>Código de Segurança</FieldLabel>
             <div className="flex gap-2">
-              <Input value={form.codigoSeguranca} onChange={set("codigoSeguranca")} placeholder="00000000000" className={inputCls + " flex-1"} required />
+              <Input value={form.codigoSeguranca} onChange={setMask("codigoSeguranca", maskDigits(11))} inputMode="numeric" placeholder="00000000000" className={inputCls + " flex-1"} required />
               <GenerateBtn onClick={() => setForm((p) => ({ ...p, codigoSeguranca: generateRandom(11) }))} />
             </div>
           </div>
@@ -693,7 +698,7 @@ export default function CnhFormPage() {
           <div className="space-y-1.5">
             <FieldLabel>Nº Espelho</FieldLabel>
             <div className="flex gap-2">
-              <Input value={form.numeroEspelho} onChange={set("numeroEspelho")} placeholder="00000000000" className={inputCls + " flex-1"} required />
+              <Input value={form.numeroEspelho} onChange={setMask("numeroEspelho", maskDigits(11))} inputMode="numeric" placeholder="00000000000" className={inputCls + " flex-1"} required />
               <GenerateBtn onClick={() => setForm((p) => ({ ...p, numeroEspelho: generateRandom(11) }))} />
             </div>
           </div>

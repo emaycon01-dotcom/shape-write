@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadHapvidaFieldPositions } from "@/lib/hapvida-align";
 import templateHapvidaUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskCPF, maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -54,7 +55,7 @@ interface HapvidaFormData {
   horaAtendimento: string;
   dias: string;
   cid: string;
-  unidadeIdx: number;
+  unidade: string;
   endereco1: string;
   endereco2: string;
   medico: string;
@@ -74,7 +75,7 @@ const initial: HapvidaFormData = {
   horaAtendimento: "",
   dias: "1",
   cid: "",
-  unidadeIdx: 0,
+  unidade: UNIDADES[0].nome,
   endereco1: UNIDADES[0].linha1,
   endereco2: UNIDADES[0].linha2,
   medico: "CARINE GONÇALVES LOPES PIETRZAKI",
@@ -132,6 +133,7 @@ export default function HapvidaFormPage() {
           docNumero: b.cns || b.cpf || "",
           celular: b.celular || "",
           nascimento: b.nascimento || "",
+          unidade: b.unidade_curta || b.unidade || p.unidade,
           uf: b.uf || p.uf,
           tipoAtendimento: b.tipo_atendimento || p.tipoAtendimento,
           dataAtendimento: b.data_atendimento || "",
@@ -177,12 +179,18 @@ export default function HapvidaFormPage() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((p) => ({ ...p, [field]: e.target.value }));
 
-  const selecionarUnidade = (idx: number) => {
+  const setMask = (field: keyof HapvidaFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
+  const setUnidade = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nome = e.target.value;
+    const known = UNIDADES.find((u) => u.nome === nome);
     setForm((p) => ({
       ...p,
-      unidadeIdx: idx,
-      endereco1: UNIDADES[idx].linha1,
-      endereco2: UNIDADES[idx].linha2,
+      unidade: nome,
+      endereco1: known ? known.linha1 : p.endereco1,
+      endereco2: known ? known.linha2 : p.endereco2,
     }));
   };
 
@@ -194,7 +202,7 @@ export default function HapvidaFormPage() {
     try {
       const templateBase64 = await loadTemplateBase64(templateHapvidaUrl);
       const horaCurta = form.horaAtendimento.slice(0, 5);
-      const unidade = UNIDADES[form.unidadeIdx]?.nome || UNIDADES[0].nome;
+      const unidade = form.unidade.trim();
 
       const bodyData = {
         paciente: form.paciente,
@@ -320,7 +328,7 @@ export default function HapvidaFormPage() {
             </div>
             <Input
               value={form.docNumero}
-              onChange={set("docNumero")}
+              onChange={setMask("docNumero", form.docTipo === "cpf" ? maskCPF : maskDigits(15))} inputMode="numeric"
               placeholder={form.docTipo === "cpf" ? "000.000.000-00" : "801440458570767"}
               className={inputCls}
               required
@@ -330,11 +338,11 @@ export default function HapvidaFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Celular</FieldLabel>
-              <Input value={form.celular} onChange={set("celular")} placeholder="(34) 99649-7562" className={inputCls} required />
+              <Input value={form.celular} onChange={setMask("celular", maskPhone)} inputMode="numeric" placeholder="(34) 99649-7562" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Data de Nascimento</FieldLabel>
-              <Input value={form.nascimento} onChange={set("nascimento")} placeholder="14/05/1990" className={inputCls} required />
+              <Input value={form.nascimento} onChange={setMask("nascimento", maskDate)} inputMode="numeric" placeholder="14/05/1990" className={inputCls} required />
             </div>
           </div>
         </div>
@@ -366,11 +374,11 @@ export default function HapvidaFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data do Atendimento</FieldLabel>
-              <Input value={form.dataAtendimento} onChange={set("dataAtendimento")} placeholder="27/01/2025" className={inputCls} required />
+              <Input value={form.dataAtendimento} onChange={setMask("dataAtendimento", maskDate)} inputMode="numeric" placeholder="27/01/2025" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Hora do Atendimento</FieldLabel>
-              <Input value={form.horaAtendimento} onChange={set("horaAtendimento")} placeholder="09:46" className={inputCls} required />
+              <Input value={form.horaAtendimento} onChange={setMask("horaAtendimento", maskTime)} inputMode="numeric" placeholder="09:46" className={inputCls} required />
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">
@@ -395,23 +403,22 @@ export default function HapvidaFormPage() {
 
           <div className="space-y-1.5">
             <FieldLabel required>Unidade</FieldLabel>
-            <div className="flex flex-wrap gap-2">
-              {UNIDADES.map((u, i) => (
-                <button
-                  key={u.nome}
-                  type="button"
-                  onClick={() => selecionarUnidade(i)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                    form.unidadeIdx === i
-                      ? "border-primary bg-primary/15 text-primary"
-                      : "border-border bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  {u.nome}
-                </button>
-              ))}
-            </div>
+            <Input
+              value={form.unidade}
+              onChange={setUnidade}
+              list="hapvida-unidades"
+              placeholder="Ex: Hapvida - Fortaleza (Centro)"
+              className={inputCls}
+              required
+            />
+            <datalist id="hapvida-unidades">
+              {UNIDADES.map((u) => <option key={u.nome} value={u.nome} />)}
+            </datalist>
+            <p className="text-[11px] text-muted-foreground">
+              Digite livremente o nome da unidade. As sugestões preenchem o endereço automaticamente.
+            </p>
           </div>
+
 
           <div className="space-y-1.5">
             <FieldLabel>Endereço - linha 1</FieldLabel>

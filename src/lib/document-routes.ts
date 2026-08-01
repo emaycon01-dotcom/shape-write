@@ -28,7 +28,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
 export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "cnh": "CNH Digital",
   "rg": "RG Digital",
-  "atestado": "Atestado Médico",
+  "atestado": "Atestado UPA24h",
   "hapvida": "Atestado HapVida",
   "unimed": "Atestado Unimed",
   "crlv": "CRLV Digital",
