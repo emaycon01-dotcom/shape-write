@@ -123,6 +123,7 @@ export async function registerDiplomaPortal(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
+        "x-api-key": apiKey,
       },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(60000),
