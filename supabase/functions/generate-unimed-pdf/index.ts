@@ -262,16 +262,16 @@ export function buildUnimedHtml(
   <div class="overlay" style="${base("endereco")}">${escapeHtml(d.endereco || "")}</div>
 
   <!-- rótulos fixos do quadro -->
-  <div class="overlay" style="top:54.8px;left:18.6px;font-size:10.3px;">Nome do paciente:</div>
-  <div class="overlay" style="top:54.8px;left:435.1px;font-size:10.3px;">Nº Pront.:</div>
-  <div class="overlay" style="top:54.8px;left:610.9px;font-size:10.3px;">N° Atend.</div>
-  <div class="overlay" style="top:75.4px;left:18.6px;font-size:10.3px;">Data de Nascimento:</div>
-  <div class="overlay" style="top:75.4px;left:425.9px;font-size:10.3px;">Convênio:</div>
-  <div class="overlay" style="top:96.2px;left:19.6px;font-size:10.3px;">Nome da mãe:</div>
-  <div class="overlay" style="top:94px;left:425.9px;font-size:10.3px;">Setor:</div>
-  <div class="overlay" style="top:96.2px;left:706.1px;font-size:10.3px;">Leito:</div>
-  <div class="overlay" style="top:116.7px;left:20.7px;font-size:10.3px;">Profissional:</div>
-  <div class="overlay" style="top:111.4px;left:425.9px;font-size:10.3px;">Data Assinatura:</div>
+  <div class="overlay" style="${base("lbl_paciente")}">Nome do paciente:</div>
+  <div class="overlay" style="${base("lbl_prontuario")}">Nº Pront.:</div>
+  <div class="overlay" style="${base("lbl_atendimento")}">N° Atend.</div>
+  <div class="overlay" style="${base("lbl_nascimento")}">Data de Nascimento:</div>
+  <div class="overlay" style="${base("lbl_convenio")}">Convênio:</div>
+  <div class="overlay" style="${base("lbl_mae")}">Nome da mãe:</div>
+  <div class="overlay" style="${base("lbl_setor")}">Setor:</div>
+  <div class="overlay" style="${base("lbl_leito")}">Leito:</div>
+  <div class="overlay" style="${base("lbl_profissional")}">Profissional:</div>
+  <div class="overlay" style="${base("lbl_data_assinatura")}">Data Assinatura:</div>
 
   <!-- valores do quadro -->
   <div class="overlay" style="${base("paciente")}">${escapeHtml(d.paciente || "")}</div>
