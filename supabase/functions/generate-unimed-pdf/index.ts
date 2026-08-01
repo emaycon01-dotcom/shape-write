@@ -246,6 +246,8 @@ export function buildUnimedHtml(
   .sig-mask { background: #ffffff; opacity: 1; z-index: 12; }
   .sig { z-index: 13; display: flex; align-items: flex-end; }
   .sig img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .sig-rule { position: absolute; z-index: 14; height: 1px; background: #111; }
+  .sig-label { position: absolute; z-index: 14; color: #111; font-size: 10.3px; line-height: 1; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -303,7 +305,7 @@ export function buildUnimedHtml(
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 63)}</div>` : ""}
 
   <!-- assinatura manuscrita (upload, modo manual): cobre a assinatura do template com branco e aplica a nova por cima -->
-  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="top:505px;left:226px;width:342px;height:103px;"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
+  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="top:492px;left:218px;width:360px;height:142px;"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div><div class="sig-rule" style="top:609px;left:238px;width:292px;"></div><div class="sig-label" style="top:616px;left:339px;">Assinatura e Carimbo</div>` : ""}
 
   <!-- assinatura digital ICP -->
   <div class="overlay" style="${base("assinatura_digital", "white-space:nowrap;")}">${escapeHtml(
