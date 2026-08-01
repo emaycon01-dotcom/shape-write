@@ -130,8 +130,8 @@ const App = () => {
                       <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
-                      <Route path="admin/aprovacoes" element={<AdminRoute><AdminAprovacoesPage /></AdminRoute>} />
-                      <Route path="admin/chamados" element={<AdminRoute><AdminChamadosPage /></AdminRoute>} />
+                      <Route path="admin/aprovacoes" element={<StaffRoute><AdminAprovacoesPage /></StaffRoute>} />
+                      <Route path="admin/chamados" element={<StaffRoute><AdminChamadosPage /></StaffRoute>} />
                     </Route>
 
                     <Route path="*" element={<NotFound />} />

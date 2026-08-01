@@ -47,6 +47,8 @@ export function AppSidebar() {
 
 
   const isAdmin = user?.role === "admin";
+  const isGerente = user?.role === "gerente";
+  const isStaff = isAdmin || isGerente;
 
 
   const renderMenuItems = (items: typeof commonItems) =>
@@ -109,7 +111,7 @@ export function AppSidebar() {
 
 
         {/* Admin: only Menu Admin + Alinhamento */}
-        {isAdmin && (
+        {isStaff && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">ADMINISTRAÇÃO</SidebarGroupLabel>
             <SidebarGroupContent>

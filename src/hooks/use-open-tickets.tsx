@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-/** Conta os chamados de suporte abertos (somente admin) com atualização em tempo real. */
+/** Conta os chamados de suporte abertos (admins e gerentes) com atualização em tempo real. */
 export function useOpenTickets() {
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "gerente";
   const [count, setCount] = useState(0);
 
   const load = useCallback(async () => {
