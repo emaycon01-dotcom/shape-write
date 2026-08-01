@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 interface Plano {
-  nome: "Dealer" | "Master" | "Diamond";
+  nome: "Basic" | "Pro" | "Premium";
   preco: number;
   desconto: string;
   icon: typeof Rocket;
@@ -24,7 +24,7 @@ interface Plano {
 
 const PLANOS: Plano[] = [
   {
-    nome: "Dealer",
+    nome: "Basic",
     preco: 150,
     desconto: "25% de desconto",
     icon: Rocket,
@@ -36,7 +36,7 @@ const PLANOS: Plano[] = [
     ],
   },
   {
-    nome: "Master",
+    nome: "Pro",
     preco: 450,
     desconto: "50% de desconto",
     icon: Star,
@@ -48,7 +48,7 @@ const PLANOS: Plano[] = [
     ],
   },
   {
-    nome: "Diamond",
+    nome: "Premium",
     preco: 999.99,
     desconto: "100% grátis",
     icon: Gem,
