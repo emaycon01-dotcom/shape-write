@@ -568,7 +568,12 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error("Error generating Diploma PDF:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
+    let msg = error instanceof Error ? error.message : "Unknown error";
+    if (/PDFSHIFT_NO_CREDITS|remaining credits/i.test(msg)) {
+      msg = "O servico de geracao de PDF esta sem creditos. Avise o administrador para recarregar.";
+    } else if (/TimeoutError|timed out|aborted/i.test(msg)) {
+      msg = "A geracao demorou demais e foi cancelada. Tente novamente em instantes.";
+    }
     return new Response(JSON.stringify({ success: false, error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
