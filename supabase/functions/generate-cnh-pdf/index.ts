@@ -310,7 +310,18 @@ function resolvePositions(overrides: unknown): Record<string, Pos> {
     }
   }
 
+  // Limite fixo da caixa da assinatura: nunca pode ultrapassar o tamanho
+  // definido no alinhamento (assinaturas de nomes longos vinham estourando).
+  const sigMax = DIGITAL_DEFAULT_POSITIONS.signature;
+  const sig = result.signature;
+  result.signature = {
+    ...sig,
+    w: Math.min(sig.w ?? sigMax.w!, sigMax.w!),
+    h: Math.min(sig.h ?? sigMax.h!, sigMax.h!),
+  };
+
   return result;
+
 }
 
 function buildCatDateOverlays(
