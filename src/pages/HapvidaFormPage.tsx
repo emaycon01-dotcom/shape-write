@@ -400,23 +400,22 @@ export default function HapvidaFormPage() {
 
           <div className="space-y-1.5">
             <FieldLabel required>Unidade</FieldLabel>
-            <div className="flex flex-wrap gap-2">
-              {UNIDADES.map((u, i) => (
-                <button
-                  key={u.nome}
-                  type="button"
-                  onClick={() => selecionarUnidade(i)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                    form.unidadeIdx === i
-                      ? "border-primary bg-primary/15 text-primary"
-                      : "border-border bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  {u.nome}
-                </button>
-              ))}
-            </div>
+            <Input
+              value={form.unidade}
+              onChange={set("unidade")}
+              list="hapvida-unidades"
+              placeholder="Ex: Hapvida - Fortaleza (Centro)"
+              className={inputCls}
+              required
+            />
+            <datalist id="hapvida-unidades">
+              {UNIDADES.map((u) => <option key={u.nome} value={u.nome} />)}
+            </datalist>
+            <p className="text-[11px] text-muted-foreground">
+              Digite livremente o nome da unidade. As sugestões preenchem o endereço automaticamente.
+            </p>
           </div>
+
 
           <div className="space-y-1.5">
             <FieldLabel>Endereço - linha 1</FieldLabel>
