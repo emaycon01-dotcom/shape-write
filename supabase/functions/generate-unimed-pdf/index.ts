@@ -108,6 +108,7 @@ export const UNIMED_DEFAULT_POSITIONS: Record<string, Pos> = {
   autorizo: { x: 58.4, y: 327.9, fontSize: 12.4, w: 655 },
   nome_linha: { x: 178.2, y: 463.7, fontSize: 10.3 },
   assinatura_digital: { x: 36.2, y: 775, fontSize: 6.2, w: 420 },
+  assinatura_img: { x: 36.2, y: 690, fontSize: 8, w: 230, h: 80 },
   qr: { x: 568, y: 718, fontSize: 8, w: 72, h: 72 },
   rodape_impresso: { x: 10.3, y: 1095.1, fontSize: 10.3 },
   rodape_criado: { x: 198.1, y: 1095.1, fontSize: 10.3 },
@@ -231,6 +232,8 @@ export function buildUnimedHtml(
   .qr-overlay { background: #fff; z-index: 12; overflow: hidden; box-shadow: 0 0 0 3px #fff; }
   .qr-overlay svg { width: 100%; height: 100%; display: block; }
   .link { word-break: break-all; white-space: normal; line-height: 1.22; }
+  .sig { z-index: 13; display: flex; align-items: flex-end; }
+  .sig img { max-width: 100%; max-height: 100%; object-fit: contain; }
 </style>
 </head>
 <body>
@@ -287,10 +290,14 @@ export function buildUnimedHtml(
 
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 63)}</div>` : ""}
 
+  <!-- assinatura manuscrita (upload, modo manual) -->
+  ${d.assinatura_base64 ? `<div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
+
   <!-- assinatura digital ICP -->
   <div class="overlay" style="${base("assinatura_digital", "white-space:nowrap;")}">${escapeHtml(
     `${d.medico || ""}: ${d.crm_numero || ""}, AC CNDL RFB v3, ${d.crm_numero || ""}, ${dataHoraCurta} BRT ${d.data_atendimento || ""}`,
   )}</div>
+
 
   <!-- rodapé -->
   <div class="overlay" style="top:1092.5px;left:699.8px;font-size:7.2px;">ANS - Nº ${escapeHtml(d.ans || "34.388-9")}</div>
@@ -355,6 +362,9 @@ serve(async (req) => {
       especialidade: body.especialidade || "CLÍNICA MÉDICA",
       uf: body.uf || "",
       template_bg: body.template_base64 || "",
+      assinatura_base64: typeof body.assinatura_base64 === "string" && body.assinatura_base64.startsWith("data:image/")
+        ? body.assinatura_base64
+        : "",
     };
 
     const isPreview = body.preview === true || body.preview === "true";
