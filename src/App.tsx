@@ -26,13 +26,14 @@ function StaffRoute({ children }: { children: React.ReactNode }) {
 }
 
 /** Somente contas verificadas pelo staff podem abrir os módulos de documentos. */
-function VerifiedRoute({ children }: { children: React.ReactNode }) {
+function VerifiedGate() {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
   if (!user.verified) return <Navigate to="/dashboard/documents" replace />;
-  return <>{children}</>;
+  return <Outlet />;
 }
+
 
 
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
