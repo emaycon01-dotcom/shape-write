@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, RefreshCw, ShieldCheck } from "lucide-react";
 
 interface HumanCheckProps {
@@ -7,38 +7,59 @@ interface HumanCheckProps {
   className?: string;
 }
 
-function makeChallenge() {
-  const a = Math.floor(Math.random() * 8) + 2;
-  const b = Math.floor(Math.random() * 8) + 2;
-  return { a, b, answer: a + b };
+type Challenge = { label: string; answer: number };
+
+const rnd = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+function makeChallenges(): Challenge[] {
+  // Soma
+  const a1 = rnd(2, 9);
+  const b1 = rnd(2, 9);
+  // Multiplicação
+  const a2 = rnd(2, 9);
+  const b2 = rnd(2, 9);
+  // Divisão exata
+  const b3 = rnd(2, 9);
+  const r3 = rnd(2, 9);
+  const a3 = b3 * r3;
+
+  return [
+    { label: `${a1} + ${b1} =`, answer: a1 + b1 },
+    { label: `${a2} × ${b2} =`, answer: a2 * b2 },
+    { label: `${a3} ÷ ${b3} =`, answer: r3 },
+  ];
 }
 
 /**
  * Verificação anti-spam 100% local (sem scripts externos).
- * Nunca bloqueia o carregamento da página.
+ * 3 desafios: soma, multiplicação e divisão.
  */
 export default function HumanCheck({ onChange, className }: HumanCheckProps) {
-  const [challenge, setChallenge] = useState(makeChallenge);
-  const [value, setValue] = useState("");
-  const [verified, setVerified] = useState(false);
-  const [startedAt] = useState(() => Date.now());
+  const [challenges, setChallenges] = useState<Challenge[]>(makeChallenges);
+  const [values, setValues] = useState<string[]>(["", "", ""]);
+  const [startedAt, setStartedAt] = useState(() => Date.now());
+  const [honeypot, setHoneypot] = useState(false);
+
+  const verified = useMemo(() => {
+    if (honeypot) return false;
+    if (Date.now() - startedAt < 1200) return false;
+    return challenges.every((c, i) => values[i] !== "" && Number(values[i]) === c.answer);
+  }, [challenges, values, startedAt, honeypot]);
 
   const reset = useCallback(() => {
-    setChallenge(makeChallenge());
-    setValue("");
-    setVerified(false);
+    setChallenges(makeChallenges());
+    setValues(["", "", ""]);
+    setStartedAt(Date.now());
   }, []);
 
   useEffect(() => {
     onChange(verified);
   }, [verified, onChange]);
 
-  const handleChange = (v: string) => {
+  const handleChange = (index: number, v: string) => {
     const clean = v.replace(/\D/g, "").slice(0, 3);
-    setValue(clean);
-    // Bots costumam responder instantaneamente: exige ao menos 1,2s de interação
-    const humanTiming = Date.now() - startedAt > 1200;
-    setVerified(Number(clean) === challenge.answer && humanTiming);
+    setValues((prev) => prev.map((p, i) => (i === index ? clean : p)));
   };
 
   return (
@@ -53,7 +74,7 @@ export default function HumanCheck({ onChange, className }: HumanCheckProps) {
         autoComplete="off"
         aria-hidden="true"
         className="absolute h-0 w-0 opacity-0 pointer-events-none"
-        onChange={() => setVerified(false)}
+        onChange={() => setHoneypot(true)}
       />
 
       <div className="flex items-center gap-3">
@@ -66,18 +87,8 @@ export default function HumanCheck({ onChange, className }: HumanCheckProps) {
         </div>
 
         <div className="flex-1">
-          <p className="text-xs text-muted-foreground">Verificação de segurança</p>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="text-sm font-medium text-foreground tabular-nums">
-              {challenge.a} + {challenge.b} =
-            </span>
-            <input
-              inputMode="numeric"
-              value={value}
-              onChange={(e) => handleChange(e.target.value)}
-              aria-label="Resultado da verificação"
-              className="h-8 w-16 rounded-md border border-border bg-background px-2 text-sm text-foreground outline-none transition-all focus-visible:ring-2 focus-visible:ring-accent/60"
-            />
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Verificação de segurança</p>
             <button
               type="button"
               onClick={reset}
@@ -86,6 +97,23 @@ export default function HumanCheck({ onChange, className }: HumanCheckProps) {
             >
               <RefreshCw className="h-3.5 w-3.5" />
             </button>
+          </div>
+
+          <div className="mt-2 space-y-2">
+            {challenges.map((c, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="min-w-[72px] text-sm font-medium text-foreground tabular-nums">
+                  {c.label}
+                </span>
+                <input
+                  inputMode="numeric"
+                  value={values[i]}
+                  onChange={(e) => handleChange(i, e.target.value)}
+                  aria-label={`Resultado da verificação ${i + 1}`}
+                  className="h-8 w-16 rounded-md border border-border bg-background px-2 text-sm text-foreground outline-none transition-all focus-visible:ring-2 focus-visible:ring-accent/60"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>
