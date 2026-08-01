@@ -25,6 +25,16 @@ function StaffRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Somente contas verificadas pelo staff podem abrir os módulos de documentos. */
+function VerifiedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!user.verified) return <Navigate to="/dashboard/documents" replace />;
+  return <>{children}</>;
+}
+
+
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
