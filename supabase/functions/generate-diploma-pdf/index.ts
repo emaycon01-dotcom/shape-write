@@ -554,7 +554,10 @@ serve(async (req) => {
         success: true,
         pdfBase64: `data:application/pdf;base64,${bytesToBase64(pdfBuffer)}`,
         codigo_validacao: codigo,
+        documento_id: documentoId,
+        validation_url: urlValidacao,
         qr_code_url: urlValidacao,
+
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
