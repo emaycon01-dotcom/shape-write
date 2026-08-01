@@ -27,6 +27,8 @@ import {
 import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.webp";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { useOpenTickets } from "@/hooks/use-open-tickets";
+
 
 const commonItems = [
   { title: "Início", url: "/dashboard", icon: LayoutDashboard },
@@ -41,9 +43,11 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
+  const { count: openTickets } = useOpenTickets();
 
 
   const isAdmin = user?.role === "admin";
+
 
   const renderMenuItems = (items: typeof commonItems) =>
     items.map((item) => (
@@ -128,12 +132,24 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink to="/dashboard/admin/chamados" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                    <NavLink to="/dashboard/admin/chamados" className="relative hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
                       <Headphones className="mr-2 h-4 w-4" />
                       {!collapsed && <span>Chamados</span>}
+                      {openTickets > 0 && (
+                        <span
+                          className={
+                            collapsed
+                              ? "absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground"
+                              : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-bold leading-none text-destructive-foreground"
+                          }
+                        >
+                          {openTickets > 99 ? "99+" : openTickets}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
 
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>

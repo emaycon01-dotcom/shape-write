@@ -4,11 +4,13 @@ import { useDocuments, isDocumentExpired, daysUntilExpiry } from "@/contexts/Doc
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.webp";
+import { useOpenTickets } from "@/hooks/use-open-tickets";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, History,
+  ShieldCheck, Zap, Clock, History, Headphones,
 
 } from "lucide-react";
+
 
 
 
@@ -83,6 +85,8 @@ export default function DashboardHome() {
   const { documents } = useDocuments();
 
   const isAdmin = user?.role === "admin";
+  const { count: openTickets } = useOpenTickets();
+
 
   const userDocs = useMemo(
     () => documents.filter((d) => d.userId === user?.id),
@@ -132,6 +136,33 @@ export default function DashboardHome() {
           </div>
         </div>
       </section>
+
+      {/* Aviso de chamados abertos (admin) */}
+      {isAdmin && openTickets > 0 && (
+        <Link
+          to="/dashboard/admin/chamados"
+          className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-destructive/40 bg-destructive/10 p-4 backdrop-blur transition-all hover:-translate-y-0.5"
+        >
+          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive/20 ring-1 ring-destructive/40">
+            <Headphones className="h-5 w-5 text-destructive" />
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[11px] font-bold leading-none text-destructive-foreground">
+              {openTickets > 99 ? "99+" : openTickets}
+            </span>
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">
+              {openTickets === 1 ? "Novo chamado de suporte" : `${openTickets} chamados de suporte abertos`}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              {openTickets === 1
+                ? "Um cliente abriu um chamado e aguarda resposta."
+                : "Clientes aguardando resposta no menu de chamados."}
+            </p>
+          </div>
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-destructive transition-transform group-hover:-translate-y-0.5" />
+        </Link>
+      )}
+
 
       {/* Atalhos */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
