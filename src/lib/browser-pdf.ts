@@ -285,6 +285,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
     const base64 = uri.split(",").pop() || "";
     return `data:application/pdf;base64,${base64}`;
   } finally {
+    releaseFonts();
     frame.remove();
   }
 }
