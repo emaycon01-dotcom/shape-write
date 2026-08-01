@@ -424,6 +424,11 @@ serve(async (req) => {
       pdfBuffer = await generateWithPdfCo(html, PDFCO_API_KEY);
     }
 
+    let pdfUrl: string | null = null;
+    if (!isPreview && validacao.token) {
+      pdfUrl = await attachPdf(validacao.token, pdfBuffer);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -431,6 +436,7 @@ serve(async (req) => {
         documento_id: validacao.documentoId,
         qr_code_url: validacao.qrCodeUrl,
         token: validacao.token ?? null,
+        pdf_url: pdfUrl,
         validacao_registrada: validacao.registered,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
