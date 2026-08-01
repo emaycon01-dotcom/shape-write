@@ -121,7 +121,9 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
     }
 
     if (!pdf) throw new Error("Documento vazio.");
-    return pdf.output("datauristring");
+    const uri = pdf.output("datauristring");
+    const base64 = uri.split(",").pop() || "";
+    return `data:application/pdf;base64,${base64}`;
   } finally {
     frame.remove();
   }
