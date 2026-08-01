@@ -51,6 +51,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages
 const AdminPanelPage = lazy(() => import("./pages/admin/AdminPanelPage"));
+const AdminAprovacoesPage = lazy(() => import("./pages/admin/AdminAprovacoesPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -120,7 +121,9 @@ const App = () => {
                       <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
+                      <Route path="admin/aprovacoes" element={<AdminRoute><AdminAprovacoesPage /></AdminRoute>} />
                     </Route>
+
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

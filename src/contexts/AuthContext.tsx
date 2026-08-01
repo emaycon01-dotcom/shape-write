@@ -25,6 +25,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+export const PENDING_MSG = "Sua conta está em análise. Aguarde a aprovação de um administrador.";
+export const REJECTED_MSG = "Seu acesso foi recusado pela administração.";
+
 async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
   // Consultas em paralelo (antes eram 3 idas sequenciais ao banco)
   const [blockedRes, profileRes, rolesRes] = await Promise.all([
@@ -34,7 +37,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
       .eq("user_id", supabaseUser.id)
       .eq("status", "bloqueado")
       .maybeSingle(),
-    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at").eq("user_id", supabaseUser.id).maybeSingle(),
+    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at, status").eq("user_id", supabaseUser.id).maybeSingle(),
     supabase.from("user_roles").select("cargo").eq("user_id", supabaseUser.id),
   ]);
 
@@ -43,8 +46,14 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
   }
 
-  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string } | null;
+  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string; status?: string } | null;
   const isAdmin = rolesRes.data?.some((r) => r.cargo === "admin") ?? false;
+
+  const status = profile?.status ?? "pendente";
+  if (!isAdmin && status !== "aprovado") {
+    await supabase.auth.signOut();
+    throw new Error(status === "rejeitado" ? REJECTED_MSG : PENDING_MSG);
+  }
 
   return {
     id: supabaseUser.id,
@@ -56,6 +65,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     createdAt: profile?.created_at || supabaseUser.created_at,
   };
 }
+
 
 const USER_CACHE_KEY = "auth_user_cache";
 
@@ -135,8 +145,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
+
+    if (data.user) {
+      const [{ data: prof }, { data: roleRows }] = await Promise.all([
+        supabase.from("profiles").select("status").eq("user_id", data.user.id).maybeSingle(),
+        supabase.from("user_roles").select("cargo").eq("user_id", data.user.id),
+      ]);
+      const isAdmin = roleRows?.some((r) => r.cargo === "admin") ?? false;
+      const status = (prof as { status?: string } | null)?.status ?? "pendente";
+      if (!isAdmin && status !== "aprovado") {
+        await supabase.auth.signOut();
+        throw new Error(status === "rejeitado" ? REJECTED_MSG : PENDING_MSG);
+      }
+    }
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
@@ -147,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (error) throw new Error(error.message);
 
-    // Create profile for the new user
+    // Create profile for the new user (fica pendente até aprovação do admin)
     if (data.user) {
       await supabase.from("profiles").insert({
         user_id: data.user.id,
@@ -155,9 +178,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name,
         credits: 0,
         plano: "free",
+        status: "pendente",
       });
     }
+    await supabase.auth.signOut();
   }, []);
+
 
   const logout = useCallback(async () => {
     writeCachedUser(null);
