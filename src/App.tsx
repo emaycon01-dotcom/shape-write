@@ -17,6 +17,14 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Admins e gerentes: chamados e aprovação de contas. */
+function StaffRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user || (user.role !== "admin" && user.role !== "gerente")) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
