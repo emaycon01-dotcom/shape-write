@@ -121,7 +121,9 @@ const App = () => {
                       <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
+                      <Route path="admin/aprovacoes" element={<AdminRoute><AdminAprovacoesPage /></AdminRoute>} />
                     </Route>
+
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
