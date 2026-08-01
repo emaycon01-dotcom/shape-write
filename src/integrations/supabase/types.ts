@@ -412,6 +412,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           credits: number
           email: string
@@ -419,9 +421,12 @@ export type Database = {
           name: string
           pin_hash: string | null
           plano: string
+          status: string
           user_id: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           credits?: number
           email?: string
@@ -429,9 +434,12 @@ export type Database = {
           name?: string
           pin_hash?: string | null
           plano?: string
+          status?: string
           user_id: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           credits?: number
           email?: string
@@ -439,6 +447,7 @@ export type Database = {
           name?: string
           pin_hash?: string | null
           plano?: string
+          status?: string
           user_id?: string
         }
         Relationships: []
@@ -526,6 +535,10 @@ export type Database = {
       }
       admin_ban_user: {
         Args: { _reason?: string; _target_user_id: string }
+        Returns: undefined
+      }
+      admin_set_account_status: {
+        Args: { _status: string; _target_user_id: string }
         Returns: undefined
       }
       admin_set_plan: {
