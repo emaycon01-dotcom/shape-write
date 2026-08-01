@@ -288,7 +288,7 @@ export function buildUnimedHtml(
 
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 63)}</div>` : ""}
 
-  <!-- assinatura digital ICP -->
+  <!-- assinatura manuscrita (upload, modo manual) -->
   ${d.assinatura_base64 ? `<div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
 
   <!-- assinatura digital ICP -->
