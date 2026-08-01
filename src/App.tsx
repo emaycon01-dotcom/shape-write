@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DocumentProvider } from "@/contexts/DocumentContext";
 import { DeviceSecurityProvider } from "@/contexts/DeviceSecurityContext";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import SupportWidget from "@/components/SupportWidget";
 import { lazy, Suspense } from "react";
 import LoginPage from "./pages/LoginPage";
 
