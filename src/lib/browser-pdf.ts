@@ -60,23 +60,49 @@ function bandCssHeight(width: number, scale: number): number {
 }
 
 
+/** Famílias embutidas (@font-face base64) usadas pelos geradores. */
+const EMBEDDED_FAMILIES = ["CNHDigital", "RGDigital", "RGOcrb", "CRLVFont", "OCRB"];
+
 /** Garante que as @font-face (base64) estejam carregadas antes de rasterizar. */
 async function ensureFontsLoaded(doc: Document) {
   const fonts = (doc as Document & { fonts?: FontFaceSet }).fonts;
   if (!fonts) return;
+  const q = (family: string) => `16px ${/\s/.test(family) ? `"${family}"` : family}`;
   try {
-    const families = new Set<string>();
-    fonts.forEach((f) => families.add(f.family));
+    // Espera as folhas de estilo do clone serem processadas (o FontFaceSet
+    // pode estar vazio logo após o clone).
+    for (let i = 0; i < 20 && fonts.size === 0; i++) {
+      await new Promise((r) => setTimeout(r, 25));
+    }
+
+    const families = new Set<string>(EMBEDDED_FAMILIES);
+    fonts.forEach((f) => families.add(f.family.replace(/^['"]|['"]$/g, "")));
+
     await Promise.all(
-      Array.from(families).map((family) =>
-        fonts.load(`16px ${/\s/.test(family) ? `"${family}"` : family}`).catch(() => undefined),
-      ),
+      Array.from(families).map((family) => fonts.load(q(family)).catch(() => undefined)),
     );
     await fonts.ready;
+
+    // Confirma de fato o carregamento das famílias declaradas no documento.
+    const declared: string[] = [];
+    fonts.forEach((f) => declared.push(f.family.replace(/^['"]|['"]$/g, "")));
+    for (let i = 0; i < 40; i++) {
+      const pending = declared.filter((f) => {
+        try {
+          return !fonts.check(q(f));
+        } catch {
+          return false;
+        }
+      });
+      if (pending.length === 0) break;
+      await Promise.all(pending.map((f) => fonts.load(q(f)).catch(() => undefined)));
+      await new Promise((r) => setTimeout(r, 50));
+    }
   } catch {
     /* ignora */
   }
 }
+
 
 function createHiddenFrame(html: string): Promise<HTMLIFrameElement> {
   return new Promise((resolve, reject) => {
