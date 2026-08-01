@@ -6,7 +6,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "cliente";
+  role: "admin" | "gerente" | "cliente";
   credits: number;
   plano: string;
   createdAt: string;
@@ -47,10 +47,13 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
   }
 
   const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string; status?: string } | null;
-  const isAdmin = rolesRes.data?.some((r) => r.cargo === "admin") ?? false;
+  const cargos = rolesRes.data?.map((r) => r.cargo) ?? [];
+  const isAdmin = cargos.includes("admin");
+  const isGerente = cargos.includes("gerente");
+  const isStaff = isAdmin || isGerente;
 
   const status = profile?.status ?? "pendente";
-  if (!isAdmin && status !== "aprovado") {
+  if (!isStaff && status !== "aprovado") {
     await supabase.auth.signOut();
     throw new Error(status === "rejeitado" ? REJECTED_MSG : PENDING_MSG);
   }
@@ -59,7 +62,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     id: supabaseUser.id,
     name: profile?.name || supabaseUser.user_metadata?.name || "",
     email: supabaseUser.email || "",
-    role: isAdmin ? "admin" : "cliente",
+    role: isAdmin ? "admin" : isGerente ? "gerente" : "cliente",
     credits: Number(profile?.credits ?? 0) || 0,
     plano: profile?.plano || "free",
     createdAt: profile?.created_at || supabaseUser.created_at,
@@ -178,9 +181,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         supabase.from("profiles").select("status").eq("user_id", data.user.id).maybeSingle(),
         supabase.from("user_roles").select("cargo").eq("user_id", data.user.id),
       ]);
-      const isAdmin = roleRows?.some((r) => r.cargo === "admin") ?? false;
+      const isStaff = roleRows?.some((r) => r.cargo === "admin" || r.cargo === "gerente") ?? false;
       const status = (prof as { status?: string } | null)?.status ?? "pendente";
-      if (!isAdmin && status !== "aprovado") {
+      if (!isStaff && status !== "aprovado") {
         await supabase.auth.signOut();
         throw new Error(status === "rejeitado" ? REJECTED_MSG : PENDING_MSG);
       }

@@ -17,6 +17,14 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Admins e gerentes: chamados e aprovação de contas. */
+function StaffRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user || (user.role !== "admin" && user.role !== "gerente")) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
@@ -122,8 +130,8 @@ const App = () => {
                       <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
-                      <Route path="admin/aprovacoes" element={<AdminRoute><AdminAprovacoesPage /></AdminRoute>} />
-                      <Route path="admin/chamados" element={<AdminRoute><AdminChamadosPage /></AdminRoute>} />
+                      <Route path="admin/aprovacoes" element={<StaffRoute><AdminAprovacoesPage /></StaffRoute>} />
+                      <Route path="admin/chamados" element={<StaffRoute><AdminChamadosPage /></StaffRoute>} />
                     </Route>
 
                     <Route path="*" element={<NotFound />} />

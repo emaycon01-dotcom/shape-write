@@ -47,6 +47,8 @@ export function AppSidebar() {
 
 
   const isAdmin = user?.role === "admin";
+  const isGerente = user?.role === "gerente";
+  const isStaff = isAdmin || isGerente;
 
 
   const renderMenuItems = (items: typeof commonItems) =>
@@ -108,12 +110,13 @@ export function AppSidebar() {
         </SidebarGroup>
 
 
-        {/* Admin: only Menu Admin + Alinhamento */}
-        {isAdmin && (
+        {/* Administração: admins veem tudo; gerentes só aprovações e chamados */}
+        {isStaff && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">ADMINISTRAÇÃO</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">{isAdmin ? "ADMINISTRAÇÃO" : "GERÊNCIA"}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/dashboard/admin" end className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
@@ -122,6 +125,7 @@ export function AppSidebar() {
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                )}
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/dashboard/admin/aprovacoes" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
@@ -151,6 +155,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
 
 
+                {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/dashboard/template-align" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
@@ -159,6 +164,7 @@ export function AppSidebar() {
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                )}
 
               </SidebarMenu>
             </SidebarGroupContent>

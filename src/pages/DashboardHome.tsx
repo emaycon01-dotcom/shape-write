@@ -85,6 +85,8 @@ export default function DashboardHome() {
   const { documents } = useDocuments();
 
   const isAdmin = user?.role === "admin";
+  const isGerente = user?.role === "gerente";
+  const isStaff = isAdmin || isGerente;
   const { count: openTickets } = useOpenTickets();
 
 
@@ -112,7 +114,7 @@ export default function DashboardHome() {
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <Chip icon={Crown} variant="solid">{isAdmin ? "Administrador" : "Cliente"}</Chip>
+              <Chip icon={Crown} variant="solid">{isAdmin ? "Administrador" : isGerente ? "Gerente" : "Cliente"}</Chip>
               <Chip icon={ShieldCheck}>Conta verificada</Chip>
               <Chip icon={Zap}>Geração instantânea</Chip>
             </div>
@@ -138,7 +140,7 @@ export default function DashboardHome() {
       </section>
 
       {/* Aviso de chamados abertos (admin) */}
-      {isAdmin && openTickets > 0 && (
+      {isStaff && openTickets > 0 && (
         <Link
           to="/dashboard/admin/chamados"
           className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-destructive/40 bg-destructive/10 p-4 backdrop-blur transition-all hover:-translate-y-0.5"
