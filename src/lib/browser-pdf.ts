@@ -209,6 +209,16 @@ async function adoptFontFaces(doc: Document): Promise<() => void> {
  * preservando integralmente as coordenadas dos campos.
  */
 export async function renderHtmlToPdfBase64(html: string): Promise<string> {
+  return (await renderHtmlToDocument(html)).pdfBase64;
+}
+
+/**
+ * Além do PDF, devolve imagens leves (JPEG) de cada página — usadas no preview
+ * do app, já que muitos navegadores móveis não exibem PDF dentro de <iframe>.
+ */
+export async function renderHtmlToDocument(
+  html: string,
+): Promise<{ pdfBase64: string; previewImages: string[] }> {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas-pro"),
     import("jspdf"),
@@ -216,6 +226,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
 
   const frame = await createHiddenFrame(html);
   let releaseFonts: () => void = () => undefined;
+  const previewImages: string[] = [];
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
@@ -230,6 +241,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
 
     for (const target of targets) {
       const width = target.offsetWidth || 794;
+
       const height = target.offsetHeight || 1123;
 
       const scale = safeScale(width);
@@ -244,6 +256,29 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
         pdf = new jsPDF({ orientation, unit: "pt", format: [wPt, hPt], compress: true });
       } else {
         pdf.addPage([wPt, hPt], orientation);
+      }
+
+      // Imagem leve da página para o preview no app (iframe de PDF falha em
+      // muitos navegadores móveis).
+      try {
+        const preview = await html2canvas(target, {
+          scale: 1.6,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+          width,
+          height,
+          windowWidth: width,
+          windowHeight: height,
+          imageTimeout: 30_000,
+          onclone: (cloned: Document) => ensureFontsLoaded(cloned),
+        });
+        previewImages.push(preview.toDataURL("image/jpeg", 0.82));
+        preview.width = 0;
+        preview.height = 0;
+      } catch {
+        /* preview é opcional */
       }
 
       for (let top = 0; top < height; top += band) {
@@ -283,7 +318,8 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
     if (!pdf) throw new Error("Documento vazio.");
     const uri = pdf.output("datauristring");
     const base64 = uri.split(",").pop() || "";
-    return `data:application/pdf;base64,${base64}`;
+    return { pdfBase64: `data:application/pdf;base64,${base64}`, previewImages };
+
   } finally {
     releaseFonts();
     frame.remove();
@@ -316,9 +352,10 @@ export async function invokeGeneratePdf(
   if (typeof payload.html !== "string") return { data: payload, error: null };
 
   try {
-    const pdfBase64 = await renderHtmlToPdfBase64(payload.html);
-    const result: Record<string, unknown> = { ...payload, pdfBase64 };
+    const { pdfBase64, previewImages } = await renderHtmlToDocument(payload.html);
+    const result: Record<string, unknown> = { ...payload, pdfBase64, previewImages };
     delete result.html;
+
 
     // Unimed: o portal de validação precisa do arquivo hospedado.
     if (functionName === "generate-unimed-pdf" && payload.token && body.preview !== true) {
