@@ -637,24 +637,17 @@ export default function DiplomaFormPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel>Nº registro</FieldLabel>
               <Input value={form.registroNumero} onChange={set("registroNumero")} className={inputCls} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Livro</FieldLabel>
-              <Input value={form.registroLivro} onChange={set("registroLivro")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Folha</FieldLabel>
-              <Input value={form.registroFolha} onChange={set("registroFolha")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Data</FieldLabel>
+              <FieldLabel>Data do registro</FieldLabel>
               <Input value={form.registroData} onChange={setMask("registroData", maskDate)} inputMode="numeric" placeholder="14/06/2023" className={inputCls} />
             </div>
           </div>
+
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
