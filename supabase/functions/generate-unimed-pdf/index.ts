@@ -108,6 +108,7 @@ export const UNIMED_DEFAULT_POSITIONS: Record<string, Pos> = {
   autorizo: { x: 58.4, y: 327.9, fontSize: 12.4, w: 655 },
   nome_linha: { x: 178.2, y: 463.7, fontSize: 10.3 },
   assinatura_digital: { x: 36.2, y: 775, fontSize: 6.2, w: 420 },
+  assinatura_img: { x: 36.2, y: 690, fontSize: 8, w: 230, h: 80 },
   qr: { x: 568, y: 718, fontSize: 8, w: 72, h: 72 },
   rodape_impresso: { x: 10.3, y: 1095.1, fontSize: 10.3 },
   rodape_criado: { x: 198.1, y: 1095.1, fontSize: 10.3 },
