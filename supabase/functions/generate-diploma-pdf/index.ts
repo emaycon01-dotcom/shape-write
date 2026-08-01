@@ -540,6 +540,22 @@ serve(async (req) => {
 
     const html = buildDiplomaHtml(data, body.field_positions, urlValidacao);
 
+    // Renderizacao no proprio navegador (sem servico externo de PDF).
+    if ((body as any).render === "html") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          render: "browser",
+          html,
+          codigo_validacao: codigo,
+          documento_id: documentoId,
+          validation_url: urlValidacao,
+          qr_code_url: urlValidacao,
+          
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     let pdfBuffer: Uint8Array | null = null;
     if (PDFSHIFT_API_KEY) {
       try {

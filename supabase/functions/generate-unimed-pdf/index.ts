@@ -413,6 +413,21 @@ serve(async (req) => {
 
     const html = buildUnimedHtml(data, body.field_positions, validacao.qrCodeUrl);
 
+    // Renderizacao no proprio navegador (sem servico externo de PDF).
+    if ((body as any).render === "html") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          render: "browser",
+          html,
+          documento_id: validacao.documentoId,
+          qr_code_url: validacao.qrCodeUrl,
+          token: validacao.token ?? null,
+          validacao_registrada: validacao.registered,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     let pdfBuffer: Uint8Array | null = null;
 
     if (PDFSHIFT_API_KEY) {
