@@ -168,7 +168,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
       const height = target.offsetHeight || 1123;
 
       const canvas = await html2canvas(target, {
-        scale: RENDER_SCALE,
+        scale: safeScale(width, height),
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
@@ -178,9 +178,13 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
         windowWidth: width,
         windowHeight: height,
         imageTimeout: 30_000,
+        // O html2canvas rasteriza um clone em outro documento: sem isto as
+        // @font-face embutidas (CNHDigital) ainda não estão prontas e o texto
+        // sai com a fonte de fallback.
+        onclone: (cloned: Document) => ensureFontsLoaded(cloned),
       });
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.98);
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
       const orientation = width > height ? "landscape" : "portrait";
 
       // 1px CSS (96dpi) = 0.75pt — mantém o tamanho físico exato do papel.
@@ -193,7 +197,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
         pdf.addPage([wPt, hPt], orientation);
       }
 
-      pdf.addImage(imgData, "JPEG", 0, 0, wPt, hPt, undefined, "FAST");
+      pdf.addImage(imgData, "JPEG", 0, 0, wPt, hPt, undefined, "NONE");
       // Libera memória em dispositivos móveis
       canvas.width = 0;
       canvas.height = 0;
