@@ -42,10 +42,12 @@ interface FinTxn {
   credits_amount: number; plan_name: string | null; status: string; created_at: string;
 }
 
-const CARGOS = ["dealer", "master", "diamond", "sub_gerente", "gerente", "admin"] as const;
+const NO_ROLE = "__none__";
+const CARGOS = ["gerente", "admin"] as const;
 const CARGO_LABELS: Record<string, string> = {
   dealer: "Dealer", master: "Master", diamond: "Diamond",
   sub_gerente: "Sub Gerente", gerente: "Gerente", admin: "Admin",
+  [NO_ROLE]: "Sem cargo",
 };
 const PLANOS = ["free", "dealer", "master", "diamond"] as const;
 const PLANO_LABELS: Record<string, string> = {
