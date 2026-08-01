@@ -115,7 +115,12 @@ export default function DashboardHome() {
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
               <Chip icon={Crown} variant="solid">{isAdmin ? "Administrador" : isGerente ? "Gerente" : "Cliente"}</Chip>
-              <Chip icon={ShieldCheck}>Conta verificada</Chip>
+              {user?.verified === false ? (
+                <Chip icon={ShieldCheck}>Conta não verificada</Chip>
+              ) : (
+                <Chip icon={ShieldCheck}>Conta verificada</Chip>
+              )}
+
               <Chip icon={Zap}>Geração instantânea</Chip>
             </div>
             <div>
