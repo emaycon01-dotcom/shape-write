@@ -233,12 +233,27 @@ export default function AdminPanelPage() {
         if (ok) setSelected((p) => (p ? { ...p, plano } : p));
       });
 
-  const setCargo = (cargo: string) =>
-    selected &&
-    run(() => supabase.rpc("admin_set_role", {
-      _target_user_id: selected.user_id,
-      _cargo: cargo as (typeof CARGOS)[number],
-    }), `Cargo alterado para ${CARGO_LABELS[cargo]}`);
+  const setCargo = (cargo: string) => {
+    if (!selected) return;
+    const isNone = cargo === NO_ROLE;
+    run(
+      () =>
+        isNone
+          ? supabase.rpc("admin_clear_role", { _target_user_id: selected.user_id })
+          : supabase.rpc("admin_set_role", {
+              _target_user_id: selected.user_id,
+              _cargo: cargo as (typeof CARGOS)[number],
+            }),
+      isNone ? "Cargo removido" : `Cargo alterado para ${CARGO_LABELS[cargo]}`,
+    ).then((ok) => {
+      if (ok) {
+        setRoles((prev) => [
+          ...prev.filter((r) => r.user_id !== selected.user_id),
+          ...(isNone ? [] : [{ user_id: selected.user_id, cargo }]),
+        ]);
+      }
+    });
+  };
 
   const banUser = () =>
     selected &&
