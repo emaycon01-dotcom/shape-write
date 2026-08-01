@@ -396,6 +396,24 @@ export default function DiplomaFormPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
+              <FieldLabel>CPF (portal de validação)</FieldLabel>
+              <Input value={form.cpf} onChange={setMask("cpf", maskCPF)} inputMode="numeric" placeholder="123.456.789-00" className={inputCls} />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel>Sexo</FieldLabel>
+              <Select value={form.sexo} onValueChange={(v) => setForm((p) => ({ ...p, sexo: v }))}>
+                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="M">Masculino</SelectItem>
+                  <SelectItem value="F">Feminino</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
               <FieldLabel>Nacionalidade</FieldLabel>
               <Input value={form.nacionalidade} onChange={set("nacionalidade")} className={inputCls} />
             </div>
