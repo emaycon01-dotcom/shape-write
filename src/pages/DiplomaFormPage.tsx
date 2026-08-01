@@ -120,6 +120,60 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/** Divide o nome da instituição em duas linhas de cabeçalho automaticamente. */
+function splitInstituicao(nome: string): { l1: string; l2: string } {
+  const limpo = nome.trim().replace(/\s+/g, " ").toUpperCase();
+  const marca = limpo.indexOf("ESTÁCIO");
+  if (marca > 0) {
+    return { l1: limpo.slice(0, marca).trim(), l2: limpo.slice(marca).trim() };
+  }
+  const palavras = limpo.split(" ");
+  if (palavras.length < 2) return { l1: limpo, l2: "" };
+  const meio = Math.ceil(palavras.length / 2);
+  return { l1: palavras.slice(0, meio).join(" "), l2: palavras.slice(meio).join(" ") };
+}
+
+interface InstituicaoPreset {
+  nome: string;
+  mantenedora: string;
+  cnpj: string;
+  reitor: string;
+  cidade: string;
+}
+
+/** Unidades disponíveis — ao selecionar, cabeçalho/mantenedora/CNPJ/reitor são preenchidos sozinhos. */
+const INSTITUICOES: InstituicaoPreset[] = [
+  {
+    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
+    cnpj: "02608755000107",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "Fortaleza - CE",
+  },
+  {
+    nome: "UNIVERSIDADE ESTÁCIO DE SÁ",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR ESTÁCIO DE SÁ LTDA",
+    cnpj: "34075739000148",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "Rio de Janeiro - RJ",
+  },
+  {
+    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DE SÃO PAULO",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
+    cnpj: "02608755000107",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "São Paulo - SP",
+  },
+  {
+    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DE BRASÍLIA",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
+    cnpj: "02608755000107",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "Brasília - DF",
+  },
+];
+
+
 const NOMES = [
   "GUSTAVO AUGUSTO RODRIGUES DA SILVA",
   "MARIANA COSTA DE ALMEIDA",
@@ -171,6 +225,35 @@ export default function DiplomaFormPage() {
   const setMask = (field: keyof DiplomaForm, fn: (v: string) => string) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
+  /** Seleção da instituição → preenche cabeçalho, mantenedora, CNPJ e reitor automaticamente. */
+  const selectInstituicao = (nome: string) => {
+    const preset = INSTITUICOES.find((i) => i.nome === nome);
+    const { l1, l2 } = splitInstituicao(nome);
+    setForm((p) => ({
+      ...p,
+      instituicao: nome,
+      instituicaoL1: l1,
+      instituicaoL2: l2,
+      mantenedora: preset?.mantenedora ?? p.mantenedora,
+      cnpj: preset?.cnpj ?? p.cnpj,
+      reitor: preset?.reitor ?? p.reitor,
+      cidadeExpedicao: preset?.cidade ?? p.cidadeExpedicao,
+    }));
+  };
+
+  /** Números internos (livro, folha e nº de série) são gerados sozinhos. */
+  useEffect(() => {
+    if (isEditMode) return;
+    setForm((p) => ({
+      ...p,
+      registroLivro: "1",
+      registroFolha: rnd(4),
+      serial: rnd(13),
+      codigoValidacao: "",
+    }));
+  }, [isEditMode]);
+
 
   const fillTest = () => {
     const ano = 2015 + Math.floor(Math.random() * 8);
@@ -461,31 +544,18 @@ export default function DiplomaFormPage() {
           <SectionHeader icon={University} title="Instituição" />
 
           <div className="space-y-1.5">
-            <FieldLabel>Nome da instituição (rodapé e verso)</FieldLabel>
-            <Input value={form.instituicao} onChange={set("instituicao")} className={inputCls} />
+            <FieldLabel>Instituição</FieldLabel>
+            <Select value={form.instituicao} onValueChange={selectInstituicao}>
+              <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {INSTITUICOES.map((i) => <SelectItem key={i.nome} value={i.nome}>{i.nome}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Cabeçalho, mantenedora, CNPJ e reitor são preenchidos automaticamente.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Cabeçalho — linha 1</FieldLabel>
-              <Input value={form.instituicaoL1} onChange={set("instituicaoL1")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Cabeçalho — linha 2</FieldLabel>
-              <Input value={form.instituicaoL2} onChange={set("instituicaoL2")} className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Mantenedora</FieldLabel>
-              <Input value={form.mantenedora} onChange={set("mantenedora")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>CNPJ</FieldLabel>
-              <Input value={form.cnpj} onChange={set("cnpj")} className={inputCls} />
-            </div>
-          </div>
 
           <div className="space-y-1.5">
             <FieldLabel>Credenciamento</FieldLabel>
@@ -538,53 +608,23 @@ export default function DiplomaFormPage() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Reitor(a)</FieldLabel>
-              <Input value={form.reitor} onChange={set("reitor")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Secretário(a) de Registro</FieldLabel>
-              <Input value={form.secretario} onChange={set("secretario")} className={inputCls} />
-            </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Secretário(a) de Registro</FieldLabel>
+            <Input value={form.secretario} onChange={set("secretario")} className={inputCls} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Resolução — número</FieldLabel>
-              <Input value={form.resolucaoNumero} onChange={set("resolucaoNumero")} placeholder="092/GR" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Resolução — ano</FieldLabel>
-              <Select value={form.resolucaoAno} onValueChange={(v) => setForm((p) => ({ ...p, resolucaoAno: v }))}>
-                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 31 }, (_, i) => String(2000 + i)).map((a) => (
-                    <SelectItem key={a} value={a}>{a}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel>Nº registro</FieldLabel>
               <Input value={form.registroNumero} onChange={set("registroNumero")} className={inputCls} />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Livro</FieldLabel>
-              <Input value={form.registroLivro} onChange={set("registroLivro")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Folha</FieldLabel>
-              <Input value={form.registroFolha} onChange={set("registroFolha")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Data</FieldLabel>
+              <FieldLabel>Data do registro</FieldLabel>
               <Input value={form.registroData} onChange={setMask("registroData", maskDate)} inputMode="numeric" placeholder="14/06/2023" className={inputCls} />
             </div>
           </div>
+
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -597,16 +637,10 @@ export default function DiplomaFormPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Nº de série (rodapé)</FieldLabel>
-              <Input value={form.serial} onChange={set("serial")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Código de validação</FieldLabel>
-              <Input value={form.codigoValidacao} onChange={set("codigoValidacao")} placeholder="gerado automaticamente" className={inputCls} />
-            </div>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Reitor(a), resolução, livro, folha, nº de série e código de validação são gerados automaticamente.
+          </p>
+
         </div>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
