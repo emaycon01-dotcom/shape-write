@@ -201,7 +201,6 @@ export default function DashboardHome() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">Serviços</p>
-              <p className="text-[11px] text-muted-foreground">Gerar CNH Digital</p>
             </div>
             <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
           </div>
@@ -267,7 +266,7 @@ export default function DashboardHome() {
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
           <div>
-            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Últimos documentos</h2>
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Últimos serviços</h2>
             <p className="text-[11px] text-muted-foreground">Gerados recentemente na sua conta</p>
           </div>
           <Link to="/dashboard/historico" className="text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline">
