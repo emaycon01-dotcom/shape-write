@@ -243,7 +243,7 @@ export function buildUnimedHtml(
   .qr-overlay { background: #fff; z-index: 12; overflow: hidden; box-shadow: 0 0 0 3px #fff; }
   .qr-overlay svg { width: 100%; height: 100%; display: block; }
   .link { word-break: break-all; white-space: normal; line-height: 1.22; }
-  .sig-mask { background: #ffffff; opacity: 1; z-index: 12; box-shadow: -8px 0 0 0 #ffffff, 8px 0 0 0 #ffffff; }
+  .sig-mask { background: #ffffff; opacity: 1; z-index: 12; }
   .sig { z-index: 13; display: flex; align-items: flex-end; }
   .sig img { max-width: 100%; max-height: 100%; object-fit: contain; }
 </style>
@@ -303,7 +303,7 @@ export function buildUnimedHtml(
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 63)}</div>` : ""}
 
   <!-- assinatura manuscrita (upload, modo manual): cobre a assinatura do template com branco e aplica a nova por cima -->
-  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="top:${p.assinatura_img.y - 16}px;left:${p.assinatura_img.x - 45}px;width:${p.assinatura_img.w + 90}px;height:106px;"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
+  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="top:505px;left:226px;width:342px;height:103px;"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
 
   <!-- assinatura digital ICP -->
   <div class="overlay" style="${base("assinatura_digital", "white-space:nowrap;")}">${escapeHtml(
