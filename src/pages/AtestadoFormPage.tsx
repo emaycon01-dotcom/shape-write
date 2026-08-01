@@ -12,6 +12,7 @@ import { loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { splitEndereco } from "@/lib/atestado-endereco";
+import { maskCPF, maskDate, maskDigits, maskTimeSec } from "@/lib/masks";
 
 
 const MEDICO = "Dr. Abdo";
@@ -142,6 +143,10 @@ export default function AtestadoFormPage() {
   const set = (field: keyof AtestadoFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((p) => ({ ...p, [field]: e.target.value }));
+
+  const setMask = (field: keyof AtestadoFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -279,7 +284,7 @@ export default function AtestadoFormPage() {
             </div>
             <Input
               value={form.docNumero}
-              onChange={set("docNumero")}
+              onChange={setMask("docNumero", form.docTipo === "cpf" ? maskCPF : maskDigits(15))} inputMode="numeric"
               placeholder={form.docTipo === "cpf" ? "000.000.000-00" : "801440458570767"}
               className={inputCls}
               required
@@ -289,7 +294,7 @@ export default function AtestadoFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data de Nascimento</FieldLabel>
-              <Input value={form.nascimento} onChange={set("nascimento")} placeholder="14/05/1990" className={inputCls} required />
+              <Input value={form.nascimento} onChange={setMask("nascimento", maskDate)} inputMode="numeric" placeholder="14/05/1990" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>UF</FieldLabel>
@@ -305,11 +310,11 @@ export default function AtestadoFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data do Atendimento</FieldLabel>
-              <Input value={form.dataAtendimento} onChange={set("dataAtendimento")} placeholder="08/11/2023" className={inputCls} required />
+              <Input value={form.dataAtendimento} onChange={setMask("dataAtendimento", maskDate)} inputMode="numeric" placeholder="08/11/2023" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Hora do Atendimento</FieldLabel>
-              <Input value={form.horaAtendimento} onChange={set("horaAtendimento")} placeholder="05:53:23" className={inputCls} required />
+              <Input value={form.horaAtendimento} onChange={setMask("horaAtendimento", maskTimeSec)} inputMode="numeric" placeholder="05:53:23" className={inputCls} required />
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">

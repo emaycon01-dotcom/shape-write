@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadHapvidaFieldPositions } from "@/lib/hapvida-align";
 import templateHapvidaUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskCPF, maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -177,6 +178,10 @@ export default function HapvidaFormPage() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((p) => ({ ...p, [field]: e.target.value }));
 
+  const setMask = (field: keyof HapvidaFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
   const selecionarUnidade = (idx: number) => {
     setForm((p) => ({
       ...p,
@@ -320,7 +325,7 @@ export default function HapvidaFormPage() {
             </div>
             <Input
               value={form.docNumero}
-              onChange={set("docNumero")}
+              onChange={setMask("docNumero", form.docTipo === "cpf" ? maskCPF : maskDigits(15))} inputMode="numeric"
               placeholder={form.docTipo === "cpf" ? "000.000.000-00" : "801440458570767"}
               className={inputCls}
               required
@@ -330,11 +335,11 @@ export default function HapvidaFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Celular</FieldLabel>
-              <Input value={form.celular} onChange={set("celular")} placeholder="(34) 99649-7562" className={inputCls} required />
+              <Input value={form.celular} onChange={setMask("celular", maskPhone)} inputMode="numeric" placeholder="(34) 99649-7562" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Data de Nascimento</FieldLabel>
-              <Input value={form.nascimento} onChange={set("nascimento")} placeholder="14/05/1990" className={inputCls} required />
+              <Input value={form.nascimento} onChange={setMask("nascimento", maskDate)} inputMode="numeric" placeholder="14/05/1990" className={inputCls} required />
             </div>
           </div>
         </div>
@@ -366,11 +371,11 @@ export default function HapvidaFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data do Atendimento</FieldLabel>
-              <Input value={form.dataAtendimento} onChange={set("dataAtendimento")} placeholder="27/01/2025" className={inputCls} required />
+              <Input value={form.dataAtendimento} onChange={setMask("dataAtendimento", maskDate)} inputMode="numeric" placeholder="27/01/2025" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Hora do Atendimento</FieldLabel>
-              <Input value={form.horaAtendimento} onChange={set("horaAtendimento")} placeholder="09:46" className={inputCls} required />
+              <Input value={form.horaAtendimento} onChange={setMask("horaAtendimento", maskTime)} inputMode="numeric" placeholder="09:46" className={inputCls} required />
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">

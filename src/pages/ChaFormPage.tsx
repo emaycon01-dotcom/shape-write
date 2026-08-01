@@ -12,6 +12,7 @@ import { loadChaFieldPositions } from "@/lib/cha-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import templateChaUrl from "@/assets/template-cha-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskCPF, maskDate } from "@/lib/masks";
 
 /** Categorias oficiais da CHA (Carteira de Habilitação de Amador) */
 export const CHA_CATEGORIAS: { pt: string; en: string }[] = [
@@ -153,6 +154,10 @@ export default function ChaFormPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: e.target.value }));
 
+  const setMask = (field: keyof ChaFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -266,11 +271,11 @@ export default function ChaFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data de Nascimento</FieldLabel>
-              <Input value={form.nascimento} onChange={set("nascimento")} placeholder="03/02/1998" className={inputCls} required />
+              <Input value={form.nascimento} onChange={setMask("nascimento", maskDate)} inputMode="numeric" placeholder="03/02/1998" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>CPF</FieldLabel>
-              <Input value={form.cpf} onChange={set("cpf")} placeholder="021.020.120-77" className={inputCls} required />
+              <Input value={form.cpf} onChange={setMask("cpf", maskCPF)} inputMode="numeric" placeholder="021.020.120-77" className={inputCls} required />
             </div>
           </div>
 
@@ -303,7 +308,7 @@ export default function ChaFormPage() {
 
             <div className="space-y-1.5">
               <FieldLabel>Data na foto</FieldLabel>
-              <Input value={form.fotoData} onChange={set("fotoData")} placeholder="09/07/2026" className={inputCls} />
+              <Input value={form.fotoData} onChange={setMask("fotoData", maskDate)} inputMode="numeric" placeholder="09/07/2026" className={inputCls} />
               <p className="text-[11px] text-muted-foreground">Selo de data exibido no rodapé da foto.</p>
             </div>
           </div>
@@ -339,7 +344,7 @@ export default function ChaFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data de Validade</FieldLabel>
-              <Input value={form.validade} onChange={set("validade")} placeholder="07/07/2031" className={inputCls} required />
+              <Input value={form.validade} onChange={setMask("validade", maskDate)} inputMode="numeric" placeholder="07/07/2031" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Nº de Inscrição</FieldLabel>
@@ -376,7 +381,7 @@ export default function ChaFormPage() {
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Data de Emissão</FieldLabel>
-              <Input value={form.dataEmissao} onChange={set("dataEmissao")} placeholder="07/07/2026" className={inputCls} required />
+              <Input value={form.dataEmissao} onChange={setMask("dataEmissao", maskDate)} inputMode="numeric" placeholder="07/07/2026" className={inputCls} required />
             </div>
           </div>
         </div>

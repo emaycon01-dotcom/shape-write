@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadCrlvFieldPositions } from "@/lib/crlv-align";
 import templateCrlvUrl from "@/assets/template-crlv-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskAlnumUpper, maskCpfCnpj, maskDate, maskDigits } from "@/lib/masks";
 
 interface CrlvFormData {
   uf: string;
@@ -210,6 +211,10 @@ export default function CrlvFormPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: e.target.value }));
 
+  const setMask = (field: keyof CrlvFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -334,36 +339,36 @@ export default function CrlvFormPage() {
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Exercício</FieldLabel>
-              <Input value={form.exercicio} onChange={set("exercicio")} placeholder="2023" className={inputCls} required />
+              <Input value={form.exercicio} onChange={setMask("exercicio", maskDigits(4))} inputMode="numeric" placeholder="2023" className={inputCls} required />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Código RENAVAM</FieldLabel>
-              <Input value={form.renavam} onChange={set("renavam")} placeholder="00335436552" className={inputCls} required />
+              <Input value={form.renavam} onChange={setMask("renavam", maskDigits(11))} inputMode="numeric" placeholder="00335436552" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Número do CRV</FieldLabel>
-              <Input value={form.numeroCrv} onChange={set("numeroCrv")} placeholder="213012407278" className={inputCls} />
+              <Input value={form.numeroCrv} onChange={setMask("numeroCrv", maskDigits(12))} inputMode="numeric" placeholder="213012407278" className={inputCls} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel>Ano de fabricação</FieldLabel>
-              <Input value={form.anoFabricacao} onChange={set("anoFabricacao")} placeholder="2011" className={inputCls} />
+              <Input value={form.anoFabricacao} onChange={setMask("anoFabricacao", maskDigits(4))} inputMode="numeric" placeholder="2011" className={inputCls} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Ano do modelo</FieldLabel>
-              <Input value={form.anoModelo} onChange={set("anoModelo")} placeholder="2011" className={inputCls} />
+              <Input value={form.anoModelo} onChange={setMask("anoModelo", maskDigits(4))} inputMode="numeric" placeholder="2011" className={inputCls} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel>Código de segurança do CLA</FieldLabel>
-              <Input value={form.codigoCla} onChange={set("codigoCla")} placeholder="02775028150" className={inputCls} />
+              <Input value={form.codigoCla} onChange={setMask("codigoCla", maskDigits(11))} inputMode="numeric" placeholder="02775028150" className={inputCls} />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>CAT</FieldLabel>
@@ -394,7 +399,7 @@ export default function CrlvFormPage() {
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Chassi</FieldLabel>
-              <Input value={form.chassi} onChange={set("chassi")} placeholder="9533452R8BR155089" className={inputCls} />
+              <Input value={form.chassi} onChange={setMask("chassi", maskAlnumUpper(17))} inputMode="text" placeholder="9533452R8BR155089" className={inputCls} />
             </div>
           </div>
 
@@ -474,7 +479,7 @@ export default function CrlvFormPage() {
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>CPF / CNPJ</FieldLabel>
-              <Input value={form.cpfCnpj} onChange={set("cpfCnpj")} placeholder="744.088.444-20" className={inputCls} required />
+              <Input value={form.cpfCnpj} onChange={setMask("cpfCnpj", maskCpfCnpj)} inputMode="numeric" placeholder="744.088.444-20" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Local</FieldLabel>
@@ -482,7 +487,7 @@ export default function CrlvFormPage() {
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Data</FieldLabel>
-              <Input value={form.data} onChange={set("data")} placeholder="25/04/2023" className={inputCls} />
+              <Input value={form.data} onChange={setMask("data", maskDate)} inputMode="numeric" placeholder="25/04/2023" className={inputCls} />
             </div>
           </div>
         </div>

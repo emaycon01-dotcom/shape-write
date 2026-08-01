@@ -23,6 +23,7 @@ import {
 import templateP1Url from "@/assets/template-diploma-p1-hq.jpg";
 import templateP2Url from "@/assets/template-diploma-p2-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskDate, maskDigits } from "@/lib/masks";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -162,6 +163,10 @@ export default function DiplomaFormPage() {
   const set = (field: keyof DiplomaForm) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((p) => ({ ...p, [field]: e.target.value }));
+
+  const setMask = (field: keyof DiplomaForm, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
 
   const fillTest = () => {
     const ano = 2015 + Math.floor(Math.random() * 8);
@@ -367,11 +372,11 @@ export default function DiplomaFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data de conclusão</FieldLabel>
-              <Input value={form.dataConclusao} onChange={set("dataConclusao")} placeholder="10/07/2015" className={inputCls} required />
+              <Input value={form.dataConclusao} onChange={setMask("dataConclusao", maskDate)} inputMode="numeric" placeholder="10/07/2015" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Data da colação de grau</FieldLabel>
-              <Input value={form.dataColacao} onChange={set("dataColacao")} placeholder="31/08/2015" className={inputCls} required />
+              <Input value={form.dataColacao} onChange={setMask("dataColacao", maskDate)} inputMode="numeric" placeholder="31/08/2015" className={inputCls} required />
             </div>
           </div>
         </div>
@@ -399,11 +404,11 @@ export default function DiplomaFormPage() {
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Nascimento</FieldLabel>
-              <Input value={form.nascimento} onChange={set("nascimento")} placeholder="31/10/1992" className={inputCls} required />
+              <Input value={form.nascimento} onChange={setMask("nascimento", maskDate)} inputMode="numeric" placeholder="31/10/1992" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Identidade</FieldLabel>
-              <Input value={form.identidade} onChange={set("identidade")} placeholder="2009010328577" className={inputCls} required />
+              <Input value={form.identidade} onChange={setMask("identidade", maskDigits(15))} inputMode="numeric" placeholder="2009010328577" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Órgão expedidor</FieldLabel>
@@ -538,7 +543,7 @@ export default function DiplomaFormPage() {
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Data</FieldLabel>
-              <Input value={form.registroData} onChange={set("registroData")} placeholder="14/06/2023" className={inputCls} />
+              <Input value={form.registroData} onChange={setMask("registroData", maskDate)} inputMode="numeric" placeholder="14/06/2023" className={inputCls} />
             </div>
           </div>
 

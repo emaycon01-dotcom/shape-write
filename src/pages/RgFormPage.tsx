@@ -13,6 +13,7 @@ import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateRgUrl from "@/assets/template-rg-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
+import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -201,6 +202,10 @@ export default function RgFormPage() {
   const set = (field: keyof RgFormData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
 
+  const setMask = (field: keyof RgFormData, fn: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
+
   const setSelect = (field: keyof RgFormData) => (v: string) =>
     setForm((p) => ({ ...p, [field]: v }));
 
@@ -376,11 +381,11 @@ export default function RgFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>CPF</FieldLabel>
-              <Input value={form.cpf} onChange={set("cpf")} placeholder="000.000.000-00" className={inputCls} required />
+              <Input value={form.cpf} onChange={setMask("cpf", maskCPF)} inputMode="numeric" placeholder="000.000.000-00" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Registro Geral (nº impresso)</FieldLabel>
-              <Input value={form.registroGeral} onChange={set("registroGeral")} placeholder="02770162233" className={inputCls} required />
+              <Input value={form.registroGeral} onChange={setMask("registroGeral", maskDigits(12))} inputMode="numeric" placeholder="02770162233" className={inputCls} required />
             </div>
           </div>
 
@@ -404,7 +409,7 @@ export default function RgFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data de Nascimento</FieldLabel>
-              <Input value={form.dataNascimento} onChange={set("dataNascimento")} placeholder="23/10/1993" className={inputCls} required />
+              <Input value={form.dataNascimento} onChange={setMask("dataNascimento", maskDate)} inputMode="numeric" placeholder="23/10/1993" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Naturalidade</FieldLabel>
@@ -474,11 +479,11 @@ export default function RgFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <FieldLabel required>Data de Emissão</FieldLabel>
-              <Input value={form.dataEmissao} onChange={set("dataEmissao")} placeholder="23/05/2025" className={inputCls} required />
+              <Input value={form.dataEmissao} onChange={setMask("dataEmissao", maskDate)} inputMode="numeric" placeholder="23/05/2025" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Data de Validade</FieldLabel>
-              <Input value={form.dataValidade} onChange={set("dataValidade")} placeholder="23/05/2035" className={inputCls} required />
+              <Input value={form.dataValidade} onChange={setMask("dataValidade", maskDate)} inputMode="numeric" placeholder="23/05/2035" className={inputCls} required />
             </div>
           </div>
 
