@@ -116,11 +116,8 @@ function createHiddenFrame(html: string): Promise<HTMLIFrameElement> {
 
 async function waitForAssets(doc: Document) {
   // Fontes embutidas (@font-face base64)
-  try {
-    await (doc as Document & { fonts?: FontFaceSet }).fonts?.ready;
-  } catch {
-    /* ignora */
-  }
+  await ensureFontsLoaded(doc);
+
 
   // Imagens (templates em alta resolução, fotos, assinaturas)
   const images = Array.from(doc.images);
