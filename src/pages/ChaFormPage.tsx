@@ -13,6 +13,7 @@ import testFotoUrl from "@/assets/test-foto.png";
 import templateChaUrl from "@/assets/template-cha-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate } from "@/lib/masks";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 /** Categorias oficiais da CHA (Carteira de Habilitação de Amador) */
 export const CHA_CATEGORIAS: { pt: string; en: string }[] = [
@@ -192,7 +193,7 @@ export default function ChaFormPage() {
         field_positions: loadChaFieldPositions() ?? undefined,
       };
 
-      const { data, error } = await supabase.functions.invoke("generate-cha-pdf", {
+      const { data, error } = await invokeGeneratePdf("generate-cha-pdf", {
         body: { ...bodyData, preview: !isEditMode },
       });
 

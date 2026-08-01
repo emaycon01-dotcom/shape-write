@@ -11,6 +11,7 @@ import { loadCrlvFieldPositions } from "@/lib/crlv-align";
 import templateCrlvUrl from "@/assets/template-crlv-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskAlnumUpper, maskCpfCnpj, maskDate, maskDigits } from "@/lib/masks";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 interface CrlvFormData {
   uf: string;
@@ -257,7 +258,7 @@ export default function CrlvFormPage() {
         field_positions: loadCrlvFieldPositions() ?? undefined,
       };
 
-      const { data, error } = await supabase.functions.invoke("generate-crlv-pdf", {
+      const { data, error } = await invokeGeneratePdf("generate-crlv-pdf", {
         body: { ...bodyData, preview: !isEditMode },
       });
 

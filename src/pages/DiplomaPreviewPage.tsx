@@ -7,6 +7,7 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -147,7 +148,7 @@ export default function DiplomaPreviewPage() {
         (formData || {}) as Record<string, unknown>;
       void template_p1_base64; void template_p2_base64; void field_positions; void __form;
 
-      const { data, error } = await supabase.functions.invoke("generate-diploma-pdf", {
+      const { data, error } = await invokeGeneratePdf("generate-diploma-pdf", {
         body: {
           action: "register_portal",
           documento_id: documentoId,

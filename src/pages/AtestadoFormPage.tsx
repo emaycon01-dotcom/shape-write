@@ -13,6 +13,7 @@ import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { splitEndereco } from "@/lib/atestado-endereco";
 import { maskCPF, maskDate, maskDigits, maskTimeSec } from "@/lib/masks";
+import { invokeGeneratePdf } from "@/lib/browser-pdf";
 
 
 const MEDICO = "Dr. Abdo";
@@ -188,7 +189,7 @@ export default function AtestadoFormPage() {
         field_positions: loadAtestadoFieldPositions() ?? undefined,
       };
 
-      const { data, error } = await supabase.functions.invoke("generate-atestado-pdf", {
+      const { data, error } = await invokeGeneratePdf("generate-atestado-pdf", {
         body: { ...bodyData, preview: !isEditMode },
       });
 
