@@ -44,6 +44,8 @@ interface DiplomaForm {
   modalidade: Modalidade;
   curso: string;
   aluno: string;
+  cpf: string;
+  sexo: string;
   nacionalidade: string;
   naturalidade: string;
   nascimento: string;
