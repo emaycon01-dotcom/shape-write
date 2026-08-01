@@ -131,6 +131,8 @@ function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "
 
 export default function DocumentsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const verified = user?.verified !== false;
 
   const abrir = (m: Modulo) => {
     if (m.manutencao) {
@@ -141,12 +143,31 @@ export default function DocumentsPage() {
     else toast.info(`${m.titulo} estará disponível em breve.`);
   };
 
+  if (!verified) {
+    return (
+      <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center gap-4 py-20 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/70 ring-1 ring-border/60">
+          <ShieldAlert className="h-8 w-8 text-warning" />
+        </div>
+        <h1 className="font-display text-2xl font-bold text-foreground">Conta não verificada</h1>
+        <p className="max-w-md text-sm text-muted-foreground">
+          Sua conta ainda está aguardando a verificação de um administrador. Assim que ela for verificada, todos os
+          módulos e a geração de documentos aparecerão aqui automaticamente.
+        </p>
+        <p className="rounded-lg border border-border/60 bg-card/60 px-4 py-2 text-xs text-muted-foreground">
+          Precisa de ajuda? Abra um chamado pelo suporte dentro do painel.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">Serviços</h1>
         <p className="text-sm text-muted-foreground">Módulos disponíveis na plataforma</p>
       </div>
+
 
       {MODULOS.map((mod) => (
         <section key={mod.grupo} className="space-y-3">
