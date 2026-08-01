@@ -226,6 +226,35 @@ export default function DiplomaFormPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
 
+  /** Seleção da instituição → preenche cabeçalho, mantenedora, CNPJ e reitor automaticamente. */
+  const selectInstituicao = (nome: string) => {
+    const preset = INSTITUICOES.find((i) => i.nome === nome);
+    const { l1, l2 } = splitInstituicao(nome);
+    setForm((p) => ({
+      ...p,
+      instituicao: nome,
+      instituicaoL1: l1,
+      instituicaoL2: l2,
+      mantenedora: preset?.mantenedora ?? p.mantenedora,
+      cnpj: preset?.cnpj ?? p.cnpj,
+      reitor: preset?.reitor ?? p.reitor,
+      cidadeExpedicao: preset?.cidade ?? p.cidadeExpedicao,
+    }));
+  };
+
+  /** Números internos (livro, folha e nº de série) são gerados sozinhos. */
+  useEffect(() => {
+    if (isEditMode) return;
+    setForm((p) => ({
+      ...p,
+      registroLivro: "1",
+      registroFolha: rnd(4),
+      serial: rnd(13),
+      codigoValidacao: "",
+    }));
+  }, [isEditMode]);
+
+
   const fillTest = () => {
     const ano = 2015 + Math.floor(Math.random() * 8);
     setForm((p) => ({
