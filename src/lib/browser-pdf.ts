@@ -175,24 +175,8 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
       const width = target.offsetWidth || 794;
       const height = target.offsetHeight || 1123;
 
-      const canvas = await html2canvas(target, {
-        scale: safeScale(width, height),
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        width,
-        height,
-        windowWidth: width,
-        windowHeight: height,
-        imageTimeout: 30_000,
-        // O html2canvas rasteriza um clone em outro documento: sem isto as
-        // @font-face embutidas (CNHDigital) ainda não estão prontas e o texto
-        // sai com a fonte de fallback.
-        onclone: (cloned: Document) => ensureFontsLoaded(cloned),
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const scale = safeScale(width);
+      const band = Math.min(height, bandCssHeight(width, scale));
       const orientation = width > height ? "landscape" : "portrait";
 
       // 1px CSS (96dpi) = 0.75pt — mantém o tamanho físico exato do papel.
@@ -205,11 +189,39 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
         pdf.addPage([wPt, hPt], orientation);
       }
 
-      pdf.addImage(imgData, "JPEG", 0, 0, wPt, hPt, undefined, "NONE");
-      // Libera memória em dispositivos móveis
-      canvas.width = 0;
-      canvas.height = 0;
+      for (let top = 0; top < height; top += band) {
+        const sliceH = Math.min(band, height - top);
+
+        const canvas = await html2canvas(target, {
+          scale,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+          width,
+          height: sliceH,
+          y: top,
+          windowWidth: width,
+          windowHeight: height,
+          imageTimeout: 30_000,
+          // O html2canvas rasteriza um clone em outro documento: sem isto as
+          // @font-face embutidas (CNHDigital/RGOcrb) ainda não estão prontas
+          // e o texto sai com a fonte de fallback.
+          onclone: (cloned: Document) => ensureFontsLoaded(cloned),
+        });
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        // +0.05pt evita fio branco entre faixas por arredondamento.
+        const yPt = top * 0.75;
+        const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
+        pdf.addImage(imgData, "JPEG", 0, yPt, wPt, hSlicePt, undefined, "NONE");
+
+        // Libera memória em dispositivos móveis
+        canvas.width = 0;
+        canvas.height = 0;
+      }
     }
+
 
     if (!pdf) throw new Error("Documento vazio.");
     const uri = pdf.output("datauristring");
