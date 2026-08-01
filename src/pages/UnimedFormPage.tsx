@@ -246,8 +246,36 @@ export default function UnimedFormPage() {
       convenio: UNIDADES[idx].convenio,
       telefone: UNIDADES[idx].telefone,
       crmUf: UNIDADES[idx].crmUf,
+      ...(p.modoManual ? {} : {
+        medico: MEDICOS_AUTO[idx].medico,
+        crmNumero: MEDICOS_AUTO[idx].crmNumero,
+        especialidade: MEDICOS_AUTO[idx].especialidade,
+      }),
     }));
   };
+
+  /** Profissional efetivo: automático fora do modo manual. */
+  const autoMedico = MEDICOS_AUTO[form.unidadeIdx] ?? MEDICOS_AUTO[0];
+  const prof = form.modoManual
+    ? { medico: form.medico, crmNumero: form.crmNumero, crmUf: form.crmUf, especialidade: form.especialidade }
+    : { ...autoMedico, crmUf: UNIDADES[form.unidadeIdx]?.crmUf || autoMedico.crmUf };
+
+  const onUploadAssinatura = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Selecione uma imagem (PNG/JPG)", variant: "destructive" });
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      toast({ title: "Imagem muito grande (máx. 3MB)", variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setForm((p) => ({ ...p, assinaturaBase64: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
