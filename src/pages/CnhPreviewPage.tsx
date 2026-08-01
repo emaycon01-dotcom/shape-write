@@ -233,6 +233,18 @@ export default function CnhPreviewPage() {
               <RefreshCw className="w-4 h-4" /> Tentar novamente
             </Button>
           </div>
+        ) : images.length > 0 ? (
+          <div className="w-full h-full overflow-auto bg-white p-2 space-y-2">
+            {images.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`Página ${i + 1} do documento`}
+                className="w-full h-auto block"
+                loading="lazy"
+              />
+            ))}
+          </div>
         ) : blobUrl ? (
           <iframe
             src={blobUrl}
@@ -240,6 +252,7 @@ export default function CnhPreviewPage() {
             title="PDF Preview"
             style={{ backgroundColor: "#ffffff" }}
           />
+
         ) : (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
