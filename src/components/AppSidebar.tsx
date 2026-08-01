@@ -127,6 +127,15 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard/admin/chamados" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                      <Headphones className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Chamados</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
                     <NavLink to="/dashboard/template-align" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
                       <SlidersHorizontal className="mr-2 h-4 w-4" />
                       {!collapsed && <span>Menu de Alinhamento</span>}
