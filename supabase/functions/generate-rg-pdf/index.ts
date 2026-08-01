@@ -345,6 +345,14 @@ ${RG_FONT_FACE}
   .sig-overlay { display: flex; align-items: center; justify-content: center; }
   .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
   .mrz-line { display:block; text-align:left; white-space:pre; }
+  .mrz-block {
+    white-space: pre;
+    text-align: left;
+    font-variant-ligatures: none;
+    font-feature-settings: "kern" 0, "liga" 0;
+    font-kerning: none;
+  }
+
 </style>
 </head>
 <body>
