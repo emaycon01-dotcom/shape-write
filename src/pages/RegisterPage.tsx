@@ -75,6 +75,25 @@ export default function RegisterPage() {
     }
   };
 
+  if (submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card/80 p-8 text-center backdrop-blur">
+          <img src={logo} alt="MonkeyLab" className="mx-auto mb-6 w-28 object-contain" />
+          <h1 className="font-display text-2xl font-bold text-foreground mb-2">Conta em análise</h1>
+          <p className="text-sm text-muted-foreground">
+            Seu cadastro foi enviado e está aguardando aprovação de um administrador.
+            Você poderá entrar assim que o acesso for liberado.
+          </p>
+          <Button className="mt-6 w-full h-11" onClick={() => navigate("/login")}>
+            Voltar ao login
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <div className="min-h-screen flex bg-background">
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-secondary/30">
