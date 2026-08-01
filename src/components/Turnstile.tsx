@@ -35,10 +35,25 @@ export function isPreviewHost() {
   const host = window.location.hostname;
   return (
     host === "localhost" ||
+    host === "127.0.0.1" ||
     host.includes("preview--") ||
     host.endsWith(".lovableproject.com") ||
-    host.endsWith(".lovable.app")
+    host.endsWith(".sandbox.lovable.dev")
   );
+}
+
+/** Valida o token no servidor (Cloudflare siteverify). */
+export async function verifyCaptchaToken(token: string): Promise<boolean> {
+  if (isPreviewHost()) return true;
+  try {
+    const { data, error } = await supabase.functions.invoke("verify-captcha", {
+      body: { action: "verify", token },
+    });
+    if (error) return false;
+    return Boolean(data?.success);
+  } catch {
+    return false;
+  }
 }
 
 /** Chave de teste oficial da Cloudflare (sempre aprova) para hosts de preview */
