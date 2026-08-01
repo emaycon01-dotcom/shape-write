@@ -918,6 +918,14 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                           : "left") as "right" | "left",
                       }
                     : {}),
+                  ...(cfg.key === "unimed" && f.w && !f.h
+                    ? {
+                        width: `${((f.w / PW) * 100).toFixed(4)}%`,
+                        whiteSpace: "normal" as const,
+                        lineHeight: 1.22,
+                        textAlign: "left" as const,
+                      }
+                    : {}),
                   ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
                   ...(isBox
                     ? {
@@ -960,7 +968,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "crlv", "cha", "diploma"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
