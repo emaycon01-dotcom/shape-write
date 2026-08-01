@@ -8,7 +8,64 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
-const RENDER_SCALE = 3.75;
+/** Escala desejada: 794px (A4 @96dpi) * 6 ≈ 4764px ≈ 576 DPI. */
+const RENDER_SCALE = 6;
+
+/** Limite de dimensão de canvas do dispositivo (Safari/iOS é o mais restrito). */
+let cachedMaxDim: number | null = null;
+function detectMaxCanvasDimension(): number {
+  if (cachedMaxDim !== null) return cachedMaxDim;
+  const candidates = [16384, 11180, 8192, 4096];
+  for (const size of candidates) {
+    try {
+      const c = document.createElement("canvas");
+      c.width = size;
+      c.height = 32;
+      const ctx = c.getContext("2d");
+      if (!ctx) continue;
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(size - 2, 0, 2, 2);
+      const ok = ctx.getImageData(size - 1, 1, 1, 1).data[0] === 255;
+      c.width = 0;
+      c.height = 0;
+      if (ok) {
+        cachedMaxDim = size;
+        return size;
+      }
+    } catch {
+      /* tenta o próximo */
+    }
+  }
+  cachedMaxDim = 4096;
+  return 4096;
+}
+
+/** Maior escala segura para a página, respeitando dimensão e área máximas. */
+function safeScale(width: number, height: number): number {
+  const maxDim = detectMaxCanvasDimension();
+  const maxArea = maxDim >= 8192 ? 268_000_000 : 16_700_000; // iOS ~16.7 MP
+  const byDim = maxDim / Math.max(width, height);
+  const byArea = Math.sqrt(maxArea / (width * height));
+  return Math.max(2, Math.min(RENDER_SCALE, byDim, byArea));
+}
+
+/** Garante que as @font-face (base64) estejam carregadas antes de rasterizar. */
+async function ensureFontsLoaded(doc: Document) {
+  const fonts = (doc as Document & { fonts?: FontFaceSet }).fonts;
+  if (!fonts) return;
+  try {
+    const families = new Set<string>();
+    fonts.forEach((f) => families.add(f.family));
+    await Promise.all(
+      Array.from(families).map((family) =>
+        fonts.load(`16px ${/\s/.test(family) ? `"${family}"` : family}`).catch(() => undefined),
+      ),
+    );
+    await fonts.ready;
+  } catch {
+    /* ignora */
+  }
+}
 
 function createHiddenFrame(html: string): Promise<HTMLIFrameElement> {
   return new Promise((resolve, reject) => {
