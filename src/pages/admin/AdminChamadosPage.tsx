@@ -89,10 +89,12 @@ export default function AdminChamadosPage() {
               }`}
             >
               <p className="truncate text-sm font-medium">{t.subject}</p>
-              <p className="truncate text-xs text-muted-foreground">{t.user_name || t.user_email}</p>
+              <p className="truncate text-xs font-medium text-foreground">{t.user_name || "Sem nome"}</p>
+              <p className="truncate text-xs text-muted-foreground">{t.user_email || "—"}</p>
               <p className="text-[11px] text-muted-foreground">
-                {t.category} · {new Date(t.created_at).toLocaleString("pt-BR")}
+                {t.category} · {new Date(t.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
               </p>
+
             </button>
           ))}
         </div>
