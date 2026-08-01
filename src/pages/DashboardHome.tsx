@@ -17,7 +17,7 @@ import {
 
 export const PLANOS = [
   {
-    nome: "Dealer",
+    nome: "Basic",
     preco: "R$ 150,00",
     valor: 150,
     icon: Rocket,
@@ -25,11 +25,11 @@ export const PLANOS = [
     ring: "ring-sky-500/30",
     desconto: 25,
     descricao:
-      "Plano de entrada da MonkeyLab. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Dealer na conta recebe 25% de desconto em todo o sistema.",
+      "Plano de entrada da MonkeyLab. Libera o painel de serviços e a geração de CNH Digital com suporte padrão. Quem tem o plano Basic na conta recebe 25% de desconto em todo o sistema.",
     beneficios: ["Painel de serviços", "CNH Digital", "Suporte padrão", "25% de desconto em todo o sistema"],
   },
   {
-    nome: "Master",
+    nome: "Pro",
     preco: "R$ 450,00",
     valor: 450,
     icon: Star,
@@ -38,11 +38,11 @@ export const PLANOS = [
     destaque: true,
     desconto: 50,
     descricao:
-      "Plano intermediário com tudo do Dealer, fila prioritária de geração e suporte prioritário. Quem tem o plano Master na conta recebe 50% de desconto em todo o sistema.",
-    beneficios: ["Tudo do Dealer", "Fila prioritária", "Suporte prioritário", "50% de desconto em todo o sistema"],
+      "Plano intermediário com tudo do Basic, fila prioritária de geração e suporte prioritário. Quem tem o plano Pro na conta recebe 50% de desconto em todo o sistema.",
+    beneficios: ["Tudo do Basic", "Fila prioritária", "Suporte prioritário", "50% de desconto em todo o sistema"],
   },
   {
-    nome: "Diamond",
+    nome: "Premium",
     preco: "R$ 999,99",
     valor: 999.99,
     icon: Gem,
@@ -50,8 +50,8 @@ export const PLANOS = [
     ring: "ring-amber-500/30",
     desconto: 100,
     descricao:
-      "Plano máximo da MonkeyLab: tudo do Master, limites ampliados e atendimento dedicado. Quem tem o plano Diamond na conta recebe 100% de desconto em todo o sistema.",
-    beneficios: ["Tudo do Master", "Limites ampliados", "Atendimento dedicado", "100% de desconto em todo o sistema"],
+      "Plano máximo da MonkeyLab: tudo do Pro, limites ampliados e atendimento dedicado. Quem tem o plano Premium na conta recebe 100% de desconto em todo o sistema.",
+    beneficios: ["Tudo do Pro", "Limites ampliados", "Atendimento dedicado", "100% de desconto em todo o sistema"],
   },
 ];
 

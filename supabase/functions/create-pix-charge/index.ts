@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
 import { ELITEPAY_BASE_URL, applyPaidTransaction, confirmElitepayPayment } from "../_shared/elitepay.ts";
 
-const PLAN_BASE_PRICES: Record<string, number> = { Dealer: 150, Master: 450, Diamond: 999.99 };
+const PLAN_BASE_PRICES: Record<string, number> = { Basic: 150, Pro: 450, Premium: 999.99 };
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {

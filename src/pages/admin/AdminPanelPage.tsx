@@ -49,7 +49,7 @@ const CARGO_LABELS: Record<string, string> = {
 };
 const PLANOS = ["free", "dealer", "master", "diamond"] as const;
 const PLANO_LABELS: Record<string, string> = {
-  free: "Free", dealer: "Dealer", master: "Master", diamond: "Diamond",
+  free: "Free", dealer: "Basic", master: "Pro", diamond: "Premium",
 };
 
 type Tab =

@@ -161,7 +161,7 @@ export async function applyPaidTransaction(supabaseAdmin: any, transaction: any)
       reason: `pix_elitepay ${transaction.elitepay_charge_id || ""}`.trim(),
     });
   } else if (transaction.type === "plano" && transaction.plan_name) {
-    const planMap: Record<string, string> = { Dealer: "dealer", Master: "master", Diamond: "diamond" };
+    const planMap: Record<string, string> = { Basic: "dealer", Pro: "master", Premium: "diamond" };
     const planValue = planMap[transaction.plan_name] || String(transaction.plan_name).toLowerCase();
 
     const { error: planError } = await supabaseAdmin
