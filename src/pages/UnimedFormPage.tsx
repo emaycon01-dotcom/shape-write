@@ -41,6 +41,13 @@ const UNIDADES = [
   },
 ];
 
+/** Profissional automático por unidade (usado fora do modo manual). */
+const MEDICOS_AUTO = [
+  { medico: "MARIA CAROLINA CARIANO DA SILVA", crmNumero: "0121699", crmUf: "CRM-RJ", especialidade: "CLÍNICA MÉDICA" },
+  { medico: "RICARDO ALMEIDA FONSECA", crmNumero: "0154872", crmUf: "CRM-SP", especialidade: "CLÍNICA MÉDICA" },
+  { medico: "JULIANA PEREIRA RESENDE", crmNumero: "0098431", crmUf: "CRM-MG", especialidade: "CLÍNICA MÉDICA" },
+];
+
 const QUADROS = [
   "choque alérgico (anafilaxia)",
   "quadro gripal (síndrome gripal)",
