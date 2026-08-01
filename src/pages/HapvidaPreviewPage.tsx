@@ -21,6 +21,14 @@ function base64ToBlob(base64DataUrl: string): Blob | null {
     return null;
   }
 }
+/** Código opaco, não sequencial e URL-safe (32 chars) para o QR de validação. */
+function makeVerifyCode(): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+}
+
 
 export default function HapvidaPreviewPage() {
   const location = useLocation();
