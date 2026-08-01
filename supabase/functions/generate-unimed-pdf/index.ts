@@ -92,6 +92,17 @@ type Pos = { x: number; y: number; fontSize: number; w?: number; h?: number; rot
 export const UNIMED_DEFAULT_POSITIONS: Record<string, Pos> = {
   unidade: { x: 191, y: 18.9, fontSize: 10.3, w: 400 },
   endereco: { x: 191, y: 33.8, fontSize: 8.3, w: 480 },
+  lbl_paciente: { x: 18.6, y: 54.8, fontSize: 10.3 },
+  lbl_prontuario: { x: 435.1, y: 54.8, fontSize: 10.3 },
+  lbl_atendimento: { x: 610.9, y: 54.8, fontSize: 10.3 },
+  lbl_nascimento: { x: 18.6, y: 75.4, fontSize: 10.3 },
+  lbl_convenio: { x: 425.9, y: 75.4, fontSize: 10.3 },
+  lbl_mae: { x: 19.6, y: 96.2, fontSize: 10.3 },
+  lbl_setor: { x: 425.9, y: 94, fontSize: 10.3 },
+  lbl_leito: { x: 706.1, y: 96.2, fontSize: 10.3 },
+  lbl_profissional: { x: 20.7, y: 116.7, fontSize: 10.3 },
+  lbl_data_assinatura: { x: 425.9, y: 111.4, fontSize: 10.3 },
+  lbl_titulo: { x: 324.7, y: 161.8, fontSize: 12.4 },
   paciente: { x: 138.6, y: 52.7, fontSize: 10.3 },
   prontuario: { x: 516.9, y: 52.6, fontSize: 10.3 },
   atendimento: { x: 688.5, y: 52.7, fontSize: 10.3 },
@@ -108,7 +119,7 @@ export const UNIMED_DEFAULT_POSITIONS: Record<string, Pos> = {
   autorizo: { x: 58.4, y: 327.9, fontSize: 12.4, w: 655 },
   nome_linha: { x: 178.2, y: 463.7, fontSize: 10.3 },
   assinatura_digital: { x: 36.2, y: 775, fontSize: 6.2, w: 420 },
-  assinatura_img: { x: 36.2, y: 690, fontSize: 8, w: 230, h: 80 },
+  assinatura_img: { x: 263, y: 470, fontSize: 8, w: 280, h: 100 },
   qr: { x: 568, y: 718, fontSize: 8, w: 72, h: 72 },
   rodape_impresso: { x: 10.3, y: 1095.1, fontSize: 10.3 },
   rodape_criado: { x: 198.1, y: 1095.1, fontSize: 10.3 },
@@ -251,16 +262,16 @@ export function buildUnimedHtml(
   <div class="overlay" style="${base("endereco")}">${escapeHtml(d.endereco || "")}</div>
 
   <!-- rótulos fixos do quadro -->
-  <div class="overlay" style="top:54.8px;left:18.6px;font-size:10.3px;">Nome do paciente:</div>
-  <div class="overlay" style="top:54.8px;left:435.1px;font-size:10.3px;">Nº Pront.:</div>
-  <div class="overlay" style="top:54.8px;left:610.9px;font-size:10.3px;">N° Atend.</div>
-  <div class="overlay" style="top:75.4px;left:18.6px;font-size:10.3px;">Data de Nascimento:</div>
-  <div class="overlay" style="top:75.4px;left:425.9px;font-size:10.3px;">Convênio:</div>
-  <div class="overlay" style="top:96.2px;left:19.6px;font-size:10.3px;">Nome da mãe:</div>
-  <div class="overlay" style="top:94px;left:425.9px;font-size:10.3px;">Setor:</div>
-  <div class="overlay" style="top:96.2px;left:706.1px;font-size:10.3px;">Leito:</div>
-  <div class="overlay" style="top:116.7px;left:20.7px;font-size:10.3px;">Profissional:</div>
-  <div class="overlay" style="top:111.4px;left:425.9px;font-size:10.3px;">Data Assinatura:</div>
+  <div class="overlay" style="${base("lbl_paciente")}">Nome do paciente:</div>
+  <div class="overlay" style="${base("lbl_prontuario")}">Nº Pront.:</div>
+  <div class="overlay" style="${base("lbl_atendimento")}">N° Atend.</div>
+  <div class="overlay" style="${base("lbl_nascimento")}">Data de Nascimento:</div>
+  <div class="overlay" style="${base("lbl_convenio")}">Convênio:</div>
+  <div class="overlay" style="${base("lbl_mae")}">Nome da mãe:</div>
+  <div class="overlay" style="${base("lbl_setor")}">Setor:</div>
+  <div class="overlay" style="${base("lbl_leito")}">Leito:</div>
+  <div class="overlay" style="${base("lbl_profissional")}">Profissional:</div>
+  <div class="overlay" style="${base("lbl_data_assinatura")}">Data Assinatura:</div>
 
   <!-- valores do quadro -->
   <div class="overlay" style="${base("paciente")}">${escapeHtml(d.paciente || "")}</div>
@@ -276,7 +287,7 @@ export function buildUnimedHtml(
   <div class="overlay" style="${base("profissional")}">${escapeHtml(d.medico || "")}</div>
 
   <!-- corpo -->
-  <div class="overlay" style="top:161.8px;left:324.7px;font-size:12.4px;">ATESTADO MÉDICO</div>
+  <div class="overlay" style="${base("lbl_titulo")}">ATESTADO MÉDICO</div>
   <div class="overlay txt" style="${base("corpo")}">${escapeHtml(buildCorpoText(d))}</div>
   <div class="overlay txt" style="${base("decreto")}">${escapeHtml(buildDecretoText(d))}</div>
   <div class="overlay txt" style="${base("autorizo")}">${escapeHtml(buildAutorizoText(d))}</div>
