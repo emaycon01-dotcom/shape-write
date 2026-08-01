@@ -112,31 +112,33 @@ const App = () => {
                       <Route path="documents/atestado" element={<AtestadoFormPage />} />
                       <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
 
-                      <Route path="documents/hapvida" element={<HapvidaFormPage />} />
-                      <Route path="documents/hapvida/preview" element={<HapvidaPreviewPage />} />
+                      <Route path="documents" element={<DocumentsPage />} />
+                      <Route element={<VerifiedGate />}>
+                        <Route path="documents/cnh" element={<CnhFormPage />} />
+                        <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
+                        <Route path="documents/rg" element={<RgFormPage />} />
+                        <Route path="documents/rg/preview" element={<RgPreviewPage />} />
+                        <Route path="documents/atestado" element={<AtestadoFormPage />} />
+                        <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
+                        <Route path="documents/hapvida" element={<HapvidaFormPage />} />
+                        <Route path="documents/hapvida/preview" element={<HapvidaPreviewPage />} />
+                        <Route path="documents/unimed" element={<UnimedFormPage />} />
+                        <Route path="documents/unimed/preview" element={<UnimedPreviewPage />} />
+                        <Route path="documents/crlv" element={<CrlvFormPage />} />
+                        <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
+                        <Route path="documents/cha" element={<ChaFormPage />} />
+                        <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
+                        <Route path="documents/diploma" element={<DiplomaFormPage />} />
+                        <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
+                        <Route path="history" element={<HistoryPage />} />
+                      </Route>
 
-                      <Route path="documents/unimed" element={<UnimedFormPage />} />
-                      <Route path="documents/unimed/preview" element={<UnimedPreviewPage />} />
-
-
-                      <Route path="documents/crlv" element={<CrlvFormPage />} />
-                      <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
-
-                      <Route path="documents/cha" element={<ChaFormPage />} />
-                      <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
-
-                      <Route path="documents/diploma" element={<DiplomaFormPage />} />
-                      <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
-
-
-
-
-                      <Route path="history" element={<HistoryPage />} />
                       <Route path="recarregar" element={<RecarregarPage />} />
                       <Route path="planos" element={<PlanosPage />} />
 
                       <Route path="template-align" element={<TemplateAlignPage />} />
                       <Route path="ferramentas/assinaturas" element={<SignatureGeneratorPage />} />
+
                       <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
