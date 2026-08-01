@@ -193,6 +193,58 @@ export const defaultHapvidaFields: FieldDef[] = [
   { id: "assinatura_info", label: "Assinatura digital (info)", sampleText: "Digitally signed by\nCARINE GONÇALVES LOPES PIETRZAKI", x: 625, y: 935.5, fontSize: 9.1, w: 150, color: "#6b6b6b" },
 ];
 
+// Defaults MUST match supabase/functions/generate-unimed-pdf/index.ts UNIMED_DEFAULT_POSITIONS
+export const defaultUnimedFields: FieldDef[] = [
+  { id: "unidade", label: "Unidade (cabeçalho)", sampleText: "TELESSAUDE - UNIMEDRJ", x: 191, y: 18.9, fontSize: 10.3, w: 400 },
+  { id: "endereco", label: "Endereço da unidade", sampleText: "AV ATLÂNTICA, 2440 - APT 1008, RIO DE JANEIRO - RJ, 22041-901", x: 191, y: 33.8, fontSize: 8.3, w: 480 },
+  { id: "paciente", label: "Nome do paciente", sampleText: "VICTORIA GABRIELA COSTA PEREIRA", x: 138.6, y: 52.7, fontSize: 10.3 },
+  { id: "prontuario", label: "Nº Prontuário", sampleText: "005592173", x: 516.9, y: 52.6, fontSize: 10.3 },
+  { id: "atendimento", label: "Nº Atendimento", sampleText: "2290479", x: 688.5, y: 52.7, fontSize: 10.3 },
+  { id: "nascimento", label: "Data de nascimento", sampleText: "14/08/2000", x: 138.6, y: 75.4, fontSize: 10.3 },
+  { id: "idade", label: "Idade", sampleText: "Idade:24 Anos", x: 223.3, y: 75.4, fontSize: 10.3 },
+  { id: "convenio", label: "Convênio", sampleText: "UNIMED RJ", x: 516.9, y: 73.2, fontSize: 10.3 },
+  { id: "mae", label: "Nome da mãe", sampleText: "DANIELE COSTA PEREIRA", x: 137.8, y: 96.2, fontSize: 10.3 },
+  { id: "setor", label: "Setor", sampleText: "-", x: 470, y: 94, fontSize: 10.3 },
+  { id: "leito", label: "Leito", sampleText: "-", x: 730, y: 96.2, fontSize: 10.3 },
+  { id: "data_assinatura", label: "Data da assinatura", sampleText: "11/12/2024 13:00:21", x: 517.1, y: 111.4, fontSize: 10.3 },
+  { id: "profissional", label: "Profissional", sampleText: "MARIA CAROLINA CARIANO DA SILVA", x: 138.6, y: 115, fontSize: 10.3 },
+  {
+    id: "corpo",
+    label: "Texto do atestado",
+    sampleText:
+      "Atesto para os devidos fins, a pedido que o(a) Sr(a). VICTORIA GABRIELA COSTA PEREIRA, inscrito(a) no CPF sob o n 148.230.176-84, paciente sob meus cuidado, foi atendido(a) no dia 11/12/24 as 13:00 apresentando quadro de choque alérgico (anafilaxia).",
+    x: 61.3,
+    y: 191,
+    fontSize: 12.4,
+    w: 665,
+  },
+  {
+    id: "decreto",
+    label: "Parágrafo do Decreto",
+    sampleText:
+      "(Este atestado é válido para as finalidades previstas nos artigos 71 e 72, parágrafo 1ª do Decreto 3048/99, e será expedido para justificar o afastamento do trabalho 01 dias).",
+    x: 58.4,
+    y: 282.6,
+    fontSize: 12.4,
+    w: 655,
+  },
+  {
+    id: "autorizo",
+    label: "Autorização do CID",
+    sampleText: "Eu, VICTORIA GABRIELA COSTA PEREIRA, autorizo a inclusão da CID T782 no atestado médico.",
+    x: 58.4,
+    y: 327.9,
+    fontSize: 12.4,
+    w: 655,
+  },
+  { id: "nome_linha", label: "Nome sobre a linha", sampleText: "VICTORIA GABRIELA COSTA PEREIRA", x: 178.2, y: 463.7, fontSize: 10.3 },
+  { id: "assinatura_digital", label: "Assinatura digital (ICP)", sampleText: "MARIA CAROLINA CARIANO DA SILVA: 0121699, AC CNDL RFB v3, 0121699, 11/12/2024 13:00 BRT 11/12/2024", x: 36.2, y: 769.4, fontSize: 6.2, w: 420 },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 428, y: 718, fontSize: 8, w: 63, h: 63, color: "#999" },
+  { id: "rodape_impresso", label: "Rodapé - Impresso em", sampleText: "Impresso em: 11/12/2024 13:00", x: 10.3, y: 1095.1, fontSize: 10.3 },
+  { id: "rodape_criado", label: "Rodapé - Criado por", sampleText: "Criado por: MARIA CAROLINA CARIANO DA SILVA", x: 198.1, y: 1095.1, fontSize: 10.3 },
+  { id: "rodape_crm", label: "Rodapé - CRM", sampleText: "CRM-RJ: 0121699", x: 565.4, y: 1095.1, fontSize: 10.3 },
+];
+
 
 
 // Defaults MUST match supabase/functions/generate-crlv-pdf/index.ts CRLV_DEFAULT_POSITIONS
