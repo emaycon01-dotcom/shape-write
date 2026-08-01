@@ -11,7 +11,9 @@ import {
   PenTool,
   Smartphone,
   UserCheck,
+  BadgeCheck,
   Headphones,
+
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,6 +31,8 @@ import logo from "@/assets/logo.webp";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useOpenTickets } from "@/hooks/use-open-tickets";
 import { usePendingApprovals } from "@/hooks/use-pending-approvals";
+import { useUnverifiedAccounts } from "@/hooks/use-unverified-accounts";
+
 
 
 const commonItems = [
@@ -46,6 +50,8 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { count: openTickets } = useOpenTickets();
   const { count: pendingApprovals } = usePendingApprovals();
+  const { count: unverified } = useUnverifiedAccounts();
+
 
 
   const isAdmin = user?.role === "admin";
@@ -85,7 +91,7 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">MENU PRINCIPAL</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {renderMenuItems(commonItems)}
+              {renderMenuItems(commonItems.filter((i) => user?.verified !== false || i.url !== "/dashboard/history"))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -148,6 +154,26 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard/admin/verificacoes" className="relative hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                      <BadgeCheck className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Verificar Contas</span>}
+                      {unverified > 0 && (
+                        <span
+                          className={
+                            collapsed
+                              ? "absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground"
+                              : "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-bold leading-none text-destructive-foreground"
+                          }
+                        >
+                          {unverified > 99 ? "99+" : unverified}
+                        </span>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+
                   <SidebarMenuButton asChild>
                     <NavLink to="/dashboard/admin/chamados" className="relative hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
                       <Headphones className="mr-2 h-4 w-4" />

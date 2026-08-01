@@ -10,7 +10,10 @@ interface User {
   credits: number;
   plano: string;
   createdAt: string;
+  /** Conta liberada pelo staff para ver e gerar documentos. */
+  verified: boolean;
 }
+
 
 interface AuthContextType {
   user: User | null;
@@ -37,7 +40,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
       .eq("user_id", supabaseUser.id)
       .eq("status", "bloqueado")
       .maybeSingle(),
-    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at, status").eq("user_id", supabaseUser.id).maybeSingle(),
+    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at, status, verified").eq("user_id", supabaseUser.id).maybeSingle(),
     supabase.from("user_roles").select("cargo").eq("user_id", supabaseUser.id),
   ]);
 
@@ -46,7 +49,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
   }
 
-  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string; status?: string } | null;
+  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string; status?: string; verified?: boolean } | null;
   const cargos = rolesRes.data?.map((r) => r.cargo) ?? [];
   const isAdmin = cargos.includes("admin");
   const isGerente = cargos.includes("gerente");
@@ -66,8 +69,10 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     credits: Number(profile?.credits ?? 0) || 0,
     plano: profile?.plano || "free",
     createdAt: profile?.created_at || supabaseUser.created_at,
+    verified: isStaff ? true : profile?.verified === true,
   };
 }
+
 
 
 const USER_CACHE_KEY = "auth_user_cache";

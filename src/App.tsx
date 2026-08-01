@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +24,17 @@ function StaffRoute({ children }: { children: React.ReactNode }) {
   if (!user || (user.role !== "admin" && user.role !== "gerente")) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
+
+/** Somente contas verificadas pelo staff podem abrir os módulos de documentos. */
+function VerifiedGate() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.verified === false) return <Navigate to="/dashboard/documents" replace />;
+  return <Outlet />;
+}
+
+
 
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
@@ -60,6 +71,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 // Admin pages
 const AdminPanelPage = lazy(() => import("./pages/admin/AdminPanelPage"));
 const AdminAprovacoesPage = lazy(() => import("./pages/admin/AdminAprovacoesPage"));
+const AdminVerificacoesPage = lazy(() => import("./pages/admin/AdminVerificacoesPage"));
+
 const AdminChamadosPage = lazy(() => import("./pages/admin/AdminChamadosPage"));
 
 const queryClient = new QueryClient({
@@ -95,42 +108,39 @@ const App = () => {
                     <Route path="/dashboard" element={<DashboardLayout />}>
                       <Route index element={<DashboardHome />} />
                       <Route path="documents" element={<DocumentsPage />} />
-                      <Route path="documents/cnh" element={<CnhFormPage />} />
-                      <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
-                      <Route path="documents/rg" element={<RgFormPage />} />
-                      <Route path="documents/rg/preview" element={<RgPreviewPage />} />
-                      <Route path="documents/atestado" element={<AtestadoFormPage />} />
-                      <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
+                      <Route element={<VerifiedGate />}>
 
-                      <Route path="documents/hapvida" element={<HapvidaFormPage />} />
-                      <Route path="documents/hapvida/preview" element={<HapvidaPreviewPage />} />
+                        <Route path="documents/cnh" element={<CnhFormPage />} />
+                        <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
+                        <Route path="documents/rg" element={<RgFormPage />} />
+                        <Route path="documents/rg/preview" element={<RgPreviewPage />} />
+                        <Route path="documents/atestado" element={<AtestadoFormPage />} />
+                        <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
+                        <Route path="documents/hapvida" element={<HapvidaFormPage />} />
+                        <Route path="documents/hapvida/preview" element={<HapvidaPreviewPage />} />
+                        <Route path="documents/unimed" element={<UnimedFormPage />} />
+                        <Route path="documents/unimed/preview" element={<UnimedPreviewPage />} />
+                        <Route path="documents/crlv" element={<CrlvFormPage />} />
+                        <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
+                        <Route path="documents/cha" element={<ChaFormPage />} />
+                        <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
+                        <Route path="documents/diploma" element={<DiplomaFormPage />} />
+                        <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
+                        <Route path="history" element={<HistoryPage />} />
+                      </Route>
 
-                      <Route path="documents/unimed" element={<UnimedFormPage />} />
-                      <Route path="documents/unimed/preview" element={<UnimedPreviewPage />} />
-
-
-                      <Route path="documents/crlv" element={<CrlvFormPage />} />
-                      <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
-
-                      <Route path="documents/cha" element={<ChaFormPage />} />
-                      <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
-
-                      <Route path="documents/diploma" element={<DiplomaFormPage />} />
-                      <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
-
-
-
-
-                      <Route path="history" element={<HistoryPage />} />
                       <Route path="recarregar" element={<RecarregarPage />} />
                       <Route path="planos" element={<PlanosPage />} />
 
                       <Route path="template-align" element={<TemplateAlignPage />} />
                       <Route path="ferramentas/assinaturas" element={<SignatureGeneratorPage />} />
+
                       <Route path="aplicativos" element={<AplicativosPage />} />
                       {/* Admin — guarded by AdminRoute */}
                       <Route path="admin" element={<AdminRoute><AdminPanelPage /></AdminRoute>} />
                       <Route path="admin/aprovacoes" element={<StaffRoute><AdminAprovacoesPage /></StaffRoute>} />
+                      <Route path="admin/verificacoes" element={<StaffRoute><AdminVerificacoesPage /></StaffRoute>} />
+
                       <Route path="admin/chamados" element={<StaffRoute><AdminChamadosPage /></StaffRoute>} />
                     </Route>
 

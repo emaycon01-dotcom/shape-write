@@ -115,7 +115,12 @@ export default function DashboardHome() {
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
               <Chip icon={Crown} variant="solid">{isAdmin ? "Administrador" : isGerente ? "Gerente" : "Cliente"}</Chip>
-              <Chip icon={ShieldCheck}>Conta verificada</Chip>
+              {user?.verified === false ? (
+                <Chip icon={ShieldCheck}>Conta não verificada</Chip>
+              ) : (
+                <Chip icon={ShieldCheck}>Conta verificada</Chip>
+              )}
+
               <Chip icon={Zap}>Geração instantânea</Chip>
             </div>
             <div>
@@ -139,12 +144,29 @@ export default function DashboardHome() {
         </div>
       </section>
 
+      {/* Aviso para contas ainda não verificadas */}
+
+      {user?.verified === false && (
+        <div className="flex items-center gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4 backdrop-blur">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-warning/20 ring-1 ring-warning/40">
+            <ShieldCheck className="h-5 w-5 text-warning" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">Sua conta ainda não foi verificada</p>
+            <p className="text-[11px] text-muted-foreground">
+              Um administrador precisa verificar sua conta para liberar os módulos e a geração de documentos.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Aviso de chamados abertos (admin) */}
       {isStaff && openTickets > 0 && (
         <Link
           to="/dashboard/admin/chamados"
           className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-destructive/40 bg-destructive/10 p-4 backdrop-blur transition-all hover:-translate-y-0.5"
         >
+
           <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive/20 ring-1 ring-destructive/40">
             <Headphones className="h-5 w-5 text-destructive" />
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[11px] font-bold leading-none text-destructive-foreground">
