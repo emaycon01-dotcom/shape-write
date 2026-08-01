@@ -31,9 +31,10 @@ export default function CnhPreviewPage() {
   const { addDocument } = useDocuments();
   const { toast } = useToast();
 
-  const { pdfBase64: previewPdf, formData } = (location.state as {
+  const { pdfBase64: previewPdf, formData, previewImages } = (location.state as {
     pdfBase64: string;
     formData: Record<string, string>;
+    previewImages?: string[];
   }) || {};
 
   const [paid, setPaid] = useState(false);
@@ -43,6 +44,8 @@ export default function CnhPreviewPage() {
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
+  const images = previewImages?.filter(Boolean) ?? [];
+
 
   useEffect(() => {
     if (!pdfBase64) return;
