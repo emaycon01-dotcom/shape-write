@@ -81,6 +81,8 @@ interface UnimedFormData {
   crmNumero: string;
   crmUf: string;
   especialidade: string;
+  modoManual: boolean;
+  assinaturaBase64: string;
 }
 
 const initial: UnimedFormData = {
