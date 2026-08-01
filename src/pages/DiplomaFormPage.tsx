@@ -142,36 +142,50 @@ interface InstituicaoPreset {
 }
 
 /** Unidades disponíveis — ao selecionar, cabeçalho/mantenedora/CNPJ/reitor são preenchidos sozinhos. */
-const INSTITUICOES: InstituicaoPreset[] = [
-  {
-    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ",
-    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
-    cnpj: "02608755000107",
-    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
-    cidade: "Fortaleza - CE",
-  },
-  {
-    nome: "UNIVERSIDADE ESTÁCIO DE SÁ",
-    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR ESTÁCIO DE SÁ LTDA",
-    cnpj: "34075739000148",
-    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
-    cidade: "Rio de Janeiro - RJ",
-  },
-  {
-    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DE SÃO PAULO",
-    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
-    cnpj: "02608755000107",
-    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
-    cidade: "São Paulo - SP",
-  },
-  {
-    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DE BRASÍLIA",
-    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
-    cnpj: "02608755000107",
-    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
-    cidade: "Brasília - DF",
-  },
+const MANTENEDORA_PADRAO = "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA";
+const CNPJ_PADRAO = "02608755000107";
+const REITOR_PADRAO = "JOSUÉ VIANA DE OLIVEIRA NETO";
+
+/** [nome da unidade, capital, UF] — cobre os 27 estados/DF. */
+const UNIDADES_UF: [string, string, string][] = [
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO ACRE", "Rio Branco", "AC"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE ALAGOAS", "Maceió", "AL"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO AMAPÁ", "Macapá", "AP"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO AMAZONAS", "Manaus", "AM"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DA BAHIA", "Salvador", "BA"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ", "Fortaleza", "CE"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE BRASÍLIA", "Brasília", "DF"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO ESPÍRITO SANTO", "Vitória", "ES"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE GOIÁS", "Goiânia", "GO"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO MARANHÃO", "São Luís", "MA"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE MATO GROSSO", "Cuiabá", "MT"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE MATO GROSSO DO SUL", "Campo Grande", "MS"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE MINAS GERAIS", "Belo Horizonte", "MG"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO PARÁ", "Belém", "PA"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DA PARAÍBA", "João Pessoa", "PB"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO PARANÁ", "Curitiba", "PR"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE PERNAMBUCO", "Recife", "PE"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO PIAUÍ", "Teresina", "PI"],
+  ["UNIVERSIDADE ESTÁCIO DE SÁ", "Rio de Janeiro", "RJ"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO RIO GRANDE DO NORTE", "Natal", "RN"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO RIO GRANDE DO SUL", "Porto Alegre", "RS"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE RONDÔNIA", "Porto Velho", "RO"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE RORAIMA", "Boa Vista", "RR"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE SANTA CATARINA", "Florianópolis", "SC"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE SÃO PAULO", "São Paulo", "SP"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DE SERGIPE", "Aracaju", "SE"],
+  ["CENTRO UNIVERSITÁRIO ESTÁCIO DO TOCANTINS", "Palmas", "TO"],
 ];
+
+const INSTITUICOES: InstituicaoPreset[] = UNIDADES_UF.map(([nome, capital, uf]) => ({
+  nome,
+  mantenedora:
+    uf === "RJ" ? "SOCIEDADE DE ENSINO SUPERIOR ESTÁCIO DE SÁ LTDA" : MANTENEDORA_PADRAO,
+  cnpj: uf === "RJ" ? "34075739000148" : CNPJ_PADRAO,
+  reitor: REITOR_PADRAO,
+  cidade: `${capital} - ${uf}`,
+}));
+
 
 
 const NOMES = [
