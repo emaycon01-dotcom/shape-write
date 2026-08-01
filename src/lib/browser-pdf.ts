@@ -258,6 +258,29 @@ export async function renderHtmlToDocument(
         pdf.addPage([wPt, hPt], orientation);
       }
 
+      // Imagem leve da página para o preview no app (iframe de PDF falha em
+      // muitos navegadores móveis).
+      try {
+        const preview = await html2canvas(target, {
+          scale: 1.6,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+          width,
+          height,
+          windowWidth: width,
+          windowHeight: height,
+          imageTimeout: 30_000,
+          onclone: (cloned: Document) => ensureFontsLoaded(cloned),
+        });
+        previewImages.push(preview.toDataURL("image/jpeg", 0.82));
+        preview.width = 0;
+        preview.height = 0;
+      } catch {
+        /* preview é opcional */
+      }
+
       for (let top = 0; top < height; top += band) {
         const sliceH = Math.min(band, height - top);
 
@@ -295,7 +318,8 @@ export async function renderHtmlToDocument(
     if (!pdf) throw new Error("Documento vazio.");
     const uri = pdf.output("datauristring");
     const base64 = uri.split(",").pop() || "";
-    return `data:application/pdf;base64,${base64}`;
+    return { pdfBase64: `data:application/pdf;base64,${base64}`, previewImages };
+
   } finally {
     releaseFonts();
     frame.remove();
