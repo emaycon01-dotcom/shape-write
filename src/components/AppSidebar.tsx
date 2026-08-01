@@ -28,6 +28,7 @@ import { NavLink } from "@/components/NavLink";
 import logo from "@/assets/logo.webp";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useOpenTickets } from "@/hooks/use-open-tickets";
+import { usePendingApprovals } from "@/hooks/use-pending-approvals";
 
 
 const commonItems = [
