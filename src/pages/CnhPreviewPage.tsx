@@ -274,7 +274,7 @@ export default function CnhPreviewPage() {
           <div className="glass rounded-xl p-4 flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-primary shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Custo: {planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s)` : "grátis (plano Diamond)"}</p>
+              <p className="text-sm font-semibold text-foreground">Custo: {planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s)` : "grátis (plano Premium)"}</p>
               <p className="text-xs text-muted-foreground">
                 Saldo atual: {user?.credits ?? 0} crédito(s)
               </p>

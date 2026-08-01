@@ -260,7 +260,7 @@ export default function HapvidaPreviewPage() {
             <CreditCard className="h-5 w-5 shrink-0 text-primary" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">
-                Custo: {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "grátis (plano Diamond)"}
+                Custo: {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "grátis (plano Premium)"}
               </p>
               <p className="text-xs text-muted-foreground">Saldo atual: {user?.credits ?? 0} crédito(s)</p>
             </div>
