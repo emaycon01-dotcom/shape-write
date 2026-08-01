@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.verify_atestado(text) FROM anon, authenticated, PUBLIC;
