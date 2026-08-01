@@ -305,7 +305,7 @@ export function buildUnimedHtml(
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 63)}</div>` : ""}
 
   <!-- assinatura manuscrita (upload, modo manual): cobre a assinatura do template com branco e aplica a nova por cima -->
-  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="top:492px;left:218px;width:360px;height:142px;"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div><div class="sig-rule" style="top:609px;left:238px;width:292px;"></div><div class="sig-label" style="top:616px;left:339px;">Assinatura e Carimbo</div>` : ""}
+  ${d.assinatura_base64 ? `<div class="overlay sig-mask" style="top:492px;left:218px;width:360px;height:142px;"></div><div class="overlay sig" style="${boxStyle("assinatura_img")}"><img src="${escapeHtml(d.assinatura_base64)}" /></div>` : ""}
 
   <!-- assinatura digital ICP -->
   <div class="overlay" style="${base("assinatura_digital", "white-space:nowrap;")}">${escapeHtml(
