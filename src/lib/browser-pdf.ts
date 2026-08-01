@@ -147,7 +147,8 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
   }
 }
 
-type InvokeResult<T = Record<string, unknown>> = { data: T | null; error: Error | null };
+/* eslint-disable @typescript-eslint/no-explicit-any */
+type InvokeResult = { data: any; error: Error | null };
 
 /**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
