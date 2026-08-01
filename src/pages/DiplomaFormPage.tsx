@@ -120,6 +120,60 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/** Divide o nome da instituição em duas linhas de cabeçalho automaticamente. */
+function splitInstituicao(nome: string): { l1: string; l2: string } {
+  const limpo = nome.trim().replace(/\s+/g, " ").toUpperCase();
+  const marca = limpo.indexOf("ESTÁCIO");
+  if (marca > 0) {
+    return { l1: limpo.slice(0, marca).trim(), l2: limpo.slice(marca).trim() };
+  }
+  const palavras = limpo.split(" ");
+  if (palavras.length < 2) return { l1: limpo, l2: "" };
+  const meio = Math.ceil(palavras.length / 2);
+  return { l1: palavras.slice(0, meio).join(" "), l2: palavras.slice(meio).join(" ") };
+}
+
+interface InstituicaoPreset {
+  nome: string;
+  mantenedora: string;
+  cnpj: string;
+  reitor: string;
+  cidade: string;
+}
+
+/** Unidades disponíveis — ao selecionar, cabeçalho/mantenedora/CNPJ/reitor são preenchidos sozinhos. */
+const INSTITUICOES: InstituicaoPreset[] = [
+  {
+    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
+    cnpj: "02608755000107",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "Fortaleza - CE",
+  },
+  {
+    nome: "UNIVERSIDADE ESTÁCIO DE SÁ",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR ESTÁCIO DE SÁ LTDA",
+    cnpj: "34075739000148",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "Rio de Janeiro - RJ",
+  },
+  {
+    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DE SÃO PAULO",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
+    cnpj: "02608755000107",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "São Paulo - SP",
+  },
+  {
+    nome: "CENTRO UNIVERSITÁRIO ESTÁCIO DE BRASÍLIA",
+    mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
+    cnpj: "02608755000107",
+    reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
+    cidade: "Brasília - DF",
+  },
+];
+
+
 const NOMES = [
   "GUSTAVO AUGUSTO RODRIGUES DA SILVA",
   "MARIANA COSTA DE ALMEIDA",
