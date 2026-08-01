@@ -48,6 +48,8 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { count: openTickets } = useOpenTickets();
   const { count: pendingApprovals } = usePendingApprovals();
+  const { count: unverified } = useUnverifiedAccounts();
+
 
 
   const isAdmin = user?.role === "admin";
