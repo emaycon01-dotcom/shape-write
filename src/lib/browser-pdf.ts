@@ -126,13 +126,17 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
       const imgData = canvas.toDataURL("image/jpeg", 0.98);
       const orientation = width > height ? "landscape" : "portrait";
 
+      // 1px CSS (96dpi) = 0.75pt — mantém o tamanho físico exato do papel.
+      const wPt = width * 0.75;
+      const hPt = height * 0.75;
+
       if (!pdf) {
-        pdf = new jsPDF({ orientation, unit: "px", format: [width, height], compress: true });
+        pdf = new jsPDF({ orientation, unit: "pt", format: [wPt, hPt], compress: true });
       } else {
-        pdf.addPage([width, height], orientation);
+        pdf.addPage([wPt, hPt], orientation);
       }
 
-      pdf.addImage(imgData, "JPEG", 0, 0, width, height, undefined, "FAST");
+      pdf.addImage(imgData, "JPEG", 0, 0, wPt, hPt, undefined, "FAST");
       // Libera memória em dispositivos móveis
       canvas.width = 0;
       canvas.height = 0;
