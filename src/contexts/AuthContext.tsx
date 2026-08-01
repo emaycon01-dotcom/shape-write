@@ -40,7 +40,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
       .eq("user_id", supabaseUser.id)
       .eq("status", "bloqueado")
       .maybeSingle(),
-    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at, status").eq("user_id", supabaseUser.id).maybeSingle(),
+    supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at, status, verified").eq("user_id", supabaseUser.id).maybeSingle(),
     supabase.from("user_roles").select("cargo").eq("user_id", supabaseUser.id),
   ]);
 
