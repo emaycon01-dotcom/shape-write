@@ -701,10 +701,6 @@ serve(async (req) => {
     const PDFSHIFT_API_KEY = Deno.env.get("PDFSHIFT_API_KEY");
     const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY");
 
-    if (!PDFSHIFT_API_KEY && !PDFCO_API_KEY) {
-      throw new Error("No PDF provider API keys are configured");
-    }
-
     const body = await req.json();
 
     const data: Record<string, string> = {

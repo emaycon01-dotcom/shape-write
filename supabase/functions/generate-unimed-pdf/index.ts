@@ -342,11 +342,18 @@ serve(async (req) => {
     const PDFSHIFT_API_KEY = Deno.env.get("PDFSHIFT_API_KEY");
     const PDFCO_API_KEY = Deno.env.get("PDFCO_API_KEY");
 
-    if (!PDFSHIFT_API_KEY && !PDFCO_API_KEY) {
-      throw new Error("No PDF provider API keys are configured");
-    }
-
     const body = await req.json();
+
+    // Anexa ao registro de validacao o PDF gerado no navegador.
+    if ((body as any).attach_pdf && (body as any).token) {
+      const raw = String((body as any).attach_pdf).split(",").pop() || "";
+      const bin = Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
+      const url = await attachPdf(String((body as any).token), bin);
+      return new Response(
+        JSON.stringify({ success: true, pdf_url: url }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const data: Record<string, string> = {
       paciente: body.paciente || "",
