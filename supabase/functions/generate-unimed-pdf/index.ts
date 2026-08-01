@@ -243,7 +243,7 @@ export function buildUnimedHtml(
   .qr-overlay { background: #fff; z-index: 12; overflow: hidden; box-shadow: 0 0 0 3px #fff; }
   .qr-overlay svg { width: 100%; height: 100%; display: block; }
   .link { word-break: break-all; white-space: normal; line-height: 1.22; }
-  .sig-mask { background: #fff; z-index: 12; }
+  .sig-mask { background: #ffffff; opacity: 1; z-index: 12; box-shadow: -8px 0 0 0 #ffffff, 8px 0 0 0 #ffffff; }
   .sig { z-index: 13; display: flex; align-items: flex-end; }
   .sig img { max-width: 100%; max-height: 100%; object-fit: contain; }
 </style>
