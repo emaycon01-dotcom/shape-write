@@ -40,12 +40,15 @@ export default function LoginPage() {
         msg.toLowerCase().includes("email not confirmed") ||
         msg.toLowerCase().includes("email_not_confirmed");
 
-      if (isEmailNotConfirmed) {
+      if (msg.includes("análise") || msg.includes("recusado")) {
+        setError(msg);
+      } else if (isEmailNotConfirmed) {
         setError("E-mail ainda não verificado.");
       } else {
         setError("E-mail ou senha inválidos.");
       }
     } finally {
+
       setLoading(false);
     }
   };
