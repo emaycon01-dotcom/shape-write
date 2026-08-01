@@ -667,16 +667,10 @@ export default function DiplomaFormPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Nº de série (rodapé)</FieldLabel>
-              <Input value={form.serial} onChange={set("serial")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Código de validação</FieldLabel>
-              <Input value={form.codigoValidacao} onChange={set("codigoValidacao")} placeholder="gerado automaticamente" className={inputCls} />
-            </div>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Reitor(a), resolução, livro, folha, nº de série e código de validação são gerados automaticamente.
+          </p>
+
         </div>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
