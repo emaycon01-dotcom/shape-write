@@ -1,11 +1,12 @@
-const SIGNATURE_WIDTH = 760;
-const SIGNATURE_HEIGHT = 256;
-const SIGNATURE_PADDING = 12;
+const MAX_SIGNATURE_WIDTH = 1520;
+const MAX_SIGNATURE_HEIGHT = 512;
+const SIGNATURE_PADDING_RATIO = 0.015;
 
 /**
- * Recorta margens transparentes/brancas e encaixa a assinatura em uma tela
- * fixa. Assim, mesmo rasterizadores com suporte incompleto a object-fit nunca
- * conseguem desenhar pixels fora da caixa definida no alinhamento.
+ * Recorta margens transparentes/brancas e devolve uma imagem com a proporção
+ * real da tinta. A caixa final e o limite rígido continuam sendo definidos
+ * pelo alinhamento; não usamos uma tela fixa aqui para evitar uma segunda
+ * redução por `object-fit: contain` no preview/PDF.
  */
 export async function normalizeSignatureImage(dataUrl: string): Promise<string> {
   if (!dataUrl.startsWith("data:image/")) return dataUrl;
@@ -48,15 +49,18 @@ export async function normalizeSignatureImage(dataUrl: string): Promise<string> 
 
   const cropWidth = right - left + 1;
   const cropHeight = bottom - top + 1;
-  const availableWidth = SIGNATURE_WIDTH - SIGNATURE_PADDING * 2;
-  const availableHeight = SIGNATURE_HEIGHT - SIGNATURE_PADDING * 2;
-  const scale = Math.min(availableWidth / cropWidth, availableHeight / cropHeight);
+  const scale = Math.min(
+    1,
+    MAX_SIGNATURE_WIDTH / cropWidth,
+    MAX_SIGNATURE_HEIGHT / cropHeight,
+  );
   const drawWidth = cropWidth * scale;
   const drawHeight = cropHeight * scale;
+  const padding = Math.max(2, Math.round(Math.min(drawWidth, drawHeight) * SIGNATURE_PADDING_RATIO));
 
   const output = document.createElement("canvas");
-  output.width = SIGNATURE_WIDTH;
-  output.height = SIGNATURE_HEIGHT;
+  output.width = Math.ceil(drawWidth) + padding * 2;
+  output.height = Math.ceil(drawHeight) + padding * 2;
   const outputContext = output.getContext("2d");
   if (!outputContext) return dataUrl;
   outputContext.clearRect(0, 0, output.width, output.height);
@@ -68,8 +72,8 @@ export async function normalizeSignatureImage(dataUrl: string): Promise<string> 
     top,
     cropWidth,
     cropHeight,
-    (SIGNATURE_WIDTH - drawWidth) / 2,
-    (SIGNATURE_HEIGHT - drawHeight) / 2,
+    padding,
+    padding,
     drawWidth,
     drawHeight,
   );
