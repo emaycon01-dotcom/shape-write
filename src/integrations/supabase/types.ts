@@ -737,6 +737,10 @@ export type Database = {
         Args: { _reason?: string; _target_user_id: string }
         Returns: undefined
       }
+      admin_clear_role: {
+        Args: { _target_user_id: string }
+        Returns: undefined
+      }
       admin_set_account_status: {
         Args: { _status: string; _target_user_id: string }
         Returns: undefined

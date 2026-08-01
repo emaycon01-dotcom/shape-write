@@ -42,10 +42,12 @@ interface FinTxn {
   credits_amount: number; plan_name: string | null; status: string; created_at: string;
 }
 
-const CARGOS = ["dealer", "master", "diamond", "sub_gerente", "gerente", "admin"] as const;
+const NO_ROLE = "__none__";
+const CARGOS = ["gerente", "admin"] as const;
 const CARGO_LABELS: Record<string, string> = {
   dealer: "Dealer", master: "Master", diamond: "Diamond",
   sub_gerente: "Sub Gerente", gerente: "Gerente", admin: "Admin",
+  [NO_ROLE]: "Sem cargo",
 };
 const PLANOS = ["free", "dealer", "master", "diamond"] as const;
 const PLANO_LABELS: Record<string, string> = {
@@ -231,12 +233,27 @@ export default function AdminPanelPage() {
         if (ok) setSelected((p) => (p ? { ...p, plano } : p));
       });
 
-  const setCargo = (cargo: string) =>
-    selected &&
-    run(() => supabase.rpc("admin_set_role", {
-      _target_user_id: selected.user_id,
-      _cargo: cargo as (typeof CARGOS)[number],
-    }), `Cargo alterado para ${CARGO_LABELS[cargo]}`);
+  const setCargo = (cargo: string) => {
+    if (!selected) return;
+    const isNone = cargo === NO_ROLE;
+    run(
+      () =>
+        isNone
+          ? supabase.rpc("admin_clear_role", { _target_user_id: selected.user_id })
+          : supabase.rpc("admin_set_role", {
+              _target_user_id: selected.user_id,
+              _cargo: cargo as (typeof CARGOS)[number],
+            }),
+      isNone ? "Cargo removido" : `Cargo alterado para ${CARGO_LABELS[cargo]}`,
+    ).then((ok) => {
+      if (ok) {
+        setRoles((prev) => [
+          ...prev.filter((r) => r.user_id !== selected.user_id),
+          ...(isNone ? [] : [{ user_id: selected.user_id, cargo }]),
+        ]);
+      }
+    });
+  };
 
   const banUser = () =>
     selected &&
@@ -436,8 +453,10 @@ export default function AdminPanelPage() {
 
       {tab === "equipe" && (
         <div className="space-y-5">
-          {(["admin", "gerente", "sub_gerente", "diamond", "master", "dealer"] as const).map((cargo) => {
-            const list = filtered.filter((p) => roleOf(p.user_id) === cargo);
+          {(["admin", "gerente", NO_ROLE] as const).map((cargo) => {
+            const list = filtered.filter((p) =>
+              cargo === NO_ROLE ? !roleOf(p.user_id) : roleOf(p.user_id) === cargo,
+            );
             return (
               <div key={cargo} className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -576,9 +595,10 @@ export default function AdminPanelPage() {
                 </div>
                 <div className="space-y-1.5">
                   <p className="text-xs font-semibold text-foreground">Cargo</p>
-                  <Select value={roleOf(selected.user_id) || undefined} onValueChange={setCargo}>
+                  <Select value={roleOf(selected.user_id) || NO_ROLE} onValueChange={setCargo}>
                     <SelectTrigger><SelectValue placeholder="Sem cargo" /></SelectTrigger>
                     <SelectContent>
+                      <SelectItem value={NO_ROLE}>Sem cargo</SelectItem>
                       {CARGOS.map((c) => <SelectItem key={c} value={c}>{CARGO_LABELS[c]}</SelectItem>)}
                     </SelectContent>
                   </Select>
