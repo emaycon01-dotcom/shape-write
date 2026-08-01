@@ -544,31 +544,18 @@ export default function DiplomaFormPage() {
           <SectionHeader icon={University} title="Instituição" />
 
           <div className="space-y-1.5">
-            <FieldLabel>Nome da instituição (rodapé e verso)</FieldLabel>
-            <Input value={form.instituicao} onChange={set("instituicao")} className={inputCls} />
+            <FieldLabel>Instituição</FieldLabel>
+            <Select value={form.instituicao} onValueChange={selectInstituicao}>
+              <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {INSTITUICOES.map((i) => <SelectItem key={i.nome} value={i.nome}>{i.nome}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Cabeçalho, mantenedora, CNPJ e reitor são preenchidos automaticamente.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Cabeçalho — linha 1</FieldLabel>
-              <Input value={form.instituicaoL1} onChange={set("instituicaoL1")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Cabeçalho — linha 2</FieldLabel>
-              <Input value={form.instituicaoL2} onChange={set("instituicaoL2")} className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Mantenedora</FieldLabel>
-              <Input value={form.mantenedora} onChange={set("mantenedora")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>CNPJ</FieldLabel>
-              <Input value={form.cnpj} onChange={set("cnpj")} className={inputCls} />
-            </div>
-          </div>
 
           <div className="space-y-1.5">
             <FieldLabel>Credenciamento</FieldLabel>
