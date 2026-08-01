@@ -55,7 +55,7 @@ interface HapvidaFormData {
   horaAtendimento: string;
   dias: string;
   cid: string;
-  unidadeIdx: number;
+  unidade: string;
   endereco1: string;
   endereco2: string;
   medico: string;
@@ -75,7 +75,7 @@ const initial: HapvidaFormData = {
   horaAtendimento: "",
   dias: "1",
   cid: "",
-  unidadeIdx: 0,
+  unidade: UNIDADES[0].nome,
   endereco1: UNIDADES[0].linha1,
   endereco2: UNIDADES[0].linha2,
   medico: "CARINE GONÇALVES LOPES PIETRZAKI",
@@ -133,6 +133,7 @@ export default function HapvidaFormPage() {
           docNumero: b.cns || b.cpf || "",
           celular: b.celular || "",
           nascimento: b.nascimento || "",
+          unidade: b.unidade_curta || b.unidade || p.unidade,
           uf: b.uf || p.uf,
           tipoAtendimento: b.tipo_atendimento || p.tipoAtendimento,
           dataAtendimento: b.data_atendimento || "",
@@ -182,12 +183,14 @@ export default function HapvidaFormPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
 
-  const selecionarUnidade = (idx: number) => {
+  const setUnidade = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nome = e.target.value;
+    const known = UNIDADES.find((u) => u.nome === nome);
     setForm((p) => ({
       ...p,
-      unidadeIdx: idx,
-      endereco1: UNIDADES[idx].linha1,
-      endereco2: UNIDADES[idx].linha2,
+      unidade: nome,
+      endereco1: known ? known.linha1 : p.endereco1,
+      endereco2: known ? known.linha2 : p.endereco2,
     }));
   };
 
@@ -199,7 +202,7 @@ export default function HapvidaFormPage() {
     try {
       const templateBase64 = await loadTemplateBase64(templateHapvidaUrl);
       const horaCurta = form.horaAtendimento.slice(0, 5);
-      const unidade = UNIDADES[form.unidadeIdx]?.nome || UNIDADES[0].nome;
+      const unidade = form.unidade.trim();
 
       const bodyData = {
         paciente: form.paciente,
@@ -402,7 +405,7 @@ export default function HapvidaFormPage() {
             <FieldLabel required>Unidade</FieldLabel>
             <Input
               value={form.unidade}
-              onChange={set("unidade")}
+              onChange={setUnidade}
               list="hapvida-unidades"
               placeholder="Ex: Hapvida - Fortaleza (Centro)"
               className={inputCls}
