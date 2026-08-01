@@ -93,11 +93,14 @@ export default function HapvidaPreviewPage() {
         return;
       }
 
+      // Código opaco e único deste documento (usado no QR do site de validação)
+      const verifyCode = makeVerifyCode();
+
       // Gera novamente o PDF final — agora com o QR Code registrado/válido
       let pdfFinal = previewPdf;
       try {
         const { data, error } = await supabase.functions.invoke("generate-hapvida-pdf", {
-          body: { ...formData, preview: false },
+          body: { ...formData, preview: false, verify_code: verifyCode },
         });
         if (error) throw error;
         const result = data?.pdfBase64;
@@ -109,7 +112,7 @@ export default function HapvidaPreviewPage() {
         console.error("Falha ao gerar PDF final com QR válido:", e);
       }
 
-      await addDocument({
+      const created = await addDocument({
         name: formData.paciente || "",
         identification: formData.cpf || "",
         date: formData.data_atendimento || "",
@@ -119,6 +122,20 @@ export default function HapvidaPreviewPage() {
         userId: user.id,
         pdfDataUrl: pdfFinal,
       });
+
+      // Vincula o código ao PDF salvo (site de validação resolve por este código)
+      try {
+        await supabase.from("document_codes").insert({
+          code: verifyCode,
+          doc_id: created.id,
+          doc_type: "hapvida",
+          user_id: user.id,
+          storage_path: `${user.id}/${created.id}.pdf`,
+        });
+      } catch (e) {
+        console.error("Falha ao registrar código de validação:", e);
+      }
+
 
       setPaid(true);
       toast({
