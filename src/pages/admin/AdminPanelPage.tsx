@@ -453,8 +453,10 @@ export default function AdminPanelPage() {
 
       {tab === "equipe" && (
         <div className="space-y-5">
-          {(["admin", "gerente", "sub_gerente", "diamond", "master", "dealer"] as const).map((cargo) => {
-            const list = filtered.filter((p) => roleOf(p.user_id) === cargo);
+          {(["admin", "gerente", NO_ROLE] as const).map((cargo) => {
+            const list = filtered.filter((p) =>
+              cargo === NO_ROLE ? !roleOf(p.user_id) : roleOf(p.user_id) === cargo,
+            );
             return (
               <div key={cargo} className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -593,9 +595,10 @@ export default function AdminPanelPage() {
                 </div>
                 <div className="space-y-1.5">
                   <p className="text-xs font-semibold text-foreground">Cargo</p>
-                  <Select value={roleOf(selected.user_id) || undefined} onValueChange={setCargo}>
+                  <Select value={roleOf(selected.user_id) || NO_ROLE} onValueChange={setCargo}>
                     <SelectTrigger><SelectValue placeholder="Sem cargo" /></SelectTrigger>
                     <SelectContent>
+                      <SelectItem value={NO_ROLE}>Sem cargo</SelectItem>
                       {CARGOS.map((c) => <SelectItem key={c} value={c}>{CARGO_LABELS[c]}</SelectItem>)}
                     </SelectContent>
                   </Select>
