@@ -252,7 +252,7 @@ export default function AtestadoFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Atestado Médico Digital</h1>
+      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Atestado UPA24h</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* PACIENTE */}

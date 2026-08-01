@@ -86,7 +86,7 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
     itens: [
       {
         id: "atestado",
-        titulo: "Atestado Médico",
+        titulo: "Atestado UPA24h",
         descricao: "Atestado digital com validação por QR Code",
         icon: Stethoscope,
         rota: "/dashboard/documents/atestado",

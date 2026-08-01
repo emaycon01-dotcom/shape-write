@@ -113,7 +113,7 @@ export default function AtestadoPreviewPage() {
         name: formData.paciente || "",
         identification: formData.cpf || "",
         date: formData.data_atendimento || "",
-        description: `Atestado Médico - ${formData.unidade_curta || formData.unidade || ""}`,
+        description: `Atestado UPA24h - ${formData.unidade_curta || formData.unidade || ""}`,
         additionalInfo: JSON.stringify(formData),
         type: "atestado",
         userId: user.id,
@@ -154,7 +154,7 @@ export default function AtestadoPreviewPage() {
       if (!blob) throw new Error("Failed to create PDF blob");
       const file = new File([blob], "atestado-medico.pdf", { type: "application/pdf" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Atestado Médico" });
+        await navigator.share({ files: [file], title: "Atestado UPA24h" });
       } else {
         handleDownload();
       }
@@ -163,7 +163,7 @@ export default function AtestadoPreviewPage() {
     }
   };
 
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu Atestado Médico Digital está pronto.\n\nPaciente: ${formData.paciente || ""}\nAtendimento: ${formData.data_atendimento || ""} ${formData.hora_atendimento || ""}\n\nValide pelo QR Code do documento.`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu Atestado UPA24h está pronto.\n\nPaciente: ${formData.paciente || ""}\nAtendimento: ${formData.data_atendimento || ""} ${formData.hora_atendimento || ""}\n\nValide pelo QR Code do documento.`;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -175,7 +175,7 @@ export default function AtestadoPreviewPage() {
       </button>
 
       <h1 className="font-display mb-1 text-2xl font-bold text-foreground">
-        {paid ? "Documento Gerado" : "Preview do Atestado Médico"}
+        {paid ? "Documento Gerado" : "Preview do Atestado UPA24h"}
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
         {paid
