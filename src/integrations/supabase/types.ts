@@ -479,6 +479,86 @@ export type Database = {
         }
         Relationships: []
       }
+      support_messages: {
+        Row: {
+          author_id: string
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          is_admin: boolean
+          ticket_id: string
+        }
+        Insert: {
+          author_id: string
+          author_name?: string
+          body: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          ticket_id: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          category: string
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          id: string
+          status: string
+          subject: string
+          updated_at: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          category?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_email?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          category?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       template_alignments: {
         Row: {
           doc_type: string
