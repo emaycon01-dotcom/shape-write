@@ -74,7 +74,7 @@ const App = () => {
             <DocumentProvider>
               <Toaster />
               <Sonner />
-              <FloatingWhatsApp />
+              <SupportWidget />
               <BrowserRouter>
                 <Suspense fallback={<Loading />}>
                   <Routes>
