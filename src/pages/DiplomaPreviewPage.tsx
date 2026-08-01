@@ -38,26 +38,47 @@ export default function DiplomaPreviewPage() {
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [pages, setPages] = useState<string[]>([]);
   const [pdfError, setPdfError] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Renderiza TODAS as páginas do PDF (frente e verso) como imagens.
   useEffect(() => {
     if (!pdfBase64) return;
-    let url: string | null = null;
-    try {
-      const blob = base64ToBlob(pdfBase64);
-      if (blob && blob.size > 0) {
-        url = URL.createObjectURL(blob);
-        setBlobUrl(url);
-        setPdfError(false);
-      } else {
-        setPdfError(true);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const blob = base64ToBlob(pdfBase64);
+        if (!blob || blob.size === 0) throw new Error("PDF inválido");
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+        const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+
+        const out: string[] = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) continue;
+          await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+          out.push(canvas.toDataURL("image/jpeg", 0.92));
+        }
+        if (!cancelled) {
+          setPages(out);
+          setPdfError(out.length === 0);
+        }
+      } catch {
+        if (!cancelled) setPdfError(true);
       }
-    } catch {
-      setPdfError(true);
-    }
-    return () => { if (url) URL.revokeObjectURL(url); };
+    })();
+
+    return () => { cancelled = true; };
   }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
