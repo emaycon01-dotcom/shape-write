@@ -258,27 +258,20 @@ export async function renderHtmlToDocument(
         pdf.addPage([wPt, hPt], orientation);
       }
 
-      // Imagem leve da página para o preview no app (iframe de PDF falha em
-      // muitos navegadores móveis).
-      try {
-        const preview = await html2canvas(target, {
-          scale: 1.6,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-          logging: false,
-          width,
-          height,
-          windowWidth: width,
-          windowHeight: height,
-          imageTimeout: 30_000,
-          onclone: (cloned: Document) => ensureFontsLoaded(cloned),
-        });
-        previewImages.push(preview.toDataURL("image/jpeg", 0.82));
-        preview.width = 0;
-        preview.height = 0;
-      } catch {
-        /* preview é opcional */
+      // O preview é derivado das MESMAS faixas usadas no PDF (sem uma segunda
+      // renderização), para não competir por memória nem afetar a qualidade.
+      const previewScale = 1.6;
+      let previewCanvas: HTMLCanvasElement | null = document.createElement("canvas");
+      previewCanvas.width = Math.round(width * previewScale);
+      previewCanvas.height = Math.round(height * previewScale);
+      const previewCtx = previewCanvas.getContext("2d");
+      if (previewCtx) {
+        previewCtx.fillStyle = "#ffffff";
+        previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        previewCtx.imageSmoothingEnabled = true;
+        previewCtx.imageSmoothingQuality = "high";
+      } else {
+        previewCanvas = null;
       }
 
       for (let top = 0; top < height; top += band) {
@@ -302,6 +295,16 @@ export async function renderHtmlToDocument(
           onclone: (cloned: Document) => ensureFontsLoaded(cloned),
         });
 
+        if (previewCanvas && previewCtx) {
+          previewCtx.drawImage(
+            canvas,
+            0,
+            Math.round(top * previewScale),
+            previewCanvas.width,
+            Math.round(sliceH * previewScale),
+          );
+        }
+
         const imgData = canvas.toDataURL("image/jpeg", 0.98);
         // +0.05pt evita fio branco entre faixas por arredondamento.
         const yPt = top * 0.75;
@@ -312,6 +315,17 @@ export async function renderHtmlToDocument(
         canvas.width = 0;
         canvas.height = 0;
       }
+
+      if (previewCanvas) {
+        try {
+          previewImages.push(previewCanvas.toDataURL("image/jpeg", 0.82));
+        } catch {
+          /* preview é opcional */
+        }
+        previewCanvas.width = 0;
+        previewCanvas.height = 0;
+      }
+
     }
 
 
