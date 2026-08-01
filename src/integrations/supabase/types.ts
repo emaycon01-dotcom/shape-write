@@ -140,6 +140,36 @@ export type Database = {
         }
         Relationships: []
       }
+      document_codes: {
+        Row: {
+          code: string
+          created_at: string
+          doc_id: string
+          doc_type: string
+          revoked: boolean
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          doc_id: string
+          doc_type?: string
+          revoked?: boolean
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          doc_id?: string
+          doc_type?: string
+          revoked?: boolean
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           additional_info: string

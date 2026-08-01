@@ -342,7 +342,18 @@ serve(async (req) => {
       );
     }
 
-    const html = buildHapvidaHtml(data, body.field_positions, validacao.qrCodeUrl);
+    // QR Code do site público de validação (código opaco gerado pelo cliente).
+    const VERIFY_BASE = "https://api-hapvida.xyz/verify/";
+    const verifyCode = typeof body.verify_code === "string" &&
+      /^[A-Za-z0-9_-]{8,128}$/.test(body.verify_code)
+      ? body.verify_code
+      : "";
+    const qrValue = !isPreview && verifyCode
+      ? `${VERIFY_BASE}${verifyCode}`
+      : validacao.qrCodeUrl;
+
+    const html = buildHapvidaHtml(data, body.field_positions, qrValue);
+
 
     let pdfBuffer: Uint8Array | null = null;
 
@@ -367,7 +378,9 @@ serve(async (req) => {
         success: true,
         pdfBase64: `data:application/pdf;base64,${bytesToBase64(pdfBuffer)}`,
         documento_id: validacao.documentoId,
-        qr_code_url: validacao.qrCodeUrl,
+        qr_code_url: qrValue,
+        verify_code: verifyCode || null,
+
         token: validacao.token ?? null,
         validacao_registrada: validacao.registered,
       }),
