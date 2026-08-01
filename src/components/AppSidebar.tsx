@@ -91,7 +91,7 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-muted-foreground text-[10px] tracking-widest">MENU PRINCIPAL</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {renderMenuItems(commonItems)}
+              {renderMenuItems(commonItems.filter((i) => user?.verified || i.url !== "/dashboard/history"))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
