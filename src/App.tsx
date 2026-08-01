@@ -30,7 +30,7 @@ function VerifiedGate() {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (!user.verified) return <Navigate to="/dashboard/documents" replace />;
+  if (user.verified === false) return <Navigate to="/dashboard/documents" replace />;
   return <Outlet />;
 }
 
