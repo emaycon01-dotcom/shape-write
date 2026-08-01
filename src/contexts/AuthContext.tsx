@@ -49,7 +49,7 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     throw new Error("Sua conta foi bloqueada. Entre em contato com o suporte.");
   }
 
-  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string; status?: string } | null;
+  const profile = profileRes.data as { name?: string; credits?: number; plano?: string; created_at?: string; status?: string; verified?: boolean } | null;
   const cargos = rolesRes.data?.map((r) => r.cargo) ?? [];
   const isAdmin = cargos.includes("admin");
   const isGerente = cargos.includes("gerente");
@@ -69,8 +69,10 @@ async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
     credits: Number(profile?.credits ?? 0) || 0,
     plano: profile?.plano || "free",
     createdAt: profile?.created_at || supabaseUser.created_at,
+    verified: isStaff ? true : profile?.verified === true,
   };
 }
+
 
 
 const USER_CACHE_KEY = "auth_user_cache";
