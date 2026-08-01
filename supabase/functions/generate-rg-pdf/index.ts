@@ -351,7 +351,10 @@ ${RG_FONT_FACE}
     font-variant-ligatures: none;
     font-feature-settings: "kern" 0, "liga" 0;
     font-kerning: none;
+    font-weight: 700;
+    -webkit-text-stroke: 0.25px currentColor;
   }
+
 
 </style>
 </head>
