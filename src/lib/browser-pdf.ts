@@ -15,7 +15,7 @@ const RENDER_SCALE = 6;
 let cachedMaxDim: number | null = null;
 function detectMaxCanvasDimension(): number {
   if (cachedMaxDim !== null) return cachedMaxDim;
-  const candidates = [4096];
+  const candidates = [16384, 11180, 8192, 4096];
   for (const size of candidates) {
     try {
       const c = document.createElement("canvas");
