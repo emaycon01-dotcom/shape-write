@@ -29,6 +29,8 @@ const AtestadoFormPage = lazy(() => import("./pages/AtestadoFormPage"));
 const AtestadoPreviewPage = lazy(() => import("./pages/AtestadoPreviewPage"));
 const HapvidaFormPage = lazy(() => import("./pages/HapvidaFormPage"));
 const HapvidaPreviewPage = lazy(() => import("./pages/HapvidaPreviewPage"));
+const UnimedFormPage = lazy(() => import("./pages/UnimedFormPage"));
+const UnimedPreviewPage = lazy(() => import("./pages/UnimedPreviewPage"));
 const CrlvFormPage = lazy(() => import("./pages/CrlvFormPage"));
 const CrlvPreviewPage = lazy(() => import("./pages/CrlvPreviewPage"));
 const ChaFormPage = lazy(() => import("./pages/ChaFormPage"));
@@ -92,6 +94,9 @@ const App = () => {
 
                       <Route path="documents/hapvida" element={<HapvidaFormPage />} />
                       <Route path="documents/hapvida/preview" element={<HapvidaPreviewPage />} />
+
+                      <Route path="documents/unimed" element={<UnimedFormPage />} />
+                      <Route path="documents/unimed/preview" element={<UnimedPreviewPage />} />
 
 
                       <Route path="documents/crlv" element={<CrlvFormPage />} />
