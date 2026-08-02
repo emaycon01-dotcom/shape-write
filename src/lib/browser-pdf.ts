@@ -315,6 +315,7 @@ async function renderOnce(html: string, scaleCap: number): Promise<string> {
         });
 
         const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        if (imgData.length < 1024) throw new Error("Falha ao rasterizar a página.");
         // +0.05pt evita fio branco entre faixas por arredondamento.
         const yPt = top * 0.75;
         const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
@@ -323,7 +324,9 @@ async function renderOnce(html: string, scaleCap: number): Promise<string> {
         // Libera memória em dispositivos móveis
         canvas.width = 0;
         canvas.height = 0;
+        await breathe();
       }
+
 
     }
 
