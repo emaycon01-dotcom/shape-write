@@ -40,6 +40,20 @@ function detectMaxCanvasDimension(): number {
   return 4096;
 }
 
+/** Memória aproximada do aparelho (GB). Android antigo costuma reportar 2–4. */
+function deviceMemoryGb(): number {
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  return typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 ? nav.deviceMemory : 4;
+}
+
+/** Fator de banda: aparelhos fracos processam faixas menores por vez. */
+function memoryAreaFactor(): number {
+  const gb = deviceMemoryGb();
+  if (gb <= 2) return 0.25;
+  if (gb <= 4) return 0.5;
+  return 1;
+}
+
 /**
  * Maior escala segura para a página. Como a rasterização é feita em FAIXAS
  * horizontais, apenas a LARGURA precisa caber no limite do dispositivo — a
@@ -53,11 +67,18 @@ function safeScale(width: number): number {
 /** Altura (em px CSS) de cada faixa, respeitando dimensão e área máximas. */
 function bandCssHeight(width: number, scale: number): number {
   const maxDim = detectMaxCanvasDimension();
-  const maxArea = maxDim >= 8192 ? 268_000_000 : 16_700_000; // iOS ~16.7 MP
+  const baseArea = maxDim >= 8192 ? 268_000_000 : 16_700_000; // iOS ~16.7 MP
+  const maxArea = Math.max(4_000_000, Math.floor(baseArea * memoryAreaFactor()));
   const maxPxByArea = Math.floor(maxArea / (width * scale));
   const maxPx = Math.min(maxDim, maxPxByArea);
   return Math.max(64, Math.floor(maxPx / scale));
 }
+
+/** Dá tempo ao navegador de liberar memória entre faixas (crítico no Android). */
+function breathe(ms = 16): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 
 
 /** Famílias embutidas (@font-face base64) usadas pelos geradores. */
@@ -212,7 +233,27 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
   return renderHtmlToDocument(html);
 }
 
+/**
+ * Tenta em qualidade máxima e, se o aparelho não der conta (Android/celular
+ * com pouca memória: canvas em branco, OOM, aba recarregando), repete com
+ * escala menor em vez de falhar.
+ */
 async function renderHtmlToDocument(html: string): Promise<string> {
+  const attempts = [RENDER_SCALE, 4, 3, 2];
+  let lastError: unknown = null;
+  for (const cap of attempts) {
+    try {
+      return await renderOnce(html, cap);
+    } catch (e) {
+      lastError = e;
+      await breathe(300);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Falha ao gerar o PDF no navegador.");
+}
+
+async function renderOnce(html: string, scaleCap: number): Promise<string> {
+
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas-pro"),
     import("jspdf"),
@@ -237,8 +278,9 @@ async function renderHtmlToDocument(html: string): Promise<string> {
 
       const height = target.offsetHeight || 1123;
 
-      const scale = safeScale(width);
+      const scale = Math.min(safeScale(width), scaleCap);
       const band = Math.min(height, bandCssHeight(width, scale));
+
       const orientation = width > height ? "landscape" : "portrait";
 
       // 1px CSS (96dpi) = 0.75pt — mantém o tamanho físico exato do papel.
@@ -273,6 +315,7 @@ async function renderHtmlToDocument(html: string): Promise<string> {
         });
 
         const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        if (imgData.length < 1024) throw new Error("Falha ao rasterizar a página.");
         // +0.05pt evita fio branco entre faixas por arredondamento.
         const yPt = top * 0.75;
         const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
@@ -281,7 +324,9 @@ async function renderHtmlToDocument(html: string): Promise<string> {
         // Libera memória em dispositivos móveis
         canvas.width = 0;
         canvas.height = 0;
+        await breathe();
       }
+
 
     }
 
