@@ -233,7 +233,27 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
   return renderHtmlToDocument(html);
 }
 
+/**
+ * Tenta em qualidade máxima e, se o aparelho não der conta (Android/celular
+ * com pouca memória: canvas em branco, OOM, aba recarregando), repete com
+ * escala menor em vez de falhar.
+ */
 async function renderHtmlToDocument(html: string): Promise<string> {
+  const attempts = [RENDER_SCALE, 4, 3, 2];
+  let lastError: unknown = null;
+  for (const cap of attempts) {
+    try {
+      return await renderOnce(html, cap);
+    } catch (e) {
+      lastError = e;
+      await breathe(300);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Falha ao gerar o PDF no navegador.");
+}
+
+async function renderOnce(html: string, scaleCap: number): Promise<string> {
+
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas-pro"),
     import("jspdf"),
