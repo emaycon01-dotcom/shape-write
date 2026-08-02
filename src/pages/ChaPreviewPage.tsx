@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -42,29 +42,9 @@ export default function ChaPreviewPage() {
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [pdfError, setPdfError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
-
-  useEffect(() => {
-    if (!pdfBase64) return;
-    let url: string | null = null;
-    try {
-      const blob = base64ToBlob(pdfBase64);
-      if (blob && blob.size > 0) {
-        url = URL.createObjectURL(blob);
-        setBlobUrl(url);
-        setPdfError(false);
-      } else {
-        setPdfError(true);
-      }
-    } catch {
-      setPdfError(true);
-    }
-    return () => { if (url) URL.revokeObjectURL(url); };
-  }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
     return (
@@ -209,23 +189,9 @@ export default function ChaPreviewPage() {
       </p>
 
       <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
-        {pdfError ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
-            <AlertTriangle className="h-12 w-12 text-destructive" />
-            <p className="font-semibold text-foreground">Erro ao carregar o preview do PDF</p>
-            <Button variant="outline" onClick={() => navigate("/dashboard/documents/cha")} className="gap-1.5">
-              <RefreshCw className="h-4 w-4" /> Tentar novamente
-            </Button>
-          </div>
-        ) : blobUrl ? (
-          <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview da CNH Marítima" />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
+        <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview da CNH Marítima" />
 
-        {!paid && !pdfError && (
+        {!paid && (
           <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
             <div
               className="absolute inset-0"
