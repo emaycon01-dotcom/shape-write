@@ -278,8 +278,9 @@ async function renderOnce(html: string, scaleCap: number): Promise<string> {
 
       const height = target.offsetHeight || 1123;
 
-      const scale = safeScale(width);
+      const scale = Math.min(safeScale(width), scaleCap);
       const band = Math.min(height, bandCssHeight(width, scale));
+
       const orientation = width > height ? "landscape" : "portrait";
 
       // 1px CSS (96dpi) = 0.75pt — mantém o tamanho físico exato do papel.
