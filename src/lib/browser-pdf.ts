@@ -361,8 +361,17 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
           imageTimeout: 30_000,
           // O html2canvas rasteriza um clone em outro documento: sem isto as
           // @font-face embutidas (CNHDigital/RGOcrb) ainda não estão prontas
-          // e o texto sai com a fonte de fallback.
-          onclone: (cloned: Document) => ensureFontsLoaded(cloned),
+          // e o texto sai com a fonte de fallback. Depois da primeira faixa as
+          // famílias já estão quentes no documento principal — repetir a
+          // verificação completa custava segundos por faixa no Android.
+          onclone: async (cloned: Document) => {
+            if (fontsWarm) {
+              await (cloned as Document & { fonts?: FontFaceSet }).fonts?.ready;
+              return;
+            }
+            await ensureFontsLoaded(cloned);
+            fontsWarm = true;
+          },
         });
 
         const imgData = canvas.toDataURL("image/jpeg", 0.98);
@@ -377,6 +386,7 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
         canvas.height = 0;
         await breathe();
       }
+
 
 
     }
