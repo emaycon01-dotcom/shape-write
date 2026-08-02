@@ -240,16 +240,23 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
  * casos em Android/iOS sem perder nitidez. Só depois de esgotar as faixas
  * menores é que a escala cai, como último recurso para não travar a tela.
  */
-async function renderHtmlToDocument(html: string): Promise<string> {
-  const attempts: Array<{ cap: number; bandDivisor: number }> = [
-    { cap: RENDER_SCALE, bandDivisor: 1 },
-    { cap: RENDER_SCALE, bandDivisor: 2 },
-    { cap: RENDER_SCALE, bandDivisor: 4 },
-    { cap: RENDER_SCALE, bandDivisor: 8 },
-    { cap: 4, bandDivisor: 4 },
-    { cap: 3, bandDivisor: 4 },
-    { cap: 2, bandDivisor: 2 },
-  ];
+async function renderHtmlToDocument(html: string, preview = false): Promise<string> {
+  // Preview não precisa carregar um PDF de 576 DPI no iframe do Android. O
+  // documento final continua sempre na escala máxima; em aparelhos fracos
+  // reduzimos somente a altura das faixas, nunca a resolução.
+  const attempts: Array<{ cap: number; bandDivisor: number }> = preview
+    ? [
+        { cap: 2, bandDivisor: 1 },
+        { cap: 2, bandDivisor: 2 },
+        { cap: 2, bandDivisor: 4 },
+      ]
+    : [
+        { cap: RENDER_SCALE, bandDivisor: 1 },
+        { cap: RENDER_SCALE, bandDivisor: 2 },
+        { cap: RENDER_SCALE, bandDivisor: 4 },
+        { cap: RENDER_SCALE, bandDivisor: 8 },
+        { cap: RENDER_SCALE, bandDivisor: 16 },
+      ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor } of attempts) {
     try {
@@ -383,7 +390,7 @@ export async function invokeGeneratePdf(
   if (typeof payload.html !== "string") return { data: payload, error: null };
 
   try {
-    const pdfBase64 = await renderHtmlToDocument(payload.html);
+    const pdfBase64 = await renderHtmlToDocument(payload.html, body.preview === true);
     const result: Record<string, unknown> = { ...payload, pdfBase64 };
     delete result.html;
 
