@@ -308,6 +308,8 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 
   const frame = await createHiddenFrame(html);
   let releaseFonts: () => void = () => undefined;
+  let fontsWarm = false;
+
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
