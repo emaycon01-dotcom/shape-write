@@ -46,11 +46,19 @@ function deviceMemoryGb(): number {
   return typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 ? nav.deviceMemory : 4;
 }
 
+/** Android (celular, tablet ou PC) — onde o canvas grande é mais frágil/lento. */
+let cachedAndroid: boolean | null = null;
+function isAndroid(): boolean {
+  if (cachedAndroid !== null) return cachedAndroid;
+  cachedAndroid = /android/i.test(navigator.userAgent);
+  return cachedAndroid;
+}
+
 /** Fator de banda: aparelhos fracos processam faixas menores por vez. */
 function memoryAreaFactor(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 0.25;
-  if (gb <= 4) return 0.5;
+  if (gb <= 2) return 0.35;
+  if (gb <= 4) return 0.6;
   return 1;
 }
 
@@ -64,11 +72,21 @@ function safeScale(width: number): number {
   return Math.max(2, Math.min(RENDER_SCALE, maxDim / width));
 }
 
-/** Altura (em px CSS) de cada faixa, respeitando dimensão e área máximas. */
+/**
+ * Altura (em px CSS) de cada faixa.
+ *
+ * O ponto crítico não é o limite teórico do canvas, e sim o PICO de memória:
+ * cada faixa vive como bitmap RGBA (4 bytes/px) + o JPEG gerado. Em Android o
+ * navegador descarta canvases grandes silenciosamente (tela branca/erro), por
+ * isso limitamos a ÁREA por faixa em vez de tentar a página inteira de uma vez.
+ * A resolução (576 DPI) permanece intacta — só o tamanho do pedaço muda.
+ */
 function bandCssHeight(width: number, scale: number): number {
   const maxDim = detectMaxCanvasDimension();
-  const baseArea = maxDim >= 8192 ? 268_000_000 : 16_700_000; // iOS ~16.7 MP
-  const maxArea = Math.max(4_000_000, Math.floor(baseArea * memoryAreaFactor()));
+  const mobile = isAndroid() || maxDim < 8192;
+  // ~12 MP por faixa no Android (≈48 MB RGBA) / ~48 MP no desktop.
+  const baseArea = mobile ? 12_000_000 : 48_000_000;
+  const maxArea = Math.max(3_000_000, Math.floor(baseArea * memoryAreaFactor()));
   const maxPxByArea = Math.floor(maxArea / (width * scale));
   const maxPx = Math.min(maxDim, maxPxByArea);
   return Math.max(64, Math.floor(maxPx / scale));
@@ -78,6 +96,7 @@ function bandCssHeight(width: number, scale: number): number {
 function breathe(ms = 16): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
+
 
 
 
