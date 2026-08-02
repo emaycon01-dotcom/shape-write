@@ -234,25 +234,36 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
 }
 
 /**
- * Tenta em qualidade máxima e, se o aparelho não der conta (Android/celular
- * com pouca memória: canvas em branco, OOM, aba recarregando), repete com
- * escala menor em vez de falhar.
+ * Sempre tenta manter a QUALIDADE MÁXIMA (576 DPI). Se o aparelho não der
+ * conta, primeiro reduzimos apenas o TAMANHO DAS FAIXAS (mesma resolução
+ * final, só que rasterizada em pedaços menores) — isso resolve a maioria dos
+ * casos em Android/iOS sem perder nitidez. Só depois de esgotar as faixas
+ * menores é que a escala cai, como último recurso para não travar a tela.
  */
 async function renderHtmlToDocument(html: string): Promise<string> {
-  const attempts = [RENDER_SCALE, 4, 3, 2];
+  const attempts: Array<{ cap: number; bandDivisor: number }> = [
+    { cap: RENDER_SCALE, bandDivisor: 1 },
+    { cap: RENDER_SCALE, bandDivisor: 2 },
+    { cap: RENDER_SCALE, bandDivisor: 4 },
+    { cap: RENDER_SCALE, bandDivisor: 8 },
+    { cap: 4, bandDivisor: 4 },
+    { cap: 3, bandDivisor: 4 },
+    { cap: 2, bandDivisor: 2 },
+  ];
   let lastError: unknown = null;
-  for (const cap of attempts) {
+  for (const { cap, bandDivisor } of attempts) {
     try {
-      return await renderOnce(html, cap);
+      return await renderOnce(html, cap, bandDivisor);
     } catch (e) {
       lastError = e;
-      await breathe(300);
+      // Pausa maior a cada tentativa: dá tempo do navegador liberar memória.
+      await breathe(500);
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Falha ao gerar o PDF no navegador.");
 }
 
-async function renderOnce(html: string, scaleCap: number): Promise<string> {
+async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Promise<string> {
 
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas-pro"),
@@ -279,7 +290,11 @@ async function renderOnce(html: string, scaleCap: number): Promise<string> {
       const height = target.offsetHeight || 1123;
 
       const scale = Math.min(safeScale(width), scaleCap);
-      const band = Math.min(height, bandCssHeight(width, scale));
+      const band = Math.max(
+        32,
+        Math.min(height, Math.floor(bandCssHeight(width, scale) / bandDivisor)),
+      );
+
 
       const orientation = width > height ? "landscape" : "portrait";
 
