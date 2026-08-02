@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { syncChaToExternal } from "@/lib/cha-external-sync";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 
 
 const VALIDACAO_URL = "https://cidadaniagov-info.site/";
@@ -217,7 +218,7 @@ export default function ChaPreviewPage() {
             </Button>
           </div>
         ) : blobUrl ? (
-          <iframe src={blobUrl} className="h-full w-full border-0 bg-white" title="PDF Preview" />
+          <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview da CNH Marítima" />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />

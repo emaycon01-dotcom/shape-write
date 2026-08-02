@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { syncRgToExternal } from "@/lib/rg-external-sync";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
@@ -214,7 +215,7 @@ export default function RgPreviewPage() {
             </Button>
           </div>
         ) : blobUrl ? (
-          <iframe src={blobUrl} className="h-full w-full border-0 bg-white" title="PDF Preview" />
+          <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do RG Digital" />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />

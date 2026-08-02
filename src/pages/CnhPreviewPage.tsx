@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -231,12 +232,7 @@ export default function CnhPreviewPage() {
             </Button>
           </div>
         ) : blobUrl ? (
-          <iframe
-            src={blobUrl}
-            className="w-full h-full border-0 bg-white"
-            title="PDF Preview"
-            style={{ backgroundColor: "#ffffff" }}
-          />
+          <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview da CNH Digital" />
 
         ) : (
           <div className="flex items-center justify-center h-full">

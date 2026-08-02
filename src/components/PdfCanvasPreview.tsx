@@ -29,7 +29,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
   useEffect(() => {
     let cancelled = false;
-    let loadingTask: { destroy: () => Promise<void> } | null = null;
+    let destroyLoadingTask: (() => Promise<void>) | null = null;
 
     const render = async () => {
       setStatus("loading");
@@ -38,7 +38,8 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
         pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
 
-        loadingTask = pdfjs.getDocument({ data: dataUrlToBytes(pdfDataUrl) });
+        const loadingTask = pdfjs.getDocument({ data: dataUrlToBytes(pdfDataUrl) });
+        destroyLoadingTask = () => loadingTask.destroy();
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
         if (cancelled) return;
@@ -73,7 +74,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     void render();
     return () => {
       cancelled = true;
-      if (loadingTask) void loadingTask.destroy();
+      if (destroyLoadingTask) void destroyLoadingTask();
       const canvas = canvasRef.current;
       if (canvas) {
         canvas.width = 0;

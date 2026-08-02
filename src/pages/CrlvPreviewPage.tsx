@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 
 const VALIDACAO_SITE = "https://verificaviosenetran.digital";
 
@@ -196,7 +197,7 @@ export default function CrlvPreviewPage() {
             </Button>
           </div>
         ) : blobUrl ? (
-          <iframe src={blobUrl} className="h-full w-full border-0 bg-white" title="PDF Preview" />
+          <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do CRLV Digital" />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
