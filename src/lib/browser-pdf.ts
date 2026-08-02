@@ -211,6 +211,16 @@ async function waitForAssets(doc: Document) {
     ),
   );
 
+  // Decodifica os bitmaps UMA vez (o html2canvas clona o documento a cada
+  // faixa; sem o decode prévio o Android redecodifica o template pesado em
+  // todas elas, que é a maior perda de tempo na geração).
+  await Promise.all(
+    Array.from(doc.images).map((img) =>
+      typeof img.decode === "function" ? img.decode().catch(() => undefined) : Promise.resolve(),
+    ),
+  );
+
+
   // Dois frames para garantir layout final
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 }
