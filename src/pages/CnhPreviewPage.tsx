@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { syncCnhToExternal } from "@/lib/cnh-external-sync";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -38,37 +39,9 @@ export default function CnhPreviewPage() {
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [pdfError, setPdfError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
-
-  useEffect(() => {
-    if (!pdfBase64) return;
-    
-    let url: string | null = null;
-    
-    try {
-      // Convert base64 data URL directly to blob (more reliable than fetch)
-      const blob = base64ToBlob(pdfBase64);
-      if (blob && blob.size > 0) {
-        url = URL.createObjectURL(blob);
-        setBlobUrl(url);
-        setPdfError(false);
-      } else {
-        console.error("PDF blob is empty");
-        setPdfError(true);
-      }
-    } catch (e) {
-      console.error("Failed to create PDF blob URL:", e);
-      setPdfError(true);
-    }
-
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
     return (
@@ -218,34 +191,10 @@ export default function CnhPreviewPage() {
 
       {/* PDF Preview area */}
       <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
-        {pdfError ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-            <AlertTriangle className="w-12 h-12 text-destructive" />
-            <p className="text-foreground font-semibold">Erro ao carregar o preview do PDF</p>
-            <p className="text-muted-foreground text-sm">
-              O PDF foi gerado mas não pôde ser exibido no navegador. 
-              Você ainda pode gerar e baixar o documento.
-            </p>
-            <Button variant="outline" onClick={handleRetry} className="gap-1.5">
-              <RefreshCw className="w-4 h-4" /> Tentar novamente
-            </Button>
-          </div>
-        ) : blobUrl ? (
-          <iframe
-            src={blobUrl}
-            className="w-full h-full border-0 bg-white"
-            title="PDF Preview"
-            style={{ backgroundColor: "#ffffff" }}
-          />
-
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        )}
+        <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview da CNH Digital" />
 
         {/* Watermark overlay - only when not paid */}
-        {!paid && !pdfError && (
+        {!paid && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden select-none flex items-center justify-center">
             <div className="absolute inset-0" style={{
               background: "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.06) 80px, hsl(var(--destructive) / 0.06) 82px)",
