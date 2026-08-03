@@ -399,6 +399,21 @@ function estadoFitStyle(estado: string, baseSize: number) {
   return `font-size:${size.toFixed(2)}px;`;
 }
 
+/**
+ * Auto-ajuste de nomes longos (nome do titular e filiação):
+ * nunca corta o texto — reduz a fonte o suficiente para caber na caixa.
+ */
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.4) {
+  const len = (value || "").trim().length;
+  if (!len) return "";
+  const charRatio = 0.52; // largura média por caractere em relação ao font-size
+  const estimated = len * baseSize * charRatio;
+  if (estimated <= maxWidth) return "";
+  const fitted = maxWidth / (len * charRatio);
+  const size = Math.max(fitted, baseSize * minRatio);
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
 
 
 function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
