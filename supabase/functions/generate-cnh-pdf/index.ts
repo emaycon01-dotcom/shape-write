@@ -512,7 +512,7 @@ ${CNH_FONT_FACE}
   <div class="overlay photo-overlay" style="${boxStyle("photo")}">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
   <div class="overlay sig-overlay" style="${boxStyle("signature")}">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
   <div class="overlay" style="${rotStyle("reg_vert_top")}">${escapeHtml(d.registro || "")}</div>
-  ${text("nome", d.nome_completo || "", "max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;")}
+  ${text("nome", d.nome_completo || "", nomeStyle(d.nome_completo || "", nomeBox, "nome"))}
   ${text("primeira_hab", d.data_primeira_hab || "")}
   ${text("nascimento", d.data_nascimento || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
   ${text("emissao", d.data_emissao || "")}
