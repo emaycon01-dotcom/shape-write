@@ -461,39 +461,45 @@ export async function invokeGeneratePdf(
 ): Promise<InvokeResult> {
   const body = options?.body ?? {};
   const isAction = typeof (body as { action?: unknown }).action === "string";
+  const isPreview = body.preview === true;
 
-  const { data, error } = await supabase.functions.invoke(functionName, {
-    body: isAction ? body : { ...body, render: "html" },
-  });
-
-  if (error) return { data, error: error as Error };
-  if (!data || typeof data !== "object") return { data, error: null };
-
-  const payload = data as Record<string, unknown>;
-  if (typeof payload.html !== "string") return { data: payload, error: null };
-
+  beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
-    const pdfBase64 = await renderHtmlToDocument(payload.html, body.preview === true);
-    const result: Record<string, unknown> = { ...payload, pdfBase64 };
-    delete result.html;
+    const { data, error } = await supabase.functions.invoke(functionName, {
+      body: isAction ? body : { ...body, render: "html" },
+    });
 
+    if (error) return { data, error: error as Error };
+    if (!data || typeof data !== "object") return { data, error: null };
 
-    // Unimed: o portal de validação precisa do arquivo hospedado.
-    if (functionName === "generate-unimed-pdf" && payload.token && body.preview !== true) {
-      try {
-        const { data: attached } = await supabase.functions.invoke(functionName, {
-          body: { token: payload.token, attach_pdf: pdfBase64 },
-        });
-        if (attached && typeof attached === "object" && "pdf_url" in attached) {
-          result.pdf_url = (attached as Record<string, unknown>).pdf_url;
+    const payload = data as Record<string, unknown>;
+    if (typeof payload.html !== "string") return { data: payload, error: null };
+
+    try {
+      const pdfBase64 = await renderHtmlToDocument(payload.html, isPreview);
+      const result: Record<string, unknown> = { ...payload, pdfBase64 };
+      delete result.html;
+
+      // Unimed: o portal de validação precisa do arquivo hospedado.
+      if (functionName === "generate-unimed-pdf" && payload.token && !isPreview) {
+        try {
+          const { data: attached } = await supabase.functions.invoke(functionName, {
+            body: { token: payload.token, attach_pdf: pdfBase64 },
+          });
+          if (attached && typeof attached === "object" && "pdf_url" in attached) {
+            result.pdf_url = (attached as Record<string, unknown>).pdf_url;
+          }
+        } catch (e) {
+          console.warn("Falha ao anexar PDF na validação:", e);
         }
-      } catch (e) {
-        console.warn("Falha ao anexar PDF na validação:", e);
       }
-    }
 
-    return { data: result, error: null };
-  } catch (e) {
-    return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
+      return { data: result, error: null };
+    } catch (e) {
+      return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
+    }
+  } finally {
+    endPdfLoading();
   }
 }
+
