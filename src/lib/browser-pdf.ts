@@ -127,6 +127,33 @@ function breathe(ms = 16): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/**
+ * Detecta canvas "preto" (falha silenciosa de memória em iPadOS/Android).
+ * Amostra alguns pontos; se todos forem quase pretos, a faixa é inválida.
+ */
+function isCanvasBlack(canvas: HTMLCanvasElement): boolean {
+  try {
+    const ctx = canvas.getContext("2d");
+    if (!ctx || canvas.width < 2 || canvas.height < 2) return false;
+    const points: Array<[number, number]> = [
+      [0.5, 0.5],
+      [0.15, 0.2],
+      [0.85, 0.8],
+      [0.5, 0.05],
+      [0.5, 0.95],
+    ];
+    for (const [px, py] of points) {
+      const x = Math.min(canvas.width - 1, Math.max(0, Math.floor(canvas.width * px)));
+      const y = Math.min(canvas.height - 1, Math.max(0, Math.floor(canvas.height * py)));
+      const d = ctx.getImageData(x, y, 1, 1).data;
+      if (d[0] > 16 || d[1] > 16 || d[2] > 16) return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 
 
 
