@@ -441,7 +441,11 @@ function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown
   const text = (id: string, value: string, extra = "") =>
     `<div class="overlay" style="${base(id, extra)}">${escapeHtml(value)}</div>`;
 
-  const ellipsis = "max-width:290px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+  // Nomes longos: mantém o texto completo, apenas encolhendo a fonte para caber.
+  const nomeBox = 210;
+  const filiacaoBox = 290;
+  const nomeStyle = (value: string, box: number, id: string) =>
+    `max-width:${box}px;white-space:nowrap;overflow:visible;text-overflow:clip;${fitTextStyle(value, p[id].fontSize, box)}`;
 
   return `<!DOCTYPE html>
 <html>
