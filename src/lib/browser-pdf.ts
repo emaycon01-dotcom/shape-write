@@ -83,10 +83,12 @@ function isAndroid(): boolean {
 /** Fator de banda: aparelhos fracos processam faixas menores por vez. */
 function memoryAreaFactor(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 0.35;
-  if (gb <= 4) return 0.6;
+  const cores = navigator.hardwareConcurrency || 4;
+  if (gb <= 2 || cores <= 2) return 0.4;
+  if (gb <= 4) return 0.75;
   return 1;
 }
+
 
 /**
  * Maior escala segura para a página. Como a rasterização é feita em FAIXAS
@@ -110,8 +112,10 @@ function safeScale(width: number): number {
 function bandCssHeight(width: number, scale: number): number {
   const maxDim = detectMaxCanvasDimension();
   const mobile = isAndroid() || maxDim < 8192;
-  // ~12 MP por faixa no Android (≈48 MB RGBA) / ~48 MP no desktop.
-  const baseArea = mobile ? 12_000_000 : 48_000_000;
+  // ~16 MP por faixa no Android (≈64 MB RGBA) / ~48 MP no desktop.
+  // Faixas maiores = menos clones do documento (o custo dominante no Android).
+  const baseArea = mobile ? 16_000_000 : 48_000_000;
+
   const maxArea = Math.max(3_000_000, Math.floor(baseArea * memoryAreaFactor()));
   const maxPxByArea = Math.floor(maxArea / (width * scale));
   const maxPx = Math.min(maxDim, maxPxByArea);
