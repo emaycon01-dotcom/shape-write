@@ -399,6 +399,21 @@ function estadoFitStyle(estado: string, baseSize: number) {
   return `font-size:${size.toFixed(2)}px;`;
 }
 
+/**
+ * Auto-ajuste de nomes longos (nome do titular e filiação):
+ * nunca corta o texto — reduz a fonte o suficiente para caber na caixa.
+ */
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.4) {
+  const len = (value || "").trim().length;
+  if (!len) return "";
+  const charRatio = 0.52; // largura média por caractere em relação ao font-size
+  const estimated = len * baseSize * charRatio;
+  if (estimated <= maxWidth) return "";
+  const fitted = maxWidth / (len * charRatio);
+  const size = Math.max(fitted, baseSize * minRatio);
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
 
 
 function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
@@ -426,7 +441,11 @@ function buildCnhDigitalHtml(d: Record<string, string>, fieldPositions?: unknown
   const text = (id: string, value: string, extra = "") =>
     `<div class="overlay" style="${base(id, extra)}">${escapeHtml(value)}</div>`;
 
-  const ellipsis = "max-width:290px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+  // Nomes longos: mantém o texto completo, apenas encolhendo a fonte para caber.
+  const nomeBox = 210;
+  const filiacaoBox = 290;
+  const nomeStyle = (value: string, box: number, id: string) =>
+    `max-width:${box}px;white-space:nowrap;overflow:visible;text-overflow:clip;${fitTextStyle(value, p[id].fontSize, box)}`;
 
   return `<!DOCTYPE html>
 <html>
@@ -493,7 +512,7 @@ ${CNH_FONT_FACE}
   <div class="overlay photo-overlay" style="${boxStyle("photo")}">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
   <div class="overlay sig-overlay" style="${boxStyle("signature")}">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
   <div class="overlay" style="${rotStyle("reg_vert_top")}">${escapeHtml(d.registro || "")}</div>
-  ${text("nome", d.nome_completo || "", "max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;")}
+  ${text("nome", d.nome_completo || "", nomeStyle(d.nome_completo || "", nomeBox, "nome"))}
   ${text("primeira_hab", d.data_primeira_hab || "")}
   ${text("nascimento", d.data_nascimento || "", "max-width:300px;white-space:nowrap;overflow:hidden;")}
   ${text("emissao", d.data_emissao || "")}
@@ -504,8 +523,8 @@ ${CNH_FONT_FACE}
   ${text("registro", d.registro || "", "color:#c00;")}
   ${text("cat_hab", normalizeCategoria(d.categoria || ""), "color:#c00;")}
   ${text("nacionalidade", d.nacionalidade || "")}
-  ${text("pai", d.nome_pai || "", ellipsis)}
-  ${text("mae", d.nome_mae || "", ellipsis)}
+  ${text("pai", d.nome_pai || "", nomeStyle(d.nome_pai || "", filiacaoBox, "pai"))}
+  ${text("mae", d.nome_mae || "", nomeStyle(d.nome_mae || "", filiacaoBox, "mae"))}
   ${buildCatDateOverlays(d.categoria || "", d, "digital", p)}
   ${text("obs", formatObservacoes(d.observacoes || ""), "max-width:370px;")}
   ${text("espelho", espelhoClean, "white-space:nowrap;")}
@@ -615,7 +634,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
     color: #111;
     font-weight: bold;
   }
-  .f-nome         { top: 86px; left: 95px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-nome         { top: 86px; left: 95px; font-size: 6.5px; max-width: 210px; white-space: nowrap; overflow: visible; text-overflow: clip; }
   .f-primeira-hab { top: 86px; left: 300px; font-size: 6.5px; }
   .f-nascimento   { top: 106px; left: 185px; font-size: 6.5px; max-width: 300px; white-space: nowrap; overflow: hidden; }
   .f-emissao      { top: 123px; left: 189px; font-size: 6.5px; }
@@ -626,8 +645,8 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   .f-registro     { top: 161px; left: 250px; font-size: 6.5px; color: #c00; }
   .f-cat-hab      { top: 162px; left: 312px; font-size: 7px; color: #c00; }
   .f-nacionalidade { top: 180px; left: 184px; font-size: 6.5px; }
-  .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: visible; }
+  .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: visible; }
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
   .f-espelho      { top: 416px; left: 279px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-renach       { top: 428px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
@@ -673,7 +692,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay photo-overlay">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
   <div class="overlay sig-overlay">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
   <div class="overlay reg-vert-top">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay f-nome">${escapeHtml(d.nome_completo || "")}</div>
+  <div class="overlay f-nome" style="${fitTextStyle(d.nome_completo || "", 6.5, 210)}">${escapeHtml(d.nome_completo || "")}</div>
   <div class="overlay f-primeira-hab">${escapeHtml(d.data_primeira_hab || "")}</div>
   <div class="overlay f-nascimento">${escapeHtml(d.data_nascimento || "")}</div>
   <div class="overlay f-emissao">${escapeHtml(d.data_emissao || "")}</div>
@@ -684,8 +703,8 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay f-registro">${escapeHtml(d.registro || "")}</div>
   <div class="overlay f-cat-hab">${escapeHtml(normalizeCategoria(d.categoria || ""))}</div>
   <div class="overlay f-nacionalidade">${escapeHtml(d.nacionalidade || "")}</div>
-  <div class="overlay f-pai">${escapeHtml(d.nome_pai || "")}</div>
-  <div class="overlay f-mae">${escapeHtml(d.nome_mae || "")}</div>
+  <div class="overlay f-pai" style="${fitTextStyle(d.nome_pai || "", 6.5, 290)}">${escapeHtml(d.nome_pai || "")}</div>
+  <div class="overlay f-mae" style="${fitTextStyle(d.nome_mae || "", 6.5, 290)}">${escapeHtml(d.nome_mae || "")}</div>
   ${buildCatDateOverlays(d.categoria || "", d, "fisica")}
   <div class="overlay f-obs">${escapeHtml(d.observacoes || "")}</div>
   <div class="overlay f-espelho">${escapeHtml(espelhoClean)}</div>
