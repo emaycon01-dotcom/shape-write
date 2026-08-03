@@ -703,8 +703,8 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay f-registro">${escapeHtml(d.registro || "")}</div>
   <div class="overlay f-cat-hab">${escapeHtml(normalizeCategoria(d.categoria || ""))}</div>
   <div class="overlay f-nacionalidade">${escapeHtml(d.nacionalidade || "")}</div>
-  <div class="overlay f-pai">${escapeHtml(d.nome_pai || "")}</div>
-  <div class="overlay f-mae">${escapeHtml(d.nome_mae || "")}</div>
+  <div class="overlay f-pai" style="${fitTextStyle(d.nome_pai || "", 6.5, 290)}">${escapeHtml(d.nome_pai || "")}</div>
+  <div class="overlay f-mae" style="${fitTextStyle(d.nome_mae || "", 6.5, 290)}">${escapeHtml(d.nome_mae || "")}</div>
   ${buildCatDateOverlays(d.categoria || "", d, "fisica")}
   <div class="overlay f-obs">${escapeHtml(d.observacoes || "")}</div>
   <div class="overlay f-espelho">${escapeHtml(espelhoClean)}</div>
