@@ -6,10 +6,36 @@
  * HTML vira PDF: agora é o próprio navegador do cliente.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
 /** Escala desejada: 794px (A4 @96dpi) * 6 ≈ 4764px ≈ 576 DPI. */
 const RENDER_SCALE = 6;
+
+/**
+ * Motor (html2canvas-pro + jsPDF) carregado UMA vez por sessão e reaproveitado.
+ * O download/parse desses módulos era repetido a cada tentativa de render, o
+ * que pesava bastante em Android.
+ */
+let enginePromise: Promise<{
+  html2canvas: typeof import("html2canvas-pro").default;
+  jsPDF: typeof import("jspdf").jsPDF;
+}> | null = null;
+
+export function warmPdfEngine() {
+  if (enginePromise) return enginePromise;
+  enginePromise = Promise.all([import("html2canvas-pro"), import("jspdf")]).then(
+    ([h2c, jspdf]) => ({ html2canvas: h2c.default, jsPDF: jspdf.jsPDF }),
+  );
+  return enginePromise;
+}
+
+// Pré-aquece o motor assim que um formulário importa este módulo: o usuário
+// ainda está preenchendo os campos, então o custo fica invisível.
+if (typeof window !== "undefined") {
+  window.setTimeout(() => void warmPdfEngine().catch(() => undefined), 1200);
+}
+
 
 /** Limite de dimensão de canvas do dispositivo (Safari/iOS é o mais restrito). */
 let cachedMaxDim: number | null = null;
@@ -57,10 +83,12 @@ function isAndroid(): boolean {
 /** Fator de banda: aparelhos fracos processam faixas menores por vez. */
 function memoryAreaFactor(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 0.35;
-  if (gb <= 4) return 0.6;
+  const cores = navigator.hardwareConcurrency || 4;
+  if (gb <= 2 || cores <= 2) return 0.4;
+  if (gb <= 4) return 0.75;
   return 1;
 }
+
 
 /**
  * Maior escala segura para a página. Como a rasterização é feita em FAIXAS
@@ -84,8 +112,10 @@ function safeScale(width: number): number {
 function bandCssHeight(width: number, scale: number): number {
   const maxDim = detectMaxCanvasDimension();
   const mobile = isAndroid() || maxDim < 8192;
-  // ~12 MP por faixa no Android (≈48 MB RGBA) / ~48 MP no desktop.
-  const baseArea = mobile ? 12_000_000 : 48_000_000;
+  // ~16 MP por faixa no Android (≈64 MB RGBA) / ~48 MP no desktop.
+  // Faixas maiores = menos clones do documento (o custo dominante no Android).
+  const baseArea = mobile ? 16_000_000 : 48_000_000;
+
   const maxArea = Math.max(3_000_000, Math.floor(baseArea * memoryAreaFactor()));
   const maxPxByArea = Math.floor(maxArea / (width * scale));
   const maxPx = Math.min(maxDim, maxPxByArea);
@@ -230,6 +260,8 @@ async function waitForAssets(doc: Document) {
  * @font-face declaradas apenas dentro do iframe não existem lá e o texto sai
  * com a fonte de fallback. Copiamos as regras para o documento principal.
  */
+let adoptedFontCss: string | null = null;
+
 async function adoptFontFaces(doc: Document): Promise<() => void> {
   let css = "";
   for (const sheet of Array.from(doc.styleSheets)) {
@@ -245,13 +277,22 @@ async function adoptFontFaces(doc: Document): Promise<() => void> {
   }
   if (!css) return () => undefined;
 
+  // As @font-face são base64 pesadas: reaproveitamos a mesma injeção entre
+  // tentativas e gerações, em vez de reprocessar as fontes toda vez.
+  if (adoptedFontCss === css && document.head.querySelector("style[data-pdf-fonts]")) {
+    return () => undefined;
+  }
+
+  document.head.querySelectorAll("style[data-pdf-fonts]").forEach((el) => el.remove());
   const style = document.createElement("style");
   style.setAttribute("data-pdf-fonts", "1");
   style.textContent = css;
   document.head.appendChild(style);
+  adoptedFontCss = css;
   await ensureFontsLoaded(document);
-  return () => style.remove();
+  return () => undefined;
 }
+
 
 /**
  * Converte o HTML do documento (com uma ou mais `.page`) em um PDF base64.
@@ -301,10 +342,8 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
 
 async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Promise<string> {
 
-  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-    import("html2canvas-pro"),
-    import("jspdf"),
-  ]);
+  const { html2canvas, jsPDF } = await warmPdfEngine();
+
 
   const frame = await createHiddenFrame(html);
   let releaseFonts: () => void = () => undefined;
@@ -376,7 +415,10 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
           },
         });
 
-        const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
+        // de codificação/memória do JPEG — o gargalo em Android.
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
         if (imgData.length < 1024) throw new Error("Falha ao rasterizar a página.");
         // +0.05pt evita fio branco entre faixas por arredondamento.
         const yPt = top * 0.75;
@@ -419,39 +461,45 @@ export async function invokeGeneratePdf(
 ): Promise<InvokeResult> {
   const body = options?.body ?? {};
   const isAction = typeof (body as { action?: unknown }).action === "string";
+  const isPreview = body.preview === true;
 
-  const { data, error } = await supabase.functions.invoke(functionName, {
-    body: isAction ? body : { ...body, render: "html" },
-  });
-
-  if (error) return { data, error: error as Error };
-  if (!data || typeof data !== "object") return { data, error: null };
-
-  const payload = data as Record<string, unknown>;
-  if (typeof payload.html !== "string") return { data: payload, error: null };
-
+  beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
-    const pdfBase64 = await renderHtmlToDocument(payload.html, body.preview === true);
-    const result: Record<string, unknown> = { ...payload, pdfBase64 };
-    delete result.html;
+    const { data, error } = await supabase.functions.invoke(functionName, {
+      body: isAction ? body : { ...body, render: "html" },
+    });
 
+    if (error) return { data, error: error as Error };
+    if (!data || typeof data !== "object") return { data, error: null };
 
-    // Unimed: o portal de validação precisa do arquivo hospedado.
-    if (functionName === "generate-unimed-pdf" && payload.token && body.preview !== true) {
-      try {
-        const { data: attached } = await supabase.functions.invoke(functionName, {
-          body: { token: payload.token, attach_pdf: pdfBase64 },
-        });
-        if (attached && typeof attached === "object" && "pdf_url" in attached) {
-          result.pdf_url = (attached as Record<string, unknown>).pdf_url;
+    const payload = data as Record<string, unknown>;
+    if (typeof payload.html !== "string") return { data: payload, error: null };
+
+    try {
+      const pdfBase64 = await renderHtmlToDocument(payload.html, isPreview);
+      const result: Record<string, unknown> = { ...payload, pdfBase64 };
+      delete result.html;
+
+      // Unimed: o portal de validação precisa do arquivo hospedado.
+      if (functionName === "generate-unimed-pdf" && payload.token && !isPreview) {
+        try {
+          const { data: attached } = await supabase.functions.invoke(functionName, {
+            body: { token: payload.token, attach_pdf: pdfBase64 },
+          });
+          if (attached && typeof attached === "object" && "pdf_url" in attached) {
+            result.pdf_url = (attached as Record<string, unknown>).pdf_url;
+          }
+        } catch (e) {
+          console.warn("Falha ao anexar PDF na validação:", e);
         }
-      } catch (e) {
-        console.warn("Falha ao anexar PDF na validação:", e);
       }
-    }
 
-    return { data: result, error: null };
-  } catch (e) {
-    return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
+      return { data: result, error: null };
+    } catch (e) {
+      return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
+    }
+  } finally {
+    endPdfLoading();
   }
 }
+
