@@ -645,8 +645,8 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   .f-registro     { top: 161px; left: 250px; font-size: 6.5px; color: #c00; }
   .f-cat-hab      { top: 162px; left: 312px; font-size: 7px; color: #c00; }
   .f-nacionalidade { top: 180px; left: 184px; font-size: 6.5px; }
-  .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
-  .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: hidden; }
+  .f-pai          { top: 200px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: visible; }
+  .f-mae          { top: 217px; left: 184px; font-size: 6.5px; max-width: 290px; white-space: nowrap; overflow: visible; }
   .f-obs          { top: 359px; left: 95px; font-size: 5.5px; max-width: 370px; }
   .f-espelho      { top: 416px; left: 279px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
   .f-renach       { top: 428px; left: 281px; font-size: 6.5px; color: #111; white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
