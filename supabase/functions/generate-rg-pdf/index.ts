@@ -269,6 +269,22 @@ function estadoFitStyle(estado: string, baseSize: number) {
   return `font-size:${size.toFixed(2)}px;`;
 }
 
+
+/**
+ * Auto-ajuste de textos longos (padrão CNH): nunca corta com "..." —
+ * reduz a fonte o suficiente para caber na caixa.
+ */
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.4) {
+  const len = (value || "").trim().length;
+  if (!len) return "";
+  const charRatio = 0.52;
+  const estimated = len * baseSize * charRatio;
+  if (estimated <= maxWidth) return "";
+  const fitted = maxWidth / (len * charRatio);
+  const size = Math.max(fitted, baseSize * minRatio);
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
 /* --------------------------------------------------------------- layout */
 
 function buildRgHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string) {
@@ -289,8 +305,9 @@ function buildRgHtml(d: Record<string, string>, fieldPositions?: unknown, qrValu
   const text = (id: string, value: string, extra = "") =>
     `<div class="overlay" style="${base(id, extra)}">${escapeHtml(value)}</div>`;
 
-  const clip = (max: number) =>
-    `max-width:${max}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;`;
+  // Padrão CNH: encolhe a fonte em vez de cortar o texto com reticências.
+  const fit = (id: string, value: string, max: number) =>
+    `max-width:${max}px;white-space:nowrap;overflow:visible;text-overflow:clip;${fitTextStyle(value, p[id].fontSize, max)}`;
 
   const estado = estadoAcentuado(d.estado || "");
 
@@ -342,8 +359,8 @@ ${RG_FONT_FACE}
     box-shadow: 0 0 0 3px #fff;
   }
   .qr-overlay svg { width:100%; height:100%; display:block; }
-  .sig-overlay { display: flex; align-items: center; justify-content: center; }
-  .sig-overlay img { max-width:100%; max-height:100%; object-fit:contain; image-rendering: high-quality; }
+  .sig-overlay { display:block; overflow:hidden !important; clip-path:inset(0); contain:strict; box-sizing:border-box; }
+  .sig-overlay img { position:absolute; inset:0; display:block; width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:contain; object-position:center; image-rendering:high-quality; }
   .mrz-line { display:block; text-align:left; white-space:pre; }
   .mrz-block {
     white-space: pre;
@@ -366,21 +383,21 @@ ${RG_FONT_FACE}
   <div class="overlay photo-overlay" style="${boxStyle("photo")}">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
   <div class="overlay sig-overlay" style="${boxStyle("signature")}">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
   <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;transform:translateX(-50%);text-align:center;white-space:nowrap;`)}${estadoFitStyle(estado, p.estado.fontSize)}">${escapeHtml(estado)}</div>
-  ${text("nome", d.nome_completo || "", clip(330))}
-  ${text("nome_social", d.nome_social || "", clip(330))}
-  ${text("registro_geral", d.registro_geral || "", clip(180))}
+  ${text("nome", d.nome_completo || "", fit("nome", d.nome_completo || "", 330))}
+  ${text("nome_social", d.nome_social || "", fit("nome_social", d.nome_social || "", 330))}
+  ${text("registro_geral", d.registro_geral || "", fit("registro_geral", d.registro_geral || "", 180))}
   ${text("sexo", d.sexo || "")}
   ${text("data_nascimento", d.data_nascimento || "")}
   ${text("nacionalidade", d.nacionalidade || "")}
-  ${text("naturalidade", d.naturalidade || "", clip(150))}
+  ${text("naturalidade", d.naturalidade || "", fit("naturalidade", d.naturalidade || "", 150))}
   ${text("data_validade", d.data_validade || "")}
 
   <!-- VERSO -->
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 82)}</div>` : ""}
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr2")}">${qrSvg(qrValue, p.qr2?.w ?? 240)}</div>` : ""}
   <div class="overlay photo-overlay" style="${boxStyle("photo2")}">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
-  ${text("filiacao1", d.filiacao1 || "", clip(300))}
-  ${text("filiacao2", d.filiacao2 || "", clip(300))}
+  ${text("filiacao1", d.filiacao1 || "", fit("filiacao1", d.filiacao1 || "", 300))}
+  ${text("filiacao2", d.filiacao2 || "", fit("filiacao2", d.filiacao2 || "", 300))}
   ${text("orgao_expedidor", d.orgao_expedidor || "")}
   ${text("local_emissao", d.local_emissao || "")}
   ${text("data_emissao", d.data_emissao || "")}
@@ -395,7 +412,7 @@ ${mrz.line3}</div>
   ${text("estado_civil", d.estado_civil || "")}
   ${text("doador", d.doador || "")}
   <div class="overlay sig-overlay" style="${boxStyle("signature2")}">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
-  ${text("certidao", d.certidao || "", clip(340))}
+  ${text("certidao", d.certidao || "", fit("certidao", d.certidao || "", 340))}
   ${text("cnh", d.cnh || "")}
   ${text("categoria", d.categoria || "")}
   ${text("pis_pasep", d.pis_pasep || "")}
@@ -404,7 +421,7 @@ ${mrz.line3}</div>
   ${text("ctps", d.ctps || "")}
   ${text("dni", d.dni || "")}
   ${text("cns", d.cns || "")}
-  ${text("observacao_saude", d.observacao_saude || "", clip(500))}
+  ${text("observacao_saude", d.observacao_saude || "", fit("observacao_saude", d.observacao_saude || "", 500))}
 </div>
 </body>
 </html>`;
