@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DocumentProvider } from "@/contexts/DocumentContext";
 import { DeviceSecurityProvider } from "@/contexts/DeviceSecurityContext";
 import SupportWidget from "@/components/SupportWidget";
+import GenerationOverlay from "@/components/GenerationOverlay";
+
 import { lazy, Suspense } from "react";
 import LoginPage from "./pages/LoginPage";
 
@@ -97,6 +99,8 @@ const App = () => {
               <Toaster />
               <Sonner />
               <SupportWidget />
+              <GenerationOverlay />
+
               <BrowserRouter>
                 <Suspense fallback={<Loading />}>
                   <Routes>
