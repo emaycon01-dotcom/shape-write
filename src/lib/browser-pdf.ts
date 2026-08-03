@@ -353,6 +353,10 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
         { cap: RENDER_SCALE, bandDivisor: 4 },
         { cap: RENDER_SCALE, bandDivisor: 8 },
         { cap: RENDER_SCALE, bandDivisor: 16 },
+        // Último recurso: só aqui a escala cai, para nunca entregar um PDF preto.
+        { cap: 4, bandDivisor: 8 },
+        { cap: 3, bandDivisor: 8 },
+        { cap: 2, bandDivisor: 8 },
       ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor } of attempts) {
