@@ -143,7 +143,23 @@ function resolvePositions(overrides: unknown): Record<string, Pos> {
 
 /* --------------------------------------------------------------- layout */
 
-export function buildChaHtml(
+export 
+/**
+ * Auto-ajuste de textos longos (padrão CNH): nunca corta com "..." —
+ * reduz a fonte o suficiente para caber na caixa.
+ */
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.4) {
+  const len = (value || "").trim().length;
+  if (!len) return "";
+  const charRatio = 0.52;
+  const estimated = len * baseSize * charRatio;
+  if (estimated <= maxWidth) return "";
+  const fitted = maxWidth / (len * charRatio);
+  const size = Math.max(fitted, baseSize * minRatio);
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
+function buildChaHtml(
   d: Record<string, string>,
   fieldPositions?: unknown,
   qrValue?: string,
@@ -161,8 +177,20 @@ export function buildChaHtml(
     return `top:${pos.y}px;left:${pos.x}px;width:${pos.w}px;height:${pos.h}px;${extra}`;
   };
 
-  const text = (id: string, value: string, extra = "") =>
-    value ? `<div class="overlay" style="${base(id, extra)}">${escapeHtml(value)}</div>` : "";
+  // Padrão CNH: textos longos encolhem a fonte em vez de estourar/cortar.
+  const FIT_WIDTHS: Record<string, number> = {
+    nome: 300, inscricao: 210, limites: 300, requisitos: 300, orgao: 210,
+    categoria: 300, categoria_en: 300,
+  };
+
+  const text = (id: string, value: string, extra = "") => {
+    if (!value) return "";
+    const max = p[id]?.w ?? FIT_WIDTHS[id];
+    const fit = max
+      ? `max-width:${max}px;white-space:nowrap;overflow:visible;text-overflow:clip;${fitTextStyle(value, p[id].fontSize, max)}`
+      : "";
+    return `<div class="overlay" style="${base(id, `${fit}${extra}`)}">${escapeHtml(value)}</div>`;
+  };
 
   return `<!DOCTYPE html>
 <html>

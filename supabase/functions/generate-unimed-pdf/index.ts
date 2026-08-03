@@ -251,8 +251,8 @@ export function buildUnimedHtml(
   .qr-overlay svg { width: 100%; height: 100%; display: block; }
   .link { word-break: break-all; white-space: normal; line-height: 1.22; }
   .sig-mask { background: #ffffff; opacity: 1; z-index: 12; }
-  .sig { z-index: 13; display: flex; align-items: flex-end; }
-  .sig img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .sig { z-index: 13; display:block; overflow:hidden !important; clip-path:inset(0); contain:strict; box-sizing:border-box; }
+  .sig img { position:absolute; inset:0; display:block; width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:contain; object-position:center bottom; image-rendering:high-quality; }
   .sig-rule { position: absolute; z-index: 14; height: 1px; background: #111; }
   .sig-label { position: absolute; z-index: 14; color: #111; font-size: 10.3px; line-height: 1; white-space: nowrap; }
 </style>
