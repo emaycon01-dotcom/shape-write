@@ -523,8 +523,8 @@ ${CNH_FONT_FACE}
   ${text("registro", d.registro || "", "color:#c00;")}
   ${text("cat_hab", normalizeCategoria(d.categoria || ""), "color:#c00;")}
   ${text("nacionalidade", d.nacionalidade || "")}
-  ${text("pai", d.nome_pai || "", ellipsis)}
-  ${text("mae", d.nome_mae || "", ellipsis)}
+  ${text("pai", d.nome_pai || "", nomeStyle(d.nome_pai || "", filiacaoBox, "pai"))}
+  ${text("mae", d.nome_mae || "", nomeStyle(d.nome_mae || "", filiacaoBox, "mae"))}
   ${buildCatDateOverlays(d.categoria || "", d, "digital", p)}
   ${text("obs", formatObservacoes(d.observacoes || ""), "max-width:370px;")}
   ${text("espelho", espelhoClean, "white-space:nowrap;")}
