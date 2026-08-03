@@ -692,7 +692,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="overlay photo-overlay">${d.foto ? `<img src="${escapeHtml(d.foto)}" />` : ""}</div>
   <div class="overlay sig-overlay">${d.assinatura ? `<img src="${escapeHtml(d.assinatura)}" />` : ""}</div>
   <div class="overlay reg-vert-top">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay f-nome">${escapeHtml(d.nome_completo || "")}</div>
+  <div class="overlay f-nome" style="${fitTextStyle(d.nome_completo || "", 6.5, 210)}">${escapeHtml(d.nome_completo || "")}</div>
   <div class="overlay f-primeira-hab">${escapeHtml(d.data_primeira_hab || "")}</div>
   <div class="overlay f-nascimento">${escapeHtml(d.data_nascimento || "")}</div>
   <div class="overlay f-emissao">${escapeHtml(d.data_emissao || "")}</div>
