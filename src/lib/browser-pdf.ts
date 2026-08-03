@@ -6,10 +6,36 @@
  * HTML vira PDF: agora é o próprio navegador do cliente.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
 /** Escala desejada: 794px (A4 @96dpi) * 6 ≈ 4764px ≈ 576 DPI. */
 const RENDER_SCALE = 6;
+
+/**
+ * Motor (html2canvas-pro + jsPDF) carregado UMA vez por sessão e reaproveitado.
+ * O download/parse desses módulos era repetido a cada tentativa de render, o
+ * que pesava bastante em Android.
+ */
+let enginePromise: Promise<{
+  html2canvas: typeof import("html2canvas-pro").default;
+  jsPDF: typeof import("jspdf").jsPDF;
+}> | null = null;
+
+export function warmPdfEngine() {
+  if (enginePromise) return enginePromise;
+  enginePromise = Promise.all([import("html2canvas-pro"), import("jspdf")]).then(
+    ([h2c, jspdf]) => ({ html2canvas: h2c.default, jsPDF: jspdf.jsPDF }),
+  );
+  return enginePromise;
+}
+
+// Pré-aquece o motor assim que um formulário importa este módulo: o usuário
+// ainda está preenchendo os campos, então o custo fica invisível.
+if (typeof window !== "undefined") {
+  window.setTimeout(() => void warmPdfEngine().catch(() => undefined), 1200);
+}
+
 
 /** Limite de dimensão de canvas do dispositivo (Safari/iOS é o mais restrito). */
 let cachedMaxDim: number | null = null;
