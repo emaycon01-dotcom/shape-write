@@ -260,6 +260,8 @@ async function waitForAssets(doc: Document) {
  * @font-face declaradas apenas dentro do iframe não existem lá e o texto sai
  * com a fonte de fallback. Copiamos as regras para o documento principal.
  */
+let adoptedFontCss: string | null = null;
+
 async function adoptFontFaces(doc: Document): Promise<() => void> {
   let css = "";
   for (const sheet of Array.from(doc.styleSheets)) {
@@ -275,13 +277,22 @@ async function adoptFontFaces(doc: Document): Promise<() => void> {
   }
   if (!css) return () => undefined;
 
+  // As @font-face são base64 pesadas: reaproveitamos a mesma injeção entre
+  // tentativas e gerações, em vez de reprocessar as fontes toda vez.
+  if (adoptedFontCss === css && document.head.querySelector("style[data-pdf-fonts]")) {
+    return () => undefined;
+  }
+
+  document.head.querySelectorAll("style[data-pdf-fonts]").forEach((el) => el.remove());
   const style = document.createElement("style");
   style.setAttribute("data-pdf-fonts", "1");
   style.textContent = css;
   document.head.appendChild(style);
+  adoptedFontCss = css;
   await ensureFontsLoaded(document);
-  return () => style.remove();
+  return () => undefined;
 }
+
 
 /**
  * Converte o HTML do documento (com uma ou mais `.page`) em um PDF base64.
