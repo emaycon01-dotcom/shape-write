@@ -17,8 +17,17 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
   return bytes;
 }
 
+/** Orçamento de pixels do canvas por dispositivo (evita tela preta em iOS/Android). */
+function pixelBudget(): number {
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const gb = typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 ? nav.deviceMemory : 4;
+  const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || gb <= 4;
+  if (gb <= 2) return 3_000_000;
+  return mobile ? 6_000_000 : 12_000_000;
+}
+
 /**
- * Preview próprio para Android. Chrome/WebView não renderiza PDF dentro de
+ * Preview próprio para Android/iOS. Chrome/WebView não renderiza PDF dentro de
  * iframe e exibe apenas o cartão "Abrir". Aqui o PDF é desenhado num canvas
  * leve; o arquivo original permanece intacto para baixar/compartilhar.
  */
@@ -46,22 +55,50 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
         const canvas = canvasRef.current;
         const host = hostRef.current;
-        const context = canvas?.getContext("2d", { alpha: false });
-        if (!canvas || !host || !context) throw new Error("Canvas indisponível");
+        if (!canvas || !host) throw new Error("Canvas indisponível");
 
         const base = page.getViewport({ scale: 1 });
         const availableWidth = Math.max(280, host.clientWidth);
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-        const scale = Math.min(2.25, (availableWidth * pixelRatio) / base.width);
-        const viewport = page.getViewport({ scale });
+        let scale = Math.min(2.25, (availableWidth * pixelRatio) / base.width);
 
-        canvas.width = Math.ceil(viewport.width);
-        canvas.height = Math.ceil(viewport.height);
-        canvas.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
-        context.fillStyle = "#ffffff";
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        // Nunca ultrapassa o orçamento de pixels do aparelho — acima disso o
+        // navegador descarta o bitmap e a tela sai preta/vazia.
+        const budget = pixelBudget();
+        const area = base.width * base.height * scale * scale;
+        if (area > budget) scale *= Math.sqrt(budget / area);
+        scale = Math.max(0.4, scale);
 
-        await page.render({ canvasContext: context, viewport }).promise;
+        let rendered = false;
+        for (let attempt = 0; attempt < 3 && !rendered; attempt += 1) {
+          const viewport = page.getViewport({ scale: scale / (attempt === 0 ? 1 : attempt * 2) });
+          try {
+            const context = canvas.getContext("2d", { alpha: false });
+            if (!context) throw new Error("Contexto 2D indisponível");
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            canvas.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            await page.render({ canvasContext: context, viewport }).promise;
+
+            // Confere se o bitmap realmente ficou desenhado (Safari/iPadOS às
+            // vezes devolve um canvas totalmente preto quando falta memória).
+            const probe = context.getImageData(
+              Math.floor(canvas.width / 2),
+              Math.floor(canvas.height * 0.08),
+              1,
+              1,
+            ).data;
+            const black = probe[0] < 12 && probe[1] < 12 && probe[2] < 12;
+            if (black && attempt < 2) throw new Error("Renderização vazia");
+            rendered = true;
+          } catch (err) {
+            if (attempt === 2) throw err;
+            await new Promise((r) => setTimeout(r, 120));
+          }
+        }
+
         if (!cancelled) setStatus("ready");
         page.cleanup();
         await pdf.destroy();
@@ -84,23 +121,28 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   }, [pdfDataUrl]);
 
   return (
-    <div ref={hostRef} className="flex h-full w-full items-start justify-center overflow-auto bg-background">
+    <div
+      ref={hostRef}
+      className="relative flex h-full w-full items-start justify-center overflow-auto bg-muted"
+    >
       {status === "loading" && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
       {status === "error" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background p-8 text-center">
           <AlertTriangle className="h-10 w-10 text-destructive" />
           <p className="font-semibold text-foreground">Não foi possível montar o preview</p>
-          <p className="text-sm text-muted-foreground">Volte ao formulário e tente novamente.</p>
+          <p className="text-sm text-muted-foreground">
+            O documento continua válido — use Baixar ou Compartilhar.
+          </p>
         </div>
       )}
       <canvas
         ref={canvasRef}
         aria-label={title}
-        className={status === "ready" ? "block h-auto max-w-full" : "invisible"}
+        className={status === "ready" ? "block h-auto max-w-full bg-white" : "invisible"}
       />
     </div>
   );

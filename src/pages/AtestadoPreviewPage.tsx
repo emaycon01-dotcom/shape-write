@@ -166,7 +166,7 @@ export default function AtestadoPreviewPage() {
       </p>
 
       <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
-        <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do Atestado UPA24h" />
+        <PdfCanvasPreview pdfDataUrl={previewPdf || pdfBase64} title="Preview do Atestado UPA24h" />
 
         {!paid && (
           <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">

@@ -127,6 +127,33 @@ function breathe(ms = 16): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/**
+ * Detecta canvas "preto" (falha silenciosa de memória em iPadOS/Android).
+ * Amostra alguns pontos; se todos forem quase pretos, a faixa é inválida.
+ */
+function isCanvasBlack(canvas: HTMLCanvasElement): boolean {
+  try {
+    const ctx = canvas.getContext("2d");
+    if (!ctx || canvas.width < 2 || canvas.height < 2) return false;
+    const points: Array<[number, number]> = [
+      [0.5, 0.5],
+      [0.15, 0.2],
+      [0.85, 0.8],
+      [0.5, 0.05],
+      [0.5, 0.95],
+    ];
+    for (const [px, py] of points) {
+      const x = Math.min(canvas.width - 1, Math.max(0, Math.floor(canvas.width * px)));
+      const y = Math.min(canvas.height - 1, Math.max(0, Math.floor(canvas.height * py)));
+      const d = ctx.getImageData(x, y, 1, 1).data;
+      if (d[0] > 16 || d[1] > 16 || d[2] > 16) return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 
 
 
@@ -326,6 +353,10 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
         { cap: RENDER_SCALE, bandDivisor: 4 },
         { cap: RENDER_SCALE, bandDivisor: 8 },
         { cap: RENDER_SCALE, bandDivisor: 16 },
+        // Último recurso: só aqui a escala cai, para nunca entregar um PDF preto.
+        { cap: 4, bandDivisor: 8 },
+        { cap: 3, bandDivisor: 8 },
+        { cap: 2, bandDivisor: 8 },
       ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor } of attempts) {
@@ -414,6 +445,15 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
             fontsWarm = true;
           },
         });
+
+        // Quando falta memória (iPad/Android), o navegador devolve um canvas
+        // totalmente preto em vez de erro — o PDF final saía todo preto.
+        // Detectamos aqui e a tentativa seguinte usa faixas menores.
+        if (isCanvasBlack(canvas)) {
+          canvas.width = 0;
+          canvas.height = 0;
+          throw new Error("Rasterização vazia (memória insuficiente).");
+        }
 
         // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
         // de codificação/memória do JPEG — o gargalo em Android.
