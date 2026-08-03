@@ -415,6 +415,15 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
           },
         });
 
+        // Quando falta memória (iPad/Android), o navegador devolve um canvas
+        // totalmente preto em vez de erro — o PDF final saía todo preto.
+        // Detectamos aqui e a tentativa seguinte usa faixas menores.
+        if (isCanvasBlack(canvas)) {
+          canvas.width = 0;
+          canvas.height = 0;
+          throw new Error("Rasterização vazia (memória insuficiente).");
+        }
+
         // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
         // de codificação/memória do JPEG — o gargalo em Android.
         const imgData = canvas.toDataURL("image/jpeg", 0.95);
