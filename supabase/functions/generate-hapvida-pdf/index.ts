@@ -168,7 +168,23 @@ export function buildCorpoHtml(d: Record<string, string>): string {
 
 /* --------------------------------------------------------------- layout */
 
-export function buildHapvidaHtml(
+export 
+/**
+ * Auto-ajuste de textos longos (padrão CNH): nunca corta com "..." —
+ * reduz a fonte o suficiente para caber na caixa.
+ */
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.4) {
+  const len = (value || "").trim().length;
+  if (!len) return "";
+  const charRatio = 0.52;
+  const estimated = len * baseSize * charRatio;
+  if (estimated <= maxWidth) return "";
+  const fitted = maxWidth / (len * charRatio);
+  const size = Math.max(fitted, baseSize * minRatio);
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
+function buildHapvidaHtml(
   d: Record<string, string>,
   fieldPositions?: unknown,
   qrValue?: string,
@@ -253,12 +269,12 @@ export function buildHapvidaHtml(
 
   <div class="overlay right muted" style="${base("consulte")}">Consulte a prescrição acessando</div>
   ${linkText
-      ? `<div class="overlay right muted" style="${base("link", "overflow:hidden;text-overflow:ellipsis;")}"><span style="text-decoration:underline;">${escapeHtml(linkText)}</span> ou</div>`
+      ? `<div class="overlay right muted" style="${base("link", `overflow:visible;text-overflow:clip;max-width:${p.link?.w ?? 320}px;${fitTextStyle(linkText, p.link.fontSize, p.link?.w ?? 320)}`)}"><span style="text-decoration:underline;">${escapeHtml(linkText)}</span> ou</div>`
       : ""}
 
   ${qrValue ? `<div class="overlay qr-overlay" style="${boxStyle("qr")}">${qrSvg(qrValue, p.qr.w ?? 87)}</div>` : ""}
 
-  <div class="overlay bold" style="${base("paciente")}">${escapeHtml(d.paciente || "")}</div>
+  <div class="overlay bold" style="${base("paciente", `max-width:${p.paciente?.w ?? 420}px;overflow:visible;text-overflow:clip;${fitTextStyle(d.paciente || "", p.paciente.fontSize, p.paciente?.w ?? 420)}`)}">${escapeHtml(d.paciente || "")}</div>
   <div class="overlay" style="${base("cpf")}"><span class="lbl">CPF:</span> ${escapeHtml(d.cpf || d.cns || "")}</div>
   <div class="overlay" style="${base("celular")}"><span class="lbl">Celular:</span> ${escapeHtml(d.celular || "")}</div>
   <div class="overlay" style="${base("tipo_atendimento")}"><span class="lbl">Tipo de atendimento:</span> &nbsp;${escapeHtml(d.tipo_atendimento || "")}</div>
@@ -267,7 +283,7 @@ export function buildHapvidaHtml(
 
   <div class="overlay" style="${base("data_emissao")}">Data de emissão: ${escapeHtml(d.data_emissao || d.data_atendimento || "")}</div>
 
-  <div class="overlay bold" style="${base("medico")}">${escapeHtml(d.medico || "")}</div>
+  <div class="overlay bold" style="${base("medico", `max-width:${p.medico?.w ?? 360}px;overflow:visible;text-overflow:clip;${fitTextStyle(d.medico || "", p.medico.fontSize, p.medico?.w ?? 360)}`)}">${escapeHtml(d.medico || "")}</div>
   <div class="overlay muted" style="${base("crm")}">${escapeHtml(d.crm || "")} - &nbsp;${escapeHtml(d.especialidade || "")}</div>
 
   <div class="overlay bold assin" style="${base("assinatura")}">${escapeHtml(d.medico || "")}</div>

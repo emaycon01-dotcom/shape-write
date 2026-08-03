@@ -198,7 +198,23 @@ export function buildCorpoTexto(d: Record<string, string>): string {
     `por motivo de ${d.motivo || "doença"}.`;
 }
 
-export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string, token?: string) {
+export 
+/**
+ * Auto-ajuste de textos longos (padrão CNH): nunca corta com "..." —
+ * reduz a fonte o suficiente para caber na caixa.
+ */
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.4) {
+  const len = (value || "").trim().length;
+  if (!len) return "";
+  const charRatio = 0.52;
+  const estimated = len * baseSize * charRatio;
+  if (estimated <= maxWidth) return "";
+  const fitted = maxWidth / (len * charRatio);
+  const size = Math.max(fitted, baseSize * minRatio);
+  return `font-size:${size.toFixed(2)}px;`;
+}
+
+function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: unknown, qrValue?: string, token?: string) {
   const templateBg = d.template_bg || "";
   const p = resolvePositions(fieldPositions);
 
@@ -281,7 +297,7 @@ export function buildAtestadoHtml(d: Record<string, string>, fieldPositions?: un
   ${text("endereco2", d.endereco2 || "", "calibri bold")}
   ${text("endereco3", d.endereco3 || "", "calibri bold")}
 
-  <div class="overlay arial" style="${base("paciente", "white-space:nowrap;")}"><span class="para-label">PARA:</span> ${escapeHtml(d.paciente || "")}</div>
+  <div class="overlay arial" style="${base("paciente", `white-space:nowrap;overflow:visible;text-overflow:clip;max-width:600px;${fitTextStyle(`PARA: ${d.paciente || ""}`, p.paciente.fontSize, 600)}`)}"><span class="para-label">PARA:</span> ${escapeHtml(d.paciente || "")}</div>
 
   <div class="overlay times" style="${base("corpo", "width:766px;line-height:1.103;text-align:left;")}">${escapeHtml(corpo)}</div>
 
