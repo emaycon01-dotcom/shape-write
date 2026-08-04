@@ -20,8 +20,10 @@ import { CHA_ALIGN_STORAGE_KEY, loadChaFieldPositions } from "@/lib/cha-align";
 import { DIPLOMA_ALIGN_STORAGE_KEY, loadDiplomaFieldPositions } from "@/lib/diploma-align";
 import { HAPVIDA_ALIGN_STORAGE_KEY, loadHapvidaFieldPositions } from "@/lib/hapvida-align";
 import { UNIMED_ALIGN_STORAGE_KEY, loadUnimedFieldPositions } from "@/lib/unimed-align";
+import { HISTORICO_ALIGN_STORAGE_KEY, loadHistoricoFieldPositions } from "@/lib/historico-align";
 import templateHapvidaBgUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import templateUnimedBgUrl from "@/assets/template-unimed-bg-hq.jpg";
+import templateHistoricoBgUrl from "@/assets/template-historico-bg-hq.jpg";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -36,6 +38,7 @@ const CRLV_FONT = "'FreeMono', 'Liberation Mono', 'Courier New', monospace";
 const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const UNIMED_FONT = "Verdana, 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif";
 const DIPLOMA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 

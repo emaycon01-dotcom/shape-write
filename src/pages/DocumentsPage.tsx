@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, Wrench, HeartPulse, ShieldPlus, ShieldAlert } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -78,6 +78,14 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         rota: "/dashboard/documents/diploma",
         creditos: 1,
         qrcode: true,
+      },
+      {
+        id: "historico-escolar",
+        titulo: "Histórico Escolar",
+        descricao: "Histórico do Ensino Médio com certificado de conclusão",
+        icon: School,
+        rota: "/dashboard/documents/historico-escolar",
+        creditos: 1,
       },
     ],
   },

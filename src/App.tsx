@@ -58,6 +58,8 @@ const ChaFormPage = lazy(() => import("./pages/ChaFormPage"));
 const ChaPreviewPage = lazy(() => import("./pages/ChaPreviewPage"));
 const DiplomaFormPage = lazy(() => import("./pages/DiplomaFormPage"));
 const DiplomaPreviewPage = lazy(() => import("./pages/DiplomaPreviewPage"));
+const HistoricoFormPage = lazy(() => import("./pages/HistoricoFormPage"));
+const HistoricoPreviewPage = lazy(() => import("./pages/HistoricoPreviewPage"));
 
 
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
@@ -130,6 +132,8 @@ const App = () => {
                         <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
                         <Route path="documents/diploma" element={<DiplomaFormPage />} />
                         <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
+                        <Route path="documents/historico-escolar" element={<HistoricoFormPage />} />
+                        <Route path="documents/historico-escolar/preview" element={<HistoricoPreviewPage />} />
                         <Route path="history" element={<HistoryPage />} />
                       </Route>
 
