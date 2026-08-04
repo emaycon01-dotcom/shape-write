@@ -549,6 +549,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.2,
     copy: () => loadDiplomaFieldPositions() ?? {},
   },
+  historico: {
+    key: "historico",
+    title: "Histórico Escolar",
+    storageKey: HISTORICO_ALIGN_STORAGE_KEY,
+    defaults: defaultHistoricoFields,
+    bg: templateHistoricoBgUrl,
+    font: HISTORICO_FONT,
+    mrzFont: HISTORICO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.22,
+    copy: () => loadHistoricoFieldPositions() ?? {},
+  },
 };
 
 
