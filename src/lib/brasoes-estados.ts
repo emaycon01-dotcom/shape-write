@@ -97,3 +97,55 @@ export async function loadBrasaoImage(uf: string): Promise<HTMLImageElement | nu
     return null;
   }
 }
+
+/** Cache (memória + localStorage) dos brasões já convertidos em data URL. */
+const brasaoDataUrlCache: Record<string, string> = {};
+const LS_PREFIX = "brasao-dataurl-";
+
+/**
+ * Retorna o brasão do estado como data URL (PNG/SVG em base64), pronto para ser
+ * embutido no HTML do PDF sem problemas de CORS.
+ */
+export async function loadBrasaoDataUrl(uf: string): Promise<string> {
+  const key = (uf || "").toUpperCase();
+  if (!key) return "";
+  if (brasaoDataUrlCache[key]) return brasaoDataUrlCache[key];
+
+  try {
+    const cached = localStorage.getItem(LS_PREFIX + key);
+    if (cached) {
+      brasaoDataUrlCache[key] = cached;
+      return cached;
+    }
+  } catch { /* storage indisponível */ }
+
+  const fileName = BRASAO_WIKI_FILES[key];
+  if (!fileName) return "";
+
+  try {
+    const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=File:${fileName}.svg&prop=imageinfo&iiprop=url&iiurlwidth=512&format=json&origin=*`;
+    const apiData = await (await fetch(apiUrl)).json();
+    const pages = apiData?.query?.pages;
+    const pageId = pages ? Object.keys(pages)[0] : null;
+    const thumbUrl = pageId ? pages[pageId]?.imageinfo?.[0]?.thumburl : null;
+    if (!thumbUrl) return "";
+
+    const blob = await (await fetch(thumbUrl)).blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+
+    brasaoDataUrlCache[key] = dataUrl;
+    try { localStorage.setItem(LS_PREFIX + key, dataUrl); } catch { /* cota cheia */ }
+    return dataUrl;
+  } catch (err) {
+    console.error(`Falha ao carregar brasão de ${key}:`, err);
+    return "";
+  }
+}
+
+/** Lista de UFs para selects. */
+export const ESTADOS_UF = Object.keys(ESTADO_NOMES).sort();

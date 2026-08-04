@@ -20,6 +20,7 @@ type Pos = { x: number; y: number; fontSize: number; w?: number; h?: number; rot
 
 // Defaults MUST match src/pages/TemplateAlignPage.tsx defaultHistoricoFields
 export const HISTORICO_DEFAULT_POSITIONS: Record<string, Pos> = {
+  brasao: { x: 108, y: 34, fontSize: 10, w: 80, h: 90 },
   gov_estado: { x: 203.1, y: 38.4, fontSize: 15.5, w: 400 },
   secretaria: { x: 203.1, y: 59.1, fontSize: 12, w: 400 },
   diretoria: { x: 203.1, y: 77.4, fontSize: 12, w: 400 },
@@ -185,12 +186,19 @@ export function buildHistoricoHtml(d: Record<string, string>, fieldPositions?: u
     text-overflow: clip;
   }
   .txt { white-space: normal; line-height: 1.22; text-align: left; }
+  .brasao { display: flex; align-items: center; justify-content: center; }
+  .brasao img { width: 100%; height: 100%; object-fit: contain; image-rendering: high-quality; }
   .cert { text-align: justify; line-height: 1.28; }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="bg-template">${templateBg ? `<img src="${escapeHtml(templateBg)}" />` : ""}</div>
+
+  <!-- brasão do estado (canto superior esquerdo) -->
+  ${d.brasao_base64 && p.brasao
+      ? `<div class="overlay brasao" style="top:${p.brasao.y}px;left:${p.brasao.x}px;width:${p.brasao.w ?? 80}px;height:${p.brasao.h ?? 90}px;"><img src="${escapeHtml(d.brasao_base64)}" /></div>`
+      : ""}
 
   <!-- cabeçalho da escola -->
   ${line("gov_estado", d.gov_estado || "GOVERNO DO ESTADO DE ALAGOAS", "font-weight:700;")}
@@ -258,7 +266,10 @@ serve(async (req) => {
       "serie_conclusao", "ano_conclusao",
     ];
 
-    const data: Record<string, string> = { template_bg: body.template_base64 || "" };
+    const data: Record<string, string> = {
+      template_bg: body.template_base64 || "",
+      brasao_base64: typeof body.brasao_base64 === "string" ? body.brasao_base64 : "",
+    };
     for (const k of keys) data[k] = typeof body[k] === "string" ? body[k] : "";
 
     const html = buildHistoricoHtml(data, body.field_positions);

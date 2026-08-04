@@ -42,7 +42,7 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "exame-toxicologico": "Exame Toxicológico",
   "cpf-fisico": "CPF Físico",
   "operador-maquinas-digital": "Operador de Máquinas Digital",
-  "historico-escolar": "Histórico Escolar",
+  "historico-escolar": "HISTÓRICO + CERTIFICADO",
   "declaracao-escolar": "Declaração Escolar",
   "certificado-escolar": "Certificado Escolar",
   "cedula-policia-pe": "Cédula Policial PE",

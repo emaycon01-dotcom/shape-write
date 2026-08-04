@@ -23,7 +23,7 @@ function base64ToBlob(base64DataUrl: string): Blob | null {
   }
 }
 
-export default function HistoricoPreviewPage() {
+export default function CertidaoPreviewPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, deductCredit } = useAuth();
@@ -45,7 +45,7 @@ export default function HistoricoPreviewPage() {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <p className="text-muted-foreground">Nenhum preview disponível.</p>
-        <Button variant="outline" onClick={() => navigate("/dashboard/documents/historico-escolar")}>
+        <Button variant="outline" onClick={() => navigate("/dashboard/documents/certidao-nascimento")}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao formulário
         </Button>
       </div>
@@ -67,7 +67,7 @@ export default function HistoricoPreviewPage() {
 
     setLoading(true);
     try {
-      const deduction = await deductCredit(1, "geracao-historico");
+      const deduction = await deductCredit(1, "geracao-certidao");
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
         setLoading(false);
@@ -76,7 +76,7 @@ export default function HistoricoPreviewPage() {
 
       let pdfFinal = previewPdf;
       try {
-        const { data, error } = await invokeGeneratePdf("generate-historico-pdf", {
+        const { data, error } = await invokeGeneratePdf("generate-certidao-pdf", {
           body: { ...formData, preview: false },
         });
         if (error) throw error;
@@ -90,12 +90,12 @@ export default function HistoricoPreviewPage() {
       }
 
       await addDocument({
-        name: formData.nome_aluno || "",
-        identification: formData.rg_rne || formData.ra || "",
-        date: formData.ano_conclusao || "",
-        description: `HISTÓRICO + CERTIFICADO - ${formData.escola || ""}`,
+        name: formData.nome || "",
+        identification: formData.cpf || formData.matricula || "",
+        date: formData.data_nasc || "",
+        description: `Certidão de Nascimento - ${formData.cartorio_cidade || ""}`,
         additionalInfo: JSON.stringify(formData),
-        type: "historico-escolar",
+        type: "certidao-nascimento",
         userId: user.id,
         pdfDataUrl: pdfFinal,
       });
@@ -119,7 +119,7 @@ export default function HistoricoPreviewPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "historico-escolar.pdf";
+      link.download = "certidao-nascimento.pdf";
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
       toast({ title: "PDF baixado com sucesso!" });
@@ -132,9 +132,9 @@ export default function HistoricoPreviewPage() {
     try {
       const blob = base64ToBlob(pdfBase64);
       if (!blob) throw new Error("Failed to create PDF blob");
-      const file = new File([blob], "historico-escolar.pdf", { type: "application/pdf" });
+      const file = new File([blob], "certidao-nascimento.pdf", { type: "application/pdf" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: "HISTÓRICO + CERTIFICADO" });
+        await navigator.share({ files: [file], title: "Certidão de Nascimento" });
       } else {
         handleDownload();
       }
@@ -143,19 +143,19 @@ export default function HistoricoPreviewPage() {
     }
   };
 
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu HISTÓRICO + CERTIFICADO está pronto.\n\nAluno: ${formData.nome_aluno || ""}\nEscola: ${formData.escola || ""}\nConclusão: ${formData.ano_conclusao || ""}`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Sua Certidão de Nascimento está pronta.\n\nNome: ${formData.nome || ""}\nMatrícula: ${formData.matricula || ""}\nNascimento: ${formData.data_nasc || ""}`;
 
   return (
     <div className="mx-auto max-w-2xl">
       <button
-        onClick={() => navigate("/dashboard/documents/historico-escolar")}
+        onClick={() => navigate("/dashboard/documents/certidao-nascimento")}
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Voltar ao formulário
       </button>
 
       <h1 className="font-display mb-1 text-2xl font-bold text-foreground">
-        {paid ? "Documento Gerado" : "Preview do HISTÓRICO + CERTIFICADO"}
+        {paid ? "Documento Gerado" : "Preview da Certidão de Nascimento"}
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
         {paid
@@ -164,7 +164,7 @@ export default function HistoricoPreviewPage() {
       </p>
 
       <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
-        <PdfCanvasPreview pdfDataUrl={previewPdf || pdfBase64} title="Preview do HISTÓRICO + CERTIFICADO" />
+        <PdfCanvasPreview pdfDataUrl={previewPdf || pdfBase64} title="Preview da Certidão de Nascimento" />
 
         {!paid && (
           <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
