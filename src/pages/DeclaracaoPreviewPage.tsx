@@ -90,10 +90,10 @@ export default function DeclaracaoPreviewPage() {
       }
 
       await addDocument({
-        name: formData.nome || "",
-        identification: formData.cpf || formData.matricula || "",
-        date: formData.data_nasc || "",
-        description: `Declaração Escolar - ${formData.cartorio_cidade || ""}`,
+        name: formData.nome_aluno || "",
+        identification: formData.escola || "",
+        date: formData.data_emissao || "",
+        description: `Declaração Escolar - ${formData.cidade || ""} - ${formData.uf || ""}`,
         additionalInfo: JSON.stringify(formData),
         type: "declaracao-escolar",
         userId: user.id,
@@ -143,7 +143,7 @@ export default function DeclaracaoPreviewPage() {
     }
   };
 
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Sua Declaração Escolar está pronta.\n\nNome: ${formData.nome || ""}\nMatrícula: ${formData.matricula || ""}\nNascimento: ${formData.data_nasc || ""}`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Sua Declaração Escolar está pronta.\n\nAluno: ${formData.nome_aluno || ""}\nEscola: ${formData.escola || ""}\nAno letivo: ${formData.ano_letivo || ""}`;
 
   return (
     <div className="mx-auto max-w-2xl">
