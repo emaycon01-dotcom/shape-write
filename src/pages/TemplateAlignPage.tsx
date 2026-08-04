@@ -1006,12 +1006,14 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                           : "left") as "right" | "left",
                       }
                     : {}),
-                  ...(cfg.key === "unimed" && f.w && !f.h
+                  ...((cfg.key === "unimed" || cfg.key === "historico") && f.w && !f.h
                     ? {
                         width: `${((f.w / PW) * 100).toFixed(4)}%`,
-                        whiteSpace: "normal" as const,
-                        lineHeight: 1.22,
-                        textAlign: "left" as const,
+                        whiteSpace: (cfg.key === "historico" && f.id !== "certificado" && f.id !== "ef_estab" && f.id !== "e1_estab" && f.id !== "e2_estab" && f.id !== "e3_estab"
+                          ? "nowrap"
+                          : "normal") as "nowrap" | "normal",
+                        lineHeight: cfg.key === "historico" && f.id === "certificado" ? 1.28 : 1.22,
+                        textAlign: (cfg.key === "historico" && f.id === "certificado" ? "justify" : "left") as "justify" | "left",
                       }
                     : {}),
                   ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
