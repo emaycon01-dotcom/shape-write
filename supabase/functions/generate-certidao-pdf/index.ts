@@ -171,11 +171,14 @@ export function buildCertidaoHtml(d: Record<string, string>, fieldPositions?: un
     "registro_extenso",
   ]);
 
+  // Textos longos do rodapé: quebram em várias linhas em vez de encolher a fonte.
+  const WRAP = new Set(["lavrada", "mp_texto", "cartorio"]);
+
   const field = (id: string, text: string, extra = "") => {
     const pos = p[id];
     if (!pos || !text) return "";
     const width = pos.w ?? 300;
-    const fit = fitTextStyle(text, pos.fontSize, width);
+    const fit = WRAP.has(id) ? "" : fitTextStyle(text, pos.fontSize, width);
     const align = CENTER.has(id) ? "center" : "left";
     const weight = BOLD.has(id) ? 700 : 400;
     const html = escapeHtml(text).replace(/\n/g, "<br/>");
