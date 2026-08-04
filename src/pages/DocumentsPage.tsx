@@ -88,6 +88,14 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         creditos: 1,
       },
       {
+        id: "declaracao-escolar",
+        titulo: "Declaração Escolar",
+        descricao: "Declaração de conclusão com brasão do estado selecionado",
+        icon: School,
+        rota: "/dashboard/documents/declaracao-escolar",
+        creditos: 1,
+      },
+      {
         id: "historico-escolar",
         titulo: "HISTÓRICO + CERTIFICADO",
         descricao: "Histórico do Ensino Médio com certificado de conclusão e brasão do estado",
