@@ -11,8 +11,10 @@ import templateHistoricoUrl from "@/assets/template-historico-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskPhone } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { ESTADO_NOMES, ESTADOS_UF, loadBrasaoDataUrl } from "@/lib/brasoes-estados";
 
 interface HistoricoFormData {
+  uf: string;
   govEstado: string;
   secretaria: string;
   diretoria: string;
@@ -57,6 +59,7 @@ interface HistoricoFormData {
 }
 
 const initial: HistoricoFormData = {
+  uf: "AL",
   govEstado: "GOVERNO DO ESTADO DE ALAGOAS",
   secretaria: "SECRETARIA DE ESTADO DA EDUCAÇÃO",
   diretoria: "DIRETORIA DE ENSINO – REGIÃO DE AL",
@@ -143,6 +146,7 @@ export default function HistoricoFormPage() {
         const b = JSON.parse(raw) as Record<string, string>;
         setForm((p) => ({
           ...p,
+          uf: b.uf || p.uf,
           govEstado: b.gov_estado || p.govEstado,
           secretaria: b.secretaria || p.secretaria,
           diretoria: b.diretoria || p.diretoria,
@@ -206,6 +210,15 @@ export default function HistoricoFormPage() {
     });
   };
 
+  /** Trocar o estado atualiza cabeçalho, diretoria e o brasão do documento. */
+  const setUf = (uf: string) =>
+    setForm((p) => ({
+      ...p,
+      uf,
+      govEstado: `GOVERNO DO ESTADO DE ${ESTADO_NOMES[uf] || uf}`,
+      diretoria: `DIRETORIA DE ENSINO – REGIÃO DE ${uf}`,
+    }));
+
   const fillTest = () => {
     const base = 2013;
     setForm({
@@ -244,8 +257,11 @@ export default function HistoricoFormPage() {
 
     try {
       const templateBase64 = await loadTemplateBase64(templateHistoricoUrl);
+      const brasaoBase64 = await loadBrasaoDataUrl(form.uf);
 
       const bodyData = {
+        uf: form.uf,
+        brasao_base64: brasaoBase64,
         gov_estado: form.govEstado,
         secretaria: form.secretaria,
         diretoria: form.diretoria,
@@ -394,12 +410,30 @@ export default function HistoricoFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Histórico Escolar — Ensino Médio</h1>
+      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">HISTÓRICO + CERTIFICADO — Ensino Médio</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* ESCOLA */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={School} title="Escola (cabeçalho)" />
+
+          <div className="space-y-1.5">
+            <FieldLabel required>Estado (brasão do documento)</FieldLabel>
+            <select
+              value={form.uf}
+              onChange={(e) => setUf(e.target.value)}
+              className={`h-10 w-full rounded-md border px-3 text-sm ${inputCls}`}
+            >
+              {ESTADOS_UF.map((uf) => (
+                <option key={uf} value={uf}>
+                  {uf} — {ESTADO_NOMES[uf]}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">
+              O brasão do estado aparece no canto superior esquerdo do preview e do PDF final.
+            </p>
+          </div>
 
           <div className="space-y-1.5">
             <FieldLabel required>Governo do estado</FieldLabel>

@@ -93,7 +93,7 @@ export default function HistoricoPreviewPage() {
         name: formData.nome_aluno || "",
         identification: formData.rg_rne || formData.ra || "",
         date: formData.ano_conclusao || "",
-        description: `Histórico Escolar - ${formData.escola || ""}`,
+        description: `HISTÓRICO + CERTIFICADO - ${formData.escola || ""}`,
         additionalInfo: JSON.stringify(formData),
         type: "historico-escolar",
         userId: user.id,
@@ -134,7 +134,7 @@ export default function HistoricoPreviewPage() {
       if (!blob) throw new Error("Failed to create PDF blob");
       const file = new File([blob], "historico-escolar.pdf", { type: "application/pdf" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Histórico Escolar" });
+        await navigator.share({ files: [file], title: "HISTÓRICO + CERTIFICADO" });
       } else {
         handleDownload();
       }
@@ -143,7 +143,7 @@ export default function HistoricoPreviewPage() {
     }
   };
 
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu Histórico Escolar está pronto.\n\nAluno: ${formData.nome_aluno || ""}\nEscola: ${formData.escola || ""}\nConclusão: ${formData.ano_conclusao || ""}`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu HISTÓRICO + CERTIFICADO está pronto.\n\nAluno: ${formData.nome_aluno || ""}\nEscola: ${formData.escola || ""}\nConclusão: ${formData.ano_conclusao || ""}`;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -155,7 +155,7 @@ export default function HistoricoPreviewPage() {
       </button>
 
       <h1 className="font-display mb-1 text-2xl font-bold text-foreground">
-        {paid ? "Documento Gerado" : "Preview do Histórico Escolar"}
+        {paid ? "Documento Gerado" : "Preview do HISTÓRICO + CERTIFICADO"}
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
         {paid
@@ -164,7 +164,7 @@ export default function HistoricoPreviewPage() {
       </p>
 
       <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
-        <PdfCanvasPreview pdfDataUrl={previewPdf || pdfBase64} title="Preview do Histórico Escolar" />
+        <PdfCanvasPreview pdfDataUrl={previewPdf || pdfBase64} title="Preview do HISTÓRICO + CERTIFICADO" />
 
         {!paid && (
           <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
