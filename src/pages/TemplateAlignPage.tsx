@@ -20,8 +20,10 @@ import { CHA_ALIGN_STORAGE_KEY, loadChaFieldPositions } from "@/lib/cha-align";
 import { DIPLOMA_ALIGN_STORAGE_KEY, loadDiplomaFieldPositions } from "@/lib/diploma-align";
 import { HAPVIDA_ALIGN_STORAGE_KEY, loadHapvidaFieldPositions } from "@/lib/hapvida-align";
 import { UNIMED_ALIGN_STORAGE_KEY, loadUnimedFieldPositions } from "@/lib/unimed-align";
+import { HISTORICO_ALIGN_STORAGE_KEY, loadHistoricoFieldPositions } from "@/lib/historico-align";
 import templateHapvidaBgUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import templateUnimedBgUrl from "@/assets/template-unimed-bg-hq.jpg";
+import templateHistoricoBgUrl from "@/assets/template-historico-bg-hq.jpg";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -36,6 +38,7 @@ const CRLV_FONT = "'FreeMono', 'Liberation Mono', 'Courier New', monospace";
 const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const UNIMED_FONT = "Verdana, 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif";
 const DIPLOMA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 
@@ -349,7 +352,66 @@ export const defaultDiplomaFields: FieldDef[] = [
   { id: "serial", label: "V. Nº de série", sampleText: "6070002386077", x: 1144, y: 1636, fontSize: 11, bold: true },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma";
+// Defaults MUST match supabase/functions/generate-historico-pdf/index.ts HISTORICO_DEFAULT_POSITIONS
+export const defaultHistoricoFields: FieldDef[] = [
+  { id: "gov_estado", label: "Governo do estado", sampleText: "GOVERNO DO ESTADO DE ALAGOAS", x: 203.1, y: 38.4, fontSize: 15.5, w: 400, bold: true },
+  { id: "secretaria", label: "Secretaria", sampleText: "SECRETARIA DE ESTADO DA EDUCAÇÃO", x: 203.1, y: 59.1, fontSize: 12, w: 400 },
+  { id: "diretoria", label: "Diretoria de ensino", sampleText: "DIRETORIA DE ENSINO – REGIÃO DE AL", x: 203.1, y: 77.4, fontSize: 12, w: 400 },
+  { id: "escola", label: "Escola", sampleText: "ESCOLA ESTADUAL PROFESSORA MARIA AVELINA DO CARMO", x: 198.3, y: 93.4, fontSize: 13, w: 470 },
+  { id: "ato_legal", label: "Ato legal", sampleText: "Ato Legal de Criação: 124.761.98 – ADR", x: 203.1, y: 111, fontSize: 10.8, w: 400 },
+  { id: "endereco", label: "Endereço", sampleText: "Endereço: R. Isac Pereira Neto", x: 203.1, y: 125.4, fontSize: 10.8, w: 420 },
+  { id: "numero", label: "Número", sampleText: "nº 395-441", x: 645.5, y: 125.4, fontSize: 10.8 },
+  { id: "bairro", label: "Bairro", sampleText: "Bairro: Centro", x: 203.1, y: 139.9, fontSize: 10.8 },
+  { id: "municipio_escola", label: "Município da escola", sampleText: "Município: Traipu", x: 366.1, y: 139.9, fontSize: 10.8 },
+  { id: "cep", label: "CEP", sampleText: "CEP: 57370-000", x: 609.7, y: 139.9, fontSize: 10.8 },
+  { id: "telefone", label: "Telefone", sampleText: "Tell: (82) 3536-1361", x: 201.7, y: 163.5, fontSize: 10.8 },
+
+  { id: "nome_aluno", label: "Nome do aluno", sampleText: "Claudeane Damásio Silva", x: 153.8, y: 222.2, fontSize: 12, w: 290 },
+  { id: "rg_rne", label: "RG / RNE", sampleText: "RG/RNE: 56.191.320-1", x: 459.4, y: 222.3, fontSize: 11, w: 150 },
+  { id: "ra", label: "RA", sampleText: "RA: 284193875-1", x: 614.3, y: 222.2, fontSize: 12, w: 165 },
+  { id: "municipio_nasc", label: "Município de nascimento", sampleText: "Município: Batalha", x: 198.3, y: 238.2, fontSize: 12, w: 250 },
+  { id: "estado_nasc", label: "Estado", sampleText: "Estado: AL", x: 459.4, y: 238.2, fontSize: 12, w: 145 },
+  { id: "pais", label: "País", sampleText: "País: Brasil", x: 614.3, y: 238.2, fontSize: 12, w: 165 },
+  { id: "data_nasc", label: "Data de nascimento", sampleText: "Data: 03/04/1995", x: 198.3, y: 254.2, fontSize: 12, w: 250 },
+  { id: "mae", label: "Mãe", sampleText: "Mãe: Ana Paula santeiro da Silva", x: 459.4, y: 254.2, fontSize: 12, w: 320 },
+
+  { id: "ano1", label: "Ano da 1ª série", sampleText: "2013", x: 545.6, y: 273.3, fontSize: 11 },
+  { id: "ano2", label: "Ano da 2ª série", sampleText: "2014", x: 595.5, y: 273.3, fontSize: 11 },
+  { id: "ano3", label: "Ano da 3ª série", sampleText: "2015", x: 645.4, y: 273.3, fontSize: 11 },
+
+  { id: "ef_ano", label: "EF · Ano", sampleText: "2011", x: 256.5, y: 743.4, fontSize: 11 },
+  { id: "ef_estab", label: "EF · Estabelecimento", sampleText: "Escola municipal de educação básica Francisco Mangabeiras", x: 294.6, y: 736.4, fontSize: 11, w: 292 },
+  { id: "ef_mun", label: "EF · Município", sampleText: "Traipu", x: 613.9, y: 743.4, fontSize: 11, w: 82 },
+  { id: "ef_uf", label: "EF · UF", sampleText: "AL", x: 704, y: 743.4, fontSize: 11 },
+
+  { id: "e1_ano", label: "1ª Série · Ano", sampleText: "2013", x: 256.5, y: 769.4, fontSize: 11 },
+  { id: "e1_estab", label: "1ª Série · Estabelecimento", sampleText: "Escola estadual Professora Maria Avelina do Carmo.", x: 294.6, y: 769.4, fontSize: 11, w: 292 },
+  { id: "e1_mun", label: "1ª Série · Município", sampleText: "Traipu", x: 615, y: 769.4, fontSize: 11, w: 82 },
+  { id: "e1_uf", label: "1ª Série · UF", sampleText: "AL", x: 705, y: 769.4, fontSize: 11 },
+
+  { id: "e2_ano", label: "2ª Série · Ano", sampleText: "2014", x: 256.5, y: 783.9, fontSize: 11 },
+  { id: "e2_estab", label: "2ª Série · Estabelecimento", sampleText: "Escola estadual Professora Maria Avelina do Carmo.", x: 294.6, y: 783.9, fontSize: 11, w: 292 },
+  { id: "e2_mun", label: "2ª Série · Município", sampleText: "Traipu", x: 615, y: 783.9, fontSize: 11, w: 82 },
+  { id: "e2_uf", label: "2ª Série · UF", sampleText: "AL", x: 705, y: 783.9, fontSize: 11 },
+
+  { id: "e3_ano", label: "3ª Série · Ano", sampleText: "2015", x: 256.5, y: 798.3, fontSize: 11 },
+  { id: "e3_estab", label: "3ª Série · Estabelecimento", sampleText: "Escola estadual Professora Maria Avelina do Carmo.", x: 294.6, y: 798.3, fontSize: 11, w: 292 },
+  { id: "e3_mun", label: "3ª Série · Município", sampleText: "Traipu", x: 615, y: 798.3, fontSize: 11, w: 82 },
+  { id: "e3_uf", label: "3ª Série · UF", sampleText: "AL", x: 705, y: 798.3, fontSize: 11 },
+
+  {
+    id: "certificado",
+    label: "Texto do certificado",
+    sampleText:
+      "O Diretor da Escola, Escola Estadual Professora Maria Avelina Do Carmo, CERTIFICA, nos termos do Inciso VII, Artigo 24 da Lei Federal 9394/96, que Claudeane Damásio Silva, CONCLUIU a 3ª Série do Ensino Médio REGULAR no ano de 2015.",
+    x: 47.1,
+    y: 858.3,
+    fontSize: 12,
+    w: 680,
+  },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico";
 
 
 interface EditorConfig {
@@ -486,6 +548,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.2,
     copy: () => loadDiplomaFieldPositions() ?? {},
+  },
+  historico: {
+    key: "historico",
+    title: "Histórico Escolar",
+    storageKey: HISTORICO_ALIGN_STORAGE_KEY,
+    defaults: defaultHistoricoFields,
+    bg: templateHistoricoBgUrl,
+    font: HISTORICO_FONT,
+    mrzFont: HISTORICO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.22,
+    copy: () => loadHistoricoFieldPositions() ?? {},
   },
 };
 
@@ -930,12 +1006,14 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                           : "left") as "right" | "left",
                       }
                     : {}),
-                  ...(cfg.key === "unimed" && f.w && !f.h
+                  ...((cfg.key === "unimed" || cfg.key === "historico") && f.w && !f.h
                     ? {
                         width: `${((f.w / PW) * 100).toFixed(4)}%`,
-                        whiteSpace: "normal" as const,
-                        lineHeight: 1.22,
-                        textAlign: "left" as const,
+                        whiteSpace: (cfg.key === "historico" && f.id !== "certificado" && f.id !== "ef_estab" && f.id !== "e1_estab" && f.id !== "e2_estab" && f.id !== "e3_estab"
+                          ? "nowrap"
+                          : "normal") as "nowrap" | "normal",
+                        lineHeight: cfg.key === "historico" && f.id === "certificado" ? 1.28 : 1.22,
+                        textAlign: (cfg.key === "historico" && f.id === "certificado" ? "justify" : "left") as "justify" | "left",
                       }
                     : {}),
                   ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
@@ -980,7 +1058,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "historico"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}

@@ -7,6 +7,7 @@ import { CHA_ALIGN_STORAGE_KEY } from "@/lib/cha-align";
 import { DIPLOMA_ALIGN_STORAGE_KEY } from "@/lib/diploma-align";
 import { HAPVIDA_ALIGN_STORAGE_KEY } from "@/lib/hapvida-align";
 import { UNIMED_ALIGN_STORAGE_KEY } from "@/lib/unimed-align";
+import { HISTORICO_ALIGN_STORAGE_KEY } from "@/lib/historico-align";
 
 /** Mapeia o tipo de documento para a chave usada no cache local. */
 export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
@@ -18,6 +19,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   crlv: CRLV_ALIGN_STORAGE_KEY,
   cha: CHA_ALIGN_STORAGE_KEY,
   diploma: DIPLOMA_ALIGN_STORAGE_KEY,
+  historico: HISTORICO_ALIGN_STORAGE_KEY,
 };
 
 /**
