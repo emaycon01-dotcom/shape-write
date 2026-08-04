@@ -80,6 +80,14 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         qrcode: true,
       },
       {
+        id: "certidao-nascimento",
+        titulo: "Certidão de Nascimento",
+        descricao: "Certidão eletrônica do Registro Civil com dados por extenso",
+        icon: FileText,
+        rota: "/dashboard/documents/certidao-nascimento",
+        creditos: 1,
+      },
+      {
         id: "historico-escolar",
         titulo: "HISTÓRICO + CERTIFICADO",
         descricao: "Histórico do Ensino Médio com certificado de conclusão e brasão do estado",
