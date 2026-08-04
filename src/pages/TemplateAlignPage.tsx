@@ -354,6 +354,7 @@ export const defaultDiplomaFields: FieldDef[] = [
 
 // Defaults MUST match supabase/functions/generate-historico-pdf/index.ts HISTORICO_DEFAULT_POSITIONS
 export const defaultHistoricoFields: FieldDef[] = [
+  { id: "brasao", label: "Brasão do estado", sampleText: "[BRASÃO]", x: 108, y: 34, fontSize: 10, w: 80, h: 90 },
   { id: "gov_estado", label: "Governo do estado", sampleText: "GOVERNO DO ESTADO DE ALAGOAS", x: 203.1, y: 38.4, fontSize: 15.5, w: 400, bold: true },
   { id: "secretaria", label: "Secretaria", sampleText: "SECRETARIA DE ESTADO DA EDUCAÇÃO", x: 203.1, y: 59.1, fontSize: 12, w: 400 },
   { id: "diretoria", label: "Diretoria de ensino", sampleText: "DIRETORIA DE ENSINO – REGIÃO DE AL", x: 203.1, y: 77.4, fontSize: 12, w: 400 },
@@ -551,7 +552,7 @@ const EDITORS: Record<DocKey, EditorConfig> = {
   },
   historico: {
     key: "historico",
-    title: "Histórico Escolar",
+    title: "Histórico + Certificado",
     storageKey: HISTORICO_ALIGN_STORAGE_KEY,
     defaults: defaultHistoricoFields,
     bg: templateHistoricoBgUrl,
@@ -569,7 +570,7 @@ const EDITORS: Record<DocKey, EditorConfig> = {
 
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
-  const isBox = field.id === "photo" || field.id === "signature";
+  const isBox = field.id === "photo" || field.id === "signature" || field.id === "brasao";
 
   return (
     <div className="glass rounded-lg p-3 space-y-3 text-sm">

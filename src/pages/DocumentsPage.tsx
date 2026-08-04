@@ -81,8 +81,8 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
       },
       {
         id: "historico-escolar",
-        titulo: "Histórico Escolar",
-        descricao: "Histórico do Ensino Médio com certificado de conclusão",
+        titulo: "HISTÓRICO + CERTIFICADO",
+        descricao: "Histórico do Ensino Médio com certificado de conclusão e brasão do estado",
         icon: School,
         rota: "/dashboard/documents/historico-escolar",
         creditos: 1,
