@@ -21,9 +21,11 @@ import { DIPLOMA_ALIGN_STORAGE_KEY, loadDiplomaFieldPositions } from "@/lib/dipl
 import { HAPVIDA_ALIGN_STORAGE_KEY, loadHapvidaFieldPositions } from "@/lib/hapvida-align";
 import { UNIMED_ALIGN_STORAGE_KEY, loadUnimedFieldPositions } from "@/lib/unimed-align";
 import { HISTORICO_ALIGN_STORAGE_KEY, loadHistoricoFieldPositions } from "@/lib/historico-align";
+import { CERTIDAO_ALIGN_STORAGE_KEY, loadCertidaoFieldPositions } from "@/lib/certidao-align";
 import templateHapvidaBgUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import templateUnimedBgUrl from "@/assets/template-unimed-bg-hq.jpg";
 import templateHistoricoBgUrl from "@/assets/template-historico-bg-hq.jpg";
+import templateCertidaoBgUrl from "@/assets/template-certidao-bg-hq.jpg";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -38,6 +40,7 @@ const CRLV_FONT = "'FreeMono', 'Liberation Mono', 'Courier New', monospace";
 const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const UNIMED_FONT = "Verdana, 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif";
 const DIPLOMA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const CERTIDAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
@@ -412,7 +415,33 @@ export const defaultHistoricoFields: FieldDef[] = [
   },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico";
+// Defaults MUST match supabase/functions/generate-certidao-pdf/index.ts CERTIDAO_DEFAULT_POSITIONS
+export const defaultCertidaoFields: FieldDef[] = [
+  { id: "nome", label: "Nome", sampleText: "CAROLINE COAN LEAL", x: 197, y: 243, fontSize: 13.5, w: 400, bold: true },
+  { id: "cpf", label: "CPF", sampleText: "073.494.389-07", x: 118, y: 275.5, fontSize: 8.5, w: 200, bold: true },
+  { id: "matricula", label: "Matrícula", sampleText: "000687 01 55 1990 1 00031 189 0031464 43", x: 197, y: 301.5, fontSize: 13.5, w: 400, bold: true },
+  { id: "nasc_extenso", label: "Nascimento por extenso", sampleText: "VINTE E SETE DE FEVEREIRO DE UM MIL E NOVECENTOS E NOVENTA", x: 116.6, y: 347, fontSize: 8.3, w: 520, bold: true },
+  { id: "dia", label: "Dia", sampleText: "27", x: 526, y: 336.5, fontSize: 8.3, w: 40, bold: true },
+  { id: "mes", label: "Mês", sampleText: "02", x: 577, y: 336.5, fontSize: 8.3, w: 40, bold: true },
+  { id: "ano", label: "Ano", sampleText: "1990", x: 633, y: 336.5, fontSize: 8.3, w: 40, bold: true },
+  { id: "hora", label: "Hora de nascimento", sampleText: "23H 20MIN", x: 143, y: 378, fontSize: 8.3, w: 90, bold: true },
+  { id: "naturalidade", label: "Naturalidade", sampleText: "SÃO JOSÉ DOS PINHAIS-PR", x: 234, y: 378, fontSize: 8.3, w: 250, bold: true },
+  { id: "municipio_registro", label: "Município de registro", sampleText: "SÃO JOSÉ DOS PINHAIS-PR", x: 116.6, y: 418, fontSize: 8.3, w: 240, bold: true },
+  { id: "local_nasc", label: "Local de nascimento", sampleText: "NOVACLÍNICA HOSPITAL E MATERNIDADE, SÃO JOSÉ DOS PINHAIS-PR", x: 372, y: 408, fontSize: 8.3, w: 250, bold: true },
+  { id: "sexo", label: "Sexo", sampleText: "FEMININO", x: 592, y: 409, fontSize: 8.5, w: 95, bold: true },
+  { id: "filiacao", label: "Filiação", sampleText: "JORGE CARLOS FERNANDES LEAL E EDNA MARIA COAN", x: 116.6, y: 448.9, fontSize: 8.3, w: 560, bold: true },
+  { id: "avos", label: "Avós", sampleText: "ANTONIO DE FREITAS LEAL, ODETE FERNANDES LEAL, ALFREDO DOMINGO COAN E ERICA PACHECO COAN", x: 116.6, y: 479, fontSize: 8.3, w: 560, bold: true },
+  { id: "gemeos", label: "Gêmeos", sampleText: "NÃO", x: 126, y: 509, fontSize: 8.3, w: 55, bold: true },
+  { id: "nome_gemeos", label: "Nome/matrícula dos gêmeos", sampleText: "", x: 228, y: 509, fontSize: 8.3, w: 380, bold: true },
+  { id: "registro_extenso", label: "Registro por extenso", sampleText: "CINCO DE MARÇO DE UM MIL E NOVECENTOS E NOVENTA", x: 116.6, y: 549, fontSize: 8.3, w: 430, bold: true },
+  { id: "lavrada", label: "Texto da lavratura", sampleText: "Certidão lavrada por Valdinei Simões Custodio - Escrevente do Registro Civil das Pessoas Naturais de São José dos Pinhais, o(a) qual assinou eletronicamente aos 01 de Fevereiro de 2023, nos termos do Provimento nº 46/2015 do Conselho Nacional de Justiça", x: 97, y: 627, fontSize: 8.3, w: 600 },
+  { id: "dou_fe", label: "Dou fé", sampleText: "O conteúdo da certidão é verdadeiro. Dou fé", x: 97, y: 655.9, fontSize: 8.3, w: 600 },
+  { id: "emitida", label: "Emitida em", sampleText: "Certidão emitida em 01 de Fevereiro de 2023", x: 97, y: 672.4, fontSize: 8.3, w: 600 },
+  { id: "mp_texto", label: "Texto MP 2200-2", sampleText: "Este é um documento público eletrônico, emitido nos termos da Medida Provisória 2200-2, de 24/08/2001, só tendo validade em formato digital, vedada a sua reprodução.", x: 97, y: 689, fontSize: 8.3, w: 600 },
+  { id: "cartorio", label: "Bloco do cartório", sampleText: "Oficial de Registro Civil das Pessoas Naturais\nSão José dos Pinhais - PR\nLidia Kruppizak - Oficial\nRua Doutor Motta Júnior, 1309 - Centro - CEP:\n83005-170\nE-mail: cartorioadmsjp@gmail.com\nTel: (41) 30811616", x: 97, y: 726.6, fontSize: 8.3, w: 310 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao";
 
 
 interface EditorConfig {
@@ -563,6 +592,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.22,
     copy: () => loadHistoricoFieldPositions() ?? {},
+  },
+  certidao: {
+    key: "certidao",
+    title: "Certidão de Nascimento",
+    storageKey: CERTIDAO_ALIGN_STORAGE_KEY,
+    defaults: defaultCertidaoFields,
+    bg: templateCertidaoBgUrl,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.42,
+    copy: () => loadCertidaoFieldPositions() ?? {},
   },
 };
 
@@ -1017,6 +1060,16 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                         textAlign: (cfg.key === "historico" && f.id === "certificado" ? "justify" : "left") as "justify" | "left",
                       }
                     : {}),
+                  ...(cfg.key === "certidao" && f.w && !f.h
+                    ? {
+                        width: `${((f.w / PW) * 100).toFixed(4)}%`,
+                        whiteSpace: "pre-line" as const,
+                        lineHeight: f.id === "cartorio" ? 1.62 : 1.42,
+                        textAlign: (["nome", "matricula", "dia", "mes", "ano", "sexo", "lavrada", "dou_fe", "emitida", "mp_texto", "cartorio"].includes(f.id)
+                          ? "center"
+                          : "left") as "center" | "left",
+                      }
+                    : {}),
                   ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
                   ...(isBox
                     ? {
@@ -1059,7 +1112,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "historico"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "historico", "certidao"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
