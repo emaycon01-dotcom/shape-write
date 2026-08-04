@@ -22,10 +22,12 @@ import { HAPVIDA_ALIGN_STORAGE_KEY, loadHapvidaFieldPositions } from "@/lib/hapv
 import { UNIMED_ALIGN_STORAGE_KEY, loadUnimedFieldPositions } from "@/lib/unimed-align";
 import { HISTORICO_ALIGN_STORAGE_KEY, loadHistoricoFieldPositions } from "@/lib/historico-align";
 import { CERTIDAO_ALIGN_STORAGE_KEY, loadCertidaoFieldPositions } from "@/lib/certidao-align";
+import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import templateHapvidaBgUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import templateUnimedBgUrl from "@/assets/template-unimed-bg-hq.jpg";
 import templateHistoricoBgUrl from "@/assets/template-historico-bg-hq.jpg";
 import templateCertidaoBgUrl from "@/assets/template-certidao-bg-hq.jpg";
+import templateDeclaracaoBgUrl from "@/assets/template-declaracao-bg-hq.jpg";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -41,6 +43,7 @@ const CHA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const UNIMED_FONT = "Verdana, 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif";
 const DIPLOMA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const CERTIDAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const DECLARACAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
@@ -441,7 +444,16 @@ export const defaultCertidaoFields: FieldDef[] = [
   { id: "cartorio", label: "Bloco do cartório", sampleText: "Oficial de Registro Civil das Pessoas Naturais\nSão José dos Pinhais - PR\nLidia Kruppizak - Oficial\nRua Doutor Motta Júnior, 1309 - Centro - CEP:\n83005-170\nE-mail: cartorioadmsjp@gmail.com\nTel: (41) 30811616", x: 97, y: 726.6, fontSize: 8.3, w: 310 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao";
+// Defaults MUST match supabase/functions/generate-declaracao-pdf/index.ts DECLARACAO_DEFAULT_POSITIONS
+export const defaultDeclaracaoFields: FieldDef[] = [
+  { id: "brasao", label: "Brasão do estado", sampleText: "", x: 372, y: 47, fontSize: 10, w: 55, h: 65 },
+  { id: "gov_estado", label: "Governo do estado", sampleText: "GOVERNO DO ESTADO DE SÃO PAULO", x: 97, y: 116.5, fontSize: 14.7, w: 600 },
+  { id: "secretaria", label: "Secretaria", sampleText: "SECRETARIA DE ESTADO DA EDUCAÇÃO", x: 97, y: 136, fontSize: 14.7, w: 600 },
+  { id: "corpo", label: "Corpo da declaração", sampleText: "Declaro para os devidos fins de direito que Rafael Santos Silva de Matos, natural de São Paulo, nascido (a) em 15/08/1998, filho (a) legítima de Marcia Maria Santos Silva e José Carlos de Oliveira Matos, CONCLUIU o 3º ano do Ensino Médio REGULAR neste estabelecimento de ensino ESCOLA ESTADUAL ROBERTO FREITAS, no ano letivo de 2015. Cujo término do ano letivo aconteceu no dia 12 de DEZEMBRO de 2015 com apresentação do Resultado Final.", x: 112.6, y: 292, fontSize: 16, w: 570 },
+  { id: "data_local", label: "Data e local", sampleText: "04 de Dezembro de 2022, São Paulo - SP", x: 97, y: 623, fontSize: 16, w: 600 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao";
 
 
 interface EditorConfig {
@@ -606,6 +618,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.42,
     copy: () => loadCertidaoFieldPositions() ?? {},
+  },
+  declaracao: {
+    key: "declaracao",
+    title: "Declaração Escolar",
+    storageKey: DECLARACAO_ALIGN_STORAGE_KEY,
+    defaults: defaultDeclaracaoFields,
+    bg: templateDeclaracaoBgUrl,
+    font: DECLARACAO_FONT,
+    mrzFont: DECLARACAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.72,
+    copy: () => loadDeclaracaoFieldPositions() ?? {},
   },
 };
 
@@ -1112,7 +1138,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "historico", "certidao"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "historico", "certidao", "declaracao"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
