@@ -33,7 +33,7 @@ export const CERTIDAO_DEFAULT_POSITIONS: Record<string, Pos> = {
   naturalidade: { x: 234, y: 378, fontSize: 8.3, w: 250 },
 
   municipio_registro: { x: 116.6, y: 418, fontSize: 8.3, w: 240 },
-  local_nasc: { x: 372, y: 408, fontSize: 8.3, w: 250 },
+  local_nasc: { x: 372, y: 404, fontSize: 7.4, w: 225 },
   sexo: { x: 592, y: 409, fontSize: 8.5, w: 95 },
 
   filiacao: { x: 116.6, y: 448.9, fontSize: 8.3, w: 560 },

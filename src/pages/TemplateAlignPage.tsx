@@ -427,7 +427,7 @@ export const defaultCertidaoFields: FieldDef[] = [
   { id: "hora", label: "Hora de nascimento", sampleText: "23H 20MIN", x: 143, y: 378, fontSize: 8.3, w: 90, bold: true },
   { id: "naturalidade", label: "Naturalidade", sampleText: "SÃO JOSÉ DOS PINHAIS-PR", x: 234, y: 378, fontSize: 8.3, w: 250, bold: true },
   { id: "municipio_registro", label: "Município de registro", sampleText: "SÃO JOSÉ DOS PINHAIS-PR", x: 116.6, y: 418, fontSize: 8.3, w: 240, bold: true },
-  { id: "local_nasc", label: "Local de nascimento", sampleText: "NOVACLÍNICA HOSPITAL E MATERNIDADE, SÃO JOSÉ DOS PINHAIS-PR", x: 372, y: 408, fontSize: 8.3, w: 250, bold: true },
+  { id: "local_nasc", label: "Local de nascimento", sampleText: "NOVACLÍNICA HOSPITAL E MATERNIDADE, SÃO JOSÉ DOS PINHAIS-PR", x: 372, y: 404, fontSize: 7.4, w: 225, bold: true },
   { id: "sexo", label: "Sexo", sampleText: "FEMININO", x: 592, y: 409, fontSize: 8.5, w: 95, bold: true },
   { id: "filiacao", label: "Filiação", sampleText: "JORGE CARLOS FERNANDES LEAL E EDNA MARIA COAN", x: 116.6, y: 448.9, fontSize: 8.3, w: 560, bold: true },
   { id: "avos", label: "Avós", sampleText: "ANTONIO DE FREITAS LEAL, ODETE FERNANDES LEAL, ALFREDO DOMINGO COAN E ERICA PACHECO COAN", x: 116.6, y: 479, fontSize: 8.3, w: 560, bold: true },
