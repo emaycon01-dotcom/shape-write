@@ -465,62 +465,107 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
         pdf.addPage([wPt, hPt], orientation);
       }
 
-      for (let top = 0; top < height; top += band) {
-        const sliceH = Math.min(band, height - top);
+      // ---------------------------------------------------------------
+      // Fatiamento por JANELA REAL em vez das opções `y`/`windowHeight`
+      // do html2canvas. Aquelas dependem do scroll do documento clonado e,
+      // em Android/iOS, produziam faixas deslocadas (documento "espremido"
+      // num canto) ou páginas em branco. Aqui a própria página é deslocada
+      // dentro de um contêiner que recorta exatamente a faixa desejada —
+      // determinístico em qualquer navegador e sem perda de resolução.
+      // ---------------------------------------------------------------
+      const parent = target.parentNode;
+      const anchor = doc.createComment("band-anchor");
+      const viewport = doc.createElement("div");
+      const inlineStyle = target.getAttribute("style") || "";
 
-        const canvas = await html2canvas(target, {
-          scale,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-          logging: false,
-          width,
-          height: sliceH,
-          y: top,
-          windowWidth: width,
-          windowHeight: height,
-          imageTimeout: 30_000,
-          // O html2canvas rasteriza um clone em outro documento: sem isto as
-          // @font-face embutidas (CNHDigital/RGOcrb) ainda não estão prontas
-          // e o texto sai com a fonte de fallback. Depois da primeira faixa as
-          // famílias já estão quentes no documento principal — repetir a
-          // verificação completa custava segundos por faixa no Android.
-          onclone: async (cloned: Document) => {
-            if (fontsWarm) {
-              await (cloned as Document & { fonts?: FontFaceSet }).fonts?.ready;
-              return;
-            }
-            await ensureFontsLoaded(cloned);
-            fontsWarm = true;
-          },
-        });
+      if (parent) {
+        parent.insertBefore(anchor, target);
+        viewport.style.cssText = [
+          `width:${width}px`,
+          "overflow:hidden",
+          "position:relative",
+          "background:#ffffff",
+          "margin:0",
+          "padding:0",
+        ].join(";");
+        viewport.appendChild(target);
+        parent.insertBefore(viewport, anchor);
+      }
 
-        // Quando falta memória (iPad/Android), o navegador devolve um canvas
-        // totalmente preto em vez de erro — o PDF final saía todo preto.
-        // Detectamos aqui e a tentativa seguinte usa faixas menores.
-        if (isCanvasBlack(canvas)) {
+      try {
+        for (let top = 0; top < height; top += band) {
+          const sliceH = Math.min(band, height - top);
+
+          if (parent) {
+            viewport.style.height = `${sliceH}px`;
+            target.style.marginTop = `${-top}px`;
+          }
+
+          const canvas = await html2canvas(parent ? viewport : target, {
+            scale,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+            width,
+            height: sliceH,
+            windowWidth: width,
+            windowHeight: sliceH,
+            scrollX: 0,
+            scrollY: 0,
+            imageTimeout: 30_000,
+            // O html2canvas rasteriza um clone em outro documento: sem isto as
+            // @font-face embutidas (CNHDigital/RGOcrb) ainda não estão prontas
+            // e o texto sai com a fonte de fallback. Depois da primeira faixa as
+            // famílias já estão quentes no documento principal — repetir a
+            // verificação completa custava segundos por faixa no Android.
+            onclone: async (cloned: Document) => {
+              if (fontsWarm) {
+                await (cloned as Document & { fonts?: FontFaceSet }).fonts?.ready;
+                return;
+              }
+              await ensureFontsLoaded(cloned);
+              fontsWarm = true;
+            },
+          });
+
+          // Quando falta memória (iPad/Android), o navegador devolve um canvas
+          // totalmente preto em vez de erro — o PDF final saía todo preto.
+          // Detectamos aqui e a tentativa seguinte usa faixas menores.
+          if (isCanvasBlack(canvas)) {
+            canvas.width = 0;
+            canvas.height = 0;
+            throw new Error("Rasterização vazia (memória insuficiente).");
+          }
+
+          // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
+          // de codificação/memória do JPEG — o gargalo em Android.
+          // Codificação assíncrona (toBlob): não congela a interface por faixa.
+          const imgData = await encodeJpeg(canvas, 0.95);
+
+
+          if (imgData.byteLength < 1024) throw new Error("Falha ao rasterizar a página.");
+          // +0.05pt evita fio branco entre faixas por arredondamento.
+          const yPt = top * 0.75;
+          const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
+          pdf.addImage(imgData, "JPEG", 0, yPt, wPt, hSlicePt, undefined, "NONE");
+
+          // Libera memória em dispositivos móveis
           canvas.width = 0;
           canvas.height = 0;
-          throw new Error("Rasterização vazia (memória insuficiente).");
+          await breathe();
         }
-
-        // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
-        // de codificação/memória do JPEG — o gargalo em Android.
-        // Codificação assíncrona (toBlob): não congela a interface por faixa.
-        const imgData = await encodeJpeg(canvas, 0.95);
-
-
-        if (imgData.byteLength < 1024) throw new Error("Falha ao rasterizar a página.");
-        // +0.05pt evita fio branco entre faixas por arredondamento.
-        const yPt = top * 0.75;
-        const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
-        pdf.addImage(imgData, "JPEG", 0, yPt, wPt, hSlicePt, undefined, "NONE");
-
-        // Libera memória em dispositivos móveis
-        canvas.width = 0;
-        canvas.height = 0;
-        await breathe();
+      } finally {
+        // Restaura o DOM original da página (importante para páginas seguintes).
+        if (parent) {
+          if (inlineStyle) target.setAttribute("style", inlineStyle);
+          else target.removeAttribute("style");
+          parent.insertBefore(target, anchor);
+          viewport.remove();
+          anchor.remove();
+        }
       }
+
 
 
 

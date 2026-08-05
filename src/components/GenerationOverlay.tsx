@@ -1,17 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { subscribePdfLoading } from "@/lib/pdf-loading";
 import logo from "@/assets/logo.webp";
 
 /**
  * Tela cheia de carregamento (cor do painel) exibida durante o preview e a
  * geração final. Também esconde a remontagem do documento (troca do QR Code).
+ *
+ * A exibição é estabilizada: só aparece se a etapa passar de 200ms e fica no
+ * mínimo 500ms. Isso elimina as "piscadas" (tela preta/branca) quando várias
+ * etapas curtas de geração acontecem em sequência.
  */
 export default function GenerationOverlay() {
   const [state, setState] = useState({ active: false, label: "" });
+  const [visible, setVisible] = useState(false);
+  const shownAt = useRef(0);
 
   useEffect(() => subscribePdfLoading(setState), []);
 
-  if (!state.active) return null;
+  useEffect(() => {
+    let timer: number | undefined;
+    if (state.active) {
+      if (visible) return;
+      timer = window.setTimeout(() => {
+        shownAt.current = Date.now();
+        setVisible(true);
+      }, 200);
+    } else if (visible) {
+      const remaining = Math.max(0, 500 - (Date.now() - shownAt.current));
+      timer = window.setTimeout(() => setVisible(false), remaining);
+    }
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [state.active, visible]);
+
+  if (!visible) return null;
+
 
   return (
     <div
