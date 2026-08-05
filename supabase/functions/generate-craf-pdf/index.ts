@@ -28,8 +28,8 @@ export const CRAF_DEFAULT_POSITIONS: Record<string, Pos> = {
   sfpc: { x: 421.7, y: 210.5, fontSize: 9, w: 130 },
   amparo: { x: 215, y: 243, fontSize: 8.5, w: 350 },
 
-  registro: { x: 403, y: 402, fontSize: 7.5, w: 168 },
-  tipo: { x: 405.7, y: 432, fontSize: 8.5, w: 76 },
+  registro: { x: 403, y: 402, fontSize: 7.5, w: 162 },
+  tipo: { x: 405.7, y: 432, fontSize: 8, w: 70 },
   marca: { x: 483, y: 432, fontSize: 8.5, w: 82 },
   calibre: { x: 405.7, y: 456, fontSize: 8.5, w: 76 },
   numero_serie: { x: 405.7, y: 481.5, fontSize: 8.5, w: 76 },
@@ -81,7 +81,7 @@ function resolvePositions(overrides: unknown): Record<string, Pos> {
  * Evita truncamento com "…": reduz a fonte proporcionalmente quando o texto
  * é maior que a largura reservada (mesmo padrão dos demais módulos).
  */
-export function fitTextStyle(text: string, width: number, fontSize: number, avgCharRatio = 0.52): string {
+export function fitTextStyle(text: string, width: number, fontSize: number, avgCharRatio = 0.56): string {
   const len = (text || "").length;
   if (!len || !width) return `font-size:${fontSize}px;`;
   const estimated = len * fontSize * avgCharRatio;
