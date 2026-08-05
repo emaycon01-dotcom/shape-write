@@ -1208,6 +1208,22 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.15,
     copy: () => loadTimFieldPositions() ?? {},
   },
+  holerite: {
+    key: "holerite",
+    title: "Holerite",
+    storageKey: HOLERITE_ALIGN_STORAGE_KEY,
+    defaults: defaultHoleriteFields,
+    bg: templateHoleriteUrl,
+    pageW: 595,
+    pageH: 842,
+    font: "'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace",
+    mrzFont: "'Courier New', monospace",
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.0,
+    copy: () => loadHoleriteFieldPositions() ?? {},
+  },
 };
 
 
