@@ -1,6 +1,7 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, Fragment, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { clearChunkRecovery } from "@/lib/lazy-retry";
 
 interface Props {
   children: ReactNode;
@@ -8,38 +9,54 @@ interface Props {
 
 interface State {
   error: Error | null;
+  retryKey: number;
 }
 
 const RECOVERY_KEY = "monkeylab_recovery_attempted";
+const MAX_SOFT_RETRIES = 2;
 
-function hasRecoveryAttempt() {
+function isChunkFailure(error: unknown) {
+  const msg = error instanceof Error ? `${error.message} ${error.name}` : String(error ?? "");
+  return /chunk|dynamically imported|module script|failed to fetch|importing a module/i.test(msg);
+}
+
+function recoveryAttempts() {
   try {
-    return sessionStorage.getItem(RECOVERY_KEY) === "true";
+    return Number(sessionStorage.getItem(RECOVERY_KEY) ?? "0") || 0;
   } catch {
-    return true;
+    return MAX_SOFT_RETRIES;
   }
 }
 
 function markRecoveryAttempt() {
   try {
-    sessionStorage.setItem(RECOVERY_KEY, "true");
+    sessionStorage.setItem(RECOVERY_KEY, String(recoveryAttempts() + 1));
   } catch {
     // Sem armazenamento, exibimos a recuperação manual em vez de recarregar em loop.
   }
 }
 
 export default class AppErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  state: State = { error: null, retryKey: 0 };
+  private softRetries = 0;
 
   static getDerivedStateFromError(error: Error): State {
-    return { error };
+    return { error, retryKey: 0 };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Falha ao renderizar o aplicativo", error, info);
 
-    const isChunkFailure = /chunk|dynamically imported|module script/i.test(error.message);
-    if (isChunkFailure && !hasRecoveryAttempt()) {
+    // Falha transitória de carregamento: tenta remontar em silêncio antes de mostrar erro.
+    if (isChunkFailure(error) && this.softRetries < MAX_SOFT_RETRIES) {
+      this.softRetries += 1;
+      setTimeout(() => {
+        this.setState((s) => ({ error: null, retryKey: s.retryKey + 1 }));
+      }, 400 * this.softRetries);
+      return;
+    }
+
+    if (isChunkFailure(error) && recoveryAttempts() < MAX_SOFT_RETRIES) {
       markRecoveryAttempt();
       window.location.reload();
     }
@@ -51,11 +68,14 @@ export default class AppErrorBoundary extends Component<Props, State> {
     } catch {
       // Navegadores com armazenamento bloqueado ainda podem recarregar.
     }
+    clearChunkRecovery();
     window.location.reload();
   };
 
   render() {
-    if (!this.state.error) return this.props.children;
+    if (!this.state.error) {
+      return <Fragment key={this.state.retryKey}>{this.props.children}</Fragment>;
+    }
 
     return (
       <main className="min-h-screen bg-background px-5 flex items-center justify-center">
