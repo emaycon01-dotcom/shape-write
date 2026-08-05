@@ -176,11 +176,10 @@ const MODULOS: Categoria[] = [
       {
         id: "comprovante-enel",
         titulo: "ENEL",
-        descricao: "Fatura de energia Enel em 2 páginas, com código de barras e QR Code PIX",
+        descricao: "Fatura de energia Enel em 2 páginas, com código de barras",
         icon: Zap,
         rota: "/dashboard/documents/comprovante-enel",
         creditos: 1,
-        qrcode: true,
       },
       {
         id: "comprovante-coelba",
@@ -189,7 +188,6 @@ const MODULOS: Categoria[] = [
         icon: Zap,
         rota: "/dashboard/documents/comprovante-coelba",
         creditos: 1,
-        qrcode: true,
       },
       {
         id: "comprovante-equatorial",
@@ -198,8 +196,8 @@ const MODULOS: Categoria[] = [
         icon: Zap,
         rota: "/dashboard/documents/comprovante-equatorial",
         creditos: 1,
-        qrcode: true,
       },
+
       {
         id: "comprovante-tim",
         titulo: "TIM",
