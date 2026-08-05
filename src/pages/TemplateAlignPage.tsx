@@ -818,7 +818,24 @@ const EDITORS: Record<DocKey, EditorConfig> = {
 
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
-  const isBox = field.id === "photo" || field.id === "signature" || field.id === "brasao";
+  const isQr = /^qr\d*$/.test(field.id);
+  const isBox = field.id === "photo" || field.id === "signature" || field.id === "brasao" || isQr;
+
+  // Redimensiona o QR mantendo a proporção. Se "grow" for para cima/esquerda,
+  // compensamos x/y para que a âncora fique no canto inferior direito.
+  const resizeQr = (size: number, anchor: "tl" | "br") => {
+    const next = Math.max(30, Math.min(900, Math.round(size)));
+    const curW = field.w || 100;
+    const curH = field.h || 100;
+    if (anchor === "br") {
+      const dx = next - curW;
+      const dy = next - curH;
+      onUpdate({ w: next, h: next, x: Math.max(0, field.x - dx), y: Math.max(0, field.y - dy) });
+    } else {
+      onUpdate({ w: next, h: next });
+    }
+  };
+
 
   return (
     <div className="glass rounded-lg p-3 space-y-3 text-sm">
