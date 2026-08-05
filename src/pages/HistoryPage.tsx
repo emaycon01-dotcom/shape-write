@@ -64,14 +64,9 @@ export default function HistoryPage() {
   // e agrupando as atualizações de estado para não re-renderizar a lista inteira a cada foto.
   useEffect(() => {
     let cancelled = false;
-    // Só as 20 mais recentes: as fotos são base64 pesados e carregar o histórico
-    // inteiro travava a lista em celulares.
-    const pending = userDocs
-      .slice(0, 20)
-      .filter((d) => !requested.current.has(d.id));
+    const pending = userDocs.filter((d) => !requested.current.has(d.id));
     if (pending.length === 0) return;
     pending.forEach((d) => requested.current.add(d.id));
-
 
     const buffer: Record<string, string | null> = {};
     let flushTimer: number | null = null;

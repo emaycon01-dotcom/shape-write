@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { subscribePdfLoading } from "@/lib/pdf-loading";
-import { warmPdfViewer } from "@/lib/pdf-viewer";
+
+const pdfJsPromise = Promise.all([
+  import("pdfjs-dist"),
+  import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+]).then(([pdfjs, worker]) => {
+  pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+  return pdfjs;
+});
 
 type PdfCanvasPreviewProps = {
   pdfDataUrl: string;
   title: string;
 };
-
 
 function dataUrlToBytes(dataUrl: string): Uint8Array {
   const comma = dataUrl.indexOf(",");
@@ -90,7 +96,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     const render = async () => {
       setStatus("loading");
       try {
-        const pdfjs = await warmPdfViewer();
+        const pdfjs = await pdfJsPromise;
 
         const loadingTask = pdfjs.getDocument({ data: dataUrlToBytes(pdfDataUrl) });
         destroyLoadingTask = () => loadingTask.destroy();
@@ -104,8 +110,8 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
         const base = page.getViewport({ scale: 1 });
         const availableWidth = Math.max(280, host.clientWidth);
-        const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
-        let scale = Math.min(3, (availableWidth * pixelRatio) / base.width);
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        let scale = Math.min(2.25, (availableWidth * pixelRatio) / base.width);
 
         // Nunca ultrapassa o orçamento de pixels do aparelho — acima disso o
         // navegador descarta o bitmap e a tela sai preta/vazia.
@@ -114,27 +120,19 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         if (area > budget) scale *= Math.sqrt(budget / area);
         scale = Math.max(0.4, scale);
 
-        canvas.style.aspectRatio = `${base.width} / ${base.height}`;
-
-        const paint = async (targetScale: number) => {
-          const viewport = page.getViewport({ scale: targetScale });
-          const context = canvas.getContext("2d", { alpha: false });
-          if (!context) throw new Error("Contexto 2D indisponível");
-          canvas.width = Math.ceil(viewport.width);
-          canvas.height = Math.ceil(viewport.height);
-          context.fillStyle = "#ffffff";
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          await page.render({ canvasContext: context, viewport }).promise;
-        };
-
-        // Uma única passada em alta resolução. A antiga passada rápida exibia
-        // por alguns instantes uma versão borrada diferente do PDF final.
         let rendered = false;
         for (let attempt = 0; attempt < 3 && !rendered; attempt += 1) {
+          const viewport = page.getViewport({ scale: scale / (attempt === 0 ? 1 : attempt * 2) });
           try {
-            await new Promise((r) => requestAnimationFrame(() => r(null)));
-            if (cancelled) return;
-            await paint(scale);
+            const context = canvas.getContext("2d", { alpha: false });
+            if (!context) throw new Error("Contexto 2D indisponível");
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            canvas.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            await page.render({ canvasContext: context, viewport }).promise;
+
             rendered = true;
           } catch (err) {
             if (attempt === 2) throw err;
@@ -161,7 +159,6 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         canvas.height = 0;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pdfDataUrl, generationActive]);
 
   return (
@@ -170,21 +167,8 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       className="relative flex h-full w-full items-start justify-center overflow-auto bg-muted"
     >
       {status === "loading" && (
-        // Esqueleto em formato de folha: o usuário vê o documento "chegando"
-        // em vez de uma área vazia com spinner.
-        <div className="absolute inset-0 flex items-start justify-center bg-muted p-4">
-          <div className="h-full w-full max-w-full animate-pulse rounded-md bg-background/70 p-6 shadow-sm">
-            <div className="mx-auto mb-6 h-4 w-1/3 rounded bg-muted-foreground/20" />
-            <div className="space-y-3">
-              {Array.from({ length: 10 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="h-3 rounded bg-muted-foreground/15"
-                  style={{ width: `${60 + ((index * 13) % 35)}%` }}
-                />
-              ))}
-            </div>
-          </div>
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
       {status === "error" && (
@@ -203,5 +187,4 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       />
     </div>
   );
-
 }

@@ -126,18 +126,15 @@ export default function AdminPanelPage() {
   const [newPassword, setNewPassword] = useState("");
 
   const fetchAll = async () => {
-    // Listas limitadas: o painel só exibe os registros recentes, então trazer
-    // tudo apenas deixava o carregamento lento.
     const [p, r, l, d, b, ct, ft] = await Promise.all([
-      supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at").order("created_at", { ascending: false }).limit(500),
+      supabase.from("profiles").select("id, user_id, name, email, credits, plano, created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, cargo"),
-      supabase.from("generation_logs").select("*").order("created_at", { ascending: false }).limit(150),
-      supabase.from("deposits").select("*").order("created_at", { ascending: false }).limit(150),
-      supabase.from("blocked_users").select("*").order("blocked_at", { ascending: false }).limit(200),
-      supabase.from("credit_transactions").select("*").order("created_at", { ascending: false }).limit(150),
-      supabase.from("financial_transactions").select("*").order("created_at", { ascending: false }).limit(150),
+      supabase.from("generation_logs").select("*").order("created_at", { ascending: false }).limit(300),
+      supabase.from("deposits").select("*").order("created_at", { ascending: false }).limit(300),
+      supabase.from("blocked_users").select("*").order("blocked_at", { ascending: false }),
+      supabase.from("credit_transactions").select("*").order("created_at", { ascending: false }).limit(300),
+      supabase.from("financial_transactions").select("*").order("created_at", { ascending: false }).limit(300),
     ]);
-
     if (p.data) setProfiles(p.data as Profile[]);
     if (r.data) setRoles(r.data as UserRole[]);
     if (l.data) setLogs(l.data as LogEntry[]);

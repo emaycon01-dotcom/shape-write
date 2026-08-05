@@ -128,14 +128,12 @@ export async function registerValidationDocument(
 
 /** QR Code vetorial (SVG) — nítido em qualquer resolução do PDF. */
 export function qrSvg(value: string, sizePx: number): string {
-  // Documento oficial: módulos pretos puros e separados por espaços brancos
-  // nítidos. O tamanho final precisa ser múltiplo exato da matriz; redimensionar
-  // 73+8 módulos para uma medida fracionária engrossa os pontos e fecha os vãos.
-  const MIN_TYPE = 14; // 73x73 módulos
+  // Força uma versão alta (módulos menores/mais densos, como no documento oficial)
+  const MIN_TYPE = 12; // 65x65 módulos
   let qr: ReturnType<typeof qrcode> | null = null;
   for (let type = MIN_TYPE; type <= 40; type++) {
     try {
-      const candidate = qrcode(type, "M");
+      const candidate = qrcode(type, "H");
       candidate.addData(value);
       candidate.make();
       qr = candidate;
@@ -145,29 +143,18 @@ export function qrSvg(value: string, sizePx: number): string {
     }
   }
   if (!qr) {
-    qr = qrcode(0, "M");
+    qr = qrcode(0, "H");
     qr.addData(value);
     qr.make();
   }
   const count = qr.getModuleCount();
-  const quiet = 4;
+  const quiet = 0; // zona de silêncio (mesma moldura branca da referência)
   const total = count + quiet * 2;
-  const modulePx = Math.max(1, Math.floor(sizePx / total));
-  const renderedSize = total * modulePx;
-
-  // Módulos ligeiramente menores que a célula: evita o efeito "estourado"
-  // (pontos grudados) e mantém os vãos brancos visíveis, deixando o QR
-  // com aparência mais clara, como no impresso.
-  const m = 0.88;
-  const off = (1 - m) / 2;
   let rects = "";
   for (let r = 0; r < count; r++) {
     for (let c = 0; c < count; c++) {
-      if (qr.isDark(r, c)) {
-        rects += `<rect x="${(c + quiet + off).toFixed(3)}" y="${(r + quiet + off).toFixed(3)}" width="${m}" height="${m}"/>`;
-      }
+      if (qr.isDark(r, c)) rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1"/>`;
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${renderedSize}" height="${renderedSize}" viewBox="0 0 ${total} ${total}"><rect width="${total}" height="${total}" fill="#ffffff"/><g fill="#1c1c1c">${rects}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><rect width="${total}" height="${total}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
 }
-
