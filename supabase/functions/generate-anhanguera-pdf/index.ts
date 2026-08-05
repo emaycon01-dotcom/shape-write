@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
-import { qrSvg, buildCodigoValidacao, buildValidationUrl, ANHANGUERA_VALIDACAO_URL } from "./validacao.ts";
+import {
+  qrSvg,
+  buildCodigoValidacao,
+  buildB4ValidationUrl,
+  registerDiplomaB4,
+  B4_BASE_URL,
+} from "./validacao.ts";
 import { ANHANGUERA_FONT_FACES } from "./fonts.ts";
 
 const corsHeaders = {
