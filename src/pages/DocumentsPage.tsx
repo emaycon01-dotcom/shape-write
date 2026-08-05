@@ -89,6 +89,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         qrcode: true,
       },
       {
+        id: "diploma-unip",
+        titulo: "Diploma UNIP",
+        descricao: "Diploma da Universidade Paulista com verso de registro e QR Code",
+        icon: GraduationCap,
+        rota: "/dashboard/documents/diploma-unip",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
         id: "certidao-nascimento",
         titulo: "Certidão de Nascimento",
         descricao: "Certidão eletrônica do Registro Civil com dados por extenso",
