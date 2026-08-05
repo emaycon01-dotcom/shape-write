@@ -734,7 +734,7 @@ export const defaultEquatorialFields: FieldDef[] = [
   { id: "info_l1", label: "Informações: linha 1", sampleText: "PARCELA : USO SISTEMA = R$ 59,93 FORNECIMENTO = R$ 52,34", x: 33.0, y: 304.0, fontSize: 6.0, w: 560 },
   { id: "info_l2", label: "Informações: linha 2", sampleText: "PERÍODO DE REFERÊNCIA DA APURAÇÃO DOS INDICADORES = 5/2023", x: 33.0, y: 312.0, fontSize: 6.0, w: 560 },
   { id: "info_l3", label: "Informações: linha 3", sampleText: "UNIDADE CONSUMIDORA CADASTRADA PARA AVISO PREFERENCIAL", x: 33.0, y: 320.0, fontSize: 6.0, w: 560 },
-  { id: "info_l4", label: "Informações: linha 4", sampleText: "VOCÊ SOLICITOU CADASTRO COMO CLIENTE VITAL/SOBREVIDA.", x: 33.0, y: 328.0, fontSize: 6.0, w: 800 },
+  { id: "info_l4", label: "Informações: linha 4", sampleText: "VOCÊ SOLICITOU CADASTRO COMO CLIENTE VITAL/SOBREVIDA.", x: 33.0, y: 328.0, fontSize: 6.0, w: 700 },
   { id: "it_grupo", label: "Itens: grupo", sampleText: "FORNECIMENTO", x: 34.0, y: 408.6, fontSize: 5.0, w: 120 },
   { id: "it_consumo_desc", label: "Itens: descrição", sampleText: "CONSUMO", x: 34.0, y: 418.7, fontSize: 5.0, w: 120 },
   { id: "it_consumo_unid", label: "Itens: unidade", sampleText: "kWh", x: 229.4, y: 418.7, fontSize: 5.0, w: 30 },

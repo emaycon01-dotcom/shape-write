@@ -61,7 +61,7 @@ export const EQUATORIAL_DEFAULT_POSITIONS: Record<string, Pos> = {
   info_l1: { x: 33.0, y: 304.0, fontSize: 6.0, w: 560 },
   info_l2: { x: 33.0, y: 312.0, fontSize: 6.0, w: 560 },
   info_l3: { x: 33.0, y: 320.0, fontSize: 6.0, w: 560 },
-  info_l4: { x: 33.0, y: 328.0, fontSize: 6.0, w: 800 },
+  info_l4: { x: 33.0, y: 328.0, fontSize: 6.0, w: 700 },
 
   /* ---- itens de fatura ---- */
   it_grupo: { x: 34.0, y: 408.6, fontSize: 5.0, w: 120 },
@@ -222,7 +222,7 @@ export function buildEquatorialHtml(d: Record<string, string>, fieldPositions?: 
   .page { width: ${PAGE_W}px; height: ${PAGE_H}px; position: relative; background: #fff; overflow: hidden; }
   .bg { position: absolute; inset: 0; z-index: 0; }
   .bg img { width: 100%; height: 100%; object-fit: fill; image-rendering: high-quality; }
-  .ov { position: absolute; z-index: 10; color: #111; line-height: 1.15; overflow: visible; white-space: pre-line; }
+  .ov { position: absolute; z-index: 10; color: #111; line-height: 1.15; overflow: visible; white-space: nowrap; }
 </style>`;
 
   return `<!DOCTYPE html>
