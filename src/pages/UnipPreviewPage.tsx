@@ -7,6 +7,7 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { readPreviewPayload } from "@/lib/preview-payload";
+import { supabase } from "@/integrations/supabase/client";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
