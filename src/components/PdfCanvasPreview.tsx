@@ -48,21 +48,9 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [generationActive, setGenerationActive] = useState(false);
-
-  useEffect(() => subscribePdfLoading(({ active }) => {
-    setGenerationActive(active);
-    if (active) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.width = 0;
-        canvas.height = 0;
-      }
-    }
-  }), []);
 
   useEffect(() => {
-    if (generationActive) return;
+
     let cancelled = false;
     let destroyLoadingTask: (() => Promise<void>) | null = null;
 
