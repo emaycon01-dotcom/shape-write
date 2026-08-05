@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
-import { buildAutenticidade, buildValidacaoUrl, qrSvg, registerCrafDocument } from "./validacao.ts";
+import { buildAutenticidade, qrSvg, registerCrafDocument } from "./validacao.ts";
 
 
 const corsHeaders = {
