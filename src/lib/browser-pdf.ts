@@ -682,6 +682,29 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
 }
 
 /**
+ * Cache do HTML de PREVIEW.
+ * Voltar ao formulário e pré-visualizar os mesmos dados repetia toda a ida e
+ * volta com a Edge Function (montagem do HTML + tráfego) sem nenhuma mudança
+ * no resultado. Guardamos apenas o HTML JÁ TOKENIZADO (poucos KB — os
+ * templates continuam fora), então o cache não pesa na memória.
+ *
+ * Nunca é usado no documento final: lá o QR precisa ser registrado de verdade
+ * pela função, e o HTML é sempre diferente do preview.
+ */
+const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>();
+const PREVIEW_CACHE_MAX = 2;
+
+function previewSignature(functionName: string, body: Record<string, unknown>): string {
+  // Strings pesadas (foto, assinatura, template) entram como tamanho + amostra:
+  // suficiente para detectar troca de arquivo sem varrer megabytes.
+  const seen = JSON.stringify(body, (_k, v) =>
+    typeof v === "string" && v.length > 5_000 ? `${v.length}:${v.slice(0, 64)}` : v,
+  );
+  return `${functionName}::${seen}`;
+}
+
+
+/**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
  * Pede o HTML à Edge Function e renderiza o PDF localmente.
  * Se a função devolver um PDF pronto (modos legados/ações), apenas repassa.
