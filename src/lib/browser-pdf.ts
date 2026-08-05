@@ -597,8 +597,10 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 
   } finally {
     releaseFonts();
+    releaseBlobs();
     frame.remove();
   }
+
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
