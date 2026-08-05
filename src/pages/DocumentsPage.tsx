@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, Home, Zap } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, Home, Zap, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -206,6 +206,21 @@ const MODULOS: Categoria[] = [
         descricao: "Fatura TIM S.A. em A4, com resumo da conta, mensalidades e ficha de pagamento",
         icon: Smartphone,
         rota: "/dashboard/documents/comprovante-tim",
+        creditos: 1,
+      },
+    ],
+  },
+  {
+    grupo: "FINANCEIRO",
+    subtitulo: "COMPROVANTES DE RENDA E FOLHA DE PAGAMENTO",
+    icon: Wallet,
+    itens: [
+      {
+        id: "holerite",
+        titulo: "HOLERITE",
+        descricao: "Recibo de pagamento de salário em 2 vias, com totais e bases de cálculo",
+        icon: Wallet,
+        rota: "/dashboard/documents/holerite",
         creditos: 1,
       },
     ],
