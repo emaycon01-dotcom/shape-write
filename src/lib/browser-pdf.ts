@@ -112,11 +112,13 @@ function safeScale(width: number): number {
 function bandCssHeight(width: number, scale: number): number {
   const maxDim = detectMaxCanvasDimension();
   const mobile = isAndroid() || maxDim < 8192;
-  // ~16 MP por faixa no Android (≈64 MB RGBA) / ~48 MP no desktop.
-  // Faixas maiores = menos clones do documento (o custo dominante no Android).
-  const baseArea = mobile ? 16_000_000 : 48_000_000;
+  // O bitmap RGBA é apenas parte do pico: durante html2canvas também coexistem
+  // clone, template decodificado e encoder JPEG. 16 MP ainda chegava a mais de
+  // 100 MB reais e fazia WebKit/Android devolver canvas branco ou preto.
+  // A faixa menor NÃO reduz DPI: apenas divide a mesma página em mais pedaços.
+  const baseArea = mobile ? 5_000_000 : 10_000_000;
 
-  const maxArea = Math.max(3_000_000, Math.floor(baseArea * memoryAreaFactor()));
+  const maxArea = Math.max(2_000_000, Math.floor(baseArea * memoryAreaFactor()));
   const maxPxByArea = Math.floor(maxArea / (width * scale));
   const maxPx = Math.min(maxDim, maxPxByArea);
   return Math.max(64, Math.floor(maxPx / scale));
@@ -200,6 +202,33 @@ function isCanvasBlack(canvas: HTMLCanvasElement): boolean {
     return true;
   } catch {
     return false;
+  }
+}
+
+/** Rejeita também a falha silenciosa que devolve uma faixa totalmente branca. */
+function isCanvasEmpty(canvas: HTMLCanvasElement): boolean {
+  try {
+    const ctx = canvas.getContext("2d");
+    if (!ctx || canvas.width < 2 || canvas.height < 2) return true;
+    let dark = 0;
+    let light = 0;
+    let transparent = 0;
+    const columns = 9;
+    const rows = 9;
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        const x = Math.min(canvas.width - 1, Math.floor(((column + 0.5) / columns) * canvas.width));
+        const y = Math.min(canvas.height - 1, Math.floor(((row + 0.5) / rows) * canvas.height));
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        if (pixel[3] < 8) transparent += 1;
+        else if (pixel[0] < 14 && pixel[1] < 14 && pixel[2] < 14) dark += 1;
+        else if (pixel[0] > 250 && pixel[1] > 250 && pixel[2] > 250) light += 1;
+      }
+    }
+    const samples = columns * rows;
+    return transparent === samples || dark === samples || light === samples;
+  } catch {
+    return true;
   }
 }
 
@@ -317,6 +346,9 @@ async function waitForAssets(doc: Document) {
     ),
   );
 
+  const failedImage = images.find((img) => !img.complete || img.naturalWidth < 1 || img.naturalHeight < 1);
+  if (failedImage) throw new Error("Uma imagem do documento não pôde ser carregada.");
+
   // Decodifica os bitmaps UMA vez (o html2canvas clona o documento a cada
   // faixa; sem o decode prévio o Android redecodifica o template pesado em
   // todas elas, que é a maior perda de tempo na geração).
@@ -397,15 +429,10 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
         { cap: 2, bandDivisor: 4 },
       ]
     : [
+        // Começa conservador em vez de provocar OOM e repetir com a memória já
+        // pressionada. As duas tentativas preservam integralmente os 576 DPI.
         { cap: RENDER_SCALE, bandDivisor: 1 },
         { cap: RENDER_SCALE, bandDivisor: 2 },
-        { cap: RENDER_SCALE, bandDivisor: 4 },
-        { cap: RENDER_SCALE, bandDivisor: 8 },
-        { cap: RENDER_SCALE, bandDivisor: 16 },
-        // Último recurso: só aqui a escala cai, para nunca entregar um PDF preto.
-        { cap: 4, bandDivisor: 8 },
-        { cap: 3, bandDivisor: 8 },
-        { cap: 2, bandDivisor: 8 },
       ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor } of attempts) {
@@ -414,7 +441,7 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
     } catch (e) {
       lastError = e;
       // Pausa maior a cada tentativa: dá tempo do navegador liberar memória.
-      await breathe(500);
+      await breathe(800);
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Falha ao gerar o PDF no navegador.");
@@ -532,7 +559,7 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
           // Quando falta memória (iPad/Android), o navegador devolve um canvas
           // totalmente preto em vez de erro — o PDF final saía todo preto.
           // Detectamos aqui e a tentativa seguinte usa faixas menores.
-          if (isCanvasBlack(canvas)) {
+          if (isCanvasBlack(canvas) || isCanvasEmpty(canvas)) {
             canvas.width = 0;
             canvas.height = 0;
             throw new Error("Rasterização vazia (memória insuficiente).");
