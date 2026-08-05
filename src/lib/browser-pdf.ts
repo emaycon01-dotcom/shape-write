@@ -7,6 +7,8 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
+import { inlineImagesToBlobUrls, stripHeavyAssets } from "@/lib/asset-transport";
+
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
 /** Escala desejada: 794px (A4 @96dpi) * 6 ≈ 4764px ≈ 576 DPI. */
@@ -437,13 +439,18 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 
   const frame = await createHiddenFrame(html);
   let releaseFonts: () => void = () => undefined;
+  let releaseBlobs: () => void = () => undefined;
   let fontsWarm = false;
 
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
+    // Troca data URLs pesadas por blob: ANTES de esperar/decodificar — cada
+    // clone do html2canvas passa a copiar só uma URL curta.
+    releaseBlobs = await inlineImagesToBlobUrls(doc);
     await waitForAssets(doc);
     releaseFonts = await adoptFontFaces(doc);
+
 
 
     const pages = Array.from(doc.querySelectorAll<HTMLElement>(".page"));
@@ -590,8 +597,10 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 
   } finally {
     releaseFonts();
+    releaseBlobs();
     frame.remove();
   }
+
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -622,8 +631,12 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
+    // Imagens pesadas (template, foto, assinatura) não sobem nem descem pela
+    // rede: seguem só como marcador e voltam ao HTML aqui no navegador.
+    const transport = isAction ? null : stripHeavyAssets(body);
+
     const { data, error } = await supabase.functions.invoke(functionName, {
-      body: isAction ? body : { ...body, render: "html" },
+      body: isAction ? body : { ...(transport?.body ?? body), render: "html" },
     });
 
     if (error) return { data, error: error as Error };
@@ -636,7 +649,9 @@ export async function invokeGeneratePdf(
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const pdfBase64 = await renderHtmlToDocument(payload.html, isPreview);
+      const html = transport ? transport.restore(payload.html) : payload.html;
+      const pdfBase64 = await renderHtmlToDocument(html, isPreview);
+
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
