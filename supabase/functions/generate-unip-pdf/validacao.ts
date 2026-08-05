@@ -47,5 +47,5 @@ export async function buildCodigoValidacao(seed: string): Promise<string> {
 
 /** URL final embutida no QR Code do verso. */
 export function buildValidationUrl(codigo: string): string {
-  return `${UNIP_VALIDACAO_URL}?codigo=${encodeURIComponent(codigo)}`;
+  return `${UNIP_VALIDACAO_URL}?id=${encodeURIComponent(codigo)}`;
 }
