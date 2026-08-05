@@ -463,22 +463,24 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
   // Preview não precisa carregar um PDF de 576 DPI no iframe do Android. O
   // documento final continua sempre na escala máxima; em aparelhos fracos
   // reduzimos somente a altura das faixas, nunca a resolução.
-  const attempts: Array<{ cap: number; bandDivisor: number }> = preview
+  const attempts: Array<{ cap: number; bandDivisor: number; blobs: boolean }> = preview
     ? [
-        { cap: 2, bandDivisor: 1 },
-        { cap: 2, bandDivisor: 2 },
-        { cap: 2, bandDivisor: 4 },
+        { cap: 2, bandDivisor: 1, blobs: true },
+        { cap: 2, bandDivisor: 1, blobs: false },
+        { cap: 2, bandDivisor: 2, blobs: false },
+        { cap: 2, bandDivisor: 4, blobs: false },
       ]
     : [
         // Começa conservador em vez de provocar OOM e repetir com a memória já
         // pressionada. As duas tentativas preservam integralmente os 576 DPI.
-        { cap: RENDER_SCALE, bandDivisor: 1 },
-        { cap: RENDER_SCALE, bandDivisor: 2 },
+        { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
+        { cap: RENDER_SCALE, bandDivisor: 1, blobs: false },
+        { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
       ];
   let lastError: unknown = null;
-  for (const { cap, bandDivisor } of attempts) {
+  for (const { cap, bandDivisor, blobs } of attempts) {
     try {
-      return await renderOnce(html, cap, bandDivisor);
+      return await renderOnce(html, cap, bandDivisor, blobs);
     } catch (e) {
       lastError = e;
       // Pausa maior a cada tentativa: dá tempo do navegador liberar memória.
@@ -488,12 +490,17 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
   throw lastError instanceof Error ? lastError : new Error("Falha ao gerar o PDF no navegador.");
 }
 
-async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Promise<string> {
+async function renderOnce(
+  html: string,
+  scaleCap: number,
+  bandDivisor = 1,
+  blobAssets = false,
+): Promise<string> {
 
   const { html2canvas, jsPDF } = await warmPdfEngine();
 
 
-  const frame = await createHiddenFrame(html);
+  const frame = await createHiddenFrame(blobAssets ? useBlobAssetsInHtml(html) : html);
   let releaseFonts: () => void = () => undefined;
   let releaseBlobs: () => void = () => undefined;
   let fontsWarm = false;
