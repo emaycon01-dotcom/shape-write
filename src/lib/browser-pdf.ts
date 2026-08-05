@@ -631,8 +631,12 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
+    // Imagens pesadas (template, foto, assinatura) não sobem nem descem pela
+    // rede: seguem só como marcador e voltam ao HTML aqui no navegador.
+    const transport = isAction ? null : stripHeavyAssets(body);
+
     const { data, error } = await supabase.functions.invoke(functionName, {
-      body: isAction ? body : { ...body, render: "html" },
+      body: isAction ? body : { ...(transport?.body ?? body), render: "html" },
     });
 
     if (error) return { data, error: error as Error };
@@ -645,7 +649,9 @@ export async function invokeGeneratePdf(
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const pdfBase64 = await renderHtmlToDocument(payload.html, isPreview);
+      const html = transport ? transport.restore(payload.html) : payload.html;
+      const pdfBase64 = await renderHtmlToDocument(html, isPreview);
+
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
