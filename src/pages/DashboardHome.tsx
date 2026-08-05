@@ -148,7 +148,33 @@ export default function DashboardHome() {
         </div>
       </section>
 
+      {/* Aviso de atualização dos aplicativos */}
+      <Link
+        to="/dashboard/aplicativos"
+        className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-warning/40 bg-warning/10 p-4 backdrop-blur transition-all hover:-translate-y-0.5"
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-warning/20 ring-1 ring-warning/40">
+          <Smartphone className="h-5 w-5 text-warning" />
+        </span>
+        <div className="min-w-0 flex-1 space-y-1">
+          <span className="inline-flex items-center gap-1 rounded-md border border-warning/40 bg-warning/15 px-2 py-[2px] text-[9px] font-bold uppercase tracking-[0.18em] text-warning">
+            Atualização
+          </span>
+          <p className="text-sm font-semibold text-foreground">Nossos aplicativos foram atualizados!</p>
+          <ol className="space-y-0.5 text-[11px] text-muted-foreground">
+            <li><strong className="text-foreground">1.</strong> Abra o menu lateral (☰)</li>
+            <li><strong className="text-foreground">2.</strong> Toque em <strong className="text-foreground">Aplicativos</strong></li>
+            <li><strong className="text-foreground">3.</strong> Baixe a nova versão dos serviços</li>
+          </ol>
+          <p className="pt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-warning">
+            Toque aqui para baixar agora →
+          </p>
+        </div>
+        <ArrowUpRight className="h-4 w-4 shrink-0 text-warning transition-transform group-hover:-translate-y-0.5" />
+      </Link>
+
       {/* Aviso para contas ainda não verificadas */}
+
 
       {user?.verified === false && (
         <div className="flex items-center gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4 backdrop-blur">
