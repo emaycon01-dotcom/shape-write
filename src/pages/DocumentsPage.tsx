@@ -318,8 +318,8 @@ export default function DocumentsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">Serviços</h1>
-          <p className="text-sm text-muted-foreground">Escolha uma categoria para ver os módulos</p>
+          <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">SERVIÇOS</h1>
+          <p className="text-sm text-muted-foreground">ESCOLHA UMA CATEGORIA PARA VER OS MÓDULOS</p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -340,7 +340,7 @@ export default function DocumentsPage() {
                   </p>
                   <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{cat.subtitulo}</p>
                   <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-                    {cat.itens.length} módulos
+                    {cat.itens.length} MÓDULOS
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -362,7 +362,7 @@ export default function DocumentsPage() {
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        Todas as categorias
+        TODAS AS CATEGORIAS
       </button>
 
       <div className="flex items-center gap-3 border-b border-border/60 pb-3">
@@ -406,7 +406,7 @@ export default function DocumentsPage() {
                   {m.manutencao && <Badge tone="maintenance" icon={Wrench}>Em manutenção</Badge>}
                   {!m.emBreve && !m.manutencao && m.creditos != null && (
                     <span className="text-[10px] font-semibold text-accent">
-                      {m.creditos} crédito{m.creditos > 1 ? "s" : ""}
+                      {m.creditos} CRÉDITO{m.creditos > 1 ? "s" : ""}
                     </span>
                   )}
                 </div>
