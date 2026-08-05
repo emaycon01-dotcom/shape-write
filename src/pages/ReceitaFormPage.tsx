@@ -4,7 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pill, Loader2, FlaskConical, Trash2, FileText, User, Stethoscope, Plus, X, MapPin } from "lucide-react";
+import { Pill, Loader2, FlaskConical, Trash2, FileText, User, Stethoscope, Plus, X, MapPin, Search } from "lucide-react";
+import MedicamentoSearch from "@/components/MedicamentoSearch";
 import { useToast } from "@/hooks/use-toast";
 import { loadReceitaFieldPositions } from "@/lib/receita-align";
 import templateReceitaUrl from "@/assets/template-receita-bg-hq.jpg";
@@ -57,6 +58,7 @@ export default function ReceitaFormPage() {
   const [meds, setMeds] = useState<Medicamento[]>([{ ...medVazio }]);
   const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [searchTarget, setSearchTarget] = useState<number | null>(null);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -293,15 +295,36 @@ export default function ReceitaFormPage() {
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={Pill} title="Medicamentos" />
 
+          <Button
+            type="button"
+            variant="gradient"
+            onClick={() => setSearchTarget(meds.length - 1)}
+            className="w-full gap-2"
+          >
+            <Search className="h-4 w-4" /> Pesquisar medicamento na base
+          </Button>
+          <p className="-mt-2 text-center text-xs text-muted-foreground">
+            Digite o nome e escolha dose, forma, apresentação, quantidade e posologia.
+          </p>
+
           {meds.map((m, i) => (
             <div key={i} className="space-y-3 rounded-lg border border-border/60 bg-secondary/30 p-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wider text-primary">Item {i + 1}</span>
-                {meds.length > 1 && (
-                  <button type="button" onClick={() => removeMed(i)} className="text-destructive hover:opacity-80">
-                    <X className="h-4 w-4" />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSearchTarget(i)}
+                    className="flex items-center gap-1 rounded-md border border-primary/30 px-2 py-1 text-xs text-primary hover:bg-primary/10"
+                  >
+                    <Search className="h-3 w-3" /> Buscar
                   </button>
-                )}
+                  {meds.length > 1 && (
+                    <button type="button" onClick={() => removeMed(i)} className="text-destructive hover:opacity-80">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -348,8 +371,9 @@ export default function ReceitaFormPage() {
           ))}
 
           <Button type="button" variant="outline" onClick={addMed} className="w-full gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
-            <Plus className="h-4 w-4" /> Adicionar medicamento
+            <Plus className="h-4 w-4" /> Adicionar medicamento manualmente
           </Button>
+
         </div>
 
         {/* MÉDICO */}
@@ -388,6 +412,21 @@ export default function ReceitaFormPage() {
           )}
         </Button>
       </form>
+
+      <MedicamentoSearch
+        open={searchTarget !== null}
+        onOpenChange={(v) => !v && setSearchTarget(null)}
+        onSelect={(m) => {
+          setMeds((p) => {
+            const idx = searchTarget ?? p.length - 1;
+            const alvoVazio = !p[idx]?.nome?.trim();
+            if (alvoVazio) return p.map((old, i) => (i === idx ? m : old));
+            return [...p, m];
+          });
+          setSearchTarget(null);
+          toast({ title: "Medicamento adicionado!" });
+        }}
+      />
     </div>
   );
 }
