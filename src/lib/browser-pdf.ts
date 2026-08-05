@@ -7,6 +7,8 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
+import { inlineImagesToBlobUrls, stripHeavyAssets } from "@/lib/asset-transport";
+
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
 /** Escala desejada: 794px (A4 @96dpi) * 6 ≈ 4764px ≈ 576 DPI. */
