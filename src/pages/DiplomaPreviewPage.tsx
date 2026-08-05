@@ -9,6 +9,7 @@ import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { readPreviewPayload } from "@/lib/preview-payload";
+import { completePdfPresentation } from "@/lib/pdf-loading";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -85,9 +86,13 @@ export default function DiplomaPreviewPage() {
         if (!cancelled) {
           setPages(out);
           setPdfError(out.length === 0);
+          requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
         }
       } catch {
-        if (!cancelled) setPdfError(true);
+        if (!cancelled) {
+          setPdfError(true);
+          completePdfPresentation();
+        }
       }
     })();
 

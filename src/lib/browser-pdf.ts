@@ -6,7 +6,7 @@
  * HTML vira PDF: agora é o próprio navegador do cliente.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
+import { awaitPdfPresentation, beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
@@ -850,6 +850,11 @@ export async function invokeGeneratePdf(
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
+
+      // A rasterização terminou, mas o PDF.js ainda precisa pintar o resultado.
+      // Mantemos o overlay até essa primeira pintura para nunca revelar canvas
+      // vazio/preto entre a geração e o documento pronto.
+      awaitPdfPresentation();
 
       // Unimed / Receita: o portal de validação precisa do arquivo hospedado.
       if (

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { supabase } from "@/integrations/supabase/client";
+import { completePdfPresentation } from "@/lib/pdf-loading";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -83,9 +84,13 @@ export default function UnipPreviewPage() {
         if (!cancelled) {
           setPages(out);
           setPdfError(out.length === 0);
+          requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
         }
       } catch {
-        if (!cancelled) setPdfError(true);
+        if (!cancelled) {
+          setPdfError(true);
+          completePdfPresentation();
+        }
       }
     })();
 
