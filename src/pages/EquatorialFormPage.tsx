@@ -15,6 +15,11 @@ import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
 
+// Textos fixos do próprio documento — não são preenchidos pelo usuário.
+const INFO_L3_FIXED = "UNIDADE CONSUMIDORA CADASTRADA PARA AVISO PREFERENCIAL";
+const FIN1_DESC_FIXED = "BONUS ITAIPU ART.21 LEI 10438/02(-)";
+const FIN2_DESC_FIXED = "CONTRIB. ILUM. PÚBLICA - MUNICIPAL";
+
 interface EquatorialFormData {
   nome: string;
   cpf: string;
@@ -106,7 +111,6 @@ const initial: EquatorialFormData = {
 
   infoL1: "",
   infoL2: "",
-  infoL3: "UNIDADE CONSUMIDORA CADASTRADA PARA AVISO PREFERENCIAL",
   infoL4: "",
 
   itUnid: "kWh",
@@ -119,9 +123,7 @@ const initial: EquatorialFormData = {
   itIcms: "",
   itTarifa: "",
 
-  fin1Desc: "",
   fin1Valor: "",
-  fin2Desc: "",
   fin2Valor: "",
   fin3Desc: "",
   fin3Valor: "",
@@ -129,13 +131,10 @@ const initial: EquatorialFormData = {
   fin4Valor: "",
 
   resAneel: "3130/22",
-  resApresentacao: "",
 
   unidadeConsumidora: "",
-  dataDocumento: "",
   numeroReferencia: "",
   especieDocumento: "MN",
-  dataProcessamento: "",
   nossoNumero: "",
   carteira: "109",
   especieMoeda: "R$",
@@ -174,7 +173,6 @@ const exemplo: EquatorialFormData = {
 
   infoL1: "PARCELA : USO SISTEMA = R$ 59,93   FORNECIMENTO = R$ 52,34  USO TRANSMISSÃO = 7,0900  ENC. SETORIAL = 5,9000",
   infoL2: "PERÍODO DE REFERÊNCIA DA APURAÇÃO DOS INDICADORES DE CONTINUIDADE = 5/2023. VRC = R$ 24,09066",
-  infoL3: "UNIDADE CONSUMIDORA CADASTRADA PARA AVISO PREFERENCIAL",
   infoL4:
     "VOCÊ SOLICITOU CADASTRO COMO CLIENTE VITAL/SOBREVIDA. A DOCUMENTAÇÃO PARA REVALIDAÇÃO NÃO FOI ENTREGUE. PRECISAMOS QUE VÁ ATÉ UMA DE NOSSAS LOJAS NO PRAZO DE 15 DIAS, OU SEU IMÓVEL SERÁ DESCADASTRADO. DÚVIDAS, PROCURE NOSSOS CANAIS DE ATENDIMENTO.",
 
@@ -188,9 +186,7 @@ const exemplo: EquatorialFormData = {
   itIcms: "21,29",
   itTarifa: "0,670990",
 
-  fin1Desc: "BONUS ITAIPU ART.21 LEI 10438/02(-)",
   fin1Valor: "-6,18",
-  fin2Desc: "CONTRIB. ILUM. PÚBLICA - MUNICIPAL",
   fin2Valor: "15,56",
   fin3Desc: "JUROS MORATÓRIA.",
   fin3Valor: "0,12",
@@ -198,13 +194,10 @@ const exemplo: EquatorialFormData = {
   fin4Valor: "2,44",
 
   resAneel: "3130/22",
-  resApresentacao: "28/07/2023",
 
   unidadeConsumidora: "10009576124",
-  dataDocumento: "28/07/2023",
   numeroReferencia: "2023067958196",
   especieDocumento: "MN",
-  dataProcessamento: "28/07/2023",
   nossoNumero: "109/06353774-0",
   carteira: "109",
   especieMoeda: "R$",
@@ -296,7 +289,6 @@ export default function EquatorialFormPage() {
       proximaLeitura: src.proxima_leitura ?? prev.proximaLeitura,
       infoL1: src.info_l1 ?? prev.infoL1,
       infoL2: src.info_l2 ?? prev.infoL2,
-      infoL3: src.info_l3 ?? prev.infoL3,
       infoL4: src.info_l4 ?? prev.infoL4,
       itUnid: src.it_unid ?? prev.itUnid,
       itQuant: src.it_quant ?? prev.itQuant,
@@ -307,21 +299,16 @@ export default function EquatorialFormPage() {
       itAliquota: src.it_aliquota ?? prev.itAliquota,
       itIcms: src.it_icms ?? prev.itIcms,
       itTarifa: src.it_tarifa ?? prev.itTarifa,
-      fin1Desc: src.fin1_desc ?? prev.fin1Desc,
       fin1Valor: src.fin1_valor ?? prev.fin1Valor,
-      fin2Desc: src.fin2_desc ?? prev.fin2Desc,
       fin2Valor: src.fin2_valor ?? prev.fin2Valor,
       fin3Desc: src.fin3_desc ?? prev.fin3Desc,
       fin3Valor: src.fin3_valor ?? prev.fin3Valor,
       fin4Desc: src.fin4_desc ?? prev.fin4Desc,
       fin4Valor: src.fin4_valor ?? prev.fin4Valor,
       resAneel: src.res_aneel ?? prev.resAneel,
-      resApresentacao: src.res_apresentacao ?? prev.resApresentacao,
       unidadeConsumidora: src.unidade_consumidora ?? prev.unidadeConsumidora,
-      dataDocumento: src.data_documento ?? prev.dataDocumento,
       numeroReferencia: src.numero_referencia ?? prev.numeroReferencia,
       especieDocumento: src.especie_documento ?? prev.especieDocumento,
-      dataProcessamento: src.data_processamento ?? prev.dataProcessamento,
       nossoNumero: src.nosso_numero ?? prev.nossoNumero,
       carteira: src.carteira ?? prev.carteira,
       especieMoeda: src.especie_moeda ?? prev.especieMoeda,
@@ -378,7 +365,7 @@ export default function EquatorialFormPage() {
 
         info_l1: form.infoL1,
         info_l2: form.infoL2,
-        info_l3: form.infoL3,
+        info_l3: INFO_L3_FIXED,
         info_l4: form.infoL4,
 
         it_unid: form.itUnid,
@@ -391,9 +378,9 @@ export default function EquatorialFormPage() {
         it_icms: form.itIcms,
         it_tarifa: form.itTarifa,
 
-        fin1_desc: form.fin1Desc,
+        fin1_desc: FIN1_DESC_FIXED,
         fin1_valor: form.fin1Valor,
-        fin2_desc: form.fin2Desc,
+        fin2_desc: FIN2_DESC_FIXED,
         fin2_valor: form.fin2Valor,
         fin3_desc: form.fin3Desc,
         fin3_valor: form.fin3Valor,
@@ -401,13 +388,13 @@ export default function EquatorialFormPage() {
         fin4_valor: form.fin4Valor,
 
         res_aneel: form.resAneel,
-        res_apresentacao: form.resApresentacao,
+        res_apresentacao: form.dataEmissao,
 
         unidade_consumidora: form.unidadeConsumidora,
-        data_documento: form.dataDocumento,
+        data_documento: form.dataEmissao,
         numero_referencia: form.numeroReferencia,
         especie_documento: form.especieDocumento,
-        data_processamento: form.dataProcessamento,
+        data_processamento: form.dataEmissao,
         nosso_numero: form.nossoNumero,
         carteira: form.carteira,
         especie_moeda: form.especieMoeda,
@@ -522,7 +509,6 @@ export default function EquatorialFormPage() {
         <Section icon={Info} title="Informações para o cliente">
           <Field label="Linha 1" value={form.infoL1} onChange={set("infoL1")} full placeholder="PARCELA : USO SISTEMA = R$ ..." />
           <Field label="Linha 2" value={form.infoL2} onChange={set("infoL2")} full placeholder="PERÍODO DE REFERÊNCIA ..." />
-          <Field label="Linha 3" value={form.infoL3} onChange={set("infoL3")} full placeholder="UNIDADE CONSUMIDORA CADASTRADA PARA AVISO PREFERENCIAL" />
           <Field label="Linha 4" value={form.infoL4} onChange={set("infoL4")} full placeholder="Aviso adicional" />
         </Section>
 
@@ -539,10 +525,8 @@ export default function EquatorialFormPage() {
         </Section>
 
         <Section icon={Receipt} title="Itens financeiros (opcional)">
-          <Field label="Descrição 1" value={form.fin1Desc} onChange={set("fin1Desc")} placeholder="BONUS ITAIPU ART.21 LEI 10438/02(-)" />
-          <Field label="Valor 1" value={form.fin1Valor} onChange={set("fin1Valor")} placeholder="-6,18" />
-          <Field label="Descrição 2" value={form.fin2Desc} onChange={set("fin2Desc")} placeholder="CONTRIB. ILUM. PÚBLICA - MUNICIPAL" />
-          <Field label="Valor 2" value={form.fin2Valor} onChange={set("fin2Valor")} placeholder="15,56" />
+          <Field label="Valor 1 (bônus Itaipu)" value={form.fin1Valor} onChange={set("fin1Valor")} placeholder="-6,18" />
+          <Field label="Valor 2 (contrib. ilum. pública)" value={form.fin2Valor} onChange={set("fin2Valor")} placeholder="15,56" />
           <Field label="Descrição 3" value={form.fin3Desc} onChange={set("fin3Desc")} placeholder="JUROS MORATÓRIA." />
           <Field label="Valor 3" value={form.fin3Valor} onChange={set("fin3Valor")} placeholder="0,12" />
           <Field label="Descrição 4" value={form.fin4Desc} onChange={set("fin4Desc")} placeholder="MULTA - 06/2023." />
@@ -551,11 +535,8 @@ export default function EquatorialFormPage() {
 
         <Section icon={Landmark} title="Ficha de compensação e página 2">
           <Field label="Resolução ANEEL" value={form.resAneel} onChange={set("resAneel")} placeholder="3130/22" />
-          <Field label="Apresentação" value={form.resApresentacao} onChange={(v) => set("resApresentacao")(maskDate(v))} placeholder="28/07/2023" />
-          <Field label="Data do documento" value={form.dataDocumento} onChange={(v) => set("dataDocumento")(maskDate(v))} placeholder="28/07/2023" />
           <Field label="Número de referência" value={form.numeroReferencia} onChange={set("numeroReferencia")} placeholder="2023067958196" />
           <Field label="Espécie documento" value={form.especieDocumento} onChange={set("especieDocumento")} placeholder="MN" />
-          <Field label="Data do processamento" value={form.dataProcessamento} onChange={(v) => set("dataProcessamento")(maskDate(v))} placeholder="28/07/2023" />
           <Field label="Nosso número" value={form.nossoNumero} onChange={set("nossoNumero")} placeholder="109/06353774-0" />
           <Field label="Carteira" value={form.carteira} onChange={set("carteira")} placeholder="109" />
           <Field label="Espécie moeda" value={form.especieMoeda} onChange={set("especieMoeda")} placeholder="R$" />

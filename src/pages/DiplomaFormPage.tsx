@@ -72,6 +72,9 @@ interface DiplomaForm {
   codigoValidacao: string;
 }
 
+/** Assinante fixo — mesmo em todos os diplomas deste modelo, não editável pelo usuário. */
+const DIPLOMA_SECRETARIO = "ADRIANA SILVA ARAUJO";
+
 const initial: DiplomaForm = {
   instituicao: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ",
   instituicaoL1: "CENTRO UNIVERSITÁRIO",
@@ -101,7 +104,7 @@ const initial: DiplomaForm = {
   mesExpedicao: "Junho",
   anoExpedicao: "2023",
   reitor: "JOSUÉ VIANA DE OLIVEIRA NETO",
-  secretario: "ADRIANA SILVA ARAUJO",
+  secretario: DIPLOMA_SECRETARIO,
   resolucaoNumero: "092/GR",
   resolucaoAno: "2016",
   registroNumero: "11897",
@@ -315,7 +318,7 @@ export default function DiplomaFormPage() {
       data_colacao: form.dataColacao,
       cidade_data: `${form.cidadeExpedicao}, ${form.diaExpedicao} de ${form.mesExpedicao} de ${form.anoExpedicao}.`,
       reitor: form.reitor,
-      secretario: form.secretario,
+      secretario: DIPLOMA_SECRETARIO,
       resolucao: `Resolução ${form.resolucaoNumero}/${form.resolucaoAno}`,
       mantenedora: form.mantenedora,
       cnpj: form.cnpj,
@@ -566,7 +569,7 @@ export default function DiplomaFormPage() {
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Cabeçalho, mantenedora, CNPJ, reitor e portarias de credenciamento/reconhecimento são preenchidos automaticamente.
+              Cabeçalho, mantenedora, CNPJ, reitor, secretário e portarias de credenciamento/reconhecimento são preenchidos automaticamente.
             </p>
           </div>
 
@@ -600,12 +603,6 @@ export default function DiplomaFormPage() {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Secretário(a) de Registro</FieldLabel>
-            <Input value={form.secretario} onChange={set("secretario")} className={inputCls} />
-          </div>
-
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">

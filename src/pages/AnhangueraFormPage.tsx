@@ -74,9 +74,6 @@ interface AnhangueraForm {
   processo: string;
   cidadeRegistro: string;
   dataRegistro: string;
-  reconhecimento: string;
-  recredenciamentoIes: string;
-  recredenciamentoUniversidade: string;
 }
 
 const initial: AnhangueraForm = {
@@ -100,13 +97,15 @@ const initial: AnhangueraForm = {
   processo: "",
   cidadeRegistro: "Campo Grande - MS",
   dataRegistro: "",
-  reconhecimento:
-    "Renovação de Reconhecimento pela Portaria Ministerial nº 1899 de 07/12/2021 - publicada no D.O.U 234 , seção 1, pág. 57 de 14/12/2021.",
-  recredenciamentoIes:
-    "Recredenciada pela Portaria Ministerial nº 336 de 08/02/2019 - publicada no D.O.U 29 , seção 1, pág. 40 de 11/02/2019.",
-  recredenciamentoUniversidade:
-    "Recredenciada pelo Decreto nº 123 de 18/12/1996 - publicada no D.O.U 246, seção 1, pág. 27624 de 19/12/1996.",
 };
+
+/** Textos institucionais fixos — mesmos em todos os diplomas Anhanguera, não editáveis pelo usuário. */
+const ANHANGUERA_RECONHECIMENTO =
+  "Renovação de Reconhecimento pela Portaria Ministerial nº 1899 de 07/12/2021 - publicada no D.O.U 234 , seção 1, pág. 57 de 14/12/2021.";
+const ANHANGUERA_RECREDENCIAMENTO_IES =
+  "Recredenciada pela Portaria Ministerial nº 336 de 08/02/2019 - publicada no D.O.U 29 , seção 1, pág. 40 de 11/02/2019.";
+const ANHANGUERA_RECREDENCIAMENTO_UNIVERSIDADE =
+  "Recredenciada pelo Decreto nº 123 de 18/12/1996 - publicada no D.O.U 246, seção 1, pág. 27624 de 19/12/1996.";
 
 const NOMES = [
   "Jennifer Liziêr Farias Dias", "Ana Carolina Ferreira Lima", "Bruno Henrique Santos Costa",
@@ -193,12 +192,12 @@ export default function AnhangueraFormPage() {
       assinante_cargo: "Diretora Processos Regulatórios",
       // ---------------- verso ----------------
       curso,
-      reconhecimento: form.reconhecimento,
+      reconhecimento: ANHANGUERA_RECONHECIMENTO,
       mantenedora: "Anhanguera Educacional Participações S.A.",
       cnpj: "04310392000146",
       universidade: "Universidade Anhanguera - Uniderp",
-      recredenciamento_ies: form.recredenciamentoIes,
-      recredenciamento_universidade: form.recredenciamentoUniversidade,
+      recredenciamento_ies: ANHANGUERA_RECREDENCIAMENTO_IES,
+      recredenciamento_universidade: ANHANGUERA_RECREDENCIAMENTO_UNIVERSIDADE,
       registro_texto:
         `Diploma registrado sob nº <b>${form.registroNumero}</b> Livro <b>${form.registroLivro}</b> Processo nº <b>${form.processo}</b>, nos termos da Lei 9394 de 20/12/1996 e Decreto nº 9.235 de\n15/12/2017.`,
       registro_cidade_data: `${form.cidadeRegistro} ${dataExtenso(form.dataRegistro)}.`,
@@ -454,39 +453,9 @@ export default function AnhangueraFormPage() {
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={University} title="Instituição" />
           <p className="text-xs text-muted-foreground">
-            Mantenedora (Anhanguera Educacional Participações S.A.), CNPJ e assinaturas já vêm preenchidos
-            conforme o padrão oficial. Os textos legais abaixo podem ser ajustados.
+            Mantenedora (Anhanguera Educacional Participações S.A.), CNPJ, assinaturas e os textos legais de
+            reconhecimento/recredenciamento já vêm preenchidos conforme o padrão oficial.
           </p>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Renovação de reconhecimento do curso</FieldLabel>
-            <textarea
-              value={form.reconhecimento}
-              onChange={(e) => setForm((p) => ({ ...p, reconhecimento: e.target.value }))}
-              rows={2}
-              className={`w-full rounded-md border p-2 text-sm ${inputCls}`}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Recredenciamento da faculdade</FieldLabel>
-            <textarea
-              value={form.recredenciamentoIes}
-              onChange={(e) => setForm((p) => ({ ...p, recredenciamentoIes: e.target.value }))}
-              rows={2}
-              className={`w-full rounded-md border p-2 text-sm ${inputCls}`}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Recredenciamento da Uniderp</FieldLabel>
-            <textarea
-              value={form.recredenciamentoUniversidade}
-              onChange={(e) => setForm((p) => ({ ...p, recredenciamentoUniversidade: e.target.value }))}
-              rows={2}
-              className={`w-full rounded-md border p-2 text-sm ${inputCls}`}
-            />
-          </div>
         </div>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
