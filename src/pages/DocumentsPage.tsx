@@ -161,6 +161,14 @@ const MODULOS: Categoria[] = [
         qrcode: true,
       },
       {
+        id: "comprovante-tim",
+        titulo: "Comprovante de Residência — TIM",
+        descricao: "Fatura TIM S.A. em A4, com resumo da conta, mensalidades e ficha de pagamento",
+        icon: FileText,
+        rota: "/dashboard/documents/comprovante-tim",
+        creditos: 1,
+      },
+      {
         id: "declaracao-escolar",
         titulo: "Declaração Escolar",
         descricao: "Declaração de conclusão com brasão do estado selecionado",
