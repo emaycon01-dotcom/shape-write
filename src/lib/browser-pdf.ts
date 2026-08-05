@@ -208,25 +208,28 @@ function isCanvasBlack(canvas: HTMLCanvasElement): boolean {
 /** Rejeita também a falha silenciosa que devolve uma faixa totalmente branca. */
 function isCanvasEmpty(canvas: HTMLCanvasElement): boolean {
   try {
-    const ctx = canvas.getContext("2d");
-    if (!ctx || canvas.width < 2 || canvas.height < 2) return true;
-    let dark = 0;
-    let light = 0;
-    let transparent = 0;
-    const columns = 9;
-    const rows = 9;
-    for (let row = 0; row < rows; row += 1) {
-      for (let column = 0; column < columns; column += 1) {
-        const x = Math.min(canvas.width - 1, Math.floor(((column + 0.5) / columns) * canvas.width));
-        const y = Math.min(canvas.height - 1, Math.floor(((row + 0.5) / rows) * canvas.height));
-        const pixel = ctx.getImageData(x, y, 1, 1).data;
-        if (pixel[3] < 8) transparent += 1;
-        else if (pixel[0] < 14 && pixel[1] < 14 && pixel[2] < 14) dark += 1;
-        else if (pixel[0] > 250 && pixel[1] > 250 && pixel[2] > 250) light += 1;
-      }
+    if (canvas.width < 2 || canvas.height < 2) return true;
+    // Reduz a faixa INTEIRA para uma sonda pequena. Diferente de alguns pontos
+    // fixos, isto preserva textos, brasões e linhas finas de documentos claros.
+    const probe = document.createElement("canvas");
+    probe.width = 64;
+    probe.height = 64;
+    const context = probe.getContext("2d", { alpha: false });
+    if (!context) return true;
+    context.drawImage(canvas, 0, 0, probe.width, probe.height);
+    const pixels = context.getImageData(0, 0, probe.width, probe.height).data;
+    let minLuma = 255;
+    let maxLuma = 0;
+    for (let index = 0; index < pixels.length; index += 4) {
+      const luma = (pixels[index] * 3 + pixels[index + 1] * 6 + pixels[index + 2]) / 10;
+      minLuma = Math.min(minLuma, luma);
+      maxLuma = Math.max(maxLuma, luma);
     }
-    const samples = columns * rows;
-    return transparent === samples || dark === samples || light === samples;
+    probe.width = 0;
+    probe.height = 0;
+    // Canvas perdido por OOM é uniforme; uma página real tem variação, ainda
+    // que o fundo seja quase todo branco.
+    return maxLuma - minLuma < 2 && (maxLuma < 14 || minLuma > 251);
   } catch {
     return true;
   }
