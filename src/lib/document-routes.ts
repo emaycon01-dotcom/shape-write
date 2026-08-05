@@ -34,7 +34,7 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "unimed": "Atestado Unimed",
   "crlv": "CRLV Digital",
   "cha": "CNH Marítima (CHA)",
-  "diploma": "Diploma Superior",
+  "diploma": "Diploma Estácio",
   "craf": "CRAF - Registro de Arma",
 
   "cha-amador": "CHÁ Amador Digital",
