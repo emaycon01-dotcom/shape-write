@@ -698,7 +698,7 @@ export const defaultCoelbaFields: FieldDef[] = [
   { id: "deb_reaviso2", label: "Débito 2: dt reaviso", sampleText: "22/10/24", x: 427.0, y: 712.2, fontSize: 8.6, w: 70 },
   { id: "deb_valor2", label: "Débito 2: valor", sampleText: "512,30", x: 523.1, y: 712.2, fontSize: 8.6, w: 60 },
   { id: "rodape_referencia", label: "Rodapé: referência", sampleText: "12/2024", x: 47.0, y: 905.0, fontSize: 19.5, w: 100, bold: true },
-  { id: "rodape_vencimento", label: "Rodapé: vencimento", sampleText: "01/01/2024", x: 440, y: 901.4, fontSize: 17.0, w: 95, bold: true },
+  { id: "rodape_vencimento", label: "Rodapé: vencimento", sampleText: "01/01/2024", x: 452, y: 901.4, fontSize: 14.0, w: 80, bold: true },
   { id: "rodape_total", label: "Rodapé: total a pagar", sampleText: "597,80", x: 640.0, y: 903.6, fontSize: 17.0, w: 110, bold: true },
   { id: "p2_nome", label: "P2: Nome", sampleText: "GLEIDSON GALO PEDREIRA", x: 24.0, y: 1642.1, fontSize: 9.8, w: 300, bold: true },
   { id: "p2_endereco", label: "P2: Endereço", sampleText: "RUA 3 TRAVESSA SÃO JOSÉ DO EGITO N 03", x: 24.0, y: 1656.0, fontSize: 8.3, w: 300 },

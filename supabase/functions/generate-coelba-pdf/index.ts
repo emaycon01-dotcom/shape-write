@@ -85,7 +85,7 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
 
   /* ---- rodapé (ficha do boleto) ---- */
   rodape_referencia: { x: 47.0, y: 905.0, fontSize: 19.5, w: 100 },
-  rodape_vencimento: { x: 440, y: 901.4, fontSize: 17.0, w: 95 },
+  rodape_vencimento: { x: 452, y: 901.4, fontSize: 14.0, w: 80 },
   rodape_total: { x: 640.0, y: 903.6, fontSize: 17.0, w: 110 },
 
   /* ---- página 2 ---- */
