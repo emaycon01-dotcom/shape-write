@@ -498,11 +498,16 @@ serve(async (req) => {
         const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        // O storage exige `apikey` além do Authorization; sem ela as chaves no
+        // formato novo são rejeitadas com "Invalid Compact JWS" e a ida e volta
+        // era perdida em toda geração.
         const up = await fetch(
           `${supabaseUrl}/storage/v1/object/documents-pdf/fotos-rg/${docId}.png?upsert=true`,
           {
             method: "POST",
+            signal: AbortSignal.timeout(8000),
             headers: {
+              apikey: serviceRole,
               Authorization: `Bearer ${serviceRole}`,
               "Content-Type": "image/png",
               "x-upsert": "true",
@@ -519,6 +524,7 @@ serve(async (req) => {
         console.error("erro ao publicar foto:", e);
       }
     }
+
 
     const validacao = isPreview
       ? { documentoId: buildDocumentoId(data), qrCodeUrl: "PREVIEW-NAO-VALIDO", registered: false }
