@@ -5,7 +5,9 @@ type PreviewPayload = {
 };
 
 const payloads = new Map<string, PreviewPayload>();
-const MAX_PAYLOADS = 2;
+// Um payload pode conter PDF, templates, foto e assinatura em Base64. Manter
+// dois previews antigos dobrava a pressão de memória sem benefício de UX.
+const MAX_PAYLOADS = 1;
 
 export function storePreviewPayload(payload: PreviewPayload): string {
   const id = crypto.randomUUID();

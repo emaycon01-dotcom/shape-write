@@ -93,6 +93,26 @@ const LIST_COLUMNS =
 
 const DOCS_CACHE_KEY = "documents_cache";
 
+/**
+ * O template já existe nos assets do app e o PDF final já é salvo no Storage.
+ * Persisti-lo novamente dentro de `additional_info` criava uma terceira cópia
+ * de vários MB por documento e tornava histórico/edição progressivamente mais
+ * pesados. Fotos e assinaturas são preservadas porque ainda são necessárias ao
+ * reabrir um formulário para edição.
+ */
+function stripEmbeddedTemplates(additionalInfo: string): string {
+  if (!additionalInfo) return additionalInfo;
+  try {
+    const value = JSON.parse(additionalInfo) as Record<string, unknown>;
+    delete value.template_base64;
+    delete value.template_p1_base64;
+    delete value.template_p2_base64;
+    return JSON.stringify(value);
+  } catch {
+    return additionalInfo;
+  }
+}
+
 function readCachedDocs(): Document[] {
   try {
     const raw = sessionStorage.getItem(DOCS_CACHE_KEY);
@@ -187,7 +207,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         identification: doc.identification,
         date: doc.date,
         description: doc.description,
-        additional_info: doc.additionalInfo,
+        additional_info: stripEmbeddedTemplates(doc.additionalInfo),
         status: "ativo",
         user_id: doc.userId,
         pdf_url: pdfUrl,
@@ -227,7 +247,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     }
 
     const dbUpdates: Record<string, unknown> = {};
-    if (updates.additionalInfo !== undefined) dbUpdates.additional_info = updates.additionalInfo;
+    if (updates.additionalInfo !== undefined) {
+      dbUpdates.additional_info = stripEmbeddedTemplates(updates.additionalInfo);
+    }
     if (pdfUrl) dbUpdates.pdf_url = pdfUrl;
 
     if (Object.keys(dbUpdates).length > 0) {

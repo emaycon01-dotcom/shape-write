@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { subscribePdfLoading } from "@/lib/pdf-loading";
+
+const pdfJsPromise = Promise.all([
+  import("pdfjs-dist"),
+  import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
+]).then(([pdfjs, worker]) => {
+  pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+  return pdfjs;
+});
 
 type PdfCanvasPreviewProps = {
   pdfDataUrl: string;
@@ -46,19 +55,48 @@ function pixelBudget(): number {
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const resumeTimerRef = useRef<number>();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [generationActive, setGenerationActive] = useState(false);
 
   useEffect(() => {
+    const unsubscribe = subscribePdfLoading((state) => {
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+      if (state.active) {
+        setGenerationActive(true);
+      } else {
+        // `invokeGeneratePdf` encerra o loading imediatamente antes de entregar
+        // o PDF final à página. Este pequeno atraso evita remontar primeiro o
+        // preview antigo e, logo depois, o final (duas renderizações seguidas).
+        resumeTimerRef.current = window.setTimeout(() => setGenerationActive(false), 120);
+      }
+    });
+    return () => {
+      unsubscribe();
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
 
+  useEffect(() => {
+    // Durante a geração final o canvas do preview concorria com os canvases de
+    // 576 DPI. Liberá-lo temporariamente reduz o pico de memória; ao concluir,
+    // o preview é montado novamente com o PDF final recebido pela página.
+    if (generationActive) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+      setStatus("loading");
+      return;
+    }
     let cancelled = false;
     let destroyLoadingTask: (() => Promise<void>) | null = null;
 
     const render = async () => {
       setStatus("loading");
       try {
-        const pdfjs = await import("pdfjs-dist");
-        const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
-        pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+        const pdfjs = await pdfJsPromise;
 
         const loadingTask = pdfjs.getDocument({ data: dataUrlToBytes(pdfDataUrl) });
         destroyLoadingTask = () => loadingTask.destroy();
@@ -95,16 +133,6 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
             context.fillRect(0, 0, canvas.width, canvas.height);
             await page.render({ canvasContext: context, viewport }).promise;
 
-            // Confere se o bitmap realmente ficou desenhado (Safari/iPadOS às
-            // vezes devolve um canvas totalmente preto quando falta memória).
-            const probe = context.getImageData(
-              Math.floor(canvas.width / 2),
-              Math.floor(canvas.height * 0.08),
-              1,
-              1,
-            ).data;
-            const black = probe[0] < 12 && probe[1] < 12 && probe[2] < 12;
-            if (black && attempt < 2) throw new Error("Renderização vazia");
             rendered = true;
           } catch (err) {
             if (attempt === 2) throw err;
@@ -131,7 +159,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         canvas.height = 0;
       }
     };
-  }, [pdfDataUrl]);
+  }, [pdfDataUrl, generationActive]);
 
   return (
     <div

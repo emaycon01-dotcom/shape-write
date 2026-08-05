@@ -182,24 +182,34 @@ export function blobToDataUrl(blob: Blob): Promise<string> {
  * Detecta canvas "preto" (falha silenciosa de memória em iPadOS/Android).
  * Amostra alguns pontos; se todos forem quase pretos, a faixa é inválida.
  */
-function isCanvasBlack(canvas: HTMLCanvasElement): boolean {
+function isCanvasInvalid(canvas: HTMLCanvasElement): boolean {
   try {
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx || canvas.width < 2 || canvas.height < 2) return false;
-    const points: Array<[number, number]> = [
-      [0.5, 0.5],
-      [0.15, 0.2],
-      [0.85, 0.8],
-      [0.5, 0.05],
-      [0.5, 0.95],
-    ];
-    for (const [px, py] of points) {
-      const x = Math.min(canvas.width - 1, Math.max(0, Math.floor(canvas.width * px)));
-      const y = Math.min(canvas.height - 1, Math.max(0, Math.floor(canvas.height * py)));
-      const d = ctx.getImageData(x, y, 1, 1).data;
-      if (d[0] > 16 || d[1] > 16 || d[2] > 16) return false;
+
+    // Reduz a faixa para uma amostra minúscula. Assim detectamos tanto o
+    // bitmap preto quanto o branco/transparente que alguns WebViews devolvem
+    // após uma falha de memória, sem ler milhões de pixels do canvas original.
+    const probe = document.createElement("canvas");
+    probe.width = 16;
+    probe.height = 16;
+    const probeCtx = probe.getContext("2d", { willReadFrequently: true });
+    if (!probeCtx) return false;
+    probeCtx.drawImage(canvas, 0, 0, probe.width, probe.height);
+    const pixels = probeCtx.getImageData(0, 0, probe.width, probe.height).data;
+    let black = 0;
+    let white = 0;
+    const total = pixels.length / 4;
+    for (let i = 0; i < pixels.length; i += 4) {
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      if (r < 14 && g < 14 && b < 14) black += 1;
+      if (r > 248 && g > 248 && b > 248) white += 1;
     }
-    return true;
+    probe.width = 0;
+    probe.height = 0;
+    return black / total > 0.98 || white / total > 0.995;
   } catch {
     return false;
   }
@@ -532,10 +542,10 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
           // Quando falta memória (iPad/Android), o navegador devolve um canvas
           // totalmente preto em vez de erro — o PDF final saía todo preto.
           // Detectamos aqui e a tentativa seguinte usa faixas menores.
-          if (isCanvasBlack(canvas)) {
+          if (isCanvasInvalid(canvas)) {
             canvas.width = 0;
             canvas.height = 0;
-            throw new Error("Rasterização vazia (memória insuficiente).");
+            throw new Error("Rasterização vazia ou inválida (memória insuficiente).");
           }
 
           // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
@@ -587,18 +597,7 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type InvokeResult = { data: any; error: Error | null };
 
-/**
- * Módulos já migrados para o motor VETORIAL (pdf-lib).
- * Nesses documentos o PDF deixa de ser uma foto do HTML: o texto vira texto
- * de verdade, o QR vira vetor e o template entra como imagem única — sem
- * canvas gigante, sem tela preta/branca e sem perda de nitidez.
- */
-const VECTOR_FUNCTIONS = new Set([
-  "generate-diploma-pdf",
-  "generate-unip-pdf",
-  "generate-anhanguera-pdf",
-]);
-
+let generationInProgress = false;
 
 /**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
@@ -613,6 +612,14 @@ export async function invokeGeneratePdf(
   const isAction = typeof (body as { action?: unknown }).action === "string";
   const isPreview = body.preview === true;
 
+  // Um toque duplo antes do React desabilitar o botão iniciava dois iframes,
+  // dois conjuntos de canvases e duas cópias do template ao mesmo tempo. Em
+  // celulares isso era suficiente para derrubar o processo do navegador.
+  if (!isAction && generationInProgress) {
+    return { data: null, error: new Error("Já existe um documento sendo gerado. Aguarde a conclusão.") };
+  }
+  if (!isAction) generationInProgress = true;
+
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
     const { data, error } = await supabase.functions.invoke(functionName, {
@@ -626,10 +633,10 @@ export async function invokeGeneratePdf(
     if (typeof payload.html !== "string") return { data: payload, error: null };
 
     try {
-      const useVector = VECTOR_FUNCTIONS.has(functionName);
-      const pdfBase64 = useVector
-        ? await (await import("@/lib/vector-pdf")).renderHtmlToVectorPdf(payload.html)
-        : await renderHtmlToDocument(payload.html, isPreview);
+      // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
+      // experimental criava resultados diferentes entre documentos e foi
+      // removida para eliminar essa duplicidade de engines.
+      const pdfBase64 = await renderHtmlToDocument(payload.html, isPreview);
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
@@ -656,6 +663,7 @@ export async function invokeGeneratePdf(
       return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
     }
   } finally {
+    if (!isAction) generationInProgress = false;
     endPdfLoading();
   }
 }
