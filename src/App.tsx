@@ -175,6 +175,8 @@ const App = () => {
                         <Route path="documents/comprovante-equatorial/preview" element={<EquatorialPreviewPage />} />
                         <Route path="documents/comprovante-tim" element={<TimFormPage />} />
                         <Route path="documents/comprovante-tim/preview" element={<TimPreviewPage />} />
+                        <Route path="documents/holerite" element={<HoleriteFormPage />} />
+                        <Route path="documents/holerite/preview" element={<HoleritePreviewPage />} />
                         <Route path="documents/declaracao-escolar" element={<DeclaracaoFormPage />} />
                         <Route path="documents/declaracao-escolar/preview" element={<DeclaracaoPreviewPage />} />
                         <Route path="documents/receita-medica" element={<ReceitaFormPage />} />
