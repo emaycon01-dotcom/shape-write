@@ -182,7 +182,7 @@ export default function CnhPreviewPage() {
 
       {/* PDF Preview area */}
       <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
-        <PdfCanvasPreview pdfDataUrl={previewPdf || pdfBase64} title="Preview da CNH Digital" />
+        <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview da CNH Digital" />
 
         {/* Watermark overlay - only when not paid */}
         {!paid && (

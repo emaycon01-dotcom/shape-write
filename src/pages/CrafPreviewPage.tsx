@@ -159,7 +159,7 @@ export default function CrafPreviewPage() {
       </p>
 
       <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
-        <PdfCanvasPreview pdfDataUrl={previewPdf || pdfBase64} title="Preview do CRAF" />
+        <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do CRAF" />
 
         {!paid && (
           <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
