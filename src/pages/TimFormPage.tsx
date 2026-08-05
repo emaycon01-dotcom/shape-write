@@ -370,6 +370,8 @@ export default function TimFormPage() {
         <Section icon={Landmark} title="Resumo da conta">
           <Field label="Período da conta" value={form.periodoConta} onChange={set("periodoConta")} placeholder="14/ABR A 13/MAI" />
           <Field label="Plano" value={form.plano} onChange={set("plano")} placeholder="TIM Controle Smart 2 0" />
+          <Field label="Período das linhas da tabela" value={form.periodoLinhas} onChange={set("periodoLinhas")} placeholder="14/04 a 13/05" />
+          <Field label="Nº dias das linhas da tabela" value={form.diasLinhas} onChange={set("diasLinhas")} placeholder="30" />
         </Section>
 
         <div className="glass space-y-4 rounded-xl p-5">
@@ -378,48 +380,43 @@ export default function TimFormPage() {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Mensalidades (linhas da tabela)</h2>
           </div>
           <p className="text-xs text-muted-foreground">
-            Deixe em branco as linhas que não devem aparecer. A linha 1 é o plano contratado (negrito).
+            Deixe em branco as linhas que não devem aparecer. A linha 1 é o plano contratado (negrito). O período e o
+            nº de dias definidos em "Resumo da conta" são aplicados a todas as linhas. A linha de Subtotal é gerada
+            automaticamente somando as 3 primeiras linhas.
           </p>
           <div className="space-y-4">
-            {form.linhas.map((linha, i) => (
-              <div key={i} className="rounded-lg border border-border/60 p-3">
-                <p className="mb-2 text-xs font-semibold text-primary">Linha {i + 1}</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Descrição</label>
-                    <Input value={linha.desc} onChange={(e) => setLinha(i, "desc")(e.target.value)} className="h-10 rounded-lg" placeholder="TIM Controle Smart 2 0 (096/PÓS/SMP)" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Franquia</label>
-                      <Input value={linha.fran} onChange={(e) => setLinha(i, "fran")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+            {form.linhas.map((linha, i) => {
+              const posicao = i < 3 ? i + 1 : i + 2;
+              return (
+                <div key={i} className="rounded-lg border border-border/60 p-3">
+                  <p className="mb-2 text-xs font-semibold text-primary">Linha {posicao}</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Descrição</label>
+                      <Input value={linha.desc} onChange={(e) => setLinha(i, "desc")(e.target.value)} className="h-10 rounded-lg" placeholder="TIM Controle Smart 2 0 (096/PÓS/SMP)" />
                     </div>
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Consumo</label>
-                      <Input value={linha.cons} onChange={(e) => setLinha(i, "cons")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Franquia</label>
+                        <Input value={linha.fran} onChange={(e) => setLinha(i, "fran")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Consumo</label>
+                        <Input value={linha.cons} onChange={(e) => setLinha(i, "cons")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quantidade</label>
                       <Input value={linha.qtd} onChange={(e) => setLinha(i, "qtd")(e.target.value)} className="h-10 rounded-lg" placeholder="1" />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Nº dias</label>
-                      <Input value={linha.dias} onChange={(e) => setLinha(i, "dias")(e.target.value)} className="h-10 rounded-lg" placeholder="30" />
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Valor</label>
+                      <Input value={linha.val} onChange={(e) => setLinha(i, "val")(e.target.value)} className="h-10 rounded-lg" placeholder="69,99" />
                     </div>
                   </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Período</label>
-                    <Input value={linha.per} onChange={(e) => setLinha(i, "per")(e.target.value)} className="h-10 rounded-lg" placeholder="14/04 a 13/05" />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Valor</label>
-                    <Input value={linha.val} onChange={(e) => setLinha(i, "val")(e.target.value)} className="h-10 rounded-lg" placeholder="69,99" />
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
