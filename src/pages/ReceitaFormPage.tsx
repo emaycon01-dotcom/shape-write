@@ -57,7 +57,7 @@ export default function ReceitaFormPage() {
   const [form, setForm] = useState<ReceitaFormData>(initial);
   const [meds, setMeds] = useState<Medicamento[]>([{ ...medVazio }]);
   const [loading, setLoading] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
+  const [searchTarget, setSearchTarget] = useState<number | null>(null);
 
   const { user } = useAuth();
   const navigate = useNavigate();
