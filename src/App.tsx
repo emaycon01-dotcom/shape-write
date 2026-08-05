@@ -103,6 +103,8 @@ const AdminAprovacoesPage = lazy(() => import("./pages/admin/AdminAprovacoesPage
 const AdminVerificacoesPage = lazy(() => import("./pages/admin/AdminVerificacoesPage"));
 
 const AdminChamadosPage = lazy(() => import("./pages/admin/AdminChamadosPage"));
+const AdminCreditosPage = lazy(() => import("./pages/admin/AdminCreditosPage"));
+const AdminLogsPage = lazy(() => import("./pages/admin/AdminLogsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
