@@ -47,8 +47,8 @@ function base64ToBytes(dataUrl: string): Uint8Array {
 
 /** Renderiza a página inteira do PDF como JPEG base64 em ~300 DPI */
 async function renderFullPageJpeg(pdfBytes: Uint8Array, pageIndex = 0): Promise<string> {
-  const pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+  // Reaproveita a instância única do app (worker local, já aquecido).
+  const pdfjsLib = await getPdfJs();
 
   const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
   const page = await pdf.getPage(pageIndex + 1);
