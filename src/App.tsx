@@ -77,6 +77,8 @@ const EquatorialFormPage = lazy(() => import("./pages/EquatorialFormPage"));
 const EquatorialPreviewPage = lazy(() => import("./pages/EquatorialPreviewPage"));
 const TimFormPage = lazy(() => import("./pages/TimFormPage"));
 const TimPreviewPage = lazy(() => import("./pages/TimPreviewPage"));
+const HoleriteFormPage = lazy(() => import("./pages/HoleriteFormPage"));
+const HoleritePreviewPage = lazy(() => import("./pages/HoleritePreviewPage"));
 const DeclaracaoFormPage = lazy(() => import("./pages/DeclaracaoFormPage"));
 const DeclaracaoPreviewPage = lazy(() => import("./pages/DeclaracaoPreviewPage"));
 const ReceitaFormPage = lazy(() => import("./pages/ReceitaFormPage"));
