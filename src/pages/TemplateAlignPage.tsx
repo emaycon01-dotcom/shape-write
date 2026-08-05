@@ -603,7 +603,7 @@ export const defaultAnhangueraFields: FieldDef[] = [
   { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 1064, y: 1732, fontSize: 8, w: 78, h: 78, color: "#999" },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera";
 
 
 interface EditorConfig {
@@ -768,6 +768,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.42,
     copy: () => loadCertidaoFieldPositions() ?? {},
+  },
+  obito: {
+    key: "obito",
+    title: "Certidão de Óbito",
+    storageKey: OBITO_ALIGN_STORAGE_KEY,
+    defaults: defaultObitoFields,
+    bg: templateObitoBgUrl,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.42,
+    copy: () => loadObitoFieldPositions() ?? {},
   },
   declaracao: {
     key: "declaracao",
@@ -1357,16 +1371,20 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                         textAlign: (cfg.key === "historico" && f.id === "certificado" ? "justify" : "left") as "justify" | "left",
                       }
                     : {}),
-                  ...(cfg.key === "certidao" && f.w && !f.h
+                  ...((cfg.key === "certidao" || cfg.key === "obito") && f.w && !f.h
                     ? {
                         width: `${((f.w / PW) * 100).toFixed(4)}%`,
                         whiteSpace: "pre-line" as const,
                         lineHeight: f.id === "cartorio" ? 1.62 : 1.42,
-                        textAlign: (["nome", "matricula", "dia", "mes", "ano", "sexo", "lavrada", "dou_fe", "emitida", "mp_texto", "cartorio"].includes(f.id)
+                        textAlign: ((cfg.key === "obito"
+                          ? ["nome", "matricula", "sexo", "cor", "eleitor", "dia", "mes", "ano", "declarante", "lavrada", "dou_fe", "emitida", "mp_texto", "cartorio"]
+                          : ["nome", "matricula", "dia", "mes", "ano", "sexo", "lavrada", "dou_fe", "emitida", "mp_texto", "cartorio"]
+                        ).includes(f.id)
                           ? "center"
                           : "left") as "center" | "left",
                       }
                     : {}),
+
                   ...(cfg.key === "receita" && f.w && !f.h
                     ? {
                         width: `${((f.w / PW) * 100).toFixed(4)}%`,
