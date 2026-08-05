@@ -1,3 +1,4 @@
+import { getPdfJs } from "@/lib/pdfjs-loader";
 
 /**
  * Integração com o app "CNH do Brasil" (Site 2 — fotos).
