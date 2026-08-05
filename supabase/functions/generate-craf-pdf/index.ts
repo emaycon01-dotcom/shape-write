@@ -209,10 +209,8 @@ serve(async (req) => {
     // Cadastra no validador Vio ANTES de montar o PDF; o QR usa a URL oficial.
     const reg = await registerCrafDocument(data, fotoBase64);
     if (!reg.registered) {
-      return new Response(
-        JSON.stringify({ success: false, error: reg.error || "Falha ao registrar no validador." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      // Não bloqueia a emissão: o QR usa a URL determinística de validação.
+      console.error("CRAF não registrado no validador:", reg.error);
     }
 
     const url = reg.qrCodeUrl || buildValidacaoUrl(autenticidade);
