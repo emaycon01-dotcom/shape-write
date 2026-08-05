@@ -69,10 +69,10 @@ export async function registerCrafDocument(
   fotoBase64: string,
 ): Promise<CrafRegisterResult> {
   const documentoId = await buildDocumentoId(d);
-  const key = Deno.env.get("CRAF_INGEST_KEY") || "";
+  const key = Deno.env.get("CRAF_INGEST_KEY_V3") || Deno.env.get("CRAF_INGEST_KEY") || "";
 
   if (!key) {
-    return { documentoId, qrCodeUrl: "", registered: false, error: "CRAF_INGEST_KEY não configurada." };
+    return { documentoId, qrCodeUrl: "", registered: false, error: "CRAF_INGEST_KEY_V3 não configurada." };
   }
   if (!fotoBase64) {
     return { documentoId, qrCodeUrl: "", registered: false, error: "Foto 3x4 é obrigatória para a validação." };
@@ -107,8 +107,6 @@ export async function registerCrafDocument(
         headers: {
           "Content-Type": "application/json",
           "X-API-Token": key,
-          "x-api-key": key,
-          "apikey": key,
           "Authorization": `Bearer ${key}`,
         },
         body: JSON.stringify(payload),
