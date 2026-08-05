@@ -1070,6 +1070,23 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.2,
     copy: () => loadCoelbaFieldPositions() ?? {},
   },
+  equatorial: {
+    key: "equatorial",
+    title: "Comprovante Equatorial GO",
+    storageKey: EQUATORIAL_ALIGN_STORAGE_KEY,
+    defaults: defaultEquatorialFields,
+    bg: templateEquatorialP1Url,
+    bgs: [templateEquatorialP1Url, templateEquatorialP2Url],
+    pageW: 909,
+    pageH: 1211,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.15,
+    copy: () => loadEquatorialFieldPositions() ?? {},
+  },
 };
 
 
