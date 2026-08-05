@@ -632,6 +632,51 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_credit_logs: {
+        Row: {
+          actor_cargo: string
+          actor_email: string
+          actor_id: string
+          actor_name: string
+          balance_after: number
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          target_email: string
+          target_name: string
+          target_user_id: string
+        }
+        Insert: {
+          actor_cargo?: string
+          actor_email?: string
+          actor_id: string
+          actor_name?: string
+          balance_after: number
+          created_at?: string
+          delta: number
+          id?: string
+          reason?: string
+          target_email?: string
+          target_name?: string
+          target_user_id: string
+        }
+        Update: {
+          actor_cargo?: string
+          actor_email?: string
+          actor_id?: string
+          actor_name?: string
+          balance_after?: number
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          target_email?: string
+          target_name?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           author_id: string
@@ -859,6 +904,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      staff_adjust_credits: {
+        Args: { _delta: number; _reason?: string; _target_user_id: string }
+        Returns: number
       }
       verify_atestado: {
         Args: { _token: string }

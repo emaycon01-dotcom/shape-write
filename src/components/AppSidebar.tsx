@@ -13,6 +13,8 @@ import {
   UserCheck,
   BadgeCheck,
   Headphones,
+  Coins,
+  ScrollText,
 
 } from "lucide-react";
 import {
@@ -193,6 +195,26 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard/admin/creditos" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                      <Coins className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Créditos</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/dashboard/admin/logs" className="hover:bg-secondary/50" activeClassName="bg-secondary text-primary font-medium">
+                      <ScrollText className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Logs de Créditos</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                )}
 
                 {isAdmin && (
                 <SidebarMenuItem>

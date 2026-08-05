@@ -210,7 +210,7 @@ export default function AdminPanelPage() {
       return;
     }
     const ok = await run(
-      () => supabase.rpc("admin_adjust_credits", {
+      () => supabase.rpc("staff_adjust_credits", {
         _target_user_id: selected.user_id,
         _delta: delta * amount,
         _reason: reason || (delta > 0 ? "crédito manual" : "remoção manual"),

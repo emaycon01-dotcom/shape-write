@@ -103,6 +103,8 @@ const AdminAprovacoesPage = lazy(() => import("./pages/admin/AdminAprovacoesPage
 const AdminVerificacoesPage = lazy(() => import("./pages/admin/AdminVerificacoesPage"));
 
 const AdminChamadosPage = lazy(() => import("./pages/admin/AdminChamadosPage"));
+const AdminCreditosPage = lazy(() => import("./pages/admin/AdminCreditosPage"));
+const AdminLogsPage = lazy(() => import("./pages/admin/AdminLogsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -199,6 +201,8 @@ const App = () => {
                       <Route path="admin/verificacoes" element={<StaffRoute><AdminVerificacoesPage /></StaffRoute>} />
 
                       <Route path="admin/chamados" element={<StaffRoute><AdminChamadosPage /></StaffRoute>} />
+                      <Route path="admin/creditos" element={<StaffRoute><AdminCreditosPage /></StaffRoute>} />
+                      <Route path="admin/logs" element={<AdminRoute><AdminLogsPage /></AdminRoute>} />
                     </Route>
 
                     <Route path="*" element={<NotFound />} />
