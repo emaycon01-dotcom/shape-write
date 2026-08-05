@@ -849,7 +849,43 @@ export const defaultTimFields: FieldDef[] = [
   { id: "stub_valor", label: "Ficha: valor", sampleText: "R$ 54,99", x: 453.0, y: 734.7, fontSize: 8.0, w: 80, bold: true },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim";
+// Defaults MUST match supabase/functions/generate-holerite-pdf/index.ts HOLERITE_DEFAULT_POSITIONS
+const HOLERITE_SPEC: Array<{ key: string; label: string; sample: string; x: number; y1: number; y2: number; w: number }> = [
+  { key: "empresa", label: "Empresa (razão social)", sample: "JTI Brasil Ltda.", x: 32.16, y1: 35.32, y2: 437.61, w: 250 },
+  { key: "cnpj", label: "CNPJ", sample: "03.334.170/0001-09", x: 65.3, y1: 45.26, y2: 449.97, w: 150 },
+  { key: "competencia", label: "Mês/ano de referência", sample: "maio/2023", x: 359.11, y1: 45.26, y2: 449.97, w: 100 },
+  { key: "codigo", label: "Código do funcionário", sample: "014", x: 38.16, y1: 69.28, y2: 476.25, w: 32 },
+  { key: "nome", label: "Nome do funcionário", sample: "MAIARA SANTOS SILVA", x: 72.0, y1: 69.28, y2: 476.25, w: 205 },
+  { key: "cargo", label: "CBO / cargo", sample: "3515-05 - Secretária", x: 284.09, y1: 69.28, y2: 476.25, w: 105 },
+  { key: "emp", label: "Emp.", sample: "01", x: 329.1, y1: 69.28, y2: 476.25, w: 26 },
+  { key: "local", label: "Local", sample: "01", x: 357.6, y1: 69.28, y2: 476.25, w: 26 },
+  { key: "depto", label: "Depto.", sample: "01", x: 386.0, y1: 69.28, y2: 476.25, w: 30 },
+  { key: "setor", label: "Setor", sample: "01", x: 418.1, y1: 69.28, y2: 476.25, w: 26 },
+  { key: "secao", label: "Seção", sample: "01", x: 445.8, y1: 69.28, y2: 476.25, w: 28 },
+  { key: "fl", label: "Fl.", sample: "1", x: 476.5, y1: 69.28, y2: 476.25, w: 20 },
+  { key: "r1_venc", label: "Salário: vencimentos", sample: "5.000,00", x: 322.6, y1: 103.24, y2: 512.13, w: 80 },
+  { key: "r1_desc", label: "Salário: descontos", sample: "0,00", x: 411.2, y1: 103.24, y2: 512.13, w: 80 },
+  { key: "r2_venc", label: "INSS: vencimentos", sample: "0,00", x: 322.6, y1: 112.85, y2: 524.49, w: 80 },
+  { key: "r2_desc", label: "INSS: descontos", sample: "537,00", x: 411.2, y1: 112.85, y2: 524.49, w: 80 },
+  { key: "r3_venc", label: "IRRF: vencimentos", sample: "0,00", x: 322.6, y1: 123.77, y2: 536.85, w: 80 },
+  { key: "r3_desc", label: "IRRF: descontos", sample: "368,05", x: 411.2, y1: 123.77, y2: 536.85, w: 80 },
+  { key: "total_venc", label: "Total de vencimentos", sample: "5.000,00", x: 312.7, y1: 309.43, y2: 748.68, w: 80 },
+  { key: "total_desc", label: "Total de descontos", sample: "905,05", x: 390.0, y1: 309.43, y2: 748.68, w: 80 },
+  { key: "liquido", label: "Valor líquido", sample: "4.094,95", x: 395.5, y1: 327.43, y2: 768.74, w: 80 },
+  { key: "base_salario", label: "Salário base", sample: "5.000,00", x: 40.4, y1: 357.79, y2: 801.98, w: 70 },
+  { key: "base_inss", label: "Sal. contr. INSS", sample: "5.000,00", x: 129.1, y1: 357.79, y2: 801.98, w: 70 },
+  { key: "base_fgts", label: "Base cálc. FGTS", sample: "5.000,00", x: 209.2, y1: 357.79, y2: 801.98, w: 70 },
+  { key: "fgts_mes", label: "FGTS do mês", sample: "400,00", x: 284.1, y1: 357.79, y2: 801.98, w: 70 },
+  { key: "base_irrf", label: "Base cálc. IRRF", sample: "4.603,37", x: 376.1, y1: 357.79, y2: 801.98, w: 70 },
+  { key: "faixa_irrf", label: "Faixa IRRF", sample: "04", x: 461.4, y1: 357.79, y2: 801.98, w: 30 },
+];
+
+export const defaultHoleriteFields: FieldDef[] = HOLERITE_SPEC.flatMap((f) => [
+  { id: `${f.key}_a`, label: `1ª via — ${f.label}`, sampleText: f.sample, x: f.x, y: f.y1, fontSize: 9.2, w: f.w },
+  { id: `${f.key}_b`, label: `2ª via — ${f.label}`, sampleText: f.sample, x: f.x, y: f.y2, fontSize: 9.2, w: f.w },
+]);
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
 
 
 interface EditorConfig {
