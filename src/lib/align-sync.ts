@@ -43,6 +43,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   coelba: COELBA_ALIGN_STORAGE_KEY,
   equatorial: EQUATORIAL_ALIGN_STORAGE_KEY,
   tim: TIM_ALIGN_STORAGE_KEY,
+  holerite: HOLERITE_ALIGN_STORAGE_KEY,
 };
 
 /**
