@@ -553,11 +553,12 @@ ${CNH_FONT_FACE}
   ${text("local", d.cidade_estado || "")}
   <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;transform:translateX(-50%);text-align:center;white-space:nowrap;font-weight:normal;font-family:'CNHDigital',Arial,Helvetica,sans-serif;`)}${estadoFitStyle(estadoAcentuado(d.estado_extenso || ""), p.estado.fontSize)}">${escapeHtml(estadoAcentuado(d.estado_extenso || ""))}</div>
   <div class="overlay" style="${rotStyle("reg_vert_bot")}">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay" style="${base("mrz", "width:378px;line-height:1.6;font-family:\'CNHDigital\',monospace;")}">
-    <div class="mrz-line">${mrz.line1}</div>
-    <div class="mrz-line">${mrz.line2}</div>
-    <div class="mrz-line">${mrz.line3}</div>
+  <div class="overlay" style="${base("mrz", "width:378px;line-height:1.6;letter-spacing:0;font-family:\'CNHDigital\',monospace;")}">
+    ${mrzGridLine(mrz.raw1, 378 / 30)}
+    ${mrzGridLine(mrz.raw2, 378 / 30)}
+    ${mrzGridLine(mrz.raw3, 378 / 30)}
   </div>
+
 </div>
 </body>
 </html>`;
