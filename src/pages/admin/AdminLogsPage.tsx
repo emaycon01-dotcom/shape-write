@@ -183,7 +183,53 @@ export default function AdminLogsPage() {
         </Select>
       </div>
 
+      {tab === "acoes" ? (
+        <div className="rounded-xl border bg-card overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary/60">
+              <tr className="text-left">
+                <th className="p-3 font-semibold">DATA</th>
+                <th className="p-3 font-semibold">QUEM FEZ</th>
+                <th className="p-3 font-semibold">PARA QUEM</th>
+                <th className="p-3 font-semibold">AÇÃO</th>
+                <th className="p-3 font-semibold">DETALHES</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {filteredActions.map((l) => (
+                <tr key={l.id} className="hover:bg-secondary/30">
+                  <td className="p-3 whitespace-nowrap text-muted-foreground">{fmt(l.created_at)}</td>
+                  <td className="p-3">
+                    <p className="font-medium">{l.actor_name || "—"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {l.actor_email} · {l.actor_cargo.toUpperCase()}
+                    </p>
+                  </td>
+                  <td className="p-3">
+                    <p className="font-medium">{l.target_name || "—"}</p>
+                    <p className="text-xs text-muted-foreground">{l.target_email}</p>
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
+                    <span className="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
+                      {ACTION_LABELS[l.action] || l.action.toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="p-3 text-muted-foreground">{l.details || "—"}</td>
+                </tr>
+              ))}
+              {!filteredActions.length && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                    {loading ? "Carregando..." : "Nenhuma ação registrada."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
       <div className="rounded-xl border bg-card overflow-x-auto">
+
         <table className="w-full text-sm">
           <thead className="bg-secondary/60">
             <tr className="text-left">
