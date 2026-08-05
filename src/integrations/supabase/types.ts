@@ -632,6 +632,48 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_action_logs: {
+        Row: {
+          action: string
+          actor_cargo: string
+          actor_email: string
+          actor_id: string
+          actor_name: string
+          created_at: string
+          details: string
+          id: string
+          target_email: string
+          target_name: string
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          actor_cargo?: string
+          actor_email?: string
+          actor_id: string
+          actor_name?: string
+          created_at?: string
+          details?: string
+          id?: string
+          target_email?: string
+          target_name?: string
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          actor_cargo?: string
+          actor_email?: string
+          actor_id?: string
+          actor_name?: string
+          created_at?: string
+          details?: string
+          id?: string
+          target_email?: string
+          target_name?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       staff_credit_logs: {
         Row: {
           actor_cargo: string
