@@ -722,7 +722,12 @@ function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) 
         value.length >= ASSET_TOKEN_MIN_BYTES &&
         value.startsWith("data:image")
       ) {
-        const token = `__LVASSET_${i++}__`;
+        // O marcador de mídia mantém o prefixo `data:` para que funções que
+        // testam `startsWith("data:")` não acabem prefixando duas vezes.
+        const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
+        const token = media
+          ? `data:image/png;base64,__LVASSET_${i++}__`
+          : `__LVASSET_${i++}__`;
         map.set(token, value);
         return token;
       }
@@ -801,7 +806,7 @@ export async function invokeGeneratePdf(
     // Sobrepõe o download/parse do visualizador com a chamada e a rasterização.
     // Não altera o PDF; apenas elimina o cold-start depois da navegação.
     void warmPdfViewer().catch(() => undefined);
-    const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
+    const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body, isPreview);
 
     const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
     const cached = cacheKey ? previewHtmlCache.get(cacheKey) : undefined;
