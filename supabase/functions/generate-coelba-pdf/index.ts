@@ -25,17 +25,17 @@ export const PAGE_H = 1123;
 // Defaults MUST match src/pages/TemplateAlignPage.tsx defaultCoelbaFields
 export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
   /* ---- cabeçalho DANFE (estático, removido pelo cliente) ---- */
-  danfe_titulo: { x: 216.2, y: 0.5, fontSize: 12.4, w: 400 },
+  danfe_titulo: { x: 216.2, y: 2.0, fontSize: 10.4, w: 500 },
   emissor_l1: { x: 216.2, y: 25.4, fontSize: 8.6, w: 330 },
   emissor_l2: { x: 216.2, y: 36.0, fontSize: 8.6, w: 330 },
   emissor_l3: { x: 216.2, y: 47.0, fontSize: 8.6, w: 330 },
 
   /* ---- identificação do cliente (página 1) ---- */
-  cliente_nome: { x: 24.0, y: 96.5, fontSize: 9.8, w: 300 },
-  cliente_cpf: { x: 24.0, y: 109.4, fontSize: 8.3, w: 300 },
-  cliente_endereco: { x: 24.0, y: 120.6, fontSize: 8.3, w: 300 },
-  cliente_bairro: { x: 24.0, y: 131.6, fontSize: 8.3, w: 300 },
-  cliente_cep: { x: 22.7, y: 150.2, fontSize: 8.3, w: 300 },
+  cliente_nome: { x: 24.0, y: 96.5, fontSize: 9.8, w: 255 },
+  cliente_cpf: { x: 24.0, y: 109.4, fontSize: 8.3, w: 255 },
+  cliente_endereco: { x: 24.0, y: 120.6, fontSize: 8.3, w: 255 },
+  cliente_bairro: { x: 24.0, y: 131.6, fontSize: 8.3, w: 255 },
+  cliente_cep: { x: 22.7, y: 150.2, fontSize: 8.3, w: 255 },
 
   /* ---- bloco da nota fiscal eletrônica ---- */
   nf_linha: { x: 515.1, y: 116.6, fontSize: 6.6, w: 265 },
@@ -46,27 +46,27 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
   nf_protocolo: { x: 515.1, y: 172.8, fontSize: 6.6, w: 265 },
 
   /* ---- faixa referência / total / vencimento ---- */
-  referencia_topo: { x: 30.0, y: 181.6, fontSize: 19.5, w: 100 },
-  total_topo: { x: 205, y: 184.0, fontSize: 16.0, w: 75 },
-  vencimento_topo: { x: 286.0, y: 181.6, fontSize: 19.5, w: 140 },
+  referencia_topo: { x: 21.0, y: 184.0, fontSize: 15.0, w: 92 },
+  total_topo: { x: 196.0, y: 185.5, fontSize: 14.5, w: 78 },
+  vencimento_topo: { x: 281.0, y: 184.0, fontSize: 15.0, w: 112 },
 
   /* ---- faixa "DATAS DE LEITURAS" ---- */
   lbl_datas: { x: 56.0, y: 290.4, fontSize: 8.0, w: 110 },
   lbl_leitura_anterior: { x: 180.2, y: 290.4, fontSize: 8.0, w: 90 },
-  val_leitura_anterior: { x: 270, y: 287.6, fontSize: 10.3, w: 80 },
+  val_leitura_anterior: { x: 262, y: 287.6, fontSize: 10.3, w: 80 },
   lbl_leitura_atual: { x: 338.9, y: 290.4, fontSize: 8.0, w: 70 },
   val_leitura_atual: { x: 415, y: 287.6, fontSize: 10.3, w: 80 },
   lbl_dias: { x: 519.1, y: 290.4, fontSize: 8.0, w: 60 },
   val_dias: { x: 578, y: 287.6, fontSize: 10.3, w: 40 },
   lbl_proxima: { x: 636.5, y: 290.4, fontSize: 8.0, w: 90 },
-  val_proxima: { x: 722, y: 287.6, fontSize: 10.3, w: 80 },
+  val_proxima: { x: 706, y: 287.6, fontSize: 10.3, w: 80 },
 
   /* ---- linha do medidor ---- */
-  med_postos: { x: 169.5, y: 635.8, fontSize: 6.6, w: 45 },
-  med_leitura_anterior: { x: 224, y: 635.8, fontSize: 6.6, w: 52 },
-  med_leitura_atual: { x: 280, y: 635.8, fontSize: 6.6, w: 52 },
-  med_constante: { x: 347, y: 635.8, fontSize: 6.6, w: 52 },
-  med_consumo: { x: 392, y: 635.8, fontSize: 6.6, w: 52 },
+  med_postos: { x: 163.0, y: 638.5, fontSize: 6.6, w: 48 },
+  med_leitura_anterior: { x: 217.0, y: 638.5, fontSize: 6.6, w: 51 },
+  med_leitura_atual: { x: 274.0, y: 638.5, fontSize: 6.6, w: 50 },
+  med_constante: { x: 330.0, y: 638.5, fontSize: 6.6, w: 56 },
+  med_consumo: { x: 392.0, y: 638.5, fontSize: 6.6, w: 57 },
 
   /* ---- aviso e débitos anteriores ---- */
   aviso_suspensao: { x: 22.7, y: 689.0, fontSize: 9.6, w: 560 },
@@ -85,7 +85,7 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
 
   /* ---- rodapé (ficha do boleto) ---- */
   rodape_referencia: { x: 47.0, y: 905.0, fontSize: 19.5, w: 100 },
-  rodape_vencimento: { x: 452, y: 901.4, fontSize: 14.0, w: 80 },
+  rodape_vencimento: { x: 450, y: 904.0, fontSize: 13.0, w: 84 },
   rodape_total: { x: 640.0, y: 903.6, fontSize: 17.0, w: 110 },
 
   /* ---- página 2 ---- */
@@ -126,10 +126,10 @@ function resolvePositions(overrides: unknown): Record<string, Pos> {
 }
 
 /** Reduz a fonte quando o texto é longo demais — nunca corta com "…". */
-function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.6) {
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.6, bold = false) {
   const len = (value || "").trim().length;
   if (!len || !maxWidth) return "";
-  const charRatio = 0.52;
+  const charRatio = bold ? 0.58 : 0.52;
   const estimated = len * baseSize * charRatio;
   if (estimated <= maxWidth) return "";
   const fitted = maxWidth / (len * charRatio);
@@ -163,17 +163,31 @@ export function buildCoelbaHtml(d: Record<string, string>, fieldPositions?: unkn
     "aviso_suspensao",
     "rodape_referencia", "rodape_vencimento", "rodape_total",
   ]);
+  /** Campos que devem caber em uma única linha dentro da célula do template. */
+  const NOWRAP = new Set([
+    "danfe_titulo", "emissor_l1", "emissor_l2", "emissor_l3",
+    "cliente_nome", "cliente_cpf", "cliente_endereco", "cliente_bairro", "cliente_cep",
+    "referencia_topo", "total_topo", "vencimento_topo",
+    "val_leitura_anterior", "val_leitura_atual", "val_dias", "val_proxima",
+    "med_postos", "med_leitura_anterior", "med_leitura_atual", "med_constante", "med_consumo",
+    "aviso_suspensao",
+    "rodape_referencia", "rodape_vencimento", "rodape_total",
+    "p2_nome", "p2_endereco", "p2_bairro", "p2_cep",
+  ]);
+  const CENTER = new Set(["referencia_topo", "vencimento_topo", "med_postos"]);
 
   const field = (id: string, text: string, extra = "") => {
     const pos = p[id];
     if (!pos || !text) return "";
     const width = pos.w ?? 200;
-    const fit = fitTextStyle(text, pos.fontSize, width);
-    const align = RIGHT.has(id) ? "right" : "left";
-    const weight = BOLD.has(id) ? 700 : 400;
+    const bold = BOLD.has(id);
+    const fit = fitTextStyle(text, pos.fontSize, width, 0.55, bold);
+    const align = RIGHT.has(id) ? "right" : CENTER.has(id) ? "center" : "left";
+    const weight = bold ? 700 : 400;
+    const wrap = NOWRAP.has(id) ? "white-space:nowrap;" : "";
     const html = escapeHtml(text).replace(/\n/g, "<br/>");
     const top = pos.y >= PAGE_H ? pos.y - PAGE_H : pos.y;
-    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${extra}">${html}</div>`;
+    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${wrap}${extra}">${html}</div>`;
   };
 
   const up = (v: string) => (v || "").toUpperCase();
