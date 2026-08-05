@@ -186,6 +186,12 @@ export function buildComprovanteHtml(d: Record<string, string>, fieldPositions?:
     "valor_documento", "controle_rodape",
   ]);
   const WRAP = new Set(["mensagens", "cliente_endereco"]);
+  /** Campos que devem caber sempre em uma única linha (evita sobreposição). */
+  const NOWRAP = new Set([
+    "chave_nf", "nota_fiscal_serie", "linha_digitavel", "pagador",
+    "cliente_nome", "instalacao", "cliente_numero",
+    "mes_ano", "vencimento", "total_pagar",
+  ]);
 
   const field = (id: string, text: string, extra = "") => {
     const pos = p[id];
@@ -194,9 +200,10 @@ export function buildComprovanteHtml(d: Record<string, string>, fieldPositions?:
     const fit = WRAP.has(id) ? "" : fitTextStyle(text, pos.fontSize, width);
     const align = CENTER.has(id) ? "center" : RIGHT.has(id) ? "right" : "left";
     const weight = BOLD.has(id) ? 700 : 400;
+    const wrap = NOWRAP.has(id) ? "white-space:nowrap;" : "";
     const html = escapeHtml(text).replace(/\n/g, "<br/>");
     const top = pos.y >= PAGE_H ? pos.y - PAGE_H : pos.y;
-    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${extra}">${html}</div>`;
+    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${wrap}${extra}">${html}</div>`;
   };
 
   /** Bloco livre (tabelas calculadas) ancorado numa posição do editor. */
