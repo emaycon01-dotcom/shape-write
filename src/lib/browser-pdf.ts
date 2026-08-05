@@ -696,22 +696,38 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
-    const { data, error } = await supabase.functions.invoke(functionName, {
-      body: isAction ? body : { ...body, render: "html" },
+    const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
+
+    let { data, error } = await supabase.functions.invoke(functionName, {
+      body: isAction ? body : { ...light, render: "html" },
     });
 
     if (error) return { data, error: error as Error };
     if (!data || typeof data !== "object") return { data, error: null };
 
-    const payload = data as Record<string, unknown>;
+    let payload = data as Record<string, unknown>;
     if (typeof payload.html !== "string") return { data: payload, error: null };
+
+    let html = map.size ? restoreHeavyAssets(payload.html, map) : payload.html;
+
+    // Alguma função que não repassa o marcador? Refaz a chamada do jeito
+    // original — nenhum módulo depende dessa otimização para funcionar.
+    if (html === null) {
+      const retry = await supabase.functions.invoke(functionName, {
+        body: { ...body, render: "html" },
+      });
+      if (retry.error) return { data: retry.data, error: retry.error as Error };
+      payload = (retry.data ?? {}) as Record<string, unknown>;
+      if (typeof payload.html !== "string") return { data: payload, error: null };
+      html = payload.html;
+    }
 
     try {
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const html = payload.html;
       const pdfBase64 = await renderHtmlToDocument(html, isPreview);
+
 
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
