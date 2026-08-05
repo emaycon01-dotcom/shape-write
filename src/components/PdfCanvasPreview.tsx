@@ -108,10 +108,16 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         const host = hostRef.current;
         if (!canvas || !host) throw new Error("Canvas indisponível");
 
-        const base = page.getViewport({ scale: 1 });
+        // `rotation: 0` neutraliza qualquer /Rotate herdado do arquivo: em
+        // alguns aparelhos a página aparecia de cabeça para baixo.
+        const base = page.getViewport({ scale: 1, rotation: 0 });
         const availableWidth = Math.max(280, host.clientWidth);
+        const availableHeight = Math.max(320, host.clientHeight);
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-        let scale = Math.min(2.25, (availableWidth * pixelRatio) / base.width);
+        // A página inteira precisa caber na área visível (largura E altura),
+        // senão o usuário via só um pedaço do documento com o resto escuro.
+        const fit = Math.min(availableWidth / base.width, availableHeight / base.height);
+        let scale = Math.min(2.25, fit * pixelRatio);
 
         // Nunca ultrapassa o orçamento de pixels do aparelho — acima disso o
         // navegador descarta o bitmap e a tela sai preta/vazia.
@@ -122,7 +128,10 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
         let rendered = false;
         for (let attempt = 0; attempt < 3 && !rendered; attempt += 1) {
-          const viewport = page.getViewport({ scale: scale / (attempt === 0 ? 1 : attempt * 2) });
+          const viewport = page.getViewport({
+            scale: scale / (attempt === 0 ? 1 : attempt * 2),
+            rotation: 0,
+          });
           try {
             const context = canvas.getContext("2d", { alpha: false });
             if (!context) throw new Error("Contexto 2D indisponível");
@@ -164,7 +173,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   return (
     <div
       ref={hostRef}
-      className="relative flex h-full w-full items-start justify-center overflow-auto bg-muted"
+      className="relative flex h-full w-full items-center justify-center overflow-auto bg-white p-2"
     >
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80">
@@ -183,7 +192,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       <canvas
         ref={canvasRef}
         aria-label={title}
-        className={status === "ready" ? "block h-auto max-w-full bg-white" : "invisible"}
+        className={status === "ready" ? "block h-auto max-h-full max-w-full bg-white" : "invisible"}
       />
     </div>
   );
