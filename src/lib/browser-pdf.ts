@@ -145,7 +145,7 @@ function breathe(ms = 16): Promise<void> {
  * cada faixa como bytes até o jsPDF incorporá-la. Assim não coexistem canvas,
  * string binária e base64 durante a etapa mais pesada da geração.
  */
-function encodeJpeg(canvas: HTMLCanvasElement, quality = 0.95): Promise<Uint8Array> {
+function encodeJpeg(canvas: HTMLCanvasElement, quality = 0.98): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     if (typeof canvas.toBlob !== "function") {
       try {
@@ -464,27 +464,19 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
  * Sempre tenta manter a QUALIDADE MÁXIMA (576 DPI). Se o aparelho não der
  * conta, primeiro reduzimos apenas o TAMANHO DAS FAIXAS (mesma resolução
  * final, só que rasterizada em pedaços menores) — isso resolve a maioria dos
- * casos em Android/iOS sem perder nitidez. Só depois de esgotar as faixas
- * menores é que a escala cai, como último recurso para não travar a tela.
+ * casos em Android/iOS sem perder nitidez. A escala nunca cai: preview e PDF
+ * final percorrem exatamente o mesmo pipeline em 576 DPI.
  */
-async function renderHtmlToDocument(html: string, preview = false): Promise<string> {
-  // Preview não precisa carregar um PDF de 576 DPI no iframe do Android. O
-  // documento final continua sempre na escala máxima; em aparelhos fracos
-  // reduzimos somente a altura das faixas, nunca a resolução.
-  const attempts: Array<{ cap: number; bandDivisor: number; blobs: boolean }> = preview
-    ? [
-        { cap: 2, bandDivisor: 1, blobs: true },
-        { cap: 2, bandDivisor: 1, blobs: false },
-        { cap: 2, bandDivisor: 2, blobs: false },
-        { cap: 2, bandDivisor: 4, blobs: false },
-      ]
-    : [
-        // Começa conservador em vez de provocar OOM e repetir com a memória já
-        // pressionada. As duas tentativas preservam integralmente os 576 DPI.
-        { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
-        { cap: RENDER_SCALE, bandDivisor: 1, blobs: false },
-        { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
-      ];
+async function renderHtmlToDocument(html: string, _preview = false): Promise<string> {
+  // Preview e final usam a mesma escala máxima. Em aparelhos com menos memória
+  // mudamos apenas o tamanho das faixas e o transporte dos assets; nenhuma
+  // tentativa reduz DPI, resolução, fonte ou qualidade de compressão.
+  const attempts: Array<{ cap: number; bandDivisor: number; blobs: boolean }> = [
+    { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
+    { cap: RENDER_SCALE, bandDivisor: 1, blobs: false },
+    { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
+    { cap: RENDER_SCALE, bandDivisor: 4, blobs: false },
+  ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor, blobs } of attempts) {
     try {
@@ -636,10 +628,9 @@ async function renderOnce(
             throw new Error("Rasterização vazia ou inválida (memória insuficiente).");
           }
 
-          // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
-          // de codificação/memória do JPEG — o gargalo em Android.
-          // Codificação assíncrona (toBlob): não congela a interface por faixa.
-          const imgData = await encodeJpeg(canvas, 0.95);
+          // Compressão de alta fidelidade idêntica no preview e no PDF final.
+          // A codificação continua assíncrona para não congelar a interface.
+          const imgData = await encodeJpeg(canvas, 0.98);
 
 
           if (imgData.byteLength < 1024) throw new Error("Falha ao rasterizar a página.");

@@ -104,8 +104,8 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
         const base = page.getViewport({ scale: 1 });
         const availableWidth = Math.max(280, host.clientWidth);
-        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-        let scale = Math.min(2.25, (availableWidth * pixelRatio) / base.width);
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+        let scale = Math.min(3, (availableWidth * pixelRatio) / base.width);
 
         // Nunca ultrapassa o orçamento de pixels do aparelho — acima disso o
         // navegador descarta o bitmap e a tela sai preta/vazia.
@@ -127,28 +127,17 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           await page.render({ canvasContext: context, viewport }).promise;
         };
 
-        // 1ª passada rápida (baixa resolução): o documento aparece quase
-        // instantaneamente, acabando com os 3–5s de tela vazia.
-        const quickScale = Math.max(0.35, Math.min(scale, 0.7));
-        try {
-          await paint(quickScale);
-          if (cancelled) return;
-          setStatus("ready");
-        } catch {
-          /* segue direto para a passada final */
-        }
-
-        // 2ª passada em alta resolução, já com a página visível.
+        // Uma única passada em alta resolução. A antiga passada rápida exibia
+        // por alguns instantes uma versão borrada diferente do PDF final.
         let rendered = false;
         for (let attempt = 0; attempt < 3 && !rendered; attempt += 1) {
           try {
             await new Promise((r) => requestAnimationFrame(() => r(null)));
             if (cancelled) return;
-            await paint(scale / (attempt === 0 ? 1 : attempt * 2));
+            await paint(scale);
             rendered = true;
           } catch (err) {
-            if (attempt === 2 && status !== "ready") throw err;
-            if (attempt === 2) break;
+            if (attempt === 2) throw err;
             await new Promise((r) => setTimeout(r, 120));
           }
         }
