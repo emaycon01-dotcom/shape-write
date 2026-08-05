@@ -25,7 +25,7 @@ export const PAGE_H = 1123;
 // Defaults MUST match src/pages/TemplateAlignPage.tsx defaultCoelbaFields
 export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
   /* ---- cabeçalho DANFE (estático, removido pelo cliente) ---- */
-  danfe_titulo: { x: 216.2, y: 0.5, fontSize: 12.4, w: 400 },
+  danfe_titulo: { x: 216.2, y: 2.0, fontSize: 10.4, w: 500 },
   emissor_l1: { x: 216.2, y: 25.4, fontSize: 8.6, w: 330 },
   emissor_l2: { x: 216.2, y: 36.0, fontSize: 8.6, w: 330 },
   emissor_l3: { x: 216.2, y: 47.0, fontSize: 8.6, w: 330 },
