@@ -181,8 +181,9 @@ export function blobToDataUrl(blob: Blob): Promise<string> {
 
 
 /**
- * Detecta canvas "preto" (falha silenciosa de memória em iPadOS/Android).
- * Amostra alguns pontos; se todos forem quase pretos, a faixa é inválida.
+ * Detecta canvas preto/transparente (falha silenciosa de memória em
+ * iPadOS/Android). Branco NÃO é falha: documentos como CRAF, atestados e
+ * diplomas possuem faixas legitimamente quase vazias.
  */
 function isCanvasInvalid(canvas: HTMLCanvasElement): boolean {
   try {
@@ -200,18 +201,18 @@ function isCanvasInvalid(canvas: HTMLCanvasElement): boolean {
     probeCtx.drawImage(canvas, 0, 0, probe.width, probe.height);
     const pixels = probeCtx.getImageData(0, 0, probe.width, probe.height).data;
     let black = 0;
-    let white = 0;
+    let transparent = 0;
     const total = pixels.length / 4;
     for (let i = 0; i < pixels.length; i += 4) {
       const r = pixels[i];
       const g = pixels[i + 1];
       const b = pixels[i + 2];
       if (r < 14 && g < 14 && b < 14) black += 1;
-      if (r > 248 && g > 248 && b > 248) white += 1;
+      if (pixels[i + 3] < 8) transparent += 1;
     }
     probe.width = 0;
     probe.height = 0;
-    return black / total > 0.98 || white / total > 0.995;
+    return black / total > 0.98 || transparent / total > 0.995;
   } catch {
     return false;
   }
@@ -631,8 +632,8 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
-    // Imagens pesadas (template, foto, assinatura) não sobem nem descem pela
-    // rede: seguem só como marcador e voltam ao HTML aqui no navegador.
+    // Somente templates pesados não sobem nem descem pela rede. Fotos e
+    // assinaturas precisam chegar às integrações de validação dos módulos.
     const transport = isAction ? null : stripHeavyAssets(body);
 
     const { data, error } = await supabase.functions.invoke(functionName, {

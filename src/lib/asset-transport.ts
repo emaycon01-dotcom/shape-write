@@ -1,6 +1,7 @@
 /**
- * Evita trafegar imagens pesadas (templates em base64, fotos, assinaturas) até
- * a Edge Function e de volta dentro do HTML.
+ * Evita trafegar templates pesados em base64 até a Edge Function e de volta
+ * dentro do HTML. Fotos e assinaturas continuam no corpo porque alguns
+ * validadores externos precisam desses arquivos na geração final.
  *
  * Antes, cada preview E cada geração final subiam ~2 MB de template e baixavam
  * os mesmos ~2 MB embutidos no HTML — em rede móvel isso sozinho custava vários
@@ -29,16 +30,18 @@ function isHeavyDataUrl(value: unknown): value is string {
 export function stripHeavyAssets(body: Record<string, unknown>): AssetTransport {
   const map = new Map<string, string>();
 
-  const swap = (value: unknown): unknown => {
-    if (isHeavyDataUrl(value)) {
+  const isTemplateKey = (key: string) => /template|background|bras[aã]o|fundo/i.test(key);
+
+  const swap = (value: unknown, key = ""): unknown => {
+    if (isTemplateKey(key) && isHeavyDataUrl(value)) {
       const token = `data:image/jpeg;base64,LVASSET${map.size}TOKEN`;
       map.set(token, value);
       return token;
     }
-    if (Array.isArray(value)) return value.map(swap);
+    if (Array.isArray(value)) return value.map((item) => swap(item, key));
     if (value && typeof value === "object") {
       const out: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = swap(v);
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = swap(v, k);
       return out;
     }
     return value;
