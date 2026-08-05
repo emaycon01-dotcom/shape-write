@@ -129,7 +129,25 @@ export default function AdminLogsPage() {
         </Button>
       </header>
 
+      <div className="flex gap-2">
+        <Button
+          variant={tab === "creditos" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setTab("creditos")}
+        >
+          CRÉDITOS
+        </Button>
+        <Button
+          variant={tab === "acoes" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setTab("acoes")}
+        >
+          AÇÕES EM CONTAS ({filteredActions.length})
+        </Button>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-4">
+
         {[
           { label: "Registros", value: totals.registros },
           { label: "Ações de gerentes", value: totals.gerente },
