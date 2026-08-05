@@ -1,7 +1,25 @@
 // Integração com o portal de validação (AtestaFácil) — Atestado Médico Digital
 import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
 
-export const VALIDACAO_BASE_URL = "https://verificamed.website/";
+export const VALIDACAO_BASE_URL = "https://verificamed.website";
+
+/**
+ * Garante que o QR sempre aponte para o dominio oficial de validacao.
+ * A API remota pode devolver verify_url com dominio interno (*.lovable.app),
+ * entao reaproveitamos apenas o caminho/query e trocamos o host.
+ */
+function forceOfficialDomain(url: string, token: string): string {
+  const fallback = `${VALIDACAO_BASE_URL}/verificar?id=${encodeURIComponent(token)}`;
+  if (!url) return fallback;
+  try {
+    const u = new URL(url);
+    const base = new URL(VALIDACAO_BASE_URL);
+    if (u.host === base.host) return u.toString();
+    return `${VALIDACAO_BASE_URL}${u.pathname}${u.search}`;
+  } catch {
+    return fallback;
+  }
+}
 
 const REGISTER_ENDPOINT =
   "https://xrfbhiihyvqoajjcdcky.supabase.co/functions/v1/register-document";
@@ -164,8 +182,7 @@ export async function registerValidationDocument(
         continue;
       }
 
-      const verifyUrl = json.verify_url ||
-        `${VALIDACAO_BASE_URL}/verificar?id=${encodeURIComponent(json.token)}`;
+      const verifyUrl = forceOfficialDomain(json.verify_url || "", json.token);
 
       return {
         documentoId: json.document_id || documentoId,
