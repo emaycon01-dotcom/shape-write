@@ -739,7 +739,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="bg-template">
     ${templateVersoBg ? `<img src="${escapeHtml(templateVersoBg)}" />` : ""}
   </div>
-  <div class="overlay" style="top:422px;left:447px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="top:422px;left:447px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:0;line-height:1.6;">${mrzGridLine(mrz.raw1, 460 / 30)}${mrzGridLine(mrz.raw2, 460 / 30)}${mrzGridLine(mrz.raw3, 460 / 30)}</div>
 </div>
 </body>
 </html>`;
