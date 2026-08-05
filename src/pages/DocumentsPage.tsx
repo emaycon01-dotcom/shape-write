@@ -143,6 +143,15 @@ const MODULOS: Categoria[] = [
         qrcode: true,
       },
       {
+        id: "comprovante-coelba",
+        titulo: "Comprovante de Residência — Coelba",
+        descricao: "Fatura Neoenergia Coelba (DANFE NF3e) em 2 páginas, com chave de acesso e protocolo",
+        icon: FileText,
+        rota: "/dashboard/documents/comprovante-coelba",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
         id: "declaracao-escolar",
         titulo: "Declaração Escolar",
         descricao: "Declaração de conclusão com brasão do estado selecionado",
