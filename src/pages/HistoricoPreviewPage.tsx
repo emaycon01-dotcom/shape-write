@@ -67,27 +67,24 @@ export default function HistoricoPreviewPage() {
 
     setLoading(true);
     try {
+
+      // 1) Gera o PDF final ANTES de cobrar: se falhar, nenhum crédito é descontado.
+      const { data, error } = await invokeGeneratePdf("generate-historico-pdf", {
+        body: { ...formData, preview: false },
+      });
+      if (error) throw error;
+      const generated = data?.pdfBase64;
+      if (!generated) throw new Error("pdf_nao_gerado");
+      const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
+
+      // 2) PDF pronto — agora sim cobra o crédito.
       const deduction = await deductCredit(1, "geracao-historico");
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
         setLoading(false);
         return;
       }
-
-      let pdfFinal = previewPdf;
-      try {
-        const { data, error } = await invokeGeneratePdf("generate-historico-pdf", {
-          body: { ...formData, preview: false },
-        });
-        if (error) throw error;
-        const result = data?.pdfBase64;
-        if (result) {
-          pdfFinal = result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`;
-          setFinalPdf(pdfFinal);
-        }
-      } catch (e) {
-        console.error("Falha ao gerar o PDF final:", e);
-      }
+      setFinalPdf(pdfFinal);
 
       await addDocument({
         name: formData.nome_aluno || "",
@@ -105,8 +102,9 @@ export default function HistoricoPreviewPage() {
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
       });
-    } catch {
-      toast({ title: "Erro ao gerar documento", description: "Tente novamente.", variant: "destructive" });
+    } catch (e) {
+      console.error("Falha na geração:", e);
+      toast({ title: "Erro ao gerar documento", description: "Nenhum crédito foi descontado. Tente novamente.", variant: "destructive" });
     } finally {
       setLoading(false);
     }

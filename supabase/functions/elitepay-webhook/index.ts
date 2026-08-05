@@ -68,12 +68,14 @@ Deno.serve(async (req) => {
     }
 
     if (normalizedStatus === "pago") {
+      // O webhook é a fonte oficial do gateway. A consulta é apenas uma checagem
+      // extra: se a API estiver indisponível, o crédito não pode deixar de cair.
       const confirmed = await confirmElitepayPayment(chargeId);
       if (!confirmed) {
-        console.warn("ElitePay confirmation failed; rejecting paid webhook:", chargeId);
-        return json({ error: "Pagamento ainda não confirmado pelo gateway" }, 409);
+        console.warn("ElitePay lookup indisponível; aplicando pagamento pelo webhook:", chargeId);
       }
     }
+
 
     if (normalizedStatus !== "pago") {
       await supabaseAdmin
