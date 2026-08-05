@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadRgFieldPositions } from "@/lib/rg-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
-import templateRgUrl from "@/assets/template-rg-bg-hq.jpg";
+import templateRgUrl from "@/assets/template-rg-bg-hq.webp";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";

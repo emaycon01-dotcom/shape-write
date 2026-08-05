@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Car, User, Gauge, ShieldCheck, Loader2, FlaskConical, Trash2, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadCrlvFieldPositions } from "@/lib/crlv-align";
-import templateCrlvUrl from "@/assets/template-crlv-bg-hq.jpg";
+import templateCrlvUrl from "@/assets/template-crlv-bg-hq.webp";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskAlnumUpper, maskCpfCnpj, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";

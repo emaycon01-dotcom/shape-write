@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { GraduationCap, School, Loader2, FlaskConical, Trash2, History, FileText, User, CalendarRange } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadHistoricoFieldPositions } from "@/lib/historico-align";
-import templateHistoricoUrl from "@/assets/template-historico-bg-hq.jpg";
+import templateHistoricoUrl from "@/assets/template-historico-bg-hq.webp";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskPhone } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";

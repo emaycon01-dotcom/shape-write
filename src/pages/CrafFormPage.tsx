@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Crosshair, Loader2, FlaskConical, Trash2, FileText, User, Shield, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadCrafFieldPositions } from "@/lib/craf-align";
-import templateCrafUrl from "@/assets/template-craf-bg-hq.jpg";
+import templateCrafUrl from "@/assets/template-craf-bg-hq.webp";
 import testFotoUrl from "@/assets/test-foto.png";
 
 import { loadTemplateBase64 } from "@/lib/template-cache";

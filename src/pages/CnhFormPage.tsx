@@ -13,7 +13,7 @@ import { mapCnhEditPayload } from "@/lib/cnh-history-edit";
 import { loadCnhFieldPositions } from "@/lib/cnh-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
-import templateCnhUrl from "@/assets/template-cnh-bg-hq.jpg";
+import templateCnhUrl from "@/assets/template-cnh-bg-hq.webp";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
