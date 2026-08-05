@@ -47,13 +47,27 @@ function pixelBudget(): number {
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const resumeTimerRef = useRef<number>();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [generationActive, setGenerationActive] = useState(false);
 
-  useEffect(
-    () => subscribePdfLoading((state) => setGenerationActive(state.active)),
-    [],
-  );
+  useEffect(() => {
+    const unsubscribe = subscribePdfLoading((state) => {
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+      if (state.active) {
+        setGenerationActive(true);
+      } else {
+        // `invokeGeneratePdf` encerra o loading imediatamente antes de entregar
+        // o PDF final à página. Este pequeno atraso evita remontar primeiro o
+        // preview antigo e, logo depois, o final (duas renderizações seguidas).
+        resumeTimerRef.current = window.setTimeout(() => setGenerationActive(false), 120);
+      }
+    });
+    return () => {
+      unsubscribe();
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     // Durante a geração final o canvas do preview concorria com os canvases de
