@@ -15,6 +15,8 @@ import {
   Headphones,
   Coins,
   ScrollText,
+  Crown,
+
 
 } from "lucide-react";
 import {
