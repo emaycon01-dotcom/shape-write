@@ -107,7 +107,6 @@ export async function registerCrafDocument(
         headers: {
           "Content-Type": "application/json",
           "X-API-Token": key,
-          "Authorization": `Bearer ${key}`,
         },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(20000),
@@ -120,13 +119,49 @@ export async function registerCrafDocument(
         await new Promise((r) => setTimeout(r, 600 * attempt));
         continue;
       }
-      const json = JSON.parse(text) as { success?: boolean; qr_code_url?: string; error?: string };
+      const json = JSON.parse(text) as {
+        success?: boolean;
+        documento_id?: string;
+        qr_code_url?: string;
+        error?: string;
+      };
       if (!json.success || !json.qr_code_url) {
         lastError = json.error || text;
         await new Promise((r) => setTimeout(r, 600 * attempt));
         continue;
       }
-      return { documentoId, qrCodeUrl: json.qr_code_url, registered: true };
+
+      // O portal deve confirmar o mesmo registro enviado. Aceitar uma URL sem
+      // vínculo confirmado produz um QR válido visualmente, mas sem documento.
+      if (json.documento_id && json.documento_id !== documentoId) {
+        lastError = "O validador confirmou um documento diferente do enviado.";
+        console.error("register-document (CRAF) documento_id divergente", {
+          enviado: documentoId,
+          recebido: json.documento_id,
+        });
+        await new Promise((r) => setTimeout(r, 600 * attempt));
+        continue;
+      }
+
+      const qrCodeUrl = json.qr_code_url.trim();
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(qrCodeUrl);
+      } catch {
+        lastError = "O validador devolveu uma URL de QR inválida.";
+        continue;
+      }
+      if (parsedUrl.protocol !== "https:" || !parsedUrl.search) {
+        lastError = "O validador devolveu uma URL sem código de consulta.";
+        continue;
+      }
+
+      console.log("CRAF registrado no Vio", {
+        documentoId,
+        host: parsedUrl.host,
+        rota: parsedUrl.pathname,
+      });
+      return { documentoId, qrCodeUrl, registered: true };
     } catch (err) {
       lastError = String(err);
       console.error("register-document (CRAF) erro de rede:", err);
