@@ -178,6 +178,62 @@ export function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
+/**
+ * Cache de bitmaps pesados (templates em base64) como `blob:`.
+ *
+ * O HTML das Edge Functions traz o template inteiro como Data URI. Cada render
+ * fazia o navegador RE-DECODIFICAR esse base64 (2–4 MB de texto → bitmap) e
+ * ainda mantinha a string gigante viva dentro do iframe. Trocando por um
+ * `blob:` o binário é decodificado UMA vez por sessão e reaproveitado em todas
+ * as gerações seguintes — menos pico de memória (principal causa de OOM em
+ * Android) e menos tempo até a primeira faixa.
+ *
+ * O pixel final é idêntico: é exatamente o mesmo binário, só referenciado por
+ * URL. Se qualquer imagem falhar ao carregar, `waitForAssets` lança e o motor
+ * repete a geração com o HTML original (`useBlobAssets = false`).
+ */
+const blobAssetCache = new Map<string, string>();
+const BLOB_ASSET_MAX = 8;
+const BLOB_ASSET_MIN_CHARS = 60_000;
+
+function dataUriToBlobUrl(dataUri: string): string | null {
+  try {
+    const comma = dataUri.indexOf(",");
+    const header = dataUri.slice(5, comma);
+    if (!header.includes(";base64")) return null;
+    const mime = header.split(";")[0] || "image/jpeg";
+    const binary = atob(dataUri.slice(comma + 1));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: mime }));
+  } catch {
+    return null;
+  }
+}
+
+/** Substitui Data URIs grandes por `blob:` reaproveitáveis entre gerações. */
+function useBlobAssetsInHtml(html: string): string {
+  return html.replace(/data:image\/[a-zA-Z+]+;base64,[A-Za-z0-9+/=]+/g, (uri) => {
+    if (uri.length < BLOB_ASSET_MIN_CHARS) return uri;
+    const key = `${uri.length}:${uri.slice(24, 88)}:${uri.slice(-48)}`;
+    const cached = blobAssetCache.get(key);
+    if (cached) return cached;
+    const url = dataUriToBlobUrl(uri);
+    if (!url) return uri;
+    blobAssetCache.set(key, url);
+    while (blobAssetCache.size > BLOB_ASSET_MAX) {
+      const oldest = blobAssetCache.keys().next().value as string | undefined;
+      if (!oldest) break;
+      const stale = blobAssetCache.get(oldest);
+      if (stale) URL.revokeObjectURL(stale);
+      blobAssetCache.delete(oldest);
+    }
+    return url;
+  });
+}
+
+
+
 
 /**
  * Detecta canvas preto/transparente (falha silenciosa de memória em
