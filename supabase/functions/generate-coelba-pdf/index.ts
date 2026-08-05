@@ -31,11 +31,11 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
   emissor_l3: { x: 216.2, y: 47.0, fontSize: 8.6, w: 330 },
 
   /* ---- identificação do cliente (página 1) ---- */
-  cliente_nome: { x: 24.0, y: 96.5, fontSize: 9.8, w: 300 },
-  cliente_cpf: { x: 24.0, y: 109.4, fontSize: 8.3, w: 300 },
-  cliente_endereco: { x: 24.0, y: 120.6, fontSize: 8.3, w: 300 },
-  cliente_bairro: { x: 24.0, y: 131.6, fontSize: 8.3, w: 300 },
-  cliente_cep: { x: 22.7, y: 150.2, fontSize: 8.3, w: 300 },
+  cliente_nome: { x: 24.0, y: 96.5, fontSize: 9.8, w: 255 },
+  cliente_cpf: { x: 24.0, y: 109.4, fontSize: 8.3, w: 255 },
+  cliente_endereco: { x: 24.0, y: 120.6, fontSize: 8.3, w: 255 },
+  cliente_bairro: { x: 24.0, y: 131.6, fontSize: 8.3, w: 255 },
+  cliente_cep: { x: 22.7, y: 150.2, fontSize: 8.3, w: 255 },
 
   /* ---- bloco da nota fiscal eletrônica ---- */
   nf_linha: { x: 515.1, y: 116.6, fontSize: 6.6, w: 265 },
