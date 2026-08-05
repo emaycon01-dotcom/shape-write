@@ -128,8 +128,9 @@ export async function registerValidationDocument(
 
 /** QR Code vetorial (SVG) — nítido em qualquer resolução do PDF. */
 export function qrSvg(value: string, sizePx: number): string {
-  // Documento oficial: QR bem denso (módulos pequenos) e com aspecto mais claro,
-  // porque a correção de erro é média e há zona de silêncio branca ao redor.
+  // Documento oficial: módulos pretos puros e separados por espaços brancos
+  // nítidos. O tamanho final precisa ser múltiplo exato da matriz; redimensionar
+  // 73+8 módulos para uma medida fracionária engrossa os pontos e fecha os vãos.
   const MIN_TYPE = 14; // 73x73 módulos
   let qr: ReturnType<typeof qrcode> | null = null;
   for (let type = MIN_TYPE; type <= 40; type++) {
@@ -149,8 +150,10 @@ export function qrSvg(value: string, sizePx: number): string {
     qr.make();
   }
   const count = qr.getModuleCount();
-  const quiet = 4; // zona de silêncio branca (deixa o conjunto mais claro)
+  const quiet = 4;
   const total = count + quiet * 2;
+  const modulePx = Math.max(1, Math.floor(sizePx / total));
+  const renderedSize = total * modulePx;
 
   let rects = "";
   for (let r = 0; r < count; r++) {
@@ -158,8 +161,5 @@ export function qrSvg(value: string, sizePx: number): string {
       if (qr.isDark(r, c)) rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1"/>`;
     }
   }
-  // Sem retângulo branco de fundo: o template não tem QR nenhum, então não há
-  // nada para "tampar". Só os módulos pretos são desenhados.
-  // Cor: cinza-escuro (como o QR impresso na CNH oficial), não preto puro.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><g fill="#4a4a4a">${rects}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${renderedSize}" height="${renderedSize}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><g fill="#000000" shape-rendering="crispEdges">${rects}</g></svg>`;
 }
