@@ -275,7 +275,7 @@ export default function TimFormPage() {
       }
 
       const token = storePreviewPayload({ pdfBase64, formData: bodyData as Record<string, string> });
-      navigate("/dashboard/documents/comprovante-tim/preview", { state: token });
+      navigate("/dashboard/documents/comprovante-tim/preview", { state: { previewId: token } });
     } catch (err) {
       console.error("Erro ao gerar comprovante TIM:", err);
       toast({ title: "Erro ao gerar o preview", description: "Tente novamente.", variant: "destructive" });

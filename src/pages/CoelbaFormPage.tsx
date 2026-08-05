@@ -318,7 +318,7 @@ export default function CoelbaFormPage() {
       }
 
       const token = storePreviewPayload({ pdfBase64, formData: bodyData });
-      navigate("/dashboard/documents/comprovante-coelba/preview", { state: token });
+      navigate("/dashboard/documents/comprovante-coelba/preview", { state: { previewId: token } });
     } catch (err) {
       console.error("Erro ao gerar comprovante Coelba:", err);
       toast({ title: "Erro ao gerar o preview", description: "Tente novamente.", variant: "destructive" });

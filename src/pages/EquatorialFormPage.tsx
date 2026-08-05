@@ -449,7 +449,7 @@ export default function EquatorialFormPage() {
       }
 
       const token = storePreviewPayload({ pdfBase64, formData: bodyData });
-      navigate("/dashboard/documents/comprovante-equatorial/preview", { state: token });
+      navigate("/dashboard/documents/comprovante-equatorial/preview", { state: { previewId: token } });
     } catch (err) {
       console.error("Erro ao gerar comprovante Equatorial:", err);
       toast({ title: "Erro ao gerar o preview", description: "Tente novamente.", variant: "destructive" });
