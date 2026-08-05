@@ -244,6 +244,40 @@ export default function AdminCreditosPage() {
                   <Minus className="mr-1 h-4 w-4" /> Remover
                 </Button>
               </div>
+
+              <div className="space-y-2 border-t pt-4">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <KeyRound className="h-4 w-4 text-primary" /> ALTERAR SENHA
+                </p>
+                {canChangePassword ? (
+                  <>
+                    <Input
+                      type="text"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Nova senha (mín. 6 caracteres)"
+                    />
+                    <Input
+                      value={pwdReason}
+                      onChange={(e) => setPwdReason(e.target.value)}
+                      placeholder="Motivo (ex.: solicitação do cliente)"
+                    />
+                    <Button className="w-full" onClick={changePassword} disabled={pwdBusy}>
+                      Salvar nova senha
+                    </Button>
+                    {!isAdmin && (
+                      <p className="text-xs text-muted-foreground">
+                        A alteração fica registrada nos logs para os administradores.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Gerentes só podem alterar a senha de usuários comuns (sem cargo).
+                  </p>
+                )}
+              </div>
+
             </>
           )}
         </div>
