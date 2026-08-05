@@ -53,13 +53,13 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
   /* ---- faixa "DATAS DE LEITURAS" ---- */
   lbl_datas: { x: 56.0, y: 290.4, fontSize: 8.0, w: 110 },
   lbl_leitura_anterior: { x: 180.2, y: 290.4, fontSize: 8.0, w: 90 },
-  val_leitura_anterior: { x: 270, y: 287.6, fontSize: 10.3, w: 80 },
+  val_leitura_anterior: { x: 262, y: 287.6, fontSize: 10.3, w: 80 },
   lbl_leitura_atual: { x: 338.9, y: 290.4, fontSize: 8.0, w: 70 },
   val_leitura_atual: { x: 415, y: 287.6, fontSize: 10.3, w: 80 },
   lbl_dias: { x: 519.1, y: 290.4, fontSize: 8.0, w: 60 },
   val_dias: { x: 578, y: 287.6, fontSize: 10.3, w: 40 },
   lbl_proxima: { x: 636.5, y: 290.4, fontSize: 8.0, w: 90 },
-  val_proxima: { x: 722, y: 287.6, fontSize: 10.3, w: 80 },
+  val_proxima: { x: 706, y: 287.6, fontSize: 10.3, w: 80 },
 
   /* ---- linha do medidor ---- */
   med_postos: { x: 163.0, y: 638.5, fontSize: 6.6, w: 48 },
@@ -85,7 +85,7 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
 
   /* ---- rodapé (ficha do boleto) ---- */
   rodape_referencia: { x: 47.0, y: 905.0, fontSize: 19.5, w: 100 },
-  rodape_vencimento: { x: 452, y: 901.4, fontSize: 14.0, w: 80 },
+  rodape_vencimento: { x: 450, y: 904.0, fontSize: 13.0, w: 84 },
   rodape_total: { x: 640.0, y: 903.6, fontSize: 17.0, w: 110 },
 
   /* ---- página 2 ---- */
