@@ -155,11 +155,19 @@ export function qrSvg(value: string, sizePx: number): string {
   const modulePx = Math.max(1, Math.floor(sizePx / total));
   const renderedSize = total * modulePx;
 
+  // Módulos ligeiramente menores que a célula: evita o efeito "estourado"
+  // (pontos grudados) e mantém os vãos brancos visíveis, deixando o QR
+  // com aparência mais clara, como no impresso.
+  const m = 0.88;
+  const off = (1 - m) / 2;
   let rects = "";
   for (let r = 0; r < count; r++) {
     for (let c = 0; c < count; c++) {
-      if (qr.isDark(r, c)) rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1"/>`;
+      if (qr.isDark(r, c)) {
+        rects += `<rect x="${(c + quiet + off).toFixed(3)}" y="${(r + quiet + off).toFixed(3)}" width="${m}" height="${m}"/>`;
+      }
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${renderedSize}" height="${renderedSize}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><g fill="#000000" shape-rendering="crispEdges">${rects}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${renderedSize}" height="${renderedSize}" viewBox="0 0 ${total} ${total}"><rect width="${total}" height="${total}" fill="#ffffff"/><g fill="#1c1c1c">${rects}</g></svg>`;
 }
+
