@@ -5,11 +5,13 @@ import { DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.webp";
 import { useOpenTickets } from "@/hooks/use-open-tickets";
+import NovidadesDialog from "@/components/NovidadesDialog";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, History, Headphones,
+  ShieldCheck, Zap, Clock, History, Headphones, Smartphone,
 
 } from "lucide-react";
+
 
 
 
@@ -105,7 +107,9 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-6">
+      <NovidadesDialog />
       {/* Hero */}
+
       <section className="relative overflow-hidden rounded-2xl border border-border/60 p-5 sm:p-6 shadow-[0_24px_60px_-34px_hsl(var(--accent)/0.6),inset_0_1px_0_hsl(var(--foreground)/0.07)]">
         <div className="absolute inset-0 gradient-primary opacity-[0.13]" />
         <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-accent/25 blur-3xl animate-glow-pulse" />
