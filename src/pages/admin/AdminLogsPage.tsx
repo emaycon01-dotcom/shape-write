@@ -285,6 +285,8 @@ export default function AdminLogsPage() {
           </tbody>
         </table>
       </div>
+      )}
+
     </div>
   );
 }
