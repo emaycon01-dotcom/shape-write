@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, FlaskConical, Trash2, User, Receipt, Landmark, ListOrdered } from "lucide-react";
+import { Loader2, FlaskConical, Trash2, User, Receipt } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadTimFieldPositions } from "@/lib/tim-align";
 import templateTimP1Url from "@/assets/template-tim-p1-hq.webp";
@@ -13,6 +13,8 @@ import { maskDate, maskCPF, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
+import { AutoSection } from "@/components/AutoSection";
+import { autoTim, baseDatas, fmtDate, refMesAbrev, addDays } from "@/lib/fatura-auto";
 
 interface TimLinha {
   desc: string;
@@ -81,40 +83,48 @@ const initial: TimFormData = {
 };
 
 const exemplo: TimFormData = {
+  ...initial,
   nome: "EVANDRO DA SILVA COUTO",
-  cpf: "05425098146",
+  cpf: "054.250.981-46",
   endereco: "RUA RENARIO, 54, ESQUINA",
   bairro: "JARDIM COLIBRI",
   cep: "79071-590",
   municipio: "CAMPO GRANDE",
   uf: "MS",
-
-  cliente: "1.263437159",
-  acesso: "67-98119-5324",
-  numFatura: "4483364151",
-
-  dataEmissao: "14/05/2021",
-  dataPostagem: "24/05/2021",
-  vencimento: "07/06/2021",
-  referencia: "MAI/2021",
-
-  periodoConta: "14/ABR A 13/MAI",
-  plano: "TIM Controle Smart 2 0",
   total: "54,99",
-
-  periodoLinhas: "14/04 a 13/05",
-  diasLinhas: "30",
-
-  linhas: [
-    { desc: "TIM Controle Smart 2 0 (096/PÓS/SMP)", fran: "-", cons: "-", qtd: "1", val: "69,99" },
-    { desc: "Desconto Basico TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "1", val: "-3,00" },
-    { desc: "Desc Fidelizado TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "3/12", val: "-12,00" },
-    { desc: "5GB Internet", fran: "5GB", cons: "-", qtd: "1", val: "Incluído" },
-    { desc: "Minutos Locais e DDD com 41", fran: "Ilimitado", cons: "-", qtd: "1", val: "Incluído" },
-    { desc: "Ebook By Skeelo", fran: "-", cons: "-", qtd: "1", val: "Incluído" },
-    { desc: "TIM Banca Jornais II", fran: "-", cons: "-", qtd: "1", val: "Incluído" },
-  ],
+  vencimento: "07/06/2021",
 };
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** Preenche automaticamente tudo que não é dado do cliente. */
+function aplicarAuto(f: TimFormData, force: boolean): TimFormData {
+  const d = baseDatas(f.vencimento);
+  const fim = addDays(d.venc, -25);
+  const ini = addDays(fim, -30);
+  const periodoLinhas = `${pad2(ini.getDate())}/${pad2(ini.getMonth() + 1)} a ${pad2(fim.getDate())}/${pad2(fim.getMonth() + 1)}`;
+  const a = autoTim(f.total);
+  const keep = (cur: string, next: string) => (force || !String(cur ?? "").trim() ? next : cur);
+  const linhasVazias = f.linhas.every((l) => !l.desc.trim() && !l.val.trim());
+
+  return {
+    ...f,
+    vencimento: keep(f.vencimento, fmtDate(d.venc)),
+    referencia: keep(f.referencia, refMesAbrev(fim)),
+    dataEmissao: keep(f.dataEmissao, fmtDate(addDays(d.venc, -24))),
+    dataPostagem: keep(f.dataPostagem, fmtDate(addDays(d.venc, -14))),
+
+    cliente: keep(f.cliente, a.cliente),
+    acesso: keep(f.acesso, a.acesso),
+    numFatura: keep(f.numFatura, a.numFatura),
+    plano: keep(f.plano, a.plano),
+    periodoConta: keep(f.periodoConta, periodoLinhas.toUpperCase().replace(" A ", " A ")),
+    periodoLinhas: keep(f.periodoLinhas, periodoLinhas),
+    diasLinhas: keep(f.diasLinhas, "30"),
+
+    linhas: force || linhasVazias ? a.linhas.map((l) => ({ ...l })) : f.linhas,
+  };
+}
 
 function Section({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
   return (
@@ -215,6 +225,11 @@ export default function TimFormPage() {
       linhas: prev.linhas.map((l, i) => (i === index ? { ...l, [key]: value } : l)),
     }));
 
+  const randomizar = () => {
+    setForm((prev) => aplicarAuto(prev, true));
+    toast({ title: "Mensalidades e códigos gerados automaticamente" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -222,32 +237,39 @@ export default function TimFormPage() {
       toast({ title: "Informe o nome do titular", variant: "destructive" });
       return;
     }
+    if (!form.total.trim()) {
+      toast({ title: "Informe o valor total da fatura", variant: "destructive" });
+      return;
+    }
     setLoading(true);
+
+    const f = aplicarAuto(form, false);
+    setForm(f);
 
     try {
       const templateBase64 = await loadTemplateBase64(templateTimP1Url);
 
       const bodyData: Record<string, string | undefined | unknown> = {
-        nome: form.nome,
-        cpf: form.cpf,
-        endereco: form.endereco,
-        bairro: form.bairro,
-        cep: form.cep,
-        municipio: form.municipio,
-        uf: form.uf,
+        nome: f.nome,
+        cpf: f.cpf,
+        endereco: f.endereco,
+        bairro: f.bairro,
+        cep: f.cep,
+        municipio: f.municipio,
+        uf: f.uf,
 
-        cliente: form.cliente,
-        acesso: form.acesso,
-        num_fatura: form.numFatura,
+        cliente: f.cliente,
+        acesso: f.acesso,
+        num_fatura: f.numFatura,
 
-        data_emissao: form.dataEmissao,
-        data_postagem: form.dataPostagem,
-        vencimento: form.vencimento,
-        referencia: form.referencia,
+        data_emissao: f.dataEmissao,
+        data_postagem: f.dataPostagem,
+        vencimento: f.vencimento,
+        referencia: f.referencia,
 
-        periodo_conta: form.periodoConta,
-        plano: form.plano,
-        total: form.total,
+        periodo_conta: f.periodoConta,
+        plano: f.plano,
+        total: f.total,
 
         template_base64: templateBase64,
         field_positions: loadTimFieldPositions() ?? undefined,
@@ -260,15 +282,13 @@ export default function TimFormPage() {
         const n = Number(cleaned);
         return Number.isFinite(n) ? n : 0;
       };
-      const subtotal = form.linhas
-        .slice(0, 3)
-        .reduce((acc, l) => acc + parseValor(l.val), 0);
+      const subtotal = f.linhas.slice(0, 3).reduce((acc, l) => acc + parseValor(l.val), 0);
       const subtotalFmt = subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
       const linhasComSubtotal: TimLinha[] = [
-        ...form.linhas.slice(0, 3),
+        ...f.linhas.slice(0, 3),
         { desc: "Subtotal", fran: "", cons: "", qtd: "", val: subtotalFmt },
-        ...form.linhas.slice(3),
+        ...f.linhas.slice(3),
       ];
 
       linhasComSubtotal.forEach((l, i) => {
@@ -277,8 +297,8 @@ export default function TimFormPage() {
         bodyData[`l${n}_fran`] = l.fran;
         bodyData[`l${n}_cons`] = l.cons;
         bodyData[`l${n}_qtd`] = l.qtd;
-        bodyData[`l${n}_dias`] = n === 4 ? "" : form.diasLinhas;
-        bodyData[`l${n}_per`] = n === 4 ? "" : form.periodoLinhas;
+        bodyData[`l${n}_dias`] = n === 4 ? "" : f.diasLinhas;
+        bodyData[`l${n}_per`] = n === 4 ? "" : f.periodoLinhas;
         bodyData[`l${n}_val`] = l.val;
       });
 
@@ -319,8 +339,8 @@ export default function TimFormPage() {
         Comprovante de Residência — TIM
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Fatura TIM S.A. em A4. Somente os campos removidos do documento são preenchidos — todo o restante do
-        original (débito automático, impostos, autenticação mecânica e código de barras) é preservado.
+        Informe apenas os dados do cliente e o valor total da fatura. Plano, descontos, subtotal, períodos e números
+        de cliente/fatura são gerados automaticamente e fecham com o total.
       </p>
 
       <div className="mb-5 flex flex-wrap gap-2">
@@ -356,35 +376,28 @@ export default function TimFormPage() {
           </div>
         </Section>
 
-        <Section icon={Receipt} title="Dados da fatura">
-          <Field label="Cliente nº" value={form.cliente} onChange={set("cliente")} placeholder="1.263437159" />
-          <Field label="Acesso (linha)" value={form.acesso} onChange={set("acesso")} placeholder="67-98119-5324" />
-          <Field label="Fatura nº" value={form.numFatura} onChange={set("numFatura")} placeholder="4483364151" />
-          <Field label="Emissão" value={form.dataEmissao} onChange={(v) => set("dataEmissao")(maskDate(v))} placeholder="14/05/2021" />
-          <Field label="Postagem" value={form.dataPostagem} onChange={(v) => set("dataPostagem")(maskDate(v))} placeholder="24/05/2021" />
-          <Field label="Vencimento" value={form.vencimento} onChange={(v) => set("vencimento")(maskDate(v))} placeholder="07/06/2021" />
-          <Field label="Mês de referência" value={form.referencia} onChange={set("referencia")} placeholder="MAI/2021" />
+        <Section icon={Receipt} title="Fatura">
           <Field label="Valor total (R$)" value={form.total} onChange={set("total")} placeholder="54,99" />
+          <Field label="Vencimento" value={form.vencimento} onChange={(v) => set("vencimento")(maskDate(v))} placeholder="07/06/2021" />
+          <Field label="Acesso (linha) — opcional" value={form.acesso} onChange={set("acesso")} placeholder="automático" />
+          <Field label="Mês de referência — opcional" value={form.referencia} onChange={set("referencia")} placeholder="automático" />
         </Section>
 
-        <Section icon={Landmark} title="Resumo da conta">
-          <Field label="Período da conta" value={form.periodoConta} onChange={set("periodoConta")} placeholder="14/ABR A 13/MAI" />
-          <Field label="Plano" value={form.plano} onChange={set("plano")} placeholder="TIM Controle Smart 2 0" />
-          <Field label="Período das linhas da tabela" value={form.periodoLinhas} onChange={set("periodoLinhas")} placeholder="14/04 a 13/05" />
-          <Field label="Nº dias das linhas da tabela" value={form.diasLinhas} onChange={set("diasLinhas")} placeholder="30" />
-        </Section>
+        <AutoSection
+          title="Plano, descontos e códigos"
+          onRandomize={randomizar}
+          description="Plano, mensalidade, descontos, subtotal, períodos, nº de cliente e nº da fatura são gerados automaticamente somando exatamente o valor total informado."
+        >
+          <Field label="Cliente nº" value={form.cliente} onChange={set("cliente")} placeholder="automático" />
+          <Field label="Fatura nº" value={form.numFatura} onChange={set("numFatura")} placeholder="automático" />
+          <Field label="Emissão" value={form.dataEmissao} onChange={(v) => set("dataEmissao")(maskDate(v))} placeholder="automático" />
+          <Field label="Postagem" value={form.dataPostagem} onChange={(v) => set("dataPostagem")(maskDate(v))} placeholder="automático" />
+          <Field label="Plano" value={form.plano} onChange={set("plano")} placeholder="automático" />
+          <Field label="Período da conta" value={form.periodoConta} onChange={set("periodoConta")} placeholder="automático" />
+          <Field label="Período das linhas" value={form.periodoLinhas} onChange={set("periodoLinhas")} placeholder="automático" />
+          <Field label="Nº dias das linhas" value={form.diasLinhas} onChange={set("diasLinhas")} placeholder="30" />
 
-        <div className="glass space-y-4 rounded-xl p-5">
-          <div className="flex items-center gap-2">
-            <ListOrdered className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Mensalidades (linhas da tabela)</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Deixe em branco as linhas que não devem aparecer. A linha 1 é o plano contratado (negrito). O período e o
-            nº de dias definidos em "Resumo da conta" são aplicados a todas as linhas. A linha de Subtotal é gerada
-            automaticamente somando as 3 primeiras linhas.
-          </p>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:col-span-2">
             {form.linhas.map((linha, i) => {
               const posicao = i < 3 ? i + 1 : i + 2;
               return (
@@ -393,7 +406,7 @@ export default function TimFormPage() {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="sm:col-span-2">
                       <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Descrição</label>
-                      <Input value={linha.desc} onChange={(e) => setLinha(i, "desc")(e.target.value)} className="h-10 rounded-lg" placeholder="TIM Controle Smart 2 0 (096/PÓS/SMP)" />
+                      <Input value={linha.desc} onChange={(e) => setLinha(i, "desc")(e.target.value)} className="h-10 rounded-lg" placeholder="automático" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -411,14 +424,14 @@ export default function TimFormPage() {
                     </div>
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Valor</label>
-                      <Input value={linha.val} onChange={(e) => setLinha(i, "val")(e.target.value)} className="h-10 rounded-lg" placeholder="69,99" />
+                      <Input value={linha.val} onChange={(e) => setLinha(i, "val")(e.target.value)} className="h-10 rounded-lg" placeholder="automático" />
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </AutoSection>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
           {loading ? (
