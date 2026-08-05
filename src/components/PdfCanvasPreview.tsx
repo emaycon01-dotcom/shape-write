@@ -1,19 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { subscribePdfLoading } from "@/lib/pdf-loading";
-
-const pdfJsPromise = Promise.all([
-  import("pdfjs-dist"),
-  import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
-]).then(([pdfjs, worker]) => {
-  pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
-  return pdfjs;
-});
+import { warmPdfViewer } from "@/lib/pdf-viewer";
 
 type PdfCanvasPreviewProps = {
   pdfDataUrl: string;
   title: string;
 };
+
 
 function dataUrlToBytes(dataUrl: string): Uint8Array {
   const comma = dataUrl.indexOf(",");
