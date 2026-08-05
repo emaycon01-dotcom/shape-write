@@ -136,6 +136,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         creditos: 1,
         qrcode: true,
       },
+      {
+        id: "receita-medica",
+        titulo: "Receita Médica",
+        descricao: "Receita Unimed com cidade da unidade, medicamentos e QR Code",
+        icon: Pill,
+        rota: "/dashboard/documents/receita-medica",
+        creditos: 1,
+        qrcode: true,
+      },
     ],
   },
 ];
