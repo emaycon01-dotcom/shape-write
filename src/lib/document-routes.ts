@@ -8,6 +8,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "crlv": "/dashboard/documents/crlv",
   "cha": "/dashboard/documents/cha",
   "diploma": "/dashboard/documents/diploma",
+  "craf": "/dashboard/documents/craf",
 
   "cha-amador": "/dashboard/documents/cha-amador",
   "cnh-nautica": "/dashboard/documentos-fisicos/carteirinhas/cnh-nautica",
@@ -34,6 +35,7 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "crlv": "CRLV Digital",
   "cha": "CNH Marítima (CHA)",
   "diploma": "Diploma Superior",
+  "craf": "CRAF - Registro de Arma",
 
   "cha-amador": "CHÁ Amador Digital",
   "cnh-nautica": "Arrais Amador Físico",

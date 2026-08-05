@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -64,6 +64,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
 
       },
 
+      {
+        id: "craf",
+        titulo: "CRAF - Registro de Arma",
+        descricao: "Certificado de Registro de Arma de Fogo do Exército com QR Code",
+        icon: Crosshair,
+        rota: "/dashboard/documents/craf",
+        creditos: 1,
+        qrcode: true,
+      },
     ],
   },
   {
