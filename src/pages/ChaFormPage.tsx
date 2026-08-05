@@ -10,7 +10,7 @@ import { Upload, X, User, Anchor, Ship, Loader2, FlaskConical, Trash2 } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { loadChaFieldPositions } from "@/lib/cha-align";
 import testFotoUrl from "@/assets/test-foto.png";
-import templateChaUrl from "@/assets/template-cha-bg-hq.jpg";
+import templateChaUrl from "@/assets/template-cha-bg-hq.webp";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";

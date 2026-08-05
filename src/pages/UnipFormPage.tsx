@@ -10,7 +10,7 @@ import { GraduationCap, University, Loader2, FlaskConical, Trash2, User, FileSig
 import { useToast } from "@/hooks/use-toast";
 import { loadUnipFieldPositions } from "@/lib/unip-align";
 import { MODALIDADES, type Modalidade, cursosPorModalidade, TOTAL_CURSOS } from "@/lib/diploma-cursos";
-import templateP1Url from "@/assets/template-unip-p1-hq.jpg";
+import templateP1Url from "@/assets/template-unip-p1-hq.webp";
 import templateP2Url from "@/assets/template-unip-p2-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits } from "@/lib/masks";

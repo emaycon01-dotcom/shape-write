@@ -682,6 +682,29 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
 }
 
 /**
+ * Cache do HTML de PREVIEW.
+ * Voltar ao formulário e pré-visualizar os mesmos dados repetia toda a ida e
+ * volta com a Edge Function (montagem do HTML + tráfego) sem nenhuma mudança
+ * no resultado. Guardamos apenas o HTML JÁ TOKENIZADO (poucos KB — os
+ * templates continuam fora), então o cache não pesa na memória.
+ *
+ * Nunca é usado no documento final: lá o QR precisa ser registrado de verdade
+ * pela função, e o HTML é sempre diferente do preview.
+ */
+const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>();
+const PREVIEW_CACHE_MAX = 2;
+
+function previewSignature(functionName: string, body: Record<string, unknown>): string {
+  // Strings pesadas (foto, assinatura, template) entram como tamanho + amostra:
+  // suficiente para detectar troca de arquivo sem varrer megabytes.
+  const seen = JSON.stringify(body, (_k, v) =>
+    typeof v === "string" && v.length > 5_000 ? `${v.length}:${v.slice(0, 64)}` : v,
+  );
+  return `${functionName}::${seen}`;
+}
+
+
+/**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
  * Pede o HTML à Edge Function e renderiza o PDF localmente.
  * Se a função devolver um PDF pronto (modos legados/ações), apenas repassa.
@@ -707,21 +730,43 @@ export async function invokeGeneratePdf(
   try {
     const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
 
-    const { data, error } = await supabase.functions.invoke(functionName, {
-      body: isAction ? body : { ...light, render: "html" },
-    });
+    const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
+    const cached = cacheKey ? previewHtmlCache.get(cacheKey) : undefined;
 
-    if (error) return { data, error: error as Error };
-    if (!data || typeof data !== "object") return { data, error: null };
+    let payload: Record<string, unknown>;
+    let rawHtml: string;
 
-    let payload = data as Record<string, unknown>;
-    if (typeof payload.html !== "string") return { data: payload, error: null };
+    if (cached) {
+      payload = cached.payload;
+      rawHtml = cached.html;
+    } else {
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: isAction ? body : { ...light, render: "html" },
+      });
 
-    let html = map.size ? restoreHeavyAssets(payload.html, map) : payload.html;
+      if (error) return { data, error: error as Error };
+      if (!data || typeof data !== "object") return { data, error: null };
+
+      payload = data as Record<string, unknown>;
+      if (typeof payload.html !== "string") return { data: payload, error: null };
+      rawHtml = payload.html;
+
+      if (cacheKey) {
+        previewHtmlCache.set(cacheKey, { html: rawHtml, payload });
+        while (previewHtmlCache.size > PREVIEW_CACHE_MAX) {
+          const oldest = previewHtmlCache.keys().next().value as string | undefined;
+          if (!oldest) break;
+          previewHtmlCache.delete(oldest);
+        }
+      }
+    }
+
+    let html = map.size ? restoreHeavyAssets(rawHtml, map) : rawHtml;
 
     // Alguma função que não repassa o marcador? Refaz a chamada do jeito
     // original — nenhum módulo depende dessa otimização para funcionar.
     if (html === null) {
+      if (cacheKey) previewHtmlCache.delete(cacheKey);
       const retry = await supabase.functions.invoke(functionName, {
         body: { ...body, render: "html" },
       });
@@ -730,6 +775,7 @@ export async function invokeGeneratePdf(
       if (typeof payload.html !== "string") return { data: payload, error: null };
       html = payload.html;
     }
+
 
     try {
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
