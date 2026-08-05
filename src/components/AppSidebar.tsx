@@ -83,7 +83,7 @@ export function AppSidebar() {
     ));
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="offcanvas">
       <SidebarContent className="flex flex-col h-full">
         {!collapsed && (
           <div className="px-4 py-5 flex items-center">
