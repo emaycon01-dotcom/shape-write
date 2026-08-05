@@ -406,7 +406,7 @@ export default function DocumentsPage() {
                   {m.manutencao && <Badge tone="maintenance" icon={Wrench}>Em manutenção</Badge>}
                   {!m.emBreve && !m.manutencao && m.creditos != null && (
                     <span className="text-[10px] font-semibold text-accent">
-                      {m.creditos} CRÉDITO{m.creditos > 1 ? "s" : ""}
+                      {m.creditos} CRÉDITO{m.creditos > 1 ? "S" : ""}
                     </span>
                   )}
                 </div>
