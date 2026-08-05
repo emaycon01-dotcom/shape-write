@@ -26,6 +26,9 @@ import { OBITO_ALIGN_STORAGE_KEY, loadObitoFieldPositions } from "@/lib/obito-al
 import { COMPROVANTE_ALIGN_STORAGE_KEY, loadComprovanteFieldPositions } from "@/lib/comprovante-align";
 import templateEnelP1Url from "@/assets/template-enel-p1-hq.webp";
 import templateEnelP2Url from "@/assets/template-enel-p2-hq.webp";
+import { COELBA_ALIGN_STORAGE_KEY, loadCoelbaFieldPositions } from "@/lib/coelba-align";
+import templateCoelbaP1Url from "@/assets/template-coelba-p1-hq.webp";
+import templateCoelbaP2Url from "@/assets/template-coelba-p2-hq.webp";
 import templateObitoBgUrl from "@/assets/template-obito-bg-hq.webp";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
