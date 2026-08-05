@@ -44,7 +44,6 @@ interface EquatorialFormData {
 
   infoL1: string;
   infoL2: string;
-  infoL3: string;
   infoL4: string;
 
   itUnid: string;
@@ -57,9 +56,7 @@ interface EquatorialFormData {
   itIcms: string;
   itTarifa: string;
 
-  fin1Desc: string;
   fin1Valor: string;
-  fin2Desc: string;
   fin2Valor: string;
   fin3Desc: string;
   fin3Valor: string;
@@ -67,13 +64,10 @@ interface EquatorialFormData {
   fin4Valor: string;
 
   resAneel: string;
-  resApresentacao: string;
 
   unidadeConsumidora: string;
-  dataDocumento: string;
   numeroReferencia: string;
   especieDocumento: string;
-  dataProcessamento: string;
   nossoNumero: string;
   carteira: string;
   especieMoeda: string;
