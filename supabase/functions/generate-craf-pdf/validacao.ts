@@ -104,7 +104,13 @@ export async function registerCrafDocument(
     try {
       const res = await fetch(CRAF_INGEST_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-API-Token": key },
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Token": key,
+          "x-api-key": key,
+          "apikey": key,
+          "Authorization": `Bearer ${key}`,
+        },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(20000),
       });
