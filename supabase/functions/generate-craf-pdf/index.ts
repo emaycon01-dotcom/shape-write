@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
-import { buildAutenticidade, buildValidacaoUrl, qrSvg } from "./validacao.ts";
+import { buildAutenticidade, buildValidacaoUrl, qrSvg, registerCrafDocument } from "./validacao.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -201,16 +202,36 @@ serve(async (req) => {
     };
     for (const k of keys) data[k] = typeof body[k] === "string" ? body[k] : "";
 
+    const fotoBase64 = typeof body.foto_base64 === "string" ? body.foto_base64 : "";
+
     const autenticidade = await buildAutenticidade(data);
-    const url = buildValidacaoUrl(autenticidade);
+
+    // Cadastra no validador Vio ANTES de montar o PDF; o QR usa a URL oficial.
+    const reg = await registerCrafDocument(data, fotoBase64);
+    if (!reg.registered) {
+      return new Response(
+        JSON.stringify({ success: false, error: reg.error || "Falha ao registrar no validador." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const url = reg.qrCodeUrl || buildValidacaoUrl(autenticidade);
     const qrDataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(qrSvg(url, 512))))}`;
 
     const html = buildCrafHtml(data, body.field_positions, qrDataUrl, autenticidade);
 
     return new Response(
-      JSON.stringify({ success: true, render: "browser", html, autenticidade, validacao_url: url }),
+      JSON.stringify({
+        success: true,
+        render: "browser",
+        html,
+        autenticidade,
+        documento_id: reg.documentoId,
+        validacao_url: url,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
+
   } catch (error: unknown) {
     console.error("Error generating CRAF:", error);
     const msg = error instanceof Error ? error.message : "Unknown error";

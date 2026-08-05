@@ -1,17 +1,47 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Crosshair, Loader2, FlaskConical, Trash2, FileText, User, Shield } from "lucide-react";
+import { Crosshair, Loader2, FlaskConical, Trash2, FileText, User, Shield, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadCrafFieldPositions } from "@/lib/craf-align";
 import templateCrafUrl from "@/assets/template-craf-bg-hq.jpg";
+import testFotoUrl from "@/assets/test-foto.png";
+
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
+
+/** Redimensiona a foto 3x4 para ~600px de largura em JPEG (< 300 KB). */
+function compressFoto(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Falha ao ler a imagem"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Imagem inválida"));
+      img.onload = () => {
+        const maxW = 600;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas indisponível"));
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 
 interface CrafFormData {
   validade: string;
@@ -64,8 +94,11 @@ export default function CrafFormPage() {
   const { getDocument, loadDocumentInfo, updateDocument } = useDocuments();
 
   const [form, setForm] = useState<CrafFormData>(initial);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const fotoRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -100,7 +133,9 @@ export default function CrafFormPage() {
           assinante: b.assinante || p.assinante,
           cidade: b.cidade || p.cidade,
         }));
+        if (b.foto_base64) setFotoPreview(b.foto_base64);
         setHydrated(true);
+
       } catch { /* payload inválido */ }
     })();
     return () => { cancelled = true; };
@@ -114,8 +149,10 @@ export default function CrafFormPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
 
-  const fillTest = () => {
+  const fillTest = async () => {
+    setFotoPreview(await loadTemplateBase64(testFotoUrl).catch(() => ""));
     setForm({
+
       ...initial,
       validade: "30/03/2032",
       nome: "Bruno Henrique Couto Neves",
@@ -133,12 +170,32 @@ export default function CrafFormPage() {
 
   const clearForm = () => {
     setForm(initial);
+    setFotoPreview(null);
+    if (fotoRef.current) fotoRef.current.value = "";
     toast({ title: "Formulário limpo!" });
+  };
+
+  const handleFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setFotoPreview(await compressFoto(file));
+    } catch {
+      toast({ title: "Não foi possível carregar a foto", variant: "destructive" });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!fotoPreview) {
+      toast({
+        title: "Foto 3x4 obrigatória",
+        description: "A foto do titular é exibida na validação do QR Code.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLoading(true);
 
     try {
@@ -160,10 +217,12 @@ export default function CrafFormPage() {
         data_expedicao: form.dataExpedicao,
         assinante: form.assinante,
         cidade: form.cidade,
+        foto_base64: fotoPreview,
 
         template_base64: templateBase64,
         field_positions: loadCrafFieldPositions() ?? undefined,
       };
+
 
       const { data, error } = await invokeGeneratePdf("generate-craf-pdf", {
         body: { ...bodyData, preview: !isEditMode },
@@ -237,9 +296,36 @@ export default function CrafFormPage() {
           <SectionHeader icon={User} title="Dados do titular" />
 
           <div className="space-y-1.5">
+            <FieldLabel required>Foto 3x4 (validação do QR Code)</FieldLabel>
+            {fotoPreview ? (
+              <div className="relative inline-block">
+                <img src={fotoPreview} alt="Foto do titular" className="h-32 w-24 rounded-lg border border-border object-cover" />
+                <button
+                  type="button"
+                  onClick={() => { setFotoPreview(null); if (fotoRef.current) fotoRef.current.value = ""; }}
+                  className="absolute -top-2 -right-2 rounded-full bg-destructive p-1 text-destructive-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fotoRef.current?.click()}
+                className="flex h-32 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-secondary/50 text-muted-foreground"
+              >
+                <Upload className="h-5 w-5" />
+                <span className="text-[11px]">Enviar</span>
+              </button>
+            )}
+            <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={handleFoto} />
+          </div>
+
+          <div className="space-y-1.5">
             <FieldLabel required>Nome completo</FieldLabel>
             <Input value={form.nome} onChange={set("nome")} placeholder="Bruno Henrique Couto Neves" className={inputCls} required />
           </div>
+
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
