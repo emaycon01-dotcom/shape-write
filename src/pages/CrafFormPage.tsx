@@ -8,6 +8,8 @@ import { Crosshair, Loader2, FlaskConical, Trash2, FileText, User, Shield, Uploa
 import { useToast } from "@/hooks/use-toast";
 import { loadCrafFieldPositions } from "@/lib/craf-align";
 import templateCrafUrl from "@/assets/template-craf-bg-hq.jpg";
+import testFotoUrl from "@/assets/test-foto.png";
+
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
@@ -147,8 +149,10 @@ export default function CrafFormPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
 
-  const fillTest = () => {
+  const fillTest = async () => {
+    setFotoPreview(await loadTemplateBase64(testFotoUrl).catch(() => ""));
     setForm({
+
       ...initial,
       validade: "30/03/2032",
       nome: "Bruno Henrique Couto Neves",
