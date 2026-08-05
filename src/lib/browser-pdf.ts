@@ -624,6 +624,64 @@ type InvokeResult = { data: any; error: Error | null };
 let generationInProgress = false;
 
 /**
+ * Transporte econômico dos assets pesados.
+ *
+ * Antes, cada geração SUBIA o template em base64 (~2–3 MB) para a Edge Function
+ * e BAIXAVA o mesmo base64 de volta dentro do HTML — ~6 MB de rede por preview
+ * e mais 6 MB no documento final. Em 4G isso era a maior parte do tempo de
+ * espera, sem relação nenhuma com a qualidade do render.
+ *
+ * Agora enviamos um marcador curto no lugar de cada data URI grande e
+ * recolocamos o valor original no HTML devolvido — byte a byte, então o
+ * documento renderizado é EXATAMENTE o mesmo. Se a função não devolver todos os
+ * marcadores, refazemos a chamada do jeito antigo (sem marcador), garantindo
+ * que nenhum módulo quebre.
+ */
+const ASSET_TOKEN_MIN_BYTES = 100_000;
+
+function tokenizeHeavyAssets(body: Record<string, unknown>) {
+  const map = new Map<string, string>();
+  let i = 0;
+  // Só os TEMPLATES de fundo entram no marcador. Fotos e assinaturas continuam
+  // seguindo inteiras, porque algumas funções inspecionam o prefixo `data:`
+  // desses campos antes de montar o HTML.
+  const isTemplateKey = (key: string) => /template/i.test(key) && /base64|bg|fundo|img/i.test(key);
+  const walk = (value: unknown, key = ""): unknown => {
+    if (typeof value === "string") {
+      if (
+        isTemplateKey(key) &&
+        value.length >= ASSET_TOKEN_MIN_BYTES &&
+        value.startsWith("data:image")
+      ) {
+        const token = `__LVASSET_${i++}__`;
+        map.set(token, value);
+        return token;
+      }
+      return value;
+    }
+    if (Array.isArray(value)) return value.map((v) => walk(v, key));
+    if (value && typeof value === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = walk(v, k);
+      return out;
+    }
+    return value;
+  };
+  const light = walk(body) as Record<string, unknown>;
+  return { light, map };
+}
+
+
+function restoreHeavyAssets(html: string, map: Map<string, string>): string | null {
+  let out = html;
+  for (const [token, value] of map) {
+    if (!out.includes(token)) return null; // marcador perdido → usa o caminho antigo
+    out = out.split(token).join(value);
+  }
+  return out;
+}
+
+/**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
  * Pede o HTML à Edge Function e renderiza o PDF localmente.
  * Se a função devolver um PDF pronto (modos legados/ações), apenas repassa.
@@ -636,6 +694,7 @@ export async function invokeGeneratePdf(
   const isAction = typeof (body as { action?: unknown }).action === "string";
   const isPreview = body.preview === true;
 
+
   // Um toque duplo antes do React desabilitar o botão iniciava dois iframes,
   // dois conjuntos de canvases e duas cópias do template ao mesmo tempo. Em
   // celulares isso era suficiente para derrubar o processo do navegador.
@@ -646,22 +705,38 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
+    const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
+
     const { data, error } = await supabase.functions.invoke(functionName, {
-      body: isAction ? body : { ...body, render: "html" },
+      body: isAction ? body : { ...light, render: "html" },
     });
 
     if (error) return { data, error: error as Error };
     if (!data || typeof data !== "object") return { data, error: null };
 
-    const payload = data as Record<string, unknown>;
+    let payload = data as Record<string, unknown>;
     if (typeof payload.html !== "string") return { data: payload, error: null };
+
+    let html = map.size ? restoreHeavyAssets(payload.html, map) : payload.html;
+
+    // Alguma função que não repassa o marcador? Refaz a chamada do jeito
+    // original — nenhum módulo depende dessa otimização para funcionar.
+    if (html === null) {
+      const retry = await supabase.functions.invoke(functionName, {
+        body: { ...body, render: "html" },
+      });
+      if (retry.error) return { data: retry.data, error: retry.error as Error };
+      payload = (retry.data ?? {}) as Record<string, unknown>;
+      if (typeof payload.html !== "string") return { data: payload, error: null };
+      html = payload.html;
+    }
 
     try {
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const html = payload.html;
       const pdfBase64 = await renderHtmlToDocument(html, isPreview);
+
 
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
