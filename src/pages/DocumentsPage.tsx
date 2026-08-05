@@ -134,6 +134,15 @@ const MODULOS: Categoria[] = [
         creditos: 1,
       },
       {
+        id: "comprovante-enel",
+        titulo: "Comprovante de Residência",
+        descricao: "Fatura de energia Enel em 2 páginas, com código de barras e QR Code PIX",
+        icon: FileText,
+        rota: "/dashboard/documents/comprovante-enel",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
         id: "declaracao-escolar",
         titulo: "Declaração Escolar",
         descricao: "Declaração de conclusão com brasão do estado selecionado",

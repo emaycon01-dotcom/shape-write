@@ -15,6 +15,7 @@ import { RECEITA_ALIGN_STORAGE_KEY } from "@/lib/receita-align";
 import { CRAF_ALIGN_STORAGE_KEY } from "@/lib/craf-align";
 import { UNIP_ALIGN_STORAGE_KEY } from "@/lib/unip-align";
 import { ANHANGUERA_ALIGN_STORAGE_KEY } from "@/lib/anhanguera-align";
+import { COMPROVANTE_ALIGN_STORAGE_KEY } from "@/lib/comprovante-align";
 
 /** Mapeia o tipo de documento para a chave usada no cache local. */
 export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
@@ -34,6 +35,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   craf: CRAF_ALIGN_STORAGE_KEY,
   unip: UNIP_ALIGN_STORAGE_KEY,
   anhanguera: ANHANGUERA_ALIGN_STORAGE_KEY,
+  comprovante: COMPROVANTE_ALIGN_STORAGE_KEY,
 };
 
 /**

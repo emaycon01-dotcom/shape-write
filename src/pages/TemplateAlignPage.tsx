@@ -23,6 +23,9 @@ import { UNIMED_ALIGN_STORAGE_KEY, loadUnimedFieldPositions } from "@/lib/unimed
 import { HISTORICO_ALIGN_STORAGE_KEY, loadHistoricoFieldPositions } from "@/lib/historico-align";
 import { CERTIDAO_ALIGN_STORAGE_KEY, loadCertidaoFieldPositions } from "@/lib/certidao-align";
 import { OBITO_ALIGN_STORAGE_KEY, loadObitoFieldPositions } from "@/lib/obito-align";
+import { COMPROVANTE_ALIGN_STORAGE_KEY, loadComprovanteFieldPositions } from "@/lib/comprovante-align";
+import templateEnelP1Url from "@/assets/template-enel-p1-hq.webp";
+import templateEnelP2Url from "@/assets/template-enel-p2-hq.webp";
 import templateObitoBgUrl from "@/assets/template-obito-bg-hq.webp";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
@@ -603,7 +606,48 @@ export const defaultAnhangueraFields: FieldDef[] = [
   { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 1064, y: 1732, fontSize: 8, w: 78, h: 78, color: "#999" },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera";
+// Defaults MUST match supabase/functions/generate-comprovante-pdf/index.ts COMPROVANTE_DEFAULT_POSITIONS
+export const defaultComprovanteFields: FieldDef[] = [
+  { id: "controle_topo", label: "Nº da conta (topo)", sampleText: "Nº 511917580397", x: 556, y: 35, fontSize: 9.6, w: 126 },
+  { id: "classificacao", label: "Classificação", sampleText: "B - B1 - CONVENCIONAL - Residencial - Residencial", x: 59.3, y: 111.6, fontSize: 7.4, w: 165 },
+  { id: "fornecimento", label: "Fornecimento", sampleText: "Monofásico", x: 293, y: 111.6, fontSize: 7.4, w: 45 },
+  { id: "leitura_anterior", label: "Data leitura anterior", sampleText: "05/03/2026", x: 377, y: 114.6, fontSize: 7.4, w: 82 },
+  { id: "leitura_atual", label: "Data leitura atual", sampleText: "04/04/2026", x: 459, y: 114.6, fontSize: 7.4, w: 65 },
+  { id: "dias_leitura", label: "Nº de dias", sampleText: "30", x: 524, y: 114.6, fontSize: 7.4, w: 59 },
+  { id: "proxima_leitura", label: "Próxima leitura", sampleText: "05/05/2026", x: 583, y: 114.6, fontSize: 7.4, w: 80 },
+  { id: "cliente_nome", label: "Nome do titular", sampleText: "MARIA APARECIDA DOS SANTOS", x: 59.3, y: 131, fontSize: 9.6, w: 285, bold: true },
+  { id: "cliente_endereco", label: "Endereço", sampleText: "RUA DAS ACACIAS, 128\nAPTO 42 BL B\nJARDIM SAO PAULO - CEP: 02040-030\nSÃO PAULO - SP", x: 59.3, y: 144, fontSize: 8.4, w: 285 },
+  { id: "cliente_documento", label: "CPF/CNPJ", sampleText: "CPF/CNPJ: 000.000.000-00", x: 59.3, y: 186, fontSize: 8.4, w: 285 },
+  { id: "instalacao", label: "Nº da instalação", sampleText: "203667891", x: 266, y: 158.4, fontSize: 12.6, w: 96, bold: true },
+  { id: "cliente_numero", label: "Nº do cliente", sampleText: "105371362", x: 266, y: 195.4, fontSize: 12.6, w: 96, bold: true },
+  { id: "chave_nf", label: "Chave da NF-e", sampleText: "3526 0207 5859 0000 0166 6600 0059 3886 6100 0106 7716", x: 374.3, y: 163.4, fontSize: 9.6, w: 224, bold: true },
+  { id: "nota_fiscal_serie", label: "Nota fiscal / série", sampleText: "NOTA FISCAL Nº 593886610 - SÉRIE B", x: 374.3, y: 174.4, fontSize: 9.6, w: 224, bold: true },
+  { id: "mes_ano", label: "Mês/Ano de referência", sampleText: "03/2026", x: 57, y: 229, fontSize: 9.6, w: 66, bold: true },
+  { id: "vencimento", label: "Vencimento", sampleText: "20/04/2026", x: 139, y: 229, fontSize: 9.6, w: 93, bold: true },
+  { id: "total_pagar", label: "Total a pagar", sampleText: "R$ 128,50", x: 234, y: 229, fontSize: 9.6, w: 131, bold: true },
+  { id: "mensagens", label: "Mensagens importantes", sampleText: "Consulte suas faturas pelo aplicativo Enel.\nEm caso de falta de energia, ligue 0800 72 72 196.", x: 57.1, y: 270, fontSize: 7.4, w: 625 },
+  { id: "faturamento", label: "Tabela de faturamento", sampleText: "USO SIST. DISTR. (TUSD) ...", x: 59.3, y: 444.5, fontSize: 7.4, w: 405 },
+  { id: "tributos", label: "Tabela de tributos", sampleText: "PIS / COFINS / ICMS", x: 466.9, y: 431.8, fontSize: 7.4, w: 130 },
+  { id: "consumo_historico", label: "Histórico de consumo", sampleText: "MAR/26 ... 158,000", x: 600.2, y: 440.4, fontSize: 7.4, w: 140 },
+  { id: "medicao", label: "Dados de medição", sampleText: "14038694 ENRG ATV ÚNICO", x: 59.1, y: 761.6, fontSize: 7.4, w: 275 },
+  { id: "debito_codigo", label: "Código débito automático", sampleText: "123456789", x: 624.2, y: 883.7, fontSize: 9.2, w: 90 },
+  { id: "linha_digitavel", label: "Linha digitável", sampleText: "83640000001 12345678901 12345678901 12345678901", x: 65.9, y: 972.5, fontSize: 12.4, w: 300 },
+  { id: "pagador", label: "Pagador", sampleText: "MARIA APARECIDA DOS SANTOS - 000.000.000-00", x: 125, y: 987, fontSize: 9.2, w: 350 },
+  { id: "data_emissao", label: "Rodapé: data de emissão", sampleText: "06/04/2026", x: 65.9, y: 1027.7, fontSize: 12.4, w: 120, bold: true },
+  { id: "nota_fiscal_rodape", label: "Rodapé: nota fiscal", sampleText: "593886610", x: 188.3, y: 1027.7, fontSize: 12.4, w: 120, bold: true },
+  { id: "referencia", label: "Rodapé: referência", sampleText: "03/2026", x: 313.4, y: 1027.7, fontSize: 12.4, w: 120, bold: true },
+  { id: "vencimento_rodape", label: "Rodapé: vencimento", sampleText: "20/04/2026", x: 442.5, y: 1027.7, fontSize: 12.4, w: 118, bold: true },
+  { id: "valor_documento", label: "Rodapé: valor", sampleText: "128,50", x: 563.5, y: 1027.7, fontSize: 12.4, w: 118, bold: true },
+  { id: "controle_rodape", label: "Rodapé: nº da conta", sampleText: "511917580397", x: 64.5, y: 1051, fontSize: 12.4, w: 130, bold: true },
+  { id: "barcode", label: "Código de barras", sampleText: "[BARRAS]", x: 215, y: 1076, fontSize: 7.4, w: 385, h: 38, color: "#999" },
+  { id: "qrcode", label: "QR Code (PIX)", sampleText: "[QR]", x: 664, y: 951, fontSize: 7.4, w: 104, h: 104, color: "#999" },
+  { id: "controle_p2", label: "P2: Nº da conta", sampleText: "Nº 511917580397", x: 550, y: 1123.6, fontSize: 9.6, w: 126 },
+  { id: "unidade_entrega", label: "P2: Unidade de entrega", sampleText: "B4850905", x: 59.6, y: 1604, fontSize: 8.4, w: 70 },
+  { id: "sequencia", label: "P2: Sequência", sampleText: "0284", x: 136.1, y: 1604, fontSize: 8.4, w: 50 },
+  { id: "medidor_p2", label: "P2: Medidor", sampleText: "14038694", x: 190.2, y: 1604, fontSize: 8.4, w: 70 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante";
 
 
 interface EditorConfig {
@@ -858,6 +902,23 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.2,
     copy: () => loadAnhangueraFieldPositions() ?? {},
+  },
+  comprovante: {
+    key: "comprovante",
+    title: "Comprovante Enel",
+    storageKey: COMPROVANTE_ALIGN_STORAGE_KEY,
+    defaults: defaultComprovanteFields,
+    bg: templateEnelP1Url,
+    bgs: [templateEnelP1Url, templateEnelP2Url],
+    pageW: 794,
+    pageH: 1123,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.32,
+    copy: () => loadComprovanteFieldPositions() ?? {},
   },
 };
 
@@ -1437,7 +1498,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf", "comprovante"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
