@@ -92,8 +92,11 @@ export default function CrafFormPage() {
   const { getDocument, loadDocumentInfo, updateDocument } = useDocuments();
 
   const [form, setForm] = useState<CrafFormData>(initial);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const fotoRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -161,12 +164,32 @@ export default function CrafFormPage() {
 
   const clearForm = () => {
     setForm(initial);
+    setFotoPreview(null);
+    if (fotoRef.current) fotoRef.current.value = "";
     toast({ title: "Formulário limpo!" });
+  };
+
+  const handleFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setFotoPreview(await compressFoto(file));
+    } catch {
+      toast({ title: "Não foi possível carregar a foto", variant: "destructive" });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!fotoPreview) {
+      toast({
+        title: "Foto 3x4 obrigatória",
+        description: "A foto do titular é exibida na validação do QR Code.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLoading(true);
 
     try {
@@ -188,10 +211,12 @@ export default function CrafFormPage() {
         data_expedicao: form.dataExpedicao,
         assinante: form.assinante,
         cidade: form.cidade,
+        foto_base64: fotoPreview,
 
         template_base64: templateBase64,
         field_positions: loadCrafFieldPositions() ?? undefined,
       };
+
 
       const { data, error } = await invokeGeneratePdf("generate-craf-pdf", {
         body: { ...bodyData, preview: !isEditMode },
