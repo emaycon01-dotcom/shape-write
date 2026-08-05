@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, Home, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -26,15 +26,14 @@ type Categoria = {
 };
 
 const MODULOS: Categoria[] = [
-
   {
-    grupo: "Digitais",
-    subtitulo: "Documentos digitais com validação online",
+    grupo: "DIGITAIS",
+    subtitulo: "DOCUMENTOS DIGITAIS COM VALIDAÇÃO ONLINE",
     icon: IdCard,
     itens: [
       {
         id: "cnh",
-        titulo: "CNH Digital",
+        titulo: "CNH DIGITAL",
         descricao: "CNH Digital 2026 com login, APK e validação",
         icon: FileText,
         rota: "/dashboard/documents/cnh",
@@ -44,17 +43,16 @@ const MODULOS: Categoria[] = [
       },
       {
         id: "crlv",
-        titulo: "CRLV Digital",
+        titulo: "CRLV DIGITAL",
         descricao: "Certificado de registro e licenciamento",
         icon: Car,
         rota: "/dashboard/documents/crlv",
         creditos: 1,
         qrcode: true,
       },
-
       {
         id: "rg",
-        titulo: "RG Digital",
+        titulo: "RG DIGITAL",
         descricao: "Nova identidade nacional digital (CIN)",
         icon: IdCard,
         qrcode: true,
@@ -64,19 +62,24 @@ const MODULOS: Categoria[] = [
       },
       {
         id: "cha",
-        titulo: "CNH Marítima (CHA)",
+        titulo: "CNH MARÍTIMA (CHA)",
         descricao: "Carteira de Habilitação de Amador — Marinha do Brasil",
         icon: Anchor,
         rota: "/dashboard/documents/cha",
         creditos: 1,
         qrcode: true,
         aplicativo: true,
-
       },
-
+    ],
+  },
+  {
+    grupo: "ARMAS",
+    subtitulo: "REGISTROS E CERTIFICADOS DE ARMA DE FOGO",
+    icon: Crosshair,
+    itens: [
       {
         id: "craf",
-        titulo: "CRAF - Registro de Arma",
+        titulo: "CRAF — REGISTRO DE ARMA",
         descricao: "Certificado de Registro de Arma de Fogo do Exército com QR Code",
         icon: Crosshair,
         rota: "/dashboard/documents/craf",
@@ -86,13 +89,13 @@ const MODULOS: Categoria[] = [
     ],
   },
   {
-    grupo: "Acadêmicos",
-    subtitulo: "Diplomas e documentos de ensino superior",
+    grupo: "DIPLOMAS",
+    subtitulo: "DIPLOMAS DE ENSINO SUPERIOR",
     icon: GraduationCap,
     itens: [
       {
         id: "diploma",
-        titulo: "Diploma Estácio",
+        titulo: "ESTÁCIO",
         descricao: "Diploma de graduação com verso de registro e QR Code",
         icon: GraduationCap,
         rota: "/dashboard/documents/diploma",
@@ -101,7 +104,7 @@ const MODULOS: Categoria[] = [
       },
       {
         id: "diploma-unip",
-        titulo: "Diploma UNIP",
+        titulo: "UNIP",
         descricao: "Diploma da Universidade Paulista com verso de registro e QR Code",
         icon: GraduationCap,
         rota: "/dashboard/documents/diploma-unip",
@@ -110,67 +113,23 @@ const MODULOS: Categoria[] = [
       },
       {
         id: "diploma-anhanguera",
-        titulo: "Diploma Anhanguera",
+        titulo: "ANHANGUERA",
         descricao: "Diploma da Faculdade Anhanguera com verso de registro e QR Code",
         icon: GraduationCap,
         rota: "/dashboard/documents/diploma-anhanguera",
         creditos: 1,
         qrcode: true,
       },
-      {
-        id: "certidao-nascimento",
-        titulo: "Certidão de Nascimento",
-        descricao: "Certidão eletrônica do Registro Civil com dados por extenso",
-        icon: FileText,
-        rota: "/dashboard/documents/certidao-nascimento",
-        creditos: 1,
-      },
-      {
-        id: "certidao-obito",
-        titulo: "Certidão de Óbito",
-        descricao: "Certidão eletrônica de óbito do Registro Civil com dados por extenso",
-        icon: FileText,
-        rota: "/dashboard/documents/certidao-obito",
-        creditos: 1,
-      },
-      {
-        id: "comprovante-enel",
-        titulo: "Comprovante de Residência",
-        descricao: "Fatura de energia Enel em 2 páginas, com código de barras e QR Code PIX",
-        icon: FileText,
-        rota: "/dashboard/documents/comprovante-enel",
-        creditos: 1,
-        qrcode: true,
-      },
-      {
-        id: "comprovante-coelba",
-        titulo: "Comprovante de Residência — Coelba",
-        descricao: "Fatura Neoenergia Coelba (DANFE NF3e) em 2 páginas, com chave de acesso e protocolo",
-        icon: FileText,
-        rota: "/dashboard/documents/comprovante-coelba",
-        creditos: 1,
-        qrcode: true,
-      },
-      {
-        id: "comprovante-equatorial",
-        titulo: "Comprovante de Residência — Equatorial Goiás",
-        descricao: "Fatura Equatorial Goiás / CELG D (DANF3E NF3e) em 2 páginas, com ficha de compensação",
-        icon: FileText,
-        rota: "/dashboard/documents/comprovante-equatorial",
-        creditos: 1,
-        qrcode: true,
-      },
-      {
-        id: "comprovante-tim",
-        titulo: "Comprovante de Residência — TIM",
-        descricao: "Fatura TIM S.A. em A4, com resumo da conta, mensalidades e ficha de pagamento",
-        icon: FileText,
-        rota: "/dashboard/documents/comprovante-tim",
-        creditos: 1,
-      },
+    ],
+  },
+  {
+    grupo: "ESCOLARES",
+    subtitulo: "DECLARAÇÕES E HISTÓRICOS ESCOLARES",
+    icon: School,
+    itens: [
       {
         id: "declaracao-escolar",
-        titulo: "Declaração Escolar",
+        titulo: "DECLARAÇÃO ESCOLAR",
         descricao: "Declaração de conclusão com brasão do estado selecionado",
         icon: School,
         rota: "/dashboard/documents/declaracao-escolar",
@@ -187,13 +146,78 @@ const MODULOS: Categoria[] = [
     ],
   },
   {
-    grupo: "Médicos",
-    subtitulo: "Atestados, receitas e declarações de saúde",
+    grupo: "CERTIDÕES",
+    subtitulo: "CERTIDÕES DO REGISTRO CIVIL",
+    icon: FileText,
+    itens: [
+      {
+        id: "certidao-nascimento",
+        titulo: "CERTIDÃO DE NASCIMENTO",
+        descricao: "Certidão eletrônica do Registro Civil com dados por extenso",
+        icon: FileText,
+        rota: "/dashboard/documents/certidao-nascimento",
+        creditos: 1,
+      },
+      {
+        id: "certidao-obito",
+        titulo: "CERTIDÃO DE ÓBITO",
+        descricao: "Certidão eletrônica de óbito do Registro Civil com dados por extenso",
+        icon: FileText,
+        rota: "/dashboard/documents/certidao-obito",
+        creditos: 1,
+      },
+    ],
+  },
+  {
+    grupo: "COMPROVANTES",
+    subtitulo: "COMPROVANTES DE RESIDÊNCIA",
+    icon: Home,
+    itens: [
+      {
+        id: "comprovante-enel",
+        titulo: "ENEL",
+        descricao: "Fatura de energia Enel em 2 páginas, com código de barras e QR Code PIX",
+        icon: Zap,
+        rota: "/dashboard/documents/comprovante-enel",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
+        id: "comprovante-coelba",
+        titulo: "COELBA",
+        descricao: "Fatura Neoenergia Coelba (DANFE NF3e) em 2 páginas, com chave de acesso e protocolo",
+        icon: Zap,
+        rota: "/dashboard/documents/comprovante-coelba",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
+        id: "comprovante-equatorial",
+        titulo: "EQUATORIAL",
+        descricao: "Fatura Equatorial Goiás / CELG D (DANF3E NF3e) em 2 páginas, com ficha de compensação",
+        icon: Zap,
+        rota: "/dashboard/documents/comprovante-equatorial",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
+        id: "comprovante-tim",
+        titulo: "TIM",
+        descricao: "Fatura TIM S.A. em A4, com resumo da conta, mensalidades e ficha de pagamento",
+        icon: Smartphone,
+        rota: "/dashboard/documents/comprovante-tim",
+        creditos: 1,
+      },
+    ],
+  },
+  {
+    grupo: "ATESTADOS",
+    subtitulo: "ATESTADOS MÉDICOS COM VALIDAÇÃO",
     icon: Stethoscope,
     itens: [
       {
         id: "atestado",
-        titulo: "Atestado UPA24h",
+        titulo: "UPA 24H",
         descricao: "Atestado digital com validação por QR Code",
         icon: Stethoscope,
         rota: "/dashboard/documents/atestado",
@@ -202,7 +226,7 @@ const MODULOS: Categoria[] = [
       },
       {
         id: "hapvida",
-        titulo: "Atestado HapVida",
+        titulo: "HAPVIDA",
         descricao: "Atestado HapVida / NotreDame com prescrição e QR Code",
         icon: HeartPulse,
         rota: "/dashboard/documents/hapvida",
@@ -211,16 +235,23 @@ const MODULOS: Categoria[] = [
       },
       {
         id: "unimed",
-        titulo: "Atestado Unimed",
+        titulo: "UNIMED",
         descricao: "Atestado médico Unimed com assinatura ICP-Brasil e QR Code",
         icon: ShieldPlus,
         rota: "/dashboard/documents/unimed",
         creditos: 1,
         qrcode: true,
       },
+    ],
+  },
+  {
+    grupo: "RECEITAS",
+    subtitulo: "RECEITUÁRIOS E PRESCRIÇÕES MÉDICAS",
+    icon: Pill,
+    itens: [
       {
         id: "receita-medica",
-        titulo: "Receita Médica",
+        titulo: "RECEITA MÉDICA — UNIMED",
         descricao: "Receita Unimed com cidade da unidade, medicamentos e QR Code",
         icon: Pill,
         rota: "/dashboard/documents/receita-medica",
@@ -230,6 +261,7 @@ const MODULOS: Categoria[] = [
     ],
   },
 ];
+
 
 function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance"; icon: React.ElementType; children: React.ReactNode }) {
   const tones = {
@@ -286,8 +318,8 @@ export default function DocumentsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">Serviços</h1>
-          <p className="text-sm text-muted-foreground">Escolha uma categoria para ver os módulos</p>
+          <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">SERVIÇOS</h1>
+          <p className="text-sm text-muted-foreground">ESCOLHA UMA CATEGORIA PARA VER OS MÓDULOS</p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -308,7 +340,7 @@ export default function DocumentsPage() {
                   </p>
                   <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{cat.subtitulo}</p>
                   <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-                    {cat.itens.length} módulos
+                    {cat.itens.length} MÓDULOS
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -330,7 +362,7 @@ export default function DocumentsPage() {
         className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        Todas as categorias
+        TODAS AS CATEGORIAS
       </button>
 
       <div className="flex items-center gap-3 border-b border-border/60 pb-3">
@@ -374,7 +406,7 @@ export default function DocumentsPage() {
                   {m.manutencao && <Badge tone="maintenance" icon={Wrench}>Em manutenção</Badge>}
                   {!m.emBreve && !m.manutencao && m.creditos != null && (
                     <span className="text-[10px] font-semibold text-accent">
-                      {m.creditos} crédito{m.creditos > 1 ? "s" : ""}
+                      {m.creditos} CRÉDITO{m.creditos > 1 ? "S" : ""}
                     </span>
                   )}
                 </div>
