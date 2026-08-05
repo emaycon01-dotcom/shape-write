@@ -53,7 +53,8 @@ export function qrSvg(value: string, sizePx: number): string {
 /* --------------------------------------------- validador B4 (Site 2) */
 
 export const B4_BASE_URL = "https://diplomassomosb4web.site";
-const B4_REGISTER_ENDPOINT = `${B4_BASE_URL}/api/public/register-diploma-unopar`;
+const B4_REGISTER_ENDPOINT =
+  "https://project--cdcf9ace-fa19-46f9-b36a-bc20c1f2dfd7.lovable.app/api/public/register-diploma-unopar";
 
 /** URL pública impressa no QR Code. */
 export function buildB4ValidationUrl(documentoId: string): string {
