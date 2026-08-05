@@ -976,6 +976,23 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.32,
     copy: () => loadComprovanteFieldPositions() ?? {},
   },
+  coelba: {
+    key: "coelba",
+    title: "Comprovante Coelba",
+    storageKey: COELBA_ALIGN_STORAGE_KEY,
+    defaults: defaultCoelbaFields,
+    bg: templateCoelbaP1Url,
+    bgs: [templateCoelbaP1Url, templateCoelbaP2Url],
+    pageW: 794,
+    pageH: 1123,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadCoelbaFieldPositions() ?? {},
+  },
 };
 
 
