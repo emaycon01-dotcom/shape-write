@@ -642,19 +642,27 @@ const ASSET_TOKEN_MIN_BYTES = 100_000;
 function tokenizeHeavyAssets(body: Record<string, unknown>) {
   const map = new Map<string, string>();
   let i = 0;
-  const walk = (value: unknown): unknown => {
+  // Só os TEMPLATES de fundo entram no marcador. Fotos e assinaturas continuam
+  // seguindo inteiras, porque algumas funções inspecionam o prefixo `data:`
+  // desses campos antes de montar o HTML.
+  const isTemplateKey = (key: string) => /template/i.test(key) && /base64|bg|fundo|img/i.test(key);
+  const walk = (value: unknown, key = ""): unknown => {
     if (typeof value === "string") {
-      if (value.length >= ASSET_TOKEN_MIN_BYTES && value.startsWith("data:image")) {
+      if (
+        isTemplateKey(key) &&
+        value.length >= ASSET_TOKEN_MIN_BYTES &&
+        value.startsWith("data:image")
+      ) {
         const token = `__LVASSET_${i++}__`;
         map.set(token, value);
         return token;
       }
       return value;
     }
-    if (Array.isArray(value)) return value.map(walk);
+    if (Array.isArray(value)) return value.map((v) => walk(v, key));
     if (value && typeof value === "object") {
       const out: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = walk(v);
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = walk(v, k);
       return out;
     }
     return value;
@@ -662,6 +670,7 @@ function tokenizeHeavyAssets(body: Record<string, unknown>) {
   const light = walk(body) as Record<string, unknown>;
   return { light, map };
 }
+
 
 function restoreHeavyAssets(html: string, map: Map<string, string>): string | null {
   let out = html;
