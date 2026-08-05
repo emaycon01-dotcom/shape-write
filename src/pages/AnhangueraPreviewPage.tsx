@@ -46,6 +46,7 @@ export default function AnhangueraPreviewPage() {
   useEffect(() => {
     if (!pdfBase64) return;
     let cancelled = false;
+    const objectUrls: string[] = [];
 
     (async () => {
       try {
@@ -54,7 +55,8 @@ export default function AnhangueraPreviewPage() {
         const bytes = new Uint8Array(await blob.arrayBuffer());
 
         const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+        const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
         const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
 
         const out: string[] = [];
@@ -67,7 +69,15 @@ export default function AnhangueraPreviewPage() {
           const ctx = canvas.getContext("2d");
           if (!ctx) continue;
           await page.render({ canvasContext: ctx, viewport }).promise;
-          out.push(canvas.toDataURL("image/jpeg", 0.92));
+           const imageBlob = await new Promise<Blob | null>((resolve) =>
+             canvas.toBlob(resolve, "image/jpeg", 0.9),
+           );
+           canvas.width = 0;
+           canvas.height = 0;
+           if (!imageBlob) continue;
+           const objectUrl = URL.createObjectURL(imageBlob);
+           objectUrls.push(objectUrl);
+           out.push(objectUrl);
         }
         if (!cancelled) {
           setPages(out);
@@ -78,7 +88,10 @@ export default function AnhangueraPreviewPage() {
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
   }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
