@@ -47,26 +47,26 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
 
   /* ---- faixa referência / total / vencimento ---- */
   referencia_topo: { x: 30.0, y: 181.6, fontSize: 19.5, w: 100 },
-  total_topo: { x: 176.0, y: 184.0, fontSize: 19.5, w: 90 },
+  total_topo: { x: 195, y: 184.0, fontSize: 19.5, w: 85 },
   vencimento_topo: { x: 286.0, y: 181.6, fontSize: 19.5, w: 140 },
 
   /* ---- faixa "DATAS DE LEITURAS" ---- */
   lbl_datas: { x: 56.0, y: 290.4, fontSize: 8.0, w: 110 },
   lbl_leitura_anterior: { x: 180.2, y: 290.4, fontSize: 8.0, w: 90 },
-  val_leitura_anterior: { x: 252.2, y: 287.6, fontSize: 10.3, w: 80 },
+  val_leitura_anterior: { x: 270, y: 287.6, fontSize: 10.3, w: 80 },
   lbl_leitura_atual: { x: 338.9, y: 290.4, fontSize: 8.0, w: 70 },
-  val_leitura_atual: { x: 397.7, y: 287.6, fontSize: 10.3, w: 80 },
+  val_leitura_atual: { x: 415, y: 287.6, fontSize: 10.3, w: 80 },
   lbl_dias: { x: 519.1, y: 290.4, fontSize: 8.0, w: 60 },
-  val_dias: { x: 563.1, y: 287.6, fontSize: 10.3, w: 40 },
+  val_dias: { x: 578, y: 287.6, fontSize: 10.3, w: 40 },
   lbl_proxima: { x: 636.5, y: 290.4, fontSize: 8.0, w: 90 },
-  val_proxima: { x: 704.6, y: 287.6, fontSize: 10.3, w: 80 },
+  val_proxima: { x: 722, y: 287.6, fontSize: 10.3, w: 80 },
 
   /* ---- linha do medidor ---- */
   med_postos: { x: 169.5, y: 635.8, fontSize: 6.6, w: 45 },
-  med_leitura_anterior: { x: 232.0, y: 635.8, fontSize: 6.6, w: 52 },
-  med_leitura_atual: { x: 288.0, y: 635.8, fontSize: 6.6, w: 52 },
-  med_constante: { x: 355.0, y: 635.8, fontSize: 6.6, w: 52 },
-  med_consumo: { x: 426.0, y: 635.8, fontSize: 6.6, w: 52 },
+  med_leitura_anterior: { x: 224, y: 635.8, fontSize: 6.6, w: 52 },
+  med_leitura_atual: { x: 280, y: 635.8, fontSize: 6.6, w: 52 },
+  med_constante: { x: 347, y: 635.8, fontSize: 6.6, w: 52 },
+  med_consumo: { x: 392, y: 635.8, fontSize: 6.6, w: 52 },
 
   /* ---- aviso e débitos anteriores ---- */
   aviso_suspensao: { x: 22.7, y: 689.0, fontSize: 9.6, w: 560 },
@@ -85,7 +85,7 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
 
   /* ---- rodapé (ficha do boleto) ---- */
   rodape_referencia: { x: 47.0, y: 905.0, fontSize: 19.5, w: 100 },
-  rodape_vencimento: { x: 437.0, y: 901.4, fontSize: 17.0, w: 120 },
+  rodape_vencimento: { x: 470, y: 901.4, fontSize: 17.0, w: 120 },
   rodape_total: { x: 640.0, y: 903.6, fontSize: 17.0, w: 110 },
 
   /* ---- página 2 ---- */
