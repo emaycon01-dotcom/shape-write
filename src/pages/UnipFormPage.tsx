@@ -16,6 +16,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
+import { pick, rnd } from "@/lib/random";
 
 const ESTADOS = [
   "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
@@ -115,12 +116,6 @@ const NOMES = [
   "Marina Duarte Albuquerque", "Vitor Emanuel Rocha Prado", "Luciana Almeida Nogueira",
 ];
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 export default function UnipFormPage() {
   const navigate = useNavigate();

@@ -14,6 +14,7 @@ import { maskDate, maskCPF, maskPhone, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
+import { rnd } from "@/lib/random";
 
 interface ObitoFormData {
   nome: string;
@@ -79,9 +80,6 @@ const initial: ObitoFormData = {
   cartorioTelefone: "(11) 30819388",
 };
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
 
 export default function ObitoFormPage() {
   const location = useLocation();

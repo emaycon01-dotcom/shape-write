@@ -13,6 +13,7 @@ import { maskDate, maskPhone } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADO_NOMES, ESTADOS_UF, loadBrasaoDataUrl } from "@/lib/brasoes-estados";
+import { pick, rnd } from "@/lib/random";
 
 interface HistoricoFormData {
   uf: string;
@@ -112,12 +113,6 @@ const NOMES = [
 ];
 const MAES = ["Ana Paula santeiro da Silva", "Rita de Cássia Ferreira", "Josefa Rocha Santos"];
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 export default function HistoricoFormPage() {
   const location = useLocation();

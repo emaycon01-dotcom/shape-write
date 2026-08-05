@@ -13,6 +13,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
+import { pick, rnd } from "@/lib/random";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -115,13 +116,7 @@ const initial: UnimedFormData = {
   assinaturaBase64: "",
 };
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 /** Calcula a idade em anos a partir de "dd/mm/aaaa". */
 export function calcIdade(nascimento: string, referencia?: string): string {

@@ -13,6 +13,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
+import { pick, rnd } from "@/lib/random";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -85,13 +86,7 @@ const initial: HapvidaFormData = {
   especialidade: "CLÍNICA MÉDICA",
 };
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 const NOMES = [
   "PATRICK DE MOURA CARVALHO",

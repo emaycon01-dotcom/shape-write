@@ -19,6 +19,7 @@ import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { normalizeSignatureImage } from "@/lib/signature-image";
+import { pick } from "@/lib/random";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -120,7 +121,6 @@ function addYears(dateStr: string, years: number) {
   return `${parts[0]}/${parts[1]}/${parseInt(parts[2]) + years}`;
 }
 
-function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 
 export default function CnhFormPage() {
   const location = useLocation();

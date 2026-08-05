@@ -25,6 +25,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
+import { pick, rnd } from "@/lib/random";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -117,12 +118,6 @@ const initial: DiplomaForm = {
   codigoValidacao: "",
 };
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 /** Divide o nome da instituição em duas linhas de cabeçalho automaticamente. */
 function splitInstituicao(nome: string): { l1: string; l2: string } {
