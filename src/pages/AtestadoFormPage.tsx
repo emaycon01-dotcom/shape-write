@@ -15,6 +15,7 @@ import { splitEndereco } from "@/lib/atestado-endereco";
 import { maskCPF, maskDate, maskDigits, maskTimeSec } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
+import { pick, rnd } from "@/lib/random";
 
 
 const MEDICO = "Dr. Abdo";
@@ -49,17 +50,11 @@ const initial: AtestadoFormData = {
   uf: "SP",
 };
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
 
 
 
 
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 const NOMES = [
   "TATIANI RODRIGUES MOR",

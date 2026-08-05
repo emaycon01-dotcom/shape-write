@@ -13,6 +13,7 @@ import { maskDate, maskTime, maskCPF, maskPhone, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
+import { rnd } from "@/lib/random";
 
 interface CertidaoFormData {
   nome: string;
@@ -68,9 +69,6 @@ const initial: CertidaoFormData = {
   cartorioTelefone: "(41) 30811616",
 };
 
-function rnd(len: number) {
-  return Array.from({ length: len }, () => Math.floor(Math.random() * 10)).join("");
-}
 
 export default function CertidaoFormPage() {
   const location = useLocation();

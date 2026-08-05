@@ -216,7 +216,7 @@ function dataUriToBlobUrl(dataUri: string): string | null {
 }
 
 /** Substitui Data URIs grandes por `blob:` reaproveitáveis entre gerações. */
-function useBlobAssetsInHtml(html: string): string {
+function applyBlobAssetsInHtml(html: string): string {
   return html.replace(/data:image\/[a-zA-Z+]+;base64,[A-Za-z0-9+/=]+/g, (uri) => {
     if (uri.length < BLOB_ASSET_MIN_CHARS) return uri;
     const key = `${uri.length}:${uri.slice(24, 88)}:${uri.slice(-48)}`;
@@ -504,9 +504,9 @@ async function renderOnce(
   const { html2canvas, jsPDF } = await warmPdfEngine();
 
 
-  const frame = await createHiddenFrame(blobAssets ? useBlobAssetsInHtml(html) : html);
+  const frame = await createHiddenFrame(blobAssets ? applyBlobAssetsInHtml(html) : html);
   let releaseFonts: () => void = () => undefined;
-  let releaseBlobs: () => void = () => undefined;
+  const releaseBlobs: () => void = () => undefined;
   let fontsWarm = false;
 
   try {
