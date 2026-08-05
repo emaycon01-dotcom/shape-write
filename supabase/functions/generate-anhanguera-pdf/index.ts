@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
-import { qrSvg, buildCodigoValidacao, buildValidationUrl, ANHANGUERA_VALIDACAO_URL } from "./validacao.ts";
+import {
+  qrSvg,
+  buildCodigoValidacao,
+  buildB4ValidationUrl,
+  registerDiplomaB4,
+  B4_BASE_URL,
+} from "./validacao.ts";
 import { ANHANGUERA_FONT_FACES } from "./fonts.ts";
 
 const corsHeaders = {
@@ -186,7 +192,7 @@ export function buildAnhangueraHtml(
     text("cidade_data", d.cidade_data),
     text("assinante_nome", d.assinante_nome),
     text("assinante_cargo", d.assinante_cargo),
-    text("val_bloco", `${ANHANGUERA_VALIDACAO_URL}\nCódigo de validação: ${d.codigo_validacao}`),
+    text("val_bloco", `${B4_BASE_URL}\nCódigo de validação: ${d.codigo_validacao}`),
   ].join("\n");
 
   const page2 = [
@@ -272,7 +278,57 @@ serve(async (req) => {
       (await buildCodigoValidacao(
         `${body.aluno || ""}|${body.curso || ""}|${body.registro_numero || ""}|${body.processo || ""}`,
       ));
-    const urlValidacao = buildValidationUrl(codigo);
+    // 1) cadastra no validador B4 — o QR só é gerado após o 200 (evita link morto)
+    const sexo = String(body.sexo || "").toUpperCase().startsWith("M") ? "Masculino" : "Feminino";
+    const registro = await registerDiplomaB4(codigo, {
+      codigo_validacao: codigo,
+      validation_url: buildB4ValidationUrl(codigo),
+      tipo_documento: "diploma-unopar",
+      modelo: body.modalidade || "bacharelado",
+      status: "Ativo",
+      nome_aluno: body.aluno || "",
+      cpf_completo: String(body.cpf || "").replace(/\D/g, ""),
+      sexo,
+      nacionalidade: "Brasileira",
+      naturalidade: body.naturalidade || "",
+      data_nascimento: body.nascimento || "",
+      data_conclusao: body.data_conclusao || "",
+      data_expedicao: body.data_diploma || "",
+      numero_registro: body.registro_numero || "",
+      data_registro: body.registro_data || "",
+      curso_nome: body.curso || "",
+      titulo_conferido: String(body.titulo_conferido || "").replace(/\s+a$/i, "").trim(),
+      grau_conferido: body.modalidade || "",
+      polo: body.instituicao_titulo || "",
+      reconhecimento: body.reconhecimento || "",
+      renovacao_reconhecimento: body.reconhecimento || "",
+      ies_emissora: {
+        nome: body.instituicao_titulo || "Faculdade Anhanguera de Macapá",
+        cnpj: body.cnpj || "04310392000146",
+        mantenedora: body.mantenedora || "Anhanguera Educacional Participações S.A.",
+        recredenciamento: body.recredenciamento_ies || "",
+      },
+      ies_registradora: {
+        nome: body.universidade || "Universidade Anhanguera - Uniderp",
+        recredenciamento: body.recredenciamento_universidade || "",
+      },
+      dados_completos: { sexo, aluno: { sexo } },
+    });
+
+    if (!registro.registered) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            registro.error === "missing_api_key"
+              ? "Chave do validador de diplomas não configurada."
+              : `Não foi possível registrar o diploma no validador (${registro.error}).`,
+        }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const urlValidacao = registro.validationUrl;
 
     const data: Record<string, string> = {
       instituicao_titulo: body.instituicao_titulo || "Faculdade Anhanguera de Macapá",

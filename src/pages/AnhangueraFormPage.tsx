@@ -206,6 +206,11 @@ export default function AnhangueraFormPage() {
       registrador_cargo: "Gerente Documentação e Diplomas",
       // ---- dados crus ----
       modalidade: form.modalidade,
+      sexo: form.sexo,
+      naturalidade: form.naturalidade,
+      nascimento: form.nascimento,
+      data_conclusao: form.dataConclusao,
+      data_diploma: form.dataDiploma,
       registro_numero: form.registroNumero,
       registro_livro: form.registroLivro,
       registro_data: form.dataRegistro,
