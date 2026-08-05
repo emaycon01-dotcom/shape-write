@@ -572,8 +572,11 @@ export async function invokeGeneratePdf(
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
 
-      // Unimed: o portal de validação precisa do arquivo hospedado.
-      if (functionName === "generate-unimed-pdf" && payload.token && !isPreview) {
+      // Unimed / Receita: o portal de validação precisa do arquivo hospedado.
+      if (
+        (functionName === "generate-unimed-pdf" || functionName === "generate-receita-pdf") &&
+        payload.token && !isPreview
+      ) {
         try {
           const { data: attached } = await supabase.functions.invoke(functionName, {
             body: { token: payload.token, attach_pdf: pdfBase64 },
