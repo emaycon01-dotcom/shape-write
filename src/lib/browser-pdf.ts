@@ -698,7 +698,7 @@ export async function invokeGeneratePdf(
   try {
     const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
 
-    let { data, error } = await supabase.functions.invoke(functionName, {
+    const { data, error } = await supabase.functions.invoke(functionName, {
       body: isAction ? body : { ...light, render: "html" },
     });
 
