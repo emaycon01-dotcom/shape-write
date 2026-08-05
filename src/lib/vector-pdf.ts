@@ -13,7 +13,7 @@
  *  - alinhamento        → vem do próprio layout do navegador (idêntico ao preview);
  *  - fontes             → os mesmos TTF/OTF das @font-face são embutidos no PDF.
  */
-import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, PDFFont, PDFPage, StandardFonts, rgb, setCharacterSqueeze } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import {
   adoptFontFaces,
