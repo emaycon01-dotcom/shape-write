@@ -132,7 +132,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         canvas.height = 0;
       }
     };
-  }, [pdfDataUrl, generationActive]);
+  }, [pdfDataUrl]);
 
   return (
     <div
