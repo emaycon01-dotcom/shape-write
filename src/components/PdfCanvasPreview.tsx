@@ -8,11 +8,23 @@ type PdfCanvasPreviewProps = {
 
 function dataUrlToBytes(dataUrl: string): Uint8Array {
   const comma = dataUrl.indexOf(",");
-  const encoded = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
-  const binary = atob(encoded);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
+  const start = comma >= 0 ? comma + 1 : 0;
+  const encodedLength = dataUrl.length - start;
+  const padding = dataUrl.endsWith("==") ? 2 : dataUrl.endsWith("=") ? 1 : 0;
+  const bytes = new Uint8Array(Math.floor((encodedLength * 3) / 4) - padding);
+  let offset = 0;
+
+  // Decodifica em blocos alinhados a 4 caracteres. O atob anterior criava uma
+  // string binária do PDF inteiro ao mesmo tempo que o Uint8Array, duplicando o
+  // uso de memória justamente ao abrir o preview.
+  const chunkSize = 32_768;
+  for (let index = start; index < dataUrl.length; index += chunkSize) {
+    const end = Math.min(dataUrl.length, index + chunkSize);
+    const binary = atob(dataUrl.substring(index, end));
+    for (let byteIndex = 0; byteIndex < binary.length; byteIndex += 1) {
+      bytes[offset] = binary.charCodeAt(byteIndex);
+      offset += 1;
+    }
   }
   return bytes;
 }
