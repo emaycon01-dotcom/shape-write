@@ -507,14 +507,26 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
       }
 
       try {
-        for (let top = 0; top < height; top += band) {
-          const sliceH = Math.min(band, height - top);
+        // Cada faixa custa um CLONE COMPLETO do documento no html2canvas
+        // (template pesado incluso). Em vez de fixar faixas pequenas para
+        // todos, começamos seguro e DOBRAMOS a faixa sempre que a anterior
+        // renderizou rápido: aparelhos bons terminam em 2–3 clones em vez de
+        // 7–10, e os fracos continuam no tamanho conservador. A resolução
+        // (576 DPI) não muda em nenhum caso.
+        const maxBand = Math.min(height, band * 4);
+        let bandCss = band;
+        let top = 0;
+        let first = true;
+
+        while (top < height) {
+          const sliceH = Math.min(bandCss, height - top);
 
           if (parent) {
             viewport.style.height = `${sliceH}px`;
             target.style.marginTop = `${-top}px`;
           }
 
+          const startedAt = Date.now();
           const canvas = await html2canvas(parent ? viewport : target, {
             scale,
             useCORS: true,
@@ -542,6 +554,7 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
               fontsWarm = true;
             },
           });
+          const elapsed = Date.now() - startedAt;
 
           // Quando falta memória (iPad/Android), o navegador devolve um canvas
           // totalmente preto em vez de erro — o PDF final saía todo preto.
@@ -567,7 +580,12 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
           // Libera memória em dispositivos móveis
           canvas.width = 0;
           canvas.height = 0;
-          await breathe();
+
+          top += sliceH;
+          if (elapsed < 1500 && bandCss < maxBand) bandCss = Math.min(maxBand, bandCss * 2);
+          // Pausa só quando ainda faltam faixas — evita esperas inúteis.
+          if (top < height) await breathe(first ? 16 : 8);
+          first = false;
         }
       } finally {
         // Restaura o DOM original da página (importante para páginas seguintes).
