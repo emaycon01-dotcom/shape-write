@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 import { authenticateRequest } from "../_shared/auth.ts";
 import { CNH_FONT_FACE } from "./cnh-font.ts";
-import { qrSvg, registerValidationDocument, buildDocumentoId } from "./validacao.ts";
+import { qrSvg, registerValidationDocument, buildDocumentoId, VALIDACAO_BASE_URL } from "./validacao.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -496,7 +496,7 @@ ${CNH_FONT_FACE}
   }
   .photo-overlay { overflow: hidden; }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
-  .qr-overlay { background:#fff; z-index: 12; overflow: hidden; }
+  .qr-overlay { background:transparent; z-index: 12; overflow: visible; }
   .qr-overlay svg { width:100%; height:100%; display:block; }
   .mrz-line { display:block; text-align:left; white-space:pre; }
   .sig-overlay { display:block; overflow:hidden !important; clip-path:inset(0); contain:strict; box-sizing:border-box; }
@@ -787,7 +787,7 @@ serve(async (req) => {
     const validacao = isPreview
       ? {
           documentoId: buildDocumentoId(data),
-          qrCodeUrl: "PREVIEW-NAO-VALIDO",
+          qrCodeUrl: `${VALIDACAO_BASE_URL}/validar?id=${encodeURIComponent(buildDocumentoId(data))}`,
           registered: false,
         }
       : await registerValidationDocument(data);
