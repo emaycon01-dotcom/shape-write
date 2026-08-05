@@ -54,7 +54,7 @@ function pixelBudget(): number {
  */
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const resumeTimerRef = useRef<number>();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [generationActive, setGenerationActive] = useState(false);
