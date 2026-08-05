@@ -114,6 +114,7 @@ const App = () => {
                   <Routes>
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/__medtest" element={<MedTestPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify/:id" element={<VerifyPage />} />
                     <Route path="/consulta-cnh" element={<ConsultaCnhPage />} />
