@@ -10,6 +10,7 @@ import { UNIMED_ALIGN_STORAGE_KEY } from "@/lib/unimed-align";
 import { HISTORICO_ALIGN_STORAGE_KEY } from "@/lib/historico-align";
 import { CERTIDAO_ALIGN_STORAGE_KEY } from "@/lib/certidao-align";
 import { DECLARACAO_ALIGN_STORAGE_KEY } from "@/lib/declaracao-align";
+import { RECEITA_ALIGN_STORAGE_KEY } from "@/lib/receita-align";
 
 /** Mapeia o tipo de documento para a chave usada no cache local. */
 export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
@@ -24,6 +25,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   historico: HISTORICO_ALIGN_STORAGE_KEY,
   certidao: CERTIDAO_ALIGN_STORAGE_KEY,
   declaracao: DECLARACAO_ALIGN_STORAGE_KEY,
+  receita: RECEITA_ALIGN_STORAGE_KEY,
 };
 
 /**

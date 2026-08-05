@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -133,6 +133,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         descricao: "Atestado médico Unimed com assinatura ICP-Brasil e QR Code",
         icon: ShieldPlus,
         rota: "/dashboard/documents/unimed",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
+        id: "receita-medica",
+        titulo: "Receita Médica",
+        descricao: "Receita Unimed com cidade da unidade, medicamentos e QR Code",
+        icon: Pill,
+        rota: "/dashboard/documents/receita-medica",
         creditos: 1,
         qrcode: true,
       },
