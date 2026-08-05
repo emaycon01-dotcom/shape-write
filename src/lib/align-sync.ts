@@ -39,6 +39,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   anhanguera: ANHANGUERA_ALIGN_STORAGE_KEY,
   comprovante: COMPROVANTE_ALIGN_STORAGE_KEY,
   coelba: COELBA_ALIGN_STORAGE_KEY,
+  equatorial: EQUATORIAL_ALIGN_STORAGE_KEY,
 };
 
 /**
