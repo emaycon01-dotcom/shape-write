@@ -43,23 +43,21 @@ export default function GenerationOverlay() {
       aria-live="polite"
       className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 bg-background"
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-70"
-        style={{
-          background:
-            "radial-gradient(60% 40% at 50% 35%, hsl(var(--primary) / 0.18), transparent 70%)",
-        }}
-      />
-      <div className="relative flex h-32 w-32 items-center justify-center">
+      {/* Apenas UMA camada animada: durante a geração a thread principal fica
+          ocupada, e camadas extras (pulse + gradiente em tela cheia) só somavam
+          composição em celulares fracos. */}
+      <div className="relative flex h-28 w-28 items-center justify-center">
         <span className="absolute inset-0 rounded-full border-2 border-primary/20" />
         <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-primary" />
         <img
           src={logo}
           alt="MonkeyLab"
-          className="h-16 w-16 animate-pulse object-contain"
+          width={56}
+          height={56}
+          className="h-14 w-14 object-contain"
         />
       </div>
-      <div className="relative text-center">
+      <div className="text-center">
         <p className="text-base font-semibold text-foreground">{state.label}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           Isso pode levar alguns segundos. Não feche a tela.
@@ -68,3 +66,4 @@ export default function GenerationOverlay() {
     </div>
   );
 }
+
