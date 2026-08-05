@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, IdCardLanyard } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -30,6 +30,7 @@ const MODULOS: Categoria[] = [
   {
     grupo: "Digitais",
     subtitulo: "Documentos digitais com validação online",
+    icon: IdCard,
     itens: [
       {
         id: "cnh",
@@ -87,6 +88,7 @@ const MODULOS: Categoria[] = [
   {
     grupo: "Acadêmicos",
     subtitulo: "Diplomas e documentos de ensino superior",
+    icon: GraduationCap,
     itens: [
       {
         id: "diploma",
@@ -142,8 +144,9 @@ const MODULOS: Categoria[] = [
     ],
   },
   {
-    grupo: "Atestado",
-    subtitulo: "Documentos médicos e declarações",
+    grupo: "Médicos",
+    subtitulo: "Atestados, receitas e declarações de saúde",
+    icon: Stethoscope,
     itens: [
       {
         id: "atestado",
