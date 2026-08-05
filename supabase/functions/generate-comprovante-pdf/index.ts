@@ -191,6 +191,8 @@ export function buildComprovanteHtml(d: Record<string, string>, fieldPositions?:
     "chave_nf", "nota_fiscal_serie", "linha_digitavel", "pagador",
     "cliente_nome", "instalacao", "cliente_numero",
     "mes_ano", "vencimento", "total_pagar",
+    "data_emissao", "nota_fiscal_rodape", "referencia",
+    "vencimento_rodape", "valor_documento", "controle_rodape",
   ]);
 
   const field = (id: string, text: string, extra = "") => {
