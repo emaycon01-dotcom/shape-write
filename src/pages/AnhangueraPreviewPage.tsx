@@ -7,6 +7,8 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { readPreviewPayload } from "@/lib/preview-payload";
+import { completePdfPresentation } from "@/lib/pdf-loading";
+import { getPdfJs } from "@/lib/pdfjs-loader";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -54,9 +56,7 @@ export default function AnhangueraPreviewPage() {
         if (!blob || blob.size === 0) throw new Error("PDF inválido");
         const bytes = new Uint8Array(await blob.arrayBuffer());
 
-        const pdfjsLib = await import("pdfjs-dist");
-        const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
+        const pdfjsLib = await getPdfJs();
         const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
 
         const out: string[] = [];
@@ -82,9 +82,13 @@ export default function AnhangueraPreviewPage() {
         if (!cancelled) {
           setPages(out);
           setPdfError(out.length === 0);
+          requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
         }
       } catch {
-        if (!cancelled) setPdfError(true);
+        if (!cancelled) {
+          setPdfError(true);
+          completePdfPresentation();
+        }
       }
     })();
 

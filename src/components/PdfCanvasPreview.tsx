@@ -1,14 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { subscribePdfLoading } from "@/lib/pdf-loading";
-
-const pdfJsPromise = Promise.all([
-  import("pdfjs-dist"),
-  import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
-]).then(([pdfjs, worker]) => {
-  pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
-  return pdfjs;
-});
+import { completePdfPresentation, subscribePdfLoading } from "@/lib/pdf-loading";
+import { getPdfJs } from "@/lib/pdfjs-loader";
 
 type PdfCanvasPreviewProps = {
   pdfDataUrl: string;
@@ -62,7 +55,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   useEffect(() => {
     const unsubscribe = subscribePdfLoading((state) => {
       if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
-      if (state.active) {
+      if (state.generating) {
         setGenerationActive(true);
       } else {
         // `invokeGeneratePdf` encerra o loading imediatamente antes de entregar
@@ -96,7 +89,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     const render = async () => {
       setStatus("loading");
       try {
-        const pdfjs = await pdfJsPromise;
+        const pdfjs = await getPdfJs();
 
         const loadingTask = pdfjs.getDocument({ data: dataUrlToBytes(pdfDataUrl) });
         destroyLoadingTask = () => loadingTask.destroy();
@@ -156,11 +149,17 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         host.appendChild(canvas);
 
         setStatus("ready");
+        // Só libera a transição quando o canvas novo já está no DOM e o browser
+        // teve oportunidade de apresentá-lo na tela.
+        requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
         page.cleanup();
         await pdf.destroy();
       } catch (error) {
         console.error("Falha ao renderizar preview do PDF:", error);
-        if (!cancelled) setStatus("error");
+        if (!cancelled) {
+          setStatus("error");
+          completePdfPresentation();
+        }
       }
     };
 
