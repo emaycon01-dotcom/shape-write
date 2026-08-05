@@ -73,6 +73,8 @@ const ComprovanteFormPage = lazy(() => import("./pages/ComprovanteFormPage"));
 const ComprovantePreviewPage = lazy(() => import("./pages/ComprovantePreviewPage"));
 const CoelbaFormPage = lazy(() => import("./pages/CoelbaFormPage"));
 const CoelbaPreviewPage = lazy(() => import("./pages/CoelbaPreviewPage"));
+const EquatorialFormPage = lazy(() => import("./pages/EquatorialFormPage"));
+const EquatorialPreviewPage = lazy(() => import("./pages/EquatorialPreviewPage"));
 const DeclaracaoFormPage = lazy(() => import("./pages/DeclaracaoFormPage"));
 const DeclaracaoPreviewPage = lazy(() => import("./pages/DeclaracaoPreviewPage"));
 const ReceitaFormPage = lazy(() => import("./pages/ReceitaFormPage"));
