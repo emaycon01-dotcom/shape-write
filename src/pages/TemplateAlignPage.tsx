@@ -24,12 +24,14 @@ import { HISTORICO_ALIGN_STORAGE_KEY, loadHistoricoFieldPositions } from "@/lib/
 import { CERTIDAO_ALIGN_STORAGE_KEY, loadCertidaoFieldPositions } from "@/lib/certidao-align";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
+import { CRAF_ALIGN_STORAGE_KEY, loadCrafFieldPositions } from "@/lib/craf-align";
 import templateHapvidaBgUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import templateUnimedBgUrl from "@/assets/template-unimed-bg-hq.jpg";
 import templateHistoricoBgUrl from "@/assets/template-historico-bg-hq.jpg";
 import templateCertidaoBgUrl from "@/assets/template-certidao-bg-hq.jpg";
 import templateDeclaracaoBgUrl from "@/assets/template-declaracao-bg-hq.jpg";
 import templateReceitaBgUrl from "@/assets/template-receita-bg-hq.jpg";
+import templateCrafBgUrl from "@/assets/template-craf-bg-hq.jpg";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -48,6 +50,7 @@ const CERTIDAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const DECLARACAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const RECEITA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const CRAF_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 
@@ -481,7 +484,30 @@ export const defaultReceitaFields: FieldDef[] = [
   { id: "farmaceutico", label: "Linha do farmacêutico", sampleText: "Farmacêutico, valide a receita digital em https://farmacias.mevosaude.com.br", x: 47, y: 1075, fontSize: 9, w: 700 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao" | "receita";
+// Defaults MUST match supabase/functions/generate-craf-pdf/index.ts CRAF_DEFAULT_POSITIONS
+export const defaultCrafFields: FieldDef[] = [
+  { id: "validade", label: "Validade", sampleText: "30/03/2032", x: 212, y: 138, fontSize: 9.5, w: 120 },
+  { id: "nome", label: "Nome completo", sampleText: "Bruno Henrique Couto Neves", x: 215, y: 173, fontSize: 9, w: 262 },
+  { id: "cpf", label: "CPF", sampleText: "015.063.256-88", x: 215, y: 209, fontSize: 9, w: 95 },
+  { id: "rg", label: "RG", sampleText: "MG-10.617.978", x: 313.6, y: 210.5, fontSize: 9, w: 100 },
+  { id: "sfpc", label: "SFPC de vinculação (RM)", sampleText: "Cmdo 4ª RM", x: 421.7, y: 210.5, fontSize: 9, w: 130 },
+  { id: "amparo", label: "Amparo legal", sampleText: "art. 3º da Lei 10.826/03 e art. 4 do Decreto 9.847/19.", x: 215, y: 243, fontSize: 8.5, w: 350 },
+  { id: "registro", label: "Registro", sampleText: "ADT ELET SISFPC NR 72 DE 30/03/2022, 4º GAAAE", x: 403, y: 402, fontSize: 7.5, w: 168 },
+  { id: "tipo", label: "Tipo", sampleText: "CARABINA / FUZIL", x: 405.7, y: 432, fontSize: 8.5, w: 76 },
+  { id: "marca", label: "Marca", sampleText: "AMADEO ROSSI", x: 483, y: 432, fontSize: 8.5, w: 82 },
+  { id: "calibre", label: "Calibre", sampleText: "357 Magnum", x: 405.7, y: 456, fontSize: 8.5, w: 76 },
+  { id: "numero_serie", label: "Nº de série", sampleText: "NVH 4712721", x: 405.7, y: 481.5, fontSize: 8.5, w: 76 },
+  { id: "numero_sigma", label: "Nº SIGMA", sampleText: "1817992", x: 483, y: 483, fontSize: 8.5, w: 82 },
+  { id: "data_expedicao", label: "Data de expedição", sampleText: "30/03/2022", x: 405.7, y: 505.5, fontSize: 8.5, w: 76 },
+  { id: "assinado_por", label: "Linha: assinado por", sampleText: "Documento Assinado Eletrônicamente por:", x: 400.4, y: 536.5, fontSize: 8.5, w: 200 },
+  { id: "assinante", label: "Assinante", sampleText: "SFPC - 4º GAAAe", x: 400.4, y: 551, fontSize: 8.5, w: 200 },
+  { id: "cidade_data", label: "Cidade e data", sampleText: "Sete Lagoas/MG, 30/03/2022", x: 400.4, y: 564.5, fontSize: 8.5, w: 200 },
+  { id: "qr", label: "QR Code", sampleText: "", x: 225.8, y: 411, fontSize: 8, w: 137, h: 137 },
+  { id: "qr_label", label: "Rótulo do QR", sampleText: "QR Code Vio", x: 258, y: 578, fontSize: 8.5, w: 120 },
+  { id: "autenticidade", label: "Código de autenticidade", sampleText: "A Autenticidade no SisGCorp eb559a07035876bc154520d8e8b23e33", x: 258, y: 590.5, fontSize: 8.5, w: 260 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao" | "receita" | "craf";
 
 
 interface EditorConfig {
@@ -674,6 +700,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.22,
     copy: () => loadReceitaFieldPositions() ?? {},
+  },
+  craf: {
+    key: "craf",
+    title: "CRAF",
+    storageKey: CRAF_ALIGN_STORAGE_KEY,
+    defaults: defaultCrafFields,
+    bg: templateCrafBgUrl,
+    font: CRAF_FONT,
+    mrzFont: CRAF_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadCrafFieldPositions() ?? {},
   },
 };
 
@@ -1190,7 +1230,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "historico", "certidao", "declaracao", "receita"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "historico", "certidao", "declaracao", "receita", "craf"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
