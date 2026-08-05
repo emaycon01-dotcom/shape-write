@@ -47,6 +47,7 @@ const DIPLOMA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const CERTIDAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const DECLARACAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const RECEITA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 
 
 
