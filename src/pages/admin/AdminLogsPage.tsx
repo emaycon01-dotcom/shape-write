@@ -23,26 +23,69 @@ interface StaffLog {
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
+interface ActionLog {
+  id: string;
+  actor_name: string;
+  actor_email: string;
+  actor_cargo: string;
+  target_name: string;
+  target_email: string;
+  action: string;
+  details: string;
+  created_at: string;
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  set_password: "ALTEROU A SENHA",
+  delete_user: "EXCLUIU A CONTA",
+};
+
 export default function AdminLogsPage() {
   const [logs, setLogs] = useState<StaffLog[]>([]);
+  const [actions, setActions] = useState<ActionLog[]>([]);
+  const [tab, setTab] = useState<"creditos" | "acoes">("creditos");
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [cargo, setCargo] = useState("todos");
 
   const fetchLogs = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("staff_credit_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500);
+    const [{ data }, { data: actionData }] = await Promise.all([
+      supabase
+        .from("staff_credit_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500),
+      supabase
+        .from("staff_action_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500),
+    ]);
     setLogs((data as StaffLog[]) ?? []);
+    setActions((actionData as ActionLog[]) ?? []);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchLogs();
   }, []);
+
+  const filteredActions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return actions.filter((l) => {
+      if (cargo !== "todos" && l.actor_cargo !== cargo) return false;
+      if (!q) return true;
+      return (
+        l.actor_name.toLowerCase().includes(q) ||
+        l.actor_email.toLowerCase().includes(q) ||
+        l.target_name.toLowerCase().includes(q) ||
+        l.target_email.toLowerCase().includes(q) ||
+        l.details.toLowerCase().includes(q)
+      );
+    });
+  }, [actions, query, cargo]);
+
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
