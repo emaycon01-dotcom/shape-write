@@ -9,6 +9,7 @@ import { HAPVIDA_ALIGN_STORAGE_KEY } from "@/lib/hapvida-align";
 import { UNIMED_ALIGN_STORAGE_KEY } from "@/lib/unimed-align";
 import { HISTORICO_ALIGN_STORAGE_KEY } from "@/lib/historico-align";
 import { CERTIDAO_ALIGN_STORAGE_KEY } from "@/lib/certidao-align";
+import { OBITO_ALIGN_STORAGE_KEY } from "@/lib/obito-align";
 import { DECLARACAO_ALIGN_STORAGE_KEY } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY } from "@/lib/receita-align";
 import { CRAF_ALIGN_STORAGE_KEY } from "@/lib/craf-align";
