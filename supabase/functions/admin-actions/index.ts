@@ -32,15 +32,17 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Verify caller is admin (server-side, never trust the client)
+    // Verify caller role (server-side, never trust the client)
     const { data: roles } = await admin
       .from("user_roles")
       .select("cargo")
       .eq("user_id", user.id);
 
-    if (!roles?.some((r: { cargo: string }) => r.cargo === "admin")) {
-      return json({ error: "Forbidden" }, 403);
-    }
+    const cargos = (roles ?? []).map((r: { cargo: string }) => r.cargo);
+    const isAdmin = cargos.includes("admin");
+    const isGerente = cargos.includes("gerente");
+
+    if (!isAdmin && !isGerente) return json({ error: "Forbidden" }, 403);
 
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "");
@@ -53,7 +55,33 @@ Deno.serve(async (req) => {
       return json({ error: "Você não pode executar esta ação na própria conta." }, 400);
     }
 
+    const { data: targetRoles } = await admin
+      .from("user_roles")
+      .select("cargo")
+      .eq("user_id", targetUserId);
+    const targetIsStaff = (targetRoles ?? []).length > 0;
+
+    const logAction = async (act: string, details: string) => {
+      const [{ data: actorP }, { data: targetP }] = await Promise.all([
+        admin.from("profiles").select("name,email").eq("user_id", user.id).maybeSingle(),
+        admin.from("profiles").select("name,email").eq("user_id", targetUserId).maybeSingle(),
+      ]);
+      await admin.from("staff_action_logs").insert({
+        actor_id: user.id,
+        actor_name: actorP?.name ?? "",
+        actor_email: actorP?.email ?? "",
+        actor_cargo: isAdmin ? "admin" : "gerente",
+        target_user_id: targetUserId,
+        target_name: targetP?.name ?? "",
+        target_email: targetP?.email ?? "",
+        action: act,
+        details,
+      });
+    };
+
     if (action === "delete_user") {
+      if (!isAdmin) return json({ error: "Forbidden" }, 403);
+      await logAction("delete_user", "Conta excluída definitivamente");
       await admin.from("user_roles").delete().eq("user_id", targetUserId);
       await admin.from("blocked_users").delete().eq("user_id", targetUserId);
       await admin.from("profiles").delete().eq("user_id", targetUserId);
@@ -62,17 +90,24 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
-
     if (action === "set_password") {
+      // Gerentes só podem alterar a senha de usuários comuns (sem cargo)
+      if (!isAdmin && targetIsStaff) {
+        return json(
+          { error: "Gerentes só podem alterar a senha de usuários comuns." },
+          403,
+        );
+      }
       const password = String(body.password ?? "");
       if (password.length < 6) {
         return json({ error: "A senha deve ter pelo menos 6 caracteres." }, 400);
       }
       const { error } = await admin.auth.admin.updateUserById(targetUserId, { password });
       if (error) return json({ error: error.message }, 500);
+      const reason = String(body.reason ?? "").slice(0, 300);
+      await logAction("set_password", reason || "Senha alterada");
       return json({ ok: true });
     }
-
 
     return json({ error: "Unknown action" }, 400);
   } catch (_err) {
