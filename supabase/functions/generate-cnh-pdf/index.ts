@@ -787,7 +787,9 @@ serve(async (req) => {
     const validacao = isPreview
       ? {
           documentoId: buildDocumentoId(data),
-          qrCodeUrl: `${VALIDACAO_BASE_URL}/validar?id=${encodeURIComponent(buildDocumentoId(data))}`,
+          // Preview: QR com aparência idêntica (mesma versão/densidade), mas
+          // com ID inválido — não abre documento nenhum. Só o PDF final vale.
+          qrCodeUrl: `${VALIDACAO_BASE_URL}/validar?id=${encodeURIComponent("PREVIEW-" + buildDocumentoId(data))}`,
           registered: false,
         }
       : await registerValidationDocument(data);
