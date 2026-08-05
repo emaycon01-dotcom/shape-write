@@ -178,6 +178,62 @@ export function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
+/**
+ * Cache de bitmaps pesados (templates em base64) como `blob:`.
+ *
+ * O HTML das Edge Functions traz o template inteiro como Data URI. Cada render
+ * fazia o navegador RE-DECODIFICAR esse base64 (2–4 MB de texto → bitmap) e
+ * ainda mantinha a string gigante viva dentro do iframe. Trocando por um
+ * `blob:` o binário é decodificado UMA vez por sessão e reaproveitado em todas
+ * as gerações seguintes — menos pico de memória (principal causa de OOM em
+ * Android) e menos tempo até a primeira faixa.
+ *
+ * O pixel final é idêntico: é exatamente o mesmo binário, só referenciado por
+ * URL. Se qualquer imagem falhar ao carregar, `waitForAssets` lança e o motor
+ * repete a geração com o HTML original (`useBlobAssets = false`).
+ */
+const blobAssetCache = new Map<string, string>();
+const BLOB_ASSET_MAX = 8;
+const BLOB_ASSET_MIN_CHARS = 60_000;
+
+function dataUriToBlobUrl(dataUri: string): string | null {
+  try {
+    const comma = dataUri.indexOf(",");
+    const header = dataUri.slice(5, comma);
+    if (!header.includes(";base64")) return null;
+    const mime = header.split(";")[0] || "image/jpeg";
+    const binary = atob(dataUri.slice(comma + 1));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: mime }));
+  } catch {
+    return null;
+  }
+}
+
+/** Substitui Data URIs grandes por `blob:` reaproveitáveis entre gerações. */
+function useBlobAssetsInHtml(html: string): string {
+  return html.replace(/data:image\/[a-zA-Z+]+;base64,[A-Za-z0-9+/=]+/g, (uri) => {
+    if (uri.length < BLOB_ASSET_MIN_CHARS) return uri;
+    const key = `${uri.length}:${uri.slice(24, 88)}:${uri.slice(-48)}`;
+    const cached = blobAssetCache.get(key);
+    if (cached) return cached;
+    const url = dataUriToBlobUrl(uri);
+    if (!url) return uri;
+    blobAssetCache.set(key, url);
+    while (blobAssetCache.size > BLOB_ASSET_MAX) {
+      const oldest = blobAssetCache.keys().next().value as string | undefined;
+      if (!oldest) break;
+      const stale = blobAssetCache.get(oldest);
+      if (stale) URL.revokeObjectURL(stale);
+      blobAssetCache.delete(oldest);
+    }
+    return url;
+  });
+}
+
+
+
 
 /**
  * Detecta canvas preto/transparente (falha silenciosa de memória em
@@ -407,22 +463,24 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
   // Preview não precisa carregar um PDF de 576 DPI no iframe do Android. O
   // documento final continua sempre na escala máxima; em aparelhos fracos
   // reduzimos somente a altura das faixas, nunca a resolução.
-  const attempts: Array<{ cap: number; bandDivisor: number }> = preview
+  const attempts: Array<{ cap: number; bandDivisor: number; blobs: boolean }> = preview
     ? [
-        { cap: 2, bandDivisor: 1 },
-        { cap: 2, bandDivisor: 2 },
-        { cap: 2, bandDivisor: 4 },
+        { cap: 2, bandDivisor: 1, blobs: true },
+        { cap: 2, bandDivisor: 1, blobs: false },
+        { cap: 2, bandDivisor: 2, blobs: false },
+        { cap: 2, bandDivisor: 4, blobs: false },
       ]
     : [
         // Começa conservador em vez de provocar OOM e repetir com a memória já
         // pressionada. As duas tentativas preservam integralmente os 576 DPI.
-        { cap: RENDER_SCALE, bandDivisor: 1 },
-        { cap: RENDER_SCALE, bandDivisor: 2 },
+        { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
+        { cap: RENDER_SCALE, bandDivisor: 1, blobs: false },
+        { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
       ];
   let lastError: unknown = null;
-  for (const { cap, bandDivisor } of attempts) {
+  for (const { cap, bandDivisor, blobs } of attempts) {
     try {
-      return await renderOnce(html, cap, bandDivisor);
+      return await renderOnce(html, cap, bandDivisor, blobs);
     } catch (e) {
       lastError = e;
       // Pausa maior a cada tentativa: dá tempo do navegador liberar memória.
@@ -432,12 +490,17 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
   throw lastError instanceof Error ? lastError : new Error("Falha ao gerar o PDF no navegador.");
 }
 
-async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Promise<string> {
+async function renderOnce(
+  html: string,
+  scaleCap: number,
+  bandDivisor = 1,
+  blobAssets = false,
+): Promise<string> {
 
   const { html2canvas, jsPDF } = await warmPdfEngine();
 
 
-  const frame = await createHiddenFrame(html);
+  const frame = await createHiddenFrame(blobAssets ? useBlobAssetsInHtml(html) : html);
   let releaseFonts: () => void = () => undefined;
   let releaseBlobs: () => void = () => undefined;
   let fontsWarm = false;
