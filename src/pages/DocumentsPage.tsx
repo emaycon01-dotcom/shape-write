@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -17,10 +18,19 @@ type Modulo = {
   manutencao?: boolean;
 };
 
-const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
+type Categoria = {
+  grupo: string;
+  subtitulo: string;
+  icon: React.ElementType;
+  itens: Modulo[];
+};
+
+const MODULOS: Categoria[] = [
+
   {
     grupo: "Digitais",
     subtitulo: "Documentos digitais com validação online",
+    icon: IdCard,
     itens: [
       {
         id: "cnh",
@@ -78,6 +88,7 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
   {
     grupo: "Acadêmicos",
     subtitulo: "Diplomas e documentos de ensino superior",
+    icon: GraduationCap,
     itens: [
       {
         id: "diploma",
@@ -133,8 +144,9 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
     ],
   },
   {
-    grupo: "Atestado",
-    subtitulo: "Documentos médicos e declarações",
+    grupo: "Médicos",
+    subtitulo: "Atestados, receitas e declarações de saúde",
+    icon: Stethoscope,
     itens: [
       {
         id: "atestado",
@@ -195,6 +207,7 @@ export default function DocumentsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const verified = user?.verified !== false;
+  const [categoria, setCategoria] = useState<string | null>(null);
 
   const abrir = (m: Modulo) => {
     if (m.manutencao) {
@@ -223,70 +236,111 @@ export default function DocumentsPage() {
     );
   }
 
+  const atual = MODULOS.find((m) => m.grupo === categoria) || null;
+
+  // ---- Tela 1: seleção de categoria -------------------------------------
+  if (!atual) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">Serviços</h1>
+          <p className="text-sm text-muted-foreground">Escolha uma categoria para ver os módulos</p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {MODULOS.map((cat) => (
+            <button
+              key={cat.grupo}
+              onClick={() => setCategoria(cat.grupo)}
+              className="group relative overflow-hidden rounded-2xl border border-primary/40 bg-card/80 p-5 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
+            >
+              <div className="absolute inset-0 gradient-primary opacity-[0.08]" />
+              <div className="relative flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/50">
+                  <cat.icon className="h-6 w-6 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-base font-bold uppercase tracking-[0.14em] text-foreground">
+                    {cat.grupo}
+                  </p>
+                  <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{cat.subtitulo}</p>
+                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                    {cat.itens.length} módulos
+                  </p>
+                </div>
+                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <p className="text-center text-[11px] text-muted-foreground">Novos módulos serão adicionados em breve.</p>
+      </div>
+    );
+  }
+
+  // ---- Tela 2: módulos da categoria (lista de cima para baixo) ----------
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">Serviços</h1>
-        <p className="text-sm text-muted-foreground">Módulos disponíveis na plataforma</p>
+    <div className="space-y-5">
+      <button
+        onClick={() => setCategoria(null)}
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Todas as categorias
+      </button>
+
+      <div className="flex items-center gap-3 border-b border-border/60 pb-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/80 ring-1 ring-border/60">
+          <atual.icon className="h-5 w-5 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <h1 className="font-display text-xl font-bold uppercase tracking-[0.14em] text-foreground">{atual.grupo}</h1>
+          <p className="text-[11px] text-muted-foreground">{atual.subtitulo}</p>
+        </div>
       </div>
 
-
-      {MODULOS.map((mod) => (
-        <section key={mod.grupo} className="space-y-3">
-          <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
-            <div>
-              <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">{mod.grupo}</h2>
-              <p className="text-[11px] text-muted-foreground">{mod.subtitulo}</p>
-            </div>
-            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-              {mod.itens.length} {mod.itens.length === 1 ? "módulo" : "módulos"}
-            </span>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {mod.itens.map((m) => (
-            <button
-                key={m.id}
-                onClick={() => abrir(m)}
-                className={`group relative overflow-hidden rounded-xl border p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 ${
-                  m.emBreve || m.manutencao
-                    ? "border-border/50 bg-card/40"
-                    : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
-                }`}
-              >
-                {!m.emBreve && !m.manutencao && <div className="absolute inset-0 gradient-primary opacity-[0.08]" />}
-                <div className="relative flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
-                    <m.icon className={`h-5 w-5 ${m.emBreve || m.manutencao ? "text-muted-foreground" : "text-primary"}`} />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <p className="truncate text-sm font-semibold text-foreground">{m.titulo}</p>
-                      {!m.manutencao && (
-                        <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
-                      )}
-                    </div>
-                    <p className="text-[11px] leading-tight text-muted-foreground">{m.descricao}</p>
-                    <div className="flex flex-wrap items-center gap-1">
-                      {m.qrcode && !m.manutencao && <Badge tone="qr" icon={QrCode}>QR Code</Badge>}
-                      {m.aplicativo && !m.manutencao && <Badge tone="app" icon={Smartphone}>Aplicativo</Badge>}
-                      {m.emBreve && <Badge tone="soon" icon={Lock}>Em breve</Badge>}
-                      {m.manutencao && <Badge tone="maintenance" icon={Wrench}>Em manutenção</Badge>}
-                      {!m.emBreve && !m.manutencao && m.creditos != null && (
-                        <span className="text-[10px] font-semibold text-accent">
-                          {m.creditos} crédito{m.creditos > 1 ? "s" : ""}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+      <div className="flex flex-col gap-3">
+        {atual.itens.map((m) => (
+          <button
+            key={m.id}
+            onClick={() => abrir(m)}
+            className={`group relative w-full overflow-hidden rounded-xl border p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 ${
+              m.emBreve || m.manutencao
+                ? "border-border/50 bg-card/40"
+                : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
+            }`}
+          >
+            {!m.emBreve && !m.manutencao && <div className="absolute inset-0 gradient-primary opacity-[0.08]" />}
+            <div className="relative flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
+                <m.icon className={`h-5 w-5 ${m.emBreve || m.manutencao ? "text-muted-foreground" : "text-primary"}`} />
+              </div>
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-semibold text-foreground">{m.titulo}</p>
+                  {!m.manutencao && (
+                    <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
+                  )}
                 </div>
-              </button>
-            ))}
-          </div>
-        </section>
-      ))}
-
-      <p className="text-center text-[11px] text-muted-foreground">Novos módulos serão adicionados em breve.</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">{m.descricao}</p>
+                <div className="flex flex-wrap items-center gap-1">
+                  {m.qrcode && !m.manutencao && <Badge tone="qr" icon={QrCode}>QR Code</Badge>}
+                  {m.aplicativo && !m.manutencao && <Badge tone="app" icon={Smartphone}>Aplicativo</Badge>}
+                  {m.emBreve && <Badge tone="soon" icon={Lock}>Em breve</Badge>}
+                  {m.manutencao && <Badge tone="maintenance" icon={Wrench}>Em manutenção</Badge>}
+                  {!m.emBreve && !m.manutencao && m.creditos != null && (
+                    <span className="text-[10px] font-semibold text-accent">
+                      {m.creditos} crédito{m.creditos > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
+
