@@ -17,6 +17,7 @@ import templateCnhUrl from "@/assets/template-cnh-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 import { normalizeSignatureImage } from "@/lib/signature-image";
 
 const UF_LIST = [
@@ -369,12 +370,8 @@ export default function CnhFormPage() {
         navigate("/dashboard/history");
       } else {
         // Normal mode: navigate to preview
-        navigate("/dashboard/documents/cnh/preview", {
-          state: {
-            pdfBase64: pdfResult,
-            formData: bodyData,
-          },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/cnh/preview", { state: { previewId } });
 
       }
     } catch (err: any) {

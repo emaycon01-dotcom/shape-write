@@ -12,6 +12,7 @@ import templateReceitaUrl from "@/assets/template-receita-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 import { CIDADES_UNIMED } from "@/lib/cidades-unimed";
 
 interface Medicamento {
@@ -188,9 +189,8 @@ export default function ReceitaFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/receita-medica/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/receita-medica/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar Receita Médica:", err);

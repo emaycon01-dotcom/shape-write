@@ -14,6 +14,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { splitEndereco } from "@/lib/atestado-endereco";
 import { maskCPF, maskDate, maskDigits, maskTimeSec } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 
 
 const MEDICO = "Dr. Abdo";
@@ -206,9 +207,8 @@ export default function AtestadoFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/atestado/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/atestado/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar PDF do atestado:", err);

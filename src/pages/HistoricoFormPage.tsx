@@ -11,6 +11,7 @@ import templateHistoricoUrl from "@/assets/template-historico-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskPhone } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADO_NOMES, ESTADOS_UF, loadBrasaoDataUrl } from "@/lib/brasoes-estados";
 
 interface HistoricoFormData {
@@ -331,9 +332,8 @@ export default function HistoricoFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/historico-escolar/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/historico-escolar/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar Histórico Escolar:", err);
