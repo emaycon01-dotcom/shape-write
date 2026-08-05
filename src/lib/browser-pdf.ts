@@ -32,10 +32,18 @@ export function warmPdfEngine() {
 }
 
 // Pré-aquece o motor assim que um formulário importa este módulo: o usuário
-// ainda está preenchendo os campos, então o custo fica invisível.
+// ainda está preenchendo os campos, então o custo fica invisível. O visualizador
+// (pdf.js + worker) também é baixado aqui — era ele o responsável pelos
+// segundos de tela vazia antes do preview aparecer.
 if (typeof window !== "undefined") {
-  window.setTimeout(() => void warmPdfEngine().catch(() => undefined), 1200);
+  window.setTimeout(() => {
+    void warmPdfEngine().catch(() => undefined);
+    void import("@/lib/pdf-viewer")
+      .then((m) => m.warmPdfViewer())
+      .catch(() => undefined);
+  }, 1200);
 }
+
 
 
 /** Limite de dimensão de canvas do dispositivo (Safari/iOS é o mais restrito). */
