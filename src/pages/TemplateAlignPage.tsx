@@ -34,6 +34,8 @@ import { TIM_ALIGN_STORAGE_KEY, loadTimFieldPositions } from "@/lib/tim-align";
 import templateEquatorialP1Url from "@/assets/template-equatorial-p1-hq.webp";
 import templateEquatorialP2Url from "@/assets/template-equatorial-p2-hq.webp";
 import templateTimP1Url from "@/assets/template-tim-p1-hq.webp";
+import { HOLERITE_ALIGN_STORAGE_KEY, loadHoleriteFieldPositions } from "@/lib/holerite-align";
+import templateHoleriteUrl from "@/assets/template-holerite-p1-hq.webp";
 import templateObitoBgUrl from "@/assets/template-obito-bg-hq.webp";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
