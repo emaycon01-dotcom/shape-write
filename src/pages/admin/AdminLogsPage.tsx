@@ -117,11 +117,12 @@ export default function AdminLogsPage() {
       <header className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <ScrollText className="h-6 w-6 text-primary" /> LOGS DE CRÉDITOS
+            <ScrollText className="h-6 w-6 text-primary" /> LOGS DE STAFF
           </h1>
           <p className="text-sm text-muted-foreground">
-            Quem deu ou removeu créditos, para quem e por quê.
+            Tudo que gerentes e admins fizeram: créditos e ações em contas.
           </p>
+
         </div>
         <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading}>
           <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Atualizar
