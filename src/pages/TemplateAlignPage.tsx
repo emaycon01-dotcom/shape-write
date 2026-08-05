@@ -818,7 +818,24 @@ const EDITORS: Record<DocKey, EditorConfig> = {
 
 
 function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: (updates: Partial<FieldDef>) => void }) {
-  const isBox = field.id === "photo" || field.id === "signature" || field.id === "brasao";
+  const isQr = /^qr\d*$/.test(field.id);
+  const isBox = field.id === "photo" || field.id === "signature" || field.id === "brasao" || isQr;
+
+  // Redimensiona o QR mantendo a proporção. Se "grow" for para cima/esquerda,
+  // compensamos x/y para que a âncora fique no canto inferior direito.
+  const resizeQr = (size: number, anchor: "tl" | "br") => {
+    const next = Math.max(30, Math.min(900, Math.round(size)));
+    const curW = field.w || 100;
+    const curH = field.h || 100;
+    if (anchor === "br") {
+      const dx = next - curW;
+      const dy = next - curH;
+      onUpdate({ w: next, h: next, x: Math.max(0, field.x - dx), y: Math.max(0, field.y - dy) });
+    } else {
+      onUpdate({ w: next, h: next });
+    }
+  };
+
 
   return (
     <div className="glass rounded-lg p-3 space-y-3 text-sm">
@@ -894,6 +911,47 @@ function FieldPropertiesPanel({ field, onUpdate }: { field: FieldDef; onUpdate: 
           </div>
         </div>
       )}
+
+      {isQr && (
+        <div className="space-y-2 rounded-md border border-border/60 p-2">
+          <Label className="text-xs text-muted-foreground">Tamanho do QR Code</Label>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => resizeQr((field.w || 100) - 10, "tl")}>
+              <Minus className="w-3 h-3" />
+            </Button>
+            <Input
+              type="number"
+              value={field.w || 100}
+              onChange={(e) => resizeQr(Number(e.target.value), "tl")}
+              className="h-7 w-20 text-xs font-mono text-center bg-secondary/50"
+            />
+            <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => resizeQr((field.w || 100) + 10, "tl")}>
+              <Plus className="w-3 h-3" />
+            </Button>
+            <Slider
+              value={[field.w || 100]}
+              min={30}
+              max={900}
+              step={2}
+              onValueChange={([v]) => resizeQr(v, "tl")}
+              className="flex-1"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={() => resizeQr((field.w || 100) + 20, "br")}>
+              Crescer ↑ ←
+            </Button>
+            <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={() => resizeQr((field.w || 100) - 20, "br")}>
+              Reduzir ↓ →
+            </Button>
+          </div>
+          <p className="text-[10px] text-muted-foreground leading-tight">
+            O slider expande para baixo/direita. Os botões "Crescer ↑ ←" expandem o QR para cima e para os lados,
+            mantendo o canto inferior direito fixo.
+          </p>
+        </div>
+      )}
+
 
       {field.rotate !== undefined && (
         <div>
