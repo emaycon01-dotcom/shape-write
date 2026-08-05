@@ -19,8 +19,6 @@ interface TimLinha {
   fran: string;
   cons: string;
   qtd: string;
-  dias: string;
-  per: string;
   val: string;
 }
 
@@ -46,10 +44,13 @@ interface TimFormData {
   plano: string;
   total: string;
 
+  periodoLinhas: string;
+  diasLinhas: string;
+
   linhas: TimLinha[];
 }
 
-const linhaVazia: TimLinha = { desc: "", fran: "", cons: "", qtd: "", dias: "", per: "", val: "" };
+const linhaVazia: TimLinha = { desc: "", fran: "", cons: "", qtd: "", val: "" };
 
 const initial: TimFormData = {
   nome: "",
@@ -73,7 +74,10 @@ const initial: TimFormData = {
   plano: "",
   total: "",
 
-  linhas: Array.from({ length: 8 }, () => ({ ...linhaVazia })),
+  periodoLinhas: "",
+  diasLinhas: "",
+
+  linhas: Array.from({ length: 7 }, () => ({ ...linhaVazia })),
 };
 
 const exemplo: TimFormData = {
@@ -98,15 +102,17 @@ const exemplo: TimFormData = {
   plano: "TIM Controle Smart 2 0",
   total: "54,99",
 
+  periodoLinhas: "14/04 a 13/05",
+  diasLinhas: "30",
+
   linhas: [
-    { desc: "TIM Controle Smart 2 0 (096/PÓS/SMP)", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "69,99" },
-    { desc: "Desconto Basico TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "-3,00" },
-    { desc: "Desc Fidelizado TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "3/12", dias: "30", per: "14/04 a 13/05", val: "-12,00" },
-    { desc: "Subtotal", fran: "", cons: "", qtd: "", dias: "", per: "", val: "54,99" },
-    { desc: "5GB Internet", fran: "5GB", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
-    { desc: "Minutos Locais e DDD com 41", fran: "Ilimitado", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
-    { desc: "Ebook By Skeelo", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
-    { desc: "TIM Banca Jornais II", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
+    { desc: "TIM Controle Smart 2 0 (096/PÓS/SMP)", fran: "-", cons: "-", qtd: "1", val: "69,99" },
+    { desc: "Desconto Basico TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "1", val: "-3,00" },
+    { desc: "Desc Fidelizado TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "3/12", val: "-12,00" },
+    { desc: "5GB Internet", fran: "5GB", cons: "-", qtd: "1", val: "Incluído" },
+    { desc: "Minutos Locais e DDD com 41", fran: "Ilimitado", cons: "-", qtd: "1", val: "Incluído" },
+    { desc: "Ebook By Skeelo", fran: "-", cons: "-", qtd: "1", val: "Incluído" },
+    { desc: "TIM Banca Jornais II", fran: "-", cons: "-", qtd: "1", val: "Incluído" },
   ],
 };
 
