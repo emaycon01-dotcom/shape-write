@@ -571,7 +571,7 @@ export async function renderHtmlToVectorPdf(html: string): Promise<string> {
     }
 
     const bytes = await pdf.save({ useObjectStreams: false });
-    const blob = new Blob([bytes], { type: "application/pdf" });
+    const blob = new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
     return await blobToDataUrl(blob);
   } finally {
     frame.remove();
