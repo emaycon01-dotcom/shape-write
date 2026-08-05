@@ -18,7 +18,6 @@ import { ESTADOS_UF } from "@/lib/brasoes-estados";
 import { AutoSection } from "@/components/AutoSection";
 import { autoEnel, baseDatas, fmtDate, refMesAno } from "@/lib/fatura-auto";
 
-
 interface ComprovanteFormData {
   nome: string;
   cpf: string;
@@ -68,6 +67,9 @@ interface ComprovanteFormData {
   sequencia: string;
 }
 
+const MENSAGENS_PADRAO =
+  "Consulte suas faturas, informe leitura e acompanhe o consumo pelo aplicativo Enel.\nEm caso de falta de energia, ligue 0800 72 72 196.";
+
 const initial: ComprovanteFormData = {
   nome: "",
   cpf: "",
@@ -95,18 +97,18 @@ const initial: ComprovanteFormData = {
   proximaLeitura: "",
   dias: "30",
 
-  consumoKwh: "158",
-  tarifaTusd: "0,43949",
-  tarifaTe: "0,33816",
-  aliquotaIcms: "12",
-  cosip: "5,63",
+  consumoKwh: "",
+  tarifaTusd: "",
+  tarifaTe: "",
+  aliquotaIcms: "",
+  cosip: "",
   totalPagar: "",
 
   medidor: "",
   leituraAnteriorMedidor: "",
   leituraAtualMedidor: "",
 
-  mensagens: "",
+  mensagens: MENSAGENS_PADRAO,
   codigoDebito: "",
   cb1: "",
   cb2: "",
@@ -117,7 +119,63 @@ const initial: ComprovanteFormData = {
   sequencia: "",
 };
 
-const rnd = (n: number) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join("");
+const exemplo: ComprovanteFormData = {
+  ...initial,
+  nome: "MARIA APARECIDA DOS SANTOS",
+  cpf: "312.480.915-07",
+  endereco: "RUA DAS ACACIAS, 128",
+  complemento: "APTO 42 BL B",
+  bairro: "JARDIM SAO PAULO",
+  cep: "02040-030",
+  municipio: "SÃO PAULO",
+  uf: "SP",
+  totalPagar: "184,90",
+  vencimento: "20/04/2026",
+};
+
+/** Preenche automaticamente tudo que não é dado do cliente. */
+function aplicarAuto(f: ComprovanteFormData, force: boolean): ComprovanteFormData {
+  const a = autoEnel(f.totalPagar);
+  const d = baseDatas(f.vencimento);
+  const keep = (cur: string, next: string) => (force || !String(cur ?? "").trim() ? next : cur);
+
+  return {
+    ...f,
+    vencimento: keep(f.vencimento, fmtDate(d.venc)),
+    referencia: keep(f.referencia, refMesAno(d.leituraAtual)),
+    dataEmissao: keep(f.dataEmissao, fmtDate(d.emissao)),
+    dataLeituraAnterior: keep(f.dataLeituraAnterior, fmtDate(d.leituraAnterior)),
+    dataLeituraAtual: keep(f.dataLeituraAtual, fmtDate(d.leituraAtual)),
+    proximaLeitura: keep(f.proximaLeitura, fmtDate(d.proximaLeitura)),
+    dias: keep(f.dias, String(d.dias)),
+
+    consumoKwh: keep(f.consumoKwh, a.consumoKwh),
+    tarifaTusd: keep(f.tarifaTusd, a.tarifaTusd),
+    tarifaTe: keep(f.tarifaTe, a.tarifaTe),
+    aliquotaIcms: keep(f.aliquotaIcms, a.aliquotaIcms),
+    cosip: keep(f.cosip, a.cosip),
+
+    medidor: keep(f.medidor, a.medidor),
+    leituraAnteriorMedidor: keep(f.leituraAnteriorMedidor, a.leituraAnteriorMedidor),
+    leituraAtualMedidor: keep(f.leituraAtualMedidor, a.leituraAtualMedidor),
+
+    instalacao: keep(f.instalacao, a.instalacao),
+    numeroCliente: keep(f.numeroCliente, a.numeroCliente),
+    numeroConta: keep(f.numeroConta, a.numeroConta),
+    notaFiscal: keep(f.notaFiscal, a.notaFiscal),
+    chaveNf: keep(f.chaveNf, a.chaveNf),
+    codigoDebito: keep(f.codigoDebito, a.codigoDebito),
+    unidadeEntrega: keep(f.unidadeEntrega, a.unidadeEntrega),
+    sequencia: keep(f.sequencia, a.sequencia),
+
+    cb1: keep(f.cb1, a.cb1),
+    cb2: keep(f.cb2, a.cb2),
+    cb3: keep(f.cb3, a.cb3),
+    cb4: keep(f.cb4, a.cb4),
+
+    mensagens: keep(f.mensagens, MENSAGENS_PADRAO),
+  };
+}
 
 export default function ComprovanteFormPage() {
   const navigate = useNavigate();
@@ -188,44 +246,13 @@ export default function ComprovanteFormPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((p) => ({ ...p, [field]: fn(e.target.value) }));
 
+  const randomizar = () => {
+    setForm((p) => aplicarAuto(p, true));
+    toast({ title: "Valores e códigos gerados automaticamente" });
+  };
+
   const fillTest = () => {
-    setForm({
-      ...initial,
-      nome: "MARIA APARECIDA DOS SANTOS",
-      cpf: `${rnd(3)}.${rnd(3)}.${rnd(3)}-${rnd(2)}`,
-      endereco: "RUA DAS ACACIAS, 128",
-      complemento: "APTO 42 BL B",
-      bairro: "JARDIM SAO PAULO",
-      cep: "02040-030",
-      municipio: "SÃO PAULO",
-      uf: "SP",
-      numeroConta: rnd(12),
-      instalacao: rnd(9),
-      numeroCliente: rnd(9),
-      notaFiscal: rnd(9),
-      serieNf: "B",
-      chaveNf: `${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)} ${rnd(4)}`,
-      referencia: "03/2026",
-      vencimento: "20/04/2026",
-      dataEmissao: "06/04/2026",
-      dataLeituraAnterior: "05/03/2026",
-      dataLeituraAtual: "04/04/2026",
-      proximaLeitura: "05/05/2026",
-      dias: "30",
-      consumoKwh: "158",
-      medidor: rnd(8),
-      leituraAnteriorMedidor: "14.382",
-      leituraAtualMedidor: "14.540",
-      mensagens:
-        "Consulte suas faturas, informe leitura e acompanhe o consumo pelo aplicativo Enel.\nEm caso de falta de energia, ligue 0800 72 72 196.",
-      codigoDebito: rnd(9),
-      cb1: `8364${rnd(7)}`,
-      cb2: rnd(11),
-      cb3: rnd(11),
-      cb4: rnd(11),
-      unidadeEntrega: `B${rnd(7)}`,
-      sequencia: rnd(4),
-    });
+    setForm(aplicarAuto(exemplo, true));
     toast({ title: "Formulário preenchido com dados de teste!" });
   };
 
@@ -237,7 +264,14 @@ export default function ComprovanteFormPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!form.totalPagar.trim()) {
+      toast({ title: "Informe o total da fatura", variant: "destructive" });
+      return;
+    }
     setLoading(true);
+
+    const f = aplicarAuto(form, false);
+    setForm(f);
 
     try {
       const [templateBase64, templateP2Base64] = await Promise.all([
@@ -246,52 +280,52 @@ export default function ComprovanteFormPage() {
       ]);
 
       const bodyData = {
-        nome: form.nome,
-        cpf: form.cpf,
-        endereco: form.endereco,
-        complemento: form.complemento,
-        bairro: form.bairro,
-        cep: form.cep,
-        municipio: form.municipio,
-        uf: form.uf,
+        nome: f.nome,
+        cpf: f.cpf,
+        endereco: f.endereco,
+        complemento: f.complemento,
+        bairro: f.bairro,
+        cep: f.cep,
+        municipio: f.municipio,
+        uf: f.uf,
 
-        numero_conta: form.numeroConta,
-        instalacao: form.instalacao,
-        numero_cliente: form.numeroCliente,
-        nota_fiscal: form.notaFiscal,
-        serie_nf: form.serieNf,
-        chave_nf: form.chaveNf,
-        classificacao: form.classificacao,
-        fornecimento: form.fornecimento,
+        numero_conta: f.numeroConta,
+        instalacao: f.instalacao,
+        numero_cliente: f.numeroCliente,
+        nota_fiscal: f.notaFiscal,
+        serie_nf: f.serieNf,
+        chave_nf: f.chaveNf,
+        classificacao: f.classificacao,
+        fornecimento: f.fornecimento,
 
-        referencia: form.referencia,
-        vencimento: form.vencimento,
-        data_emissao: form.dataEmissao,
-        data_leitura_anterior: form.dataLeituraAnterior,
-        data_leitura_atual: form.dataLeituraAtual,
-        proxima_leitura: form.proximaLeitura,
-        dias: form.dias,
+        referencia: f.referencia,
+        vencimento: f.vencimento,
+        data_emissao: f.dataEmissao,
+        data_leitura_anterior: f.dataLeituraAnterior,
+        data_leitura_atual: f.dataLeituraAtual,
+        proxima_leitura: f.proximaLeitura,
+        dias: f.dias,
 
-        consumo_kwh: form.consumoKwh,
-        tarifa_tusd: form.tarifaTusd,
-        tarifa_te: form.tarifaTe,
-        aliquota_icms: form.aliquotaIcms,
-        cosip: form.cosip,
-        total_pagar: form.totalPagar,
+        consumo_kwh: f.consumoKwh,
+        tarifa_tusd: f.tarifaTusd,
+        tarifa_te: f.tarifaTe,
+        aliquota_icms: f.aliquotaIcms,
+        cosip: f.cosip,
+        total_pagar: f.totalPagar,
 
-        medidor: form.medidor,
-        leitura_anterior_medidor: form.leituraAnteriorMedidor,
-        leitura_atual_medidor: form.leituraAtualMedidor,
+        medidor: f.medidor,
+        leitura_anterior_medidor: f.leituraAnteriorMedidor,
+        leitura_atual_medidor: f.leituraAtualMedidor,
 
-        mensagens: form.mensagens,
-        codigo_debito: form.codigoDebito,
-        cb1: form.cb1,
-        cb2: form.cb2,
-        cb3: form.cb3,
-        cb4: form.cb4,
+        mensagens: f.mensagens,
+        codigo_debito: f.codigoDebito,
+        cb1: f.cb1,
+        cb2: f.cb2,
+        cb3: f.cb3,
+        cb4: f.cb4,
 
-        unidade_entrega: form.unidadeEntrega,
-        sequencia: form.sequencia,
+        unidade_entrega: f.unidadeEntrega,
+        sequencia: f.sequencia,
 
         template_base64: templateBase64,
         template_p2_base64: templateP2Base64,
@@ -362,7 +396,11 @@ export default function ComprovanteFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Comprovante de Residência (Enel)</h1>
+      <h1 className="font-display mb-1 text-2xl font-bold text-foreground">Comprovante de Residência (Enel)</h1>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Informe apenas os dados do cliente e o total da fatura. Consumo, tarifas, ICMS, COSIP, leituras, chave da
+        NF-e e a linha digitável são calculados automaticamente.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* TITULAR */}
@@ -420,30 +458,26 @@ export default function ComprovanteFormPage() {
           </div>
         </div>
 
-        {/* UNIDADE CONSUMIDORA */}
+        {/* FATURA */}
         <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={Zap} title="Unidade consumidora" />
+          <SectionHeader icon={Receipt} title="Fatura" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <FieldLabel required>Nº da instalação</FieldLabel>
-              <Input value={form.instalacao} onChange={set("instalacao")} placeholder="203667891" className={inputCls} required />
+              <FieldLabel required>Total a pagar (R$)</FieldLabel>
+              <Input value={form.totalPagar} onChange={set("totalPagar")} placeholder="184,90" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Nº do cliente</FieldLabel>
-              <Input value={form.numeroCliente} onChange={set("numeroCliente")} placeholder="105371362" className={inputCls} />
+              <FieldLabel required>Vencimento</FieldLabel>
+              <Input value={form.vencimento} onChange={setMask("vencimento", maskDate)} inputMode="numeric" placeholder="20/04/2026" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Nº da conta</FieldLabel>
-              <Input value={form.numeroConta} onChange={set("numeroConta")} placeholder="511917580397" className={inputCls} />
+              <FieldLabel>Referência (opcional)</FieldLabel>
+              <Input value={form.referencia} onChange={set("referencia")} placeholder="03/2026" className={inputCls} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <FieldLabel>Classificação</FieldLabel>
-              <Input value={form.classificacao} onChange={set("classificacao")} className={inputCls} />
-            </div>
             <div className="space-y-1.5">
               <FieldLabel>Fornecimento</FieldLabel>
               <select value={form.fornecimento} onChange={(e) => setForm((p) => ({ ...p, fornecimento: e.target.value }))} className={selectCls}>
@@ -452,140 +486,109 @@ export default function ComprovanteFormPage() {
                 <option value="Trifásico">Trifásico</option>
               </select>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <FieldLabel>Nota fiscal nº</FieldLabel>
-              <Input value={form.notaFiscal} onChange={set("notaFiscal")} placeholder="593886610" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Série</FieldLabel>
-              <Input value={form.serieNf} onChange={set("serieNf")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Unidade de entrega</FieldLabel>
-              <Input value={form.unidadeEntrega} onChange={set("unidadeEntrega")} placeholder="B4850905" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Chave de acesso da NF-e</FieldLabel>
-            <Input value={form.chaveNf} onChange={set("chaveNf")} placeholder="3526 0207 5859 0000 0166 6600 0059 3886 6100 0106 7716" className={inputCls} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <FieldLabel>Medidor</FieldLabel>
-              <Input value={form.medidor} onChange={set("medidor")} placeholder="14038694" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Sequência</FieldLabel>
-              <Input value={form.sequencia} onChange={set("sequencia")} placeholder="0284" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Código débito automático</FieldLabel>
-              <Input value={form.codigoDebito} onChange={set("codigoDebito")} className={inputCls} />
+              <FieldLabel>Classificação</FieldLabel>
+              <Input value={form.classificacao} onChange={set("classificacao")} className={inputCls} />
             </div>
           </div>
         </div>
 
-        {/* LEITURA E CONSUMO */}
-        <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={Receipt} title="Leitura, consumo e valores" />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <FieldLabel required>Referência (MM/AAAA)</FieldLabel>
-              <Input value={form.referencia} onChange={set("referencia")} placeholder="03/2026" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>Vencimento</FieldLabel>
-              <Input value={form.vencimento} onChange={setMask("vencimento", maskDate)} inputMode="numeric" placeholder="20/04/2026" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Data de emissão</FieldLabel>
-              <Input value={form.dataEmissao} onChange={setMask("dataEmissao", maskDate)} inputMode="numeric" placeholder="06/04/2026" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Leitura anterior</FieldLabel>
-              <Input value={form.dataLeituraAnterior} onChange={setMask("dataLeituraAnterior", maskDate)} inputMode="numeric" placeholder="05/03/2026" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Leitura atual</FieldLabel>
-              <Input value={form.dataLeituraAtual} onChange={setMask("dataLeituraAtual", maskDate)} inputMode="numeric" placeholder="04/04/2026" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Nº de dias</FieldLabel>
-              <Input value={form.dias} onChange={set("dias")} inputMode="numeric" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Próxima leitura</FieldLabel>
-              <Input value={form.proximaLeitura} onChange={setMask("proximaLeitura", maskDate)} inputMode="numeric" placeholder="05/05/2026" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <FieldLabel required>Consumo (kWh)</FieldLabel>
-              <Input value={form.consumoKwh} onChange={set("consumoKwh")} inputMode="numeric" placeholder="158" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Leitura anterior (medidor)</FieldLabel>
-              <Input value={form.leituraAnteriorMedidor} onChange={set("leituraAnteriorMedidor")} placeholder="14.382" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Leitura atual (medidor)</FieldLabel>
-              <Input value={form.leituraAtualMedidor} onChange={set("leituraAtualMedidor")} placeholder="14.540" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Tarifa TUSD</FieldLabel>
-              <Input value={form.tarifaTusd} onChange={set("tarifaTusd")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Tarifa TE</FieldLabel>
-              <Input value={form.tarifaTe} onChange={set("tarifaTe")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>ICMS (%)</FieldLabel>
-              <Input value={form.aliquotaIcms} onChange={set("aliquotaIcms")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>COSIP (R$)</FieldLabel>
-              <Input value={form.cosip} onChange={set("cosip")} className={inputCls} />
-            </div>
-          </div>
-
+        {/* AUTOMÁTICO */}
+        <AutoSection
+          title="Consumo, impostos e códigos"
+          onRandomize={randomizar}
+          description="Consumo em kWh, tarifas TUSD/TE, ICMS, COSIP, leituras do medidor, nº de instalação/cliente/conta, chave da NF-e e a linha digitável do código de barras são gerados automaticamente e fecham com o total informado."
+        >
           <div className="space-y-1.5">
-            <FieldLabel>Total a pagar (opcional — calculado automaticamente)</FieldLabel>
-            <Input value={form.totalPagar} onChange={set("totalPagar")} placeholder="Deixe vazio para calcular" className={inputCls} />
+            <FieldLabel>Consumo (kWh)</FieldLabel>
+            <Input value={form.consumoKwh} onChange={set("consumoKwh")} placeholder="automático" className={inputCls} />
           </div>
-
           <div className="space-y-1.5">
+            <FieldLabel>COSIP (R$)</FieldLabel>
+            <Input value={form.cosip} onChange={set("cosip")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Tarifa TUSD</FieldLabel>
+            <Input value={form.tarifaTusd} onChange={set("tarifaTusd")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Tarifa TE</FieldLabel>
+            <Input value={form.tarifaTe} onChange={set("tarifaTe")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>ICMS (%)</FieldLabel>
+            <Input value={form.aliquotaIcms} onChange={set("aliquotaIcms")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Data de emissão</FieldLabel>
+            <Input value={form.dataEmissao} onChange={setMask("dataEmissao", maskDate)} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Leitura anterior (data)</FieldLabel>
+            <Input value={form.dataLeituraAnterior} onChange={setMask("dataLeituraAnterior", maskDate)} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Leitura atual (data)</FieldLabel>
+            <Input value={form.dataLeituraAtual} onChange={setMask("dataLeituraAtual", maskDate)} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Nº de dias</FieldLabel>
+            <Input value={form.dias} onChange={set("dias")} placeholder="30" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Próxima leitura</FieldLabel>
+            <Input value={form.proximaLeitura} onChange={setMask("proximaLeitura", maskDate)} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Leitura anterior (medidor)</FieldLabel>
+            <Input value={form.leituraAnteriorMedidor} onChange={set("leituraAnteriorMedidor")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Leitura atual (medidor)</FieldLabel>
+            <Input value={form.leituraAtualMedidor} onChange={set("leituraAtualMedidor")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Nº da instalação</FieldLabel>
+            <Input value={form.instalacao} onChange={set("instalacao")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Nº do cliente</FieldLabel>
+            <Input value={form.numeroCliente} onChange={set("numeroCliente")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Nº da conta</FieldLabel>
+            <Input value={form.numeroConta} onChange={set("numeroConta")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Nota fiscal nº</FieldLabel>
+            <Input value={form.notaFiscal} onChange={set("notaFiscal")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Medidor</FieldLabel>
+            <Input value={form.medidor} onChange={set("medidor")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Unidade de entrega</FieldLabel>
+            <Input value={form.unidadeEntrega} onChange={set("unidadeEntrega")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <FieldLabel>Chave de acesso da NF-e</FieldLabel>
+            <Input value={form.chaveNf} onChange={set("chaveNf")} placeholder="automático" className={inputCls} />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <FieldLabel>Linha digitável (4 blocos)</FieldLabel>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Input value={form.cb1} onChange={set("cb1")} inputMode="numeric" placeholder="Bloco 1" className={inputCls} />
+              <Input value={form.cb2} onChange={set("cb2")} inputMode="numeric" placeholder="Bloco 2" className={inputCls} />
+              <Input value={form.cb3} onChange={set("cb3")} inputMode="numeric" placeholder="Bloco 3" className={inputCls} />
+              <Input value={form.cb4} onChange={set("cb4")} inputMode="numeric" placeholder="Bloco 4" className={inputCls} />
+            </div>
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
             <FieldLabel>Mensagens importantes</FieldLabel>
             <Textarea value={form.mensagens} onChange={set("mensagens")} rows={3} className={inputCls} />
           </div>
-        </div>
-
-        {/* FICHA DE COMPENSAÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={Barcode} title="Ficha de compensação (código de barras)" />
-          <p className="text-xs text-muted-foreground">
-            Informe os 4 blocos de 11/12 dígitos da linha digitável. O código de barras é gerado automaticamente.
-          </p>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Input value={form.cb1} onChange={set("cb1")} inputMode="numeric" placeholder="Bloco 1" className={inputCls} />
-            <Input value={form.cb2} onChange={set("cb2")} inputMode="numeric" placeholder="Bloco 2" className={inputCls} />
-            <Input value={form.cb3} onChange={set("cb3")} inputMode="numeric" placeholder="Bloco 3" className={inputCls} />
-            <Input value={form.cb4} onChange={set("cb4")} inputMode="numeric" placeholder="Bloco 4" className={inputCls} />
-          </div>
-        </div>
+        </AutoSection>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
           {loading ? (
