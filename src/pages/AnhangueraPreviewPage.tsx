@@ -55,7 +55,8 @@ export default function AnhangueraPreviewPage() {
         const bytes = new Uint8Array(await blob.arrayBuffer());
 
         const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+        const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
         const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
 
         const out: string[] = [];
