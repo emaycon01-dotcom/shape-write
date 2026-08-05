@@ -730,21 +730,43 @@ export async function invokeGeneratePdf(
   try {
     const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
 
-    const { data, error } = await supabase.functions.invoke(functionName, {
-      body: isAction ? body : { ...light, render: "html" },
-    });
+    const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
+    const cached = cacheKey ? previewHtmlCache.get(cacheKey) : undefined;
 
-    if (error) return { data, error: error as Error };
-    if (!data || typeof data !== "object") return { data, error: null };
+    let payload: Record<string, unknown>;
+    let rawHtml: string;
 
-    let payload = data as Record<string, unknown>;
-    if (typeof payload.html !== "string") return { data: payload, error: null };
+    if (cached) {
+      payload = cached.payload;
+      rawHtml = cached.html;
+    } else {
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: isAction ? body : { ...light, render: "html" },
+      });
 
-    let html = map.size ? restoreHeavyAssets(payload.html, map) : payload.html;
+      if (error) return { data, error: error as Error };
+      if (!data || typeof data !== "object") return { data, error: null };
+
+      payload = data as Record<string, unknown>;
+      if (typeof payload.html !== "string") return { data: payload, error: null };
+      rawHtml = payload.html;
+
+      if (cacheKey) {
+        previewHtmlCache.set(cacheKey, { html: rawHtml, payload });
+        while (previewHtmlCache.size > PREVIEW_CACHE_MAX) {
+          const oldest = previewHtmlCache.keys().next().value as string | undefined;
+          if (!oldest) break;
+          previewHtmlCache.delete(oldest);
+        }
+      }
+    }
+
+    let html = map.size ? restoreHeavyAssets(rawHtml, map) : rawHtml;
 
     // Alguma função que não repassa o marcador? Refaz a chamada do jeito
     // original — nenhum módulo depende dessa otimização para funcionar.
     if (html === null) {
+      if (cacheKey) previewHtmlCache.delete(cacheKey);
       const retry = await supabase.functions.invoke(functionName, {
         body: { ...body, render: "html" },
       });
@@ -753,6 +775,7 @@ export async function invokeGeneratePdf(
       if (typeof payload.html !== "string") return { data: payload, error: null };
       html = payload.html;
     }
+
 
     try {
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
