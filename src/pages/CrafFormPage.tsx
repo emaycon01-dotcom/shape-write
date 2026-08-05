@@ -131,7 +131,9 @@ export default function CrafFormPage() {
           assinante: b.assinante || p.assinante,
           cidade: b.cidade || p.cidade,
         }));
+        if (b.foto_base64) setFotoPreview(b.foto_base64);
         setHydrated(true);
+
       } catch { /* payload inválido */ }
     })();
     return () => { cancelled = true; };
@@ -290,9 +292,36 @@ export default function CrafFormPage() {
           <SectionHeader icon={User} title="Dados do titular" />
 
           <div className="space-y-1.5">
+            <FieldLabel required>Foto 3x4 (validação do QR Code)</FieldLabel>
+            {fotoPreview ? (
+              <div className="relative inline-block">
+                <img src={fotoPreview} alt="Foto do titular" className="h-32 w-24 rounded-lg border border-border object-cover" />
+                <button
+                  type="button"
+                  onClick={() => { setFotoPreview(null); if (fotoRef.current) fotoRef.current.value = ""; }}
+                  className="absolute -top-2 -right-2 rounded-full bg-destructive p-1 text-destructive-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fotoRef.current?.click()}
+                className="flex h-32 w-24 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border bg-secondary/50 text-muted-foreground"
+              >
+                <Upload className="h-5 w-5" />
+                <span className="text-[11px]">Enviar</span>
+              </button>
+            )}
+            <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={handleFoto} />
+          </div>
+
+          <div className="space-y-1.5">
             <FieldLabel required>Nome completo</FieldLabel>
             <Input value={form.nome} onChange={set("nome")} placeholder="Bruno Henrique Couto Neves" className={inputCls} required />
           </div>
+
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
