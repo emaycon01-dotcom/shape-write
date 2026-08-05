@@ -412,6 +412,21 @@ export default function ReceitaFormPage() {
           )}
         </Button>
       </form>
+
+      <MedicamentoSearch
+        open={searchTarget !== null}
+        onOpenChange={(v) => !v && setSearchTarget(null)}
+        onSelect={(m) => {
+          setMeds((p) => {
+            const idx = searchTarget ?? p.length - 1;
+            const alvoVazio = !p[idx]?.nome?.trim();
+            if (alvoVazio) return p.map((old, i) => (i === idx ? m : old));
+            return [...p, m];
+          });
+          setSearchTarget(null);
+          toast({ title: "Medicamento adicionado!" });
+        }}
+      />
     </div>
   );
 }
