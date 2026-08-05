@@ -168,7 +168,7 @@ function encodeJpeg(canvas: HTMLCanvasElement, quality = 0.95): Promise<Uint8Arr
 }
 
 /** Converte o Blob final uma única vez, sem criar e dividir uma Data URI gigante. */
-function blobToDataUrl(blob: Blob): Promise<string> {
+export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ""));
@@ -252,7 +252,7 @@ async function ensureFontsLoaded(doc: Document) {
 }
 
 
-function createHiddenFrame(html: string): Promise<HTMLIFrameElement> {
+export function createHiddenFrame(html: string): Promise<HTMLIFrameElement> {
   return new Promise((resolve, reject) => {
     const frame = document.createElement("iframe");
     frame.setAttribute("aria-hidden", "true");
@@ -299,7 +299,7 @@ function createHiddenFrame(html: string): Promise<HTMLIFrameElement> {
 }
 
 
-async function waitForAssets(doc: Document) {
+export async function waitForAssets(doc: Document) {
   // Fontes embutidas (@font-face base64)
   await ensureFontsLoaded(doc);
 
@@ -343,7 +343,7 @@ async function waitForAssets(doc: Document) {
  */
 let adoptedFontCss: string | null = null;
 
-async function adoptFontFaces(doc: Document): Promise<() => void> {
+export async function adoptFontFaces(doc: Document): Promise<() => void> {
   let css = "";
   for (const sheet of Array.from(doc.styleSheets)) {
     let rules: CSSRule[] = [];
