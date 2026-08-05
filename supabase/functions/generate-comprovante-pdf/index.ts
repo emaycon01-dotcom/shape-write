@@ -42,8 +42,8 @@ export const COMPROVANTE_DEFAULT_POSITIONS: Record<string, Pos> = {
   instalacao: { x: 266, y: 158.4, fontSize: 12.6, w: 96 },
   cliente_numero: { x: 266, y: 195.4, fontSize: 12.6, w: 96 },
 
-  chave_nf: { x: 374.3, y: 163.4, fontSize: 9.6, w: 224 },
-  nota_fiscal_serie: { x: 374.3, y: 174.4, fontSize: 9.6, w: 224 },
+  chave_nf: { x: 374.3, y: 162.0, fontSize: 9.2, w: 224 },
+  nota_fiscal_serie: { x: 374.3, y: 176.5, fontSize: 9.2, w: 224 },
 
   mes_ano: { x: 57, y: 229, fontSize: 9.6, w: 66 },
   vencimento: { x: 139, y: 229, fontSize: 9.6, w: 93 },
@@ -60,8 +60,8 @@ export const COMPROVANTE_DEFAULT_POSITIONS: Record<string, Pos> = {
   debito_codigo: { x: 624.2, y: 883.7, fontSize: 9.2, w: 90 },
 
   /* --- ficha de compensação (rodapé) --- */
-  linha_digitavel: { x: 65.9, y: 972.5, fontSize: 12.4, w: 300 },
-  pagador: { x: 125, y: 987, fontSize: 9.2, w: 350 },
+  linha_digitavel: { x: 65.9, y: 972.5, fontSize: 12.4, w: 450 },
+  pagador: { x: 125, y: 999, fontSize: 9.2, w: 350 },
   data_emissao: { x: 65.9, y: 1027.7, fontSize: 12.4, w: 120 },
   nota_fiscal_rodape: { x: 188.3, y: 1027.7, fontSize: 12.4, w: 120 },
   referencia: { x: 313.4, y: 1027.7, fontSize: 12.4, w: 120 },

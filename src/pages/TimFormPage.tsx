@@ -189,15 +189,20 @@ export default function TimFormPage() {
       periodoConta: src.periodo_conta ?? prev.periodoConta,
       plano: src.plano ?? prev.plano,
       total: src.total ?? prev.total,
-      linhas: prev.linhas.map((l, i) => ({
-        desc: src[`l${i + 1}_desc`] ?? l.desc,
-        fran: src[`l${i + 1}_fran`] ?? l.fran,
-        cons: src[`l${i + 1}_cons`] ?? l.cons,
-        qtd: src[`l${i + 1}_qtd`] ?? l.qtd,
-        dias: src[`l${i + 1}_dias`] ?? l.dias,
-        per: src[`l${i + 1}_per`] ?? l.per,
-        val: src[`l${i + 1}_val`] ?? l.val,
-      })),
+      periodoLinhas: src.l1_per ?? prev.periodoLinhas,
+      diasLinhas: src.l1_dias ?? prev.diasLinhas,
+      linhas: prev.linhas.map((l, i) => {
+        // posição real na tabela: linha 4 é o subtotal automático, então
+        // pulamos esse índice ao remapear as linhas editáveis (1,2,3,5,6,7,8).
+        const n = i < 3 ? i + 1 : i + 2;
+        return {
+          desc: src[`l${n}_desc`] ?? l.desc,
+          fran: src[`l${n}_fran`] ?? l.fran,
+          cons: src[`l${n}_cons`] ?? l.cons,
+          qtd: src[`l${n}_qtd`] ?? l.qtd,
+          val: src[`l${n}_val`] ?? l.val,
+        };
+      }),
     }));
   }, [editState?.formData]);
 
@@ -248,14 +253,32 @@ export default function TimFormPage() {
         field_positions: loadTimFieldPositions() ?? undefined,
       };
 
-      form.linhas.forEach((l, i) => {
+      // As linhas 1, 2, 3, 5, 6, 7 e 8 são editáveis; a linha 4 (Subtotal) é
+      // calculada automaticamente somando os valores numéricos das linhas 1-3.
+      const parseValor = (v: string) => {
+        const cleaned = (v || "").replace(/\./g, "").replace(",", ".").trim();
+        const n = Number(cleaned);
+        return Number.isFinite(n) ? n : 0;
+      };
+      const subtotal = form.linhas
+        .slice(0, 3)
+        .reduce((acc, l) => acc + parseValor(l.val), 0);
+      const subtotalFmt = subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const linhasComSubtotal: TimLinha[] = [
+        ...form.linhas.slice(0, 3),
+        { desc: "Subtotal", fran: "", cons: "", qtd: "", val: subtotalFmt },
+        ...form.linhas.slice(3),
+      ];
+
+      linhasComSubtotal.forEach((l, i) => {
         const n = i + 1;
         bodyData[`l${n}_desc`] = l.desc;
         bodyData[`l${n}_fran`] = l.fran;
         bodyData[`l${n}_cons`] = l.cons;
         bodyData[`l${n}_qtd`] = l.qtd;
-        bodyData[`l${n}_dias`] = l.dias;
-        bodyData[`l${n}_per`] = l.per;
+        bodyData[`l${n}_dias`] = n === 4 ? "" : form.diasLinhas;
+        bodyData[`l${n}_per`] = n === 4 ? "" : form.periodoLinhas;
         bodyData[`l${n}_val`] = l.val;
       });
 
