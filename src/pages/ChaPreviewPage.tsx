@@ -72,28 +72,24 @@ export default function ChaPreviewPage() {
 
     setLoading(true);
     try {
+
+      // 1) Gera o PDF final ANTES de cobrar: se falhar, nenhum crédito é descontado.
+      const { data, error } = await invokeGeneratePdf("generate-cha-pdf", {
+        body: { ...formData, preview: false },
+      });
+      if (error) throw error;
+      const generated = data?.pdfBase64;
+      if (!generated) throw new Error("pdf_nao_gerado");
+      const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
+
+      // 2) PDF pronto — agora sim cobra o crédito.
       const deduction = await deductCredit(1, "geracao-cha");
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
         setLoading(false);
         return;
       }
-
-      // Gera novamente o PDF final — agora com o QR Code registrado/válido
-      let pdfFinal = previewPdf;
-      try {
-        const { data, error } = await invokeGeneratePdf("generate-cha-pdf", {
-          body: { ...formData, preview: false },
-        });
-        if (error) throw error;
-        const result = data?.pdfBase64;
-        if (result) {
-          pdfFinal = result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`;
-          setFinalPdf(pdfFinal);
-        }
-      } catch (e) {
-        console.error("Falha ao gerar PDF final com QR válido:", e);
-      }
+      setFinalPdf(pdfFinal);
 
       await addDocument({
         name: formData.nome || "",
@@ -129,8 +125,9 @@ export default function ChaPreviewPage() {
         }
       });
 
-    } catch {
-      toast({ title: "Erro ao gerar documento", description: "Tente novamente.", variant: "destructive" });
+    } catch (e) {
+      console.error("Falha na geração:", e);
+      toast({ title: "Erro ao gerar documento", description: "Nenhum crédito foi descontado. Tente novamente.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
