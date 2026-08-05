@@ -179,11 +179,31 @@ function buildMrz(d: Record<string, string>) {
 
 
   return {
+    // brutos (para montagem em grade) e escapados (uso direto em HTML)
+    raw1: line1,
+    raw2: line2,
+    raw3: line3,
     line1: escapeHtml(line1),
     line2: escapeHtml(line2),
     line3: escapeHtml(line3),
   };
 }
+
+/**
+ * Renderiza a linha do MRZ como uma grade de células de largura fixa: assim as
+ * três linhas terminam exatamente na mesma coluna, como no documento oficial.
+ */
+function mrzGridLine(line: string, cell: number) {
+  const cells = line
+    .split("")
+    .map(
+      (ch) =>
+        `<span style="display:inline-block;width:${cell}px;text-align:center;letter-spacing:0;">${escapeHtml(ch)}</span>`
+    )
+    .join("");
+  return `<div class="mrz-line">${cells}</div>`;
+}
+
 
 function cleanCode(value: string) {
   return value.replace(/\s+/g, "").toUpperCase();
