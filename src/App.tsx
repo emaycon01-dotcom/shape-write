@@ -167,6 +167,8 @@ const App = () => {
                         <Route path="documents/comprovante-enel/preview" element={<ComprovantePreviewPage />} />
                         <Route path="documents/comprovante-coelba" element={<CoelbaFormPage />} />
                         <Route path="documents/comprovante-coelba/preview" element={<CoelbaPreviewPage />} />
+                        <Route path="documents/comprovante-equatorial" element={<EquatorialFormPage />} />
+                        <Route path="documents/comprovante-equatorial/preview" element={<EquatorialPreviewPage />} />
                         <Route path="documents/declaracao-escolar" element={<DeclaracaoFormPage />} />
                         <Route path="documents/declaracao-escolar/preview" element={<DeclaracaoPreviewPage />} />
                         <Route path="documents/receita-medica" element={<ReceitaFormPage />} />
