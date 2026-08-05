@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, FlaskConical, Trash2, User, Home, Receipt, Gauge, Landmark, Info } from "lucide-react";
+import { Loader2, FlaskConical, Trash2, User, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadEquatorialFieldPositions } from "@/lib/equatorial-align";
 import templateEquatorialP1Url from "@/assets/template-equatorial-p1-hq.webp";
@@ -14,6 +14,8 @@ import { maskDate, maskCPF, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
+import { AutoSection } from "@/components/AutoSection";
+import { autoEquatorial, baseDatas, fmtDate, refMesAbrev } from "@/lib/fatura-auto";
 
 // Textos fixos do próprio documento — não são preenchidos pelo usuário.
 const INFO_L3_FIXED = "UNIDADE CONSUMIDORA CADASTRADA PARA AVISO PREFERENCIAL";
@@ -145,6 +147,7 @@ const initial: EquatorialFormData = {
 };
 
 const exemplo: EquatorialFormData = {
+  ...initial,
   nome: "LEONALDO RIBEIRO DE OLIVEIRA",
   cpf: "610.078.461-00",
   endereco: "RUA SEM NOME, Q. 106, L. 18, S/N",
@@ -152,60 +155,59 @@ const exemplo: EquatorialFormData = {
   cep: "72910-000",
   municipio: "AGUAS LINDAS DE GOIAS",
   uf: "GO",
-  perdas: "0%",
-
-  classificacao: "B B1 RESIDENCIAL - RESIDENCIAL NORMAL CONVENCIONAL",
-  tipoFornecimento: "MONOFÁSICO",
-
-  notaFiscal: "65789409",
-  serieNf: "0",
-  dataEmissao: "28/07/2023",
-  horaEmissao: "17:26:04",
-
-  referencia: "JUL/2023",
   totalPagar: "137,20",
   vencimento: "07/08/2023",
-
-  leituraAnterior: "23/06/2023",
-  leituraAtual: "25/07/2023",
-  dias: "32",
-  proximaLeitura: "24/08/2023",
-
-  infoL1: "PARCELA : USO SISTEMA = R$ 59,93   FORNECIMENTO = R$ 52,34  USO TRANSMISSÃO = 7,0900  ENC. SETORIAL = 5,9000",
-  infoL2: "PERÍODO DE REFERÊNCIA DA APURAÇÃO DOS INDICADORES DE CONTINUIDADE = 5/2023. VRC = R$ 24,09066",
-  infoL4:
-    "VOCÊ SOLICITOU CADASTRO COMO CLIENTE VITAL/SOBREVIDA. A DOCUMENTAÇÃO PARA REVALIDAÇÃO NÃO FOI ENTREGUE. PRECISAMOS QUE VÁ ATÉ UMA DE NOSSAS LOJAS NO PRAZO DE 15 DIAS, OU SEU IMÓVEL SERÁ DESCADASTRADO. DÚVIDAS, PROCURE NOSSOS CANAIS DE ATENDIMENTO.",
-
-  itUnid: "kWh",
-  itQuant: "150,00",
-  itPrecoUnit: "0,835099",
-  itValor: "125,26",
-  itPis: "3,32",
-  itBaseIcms: "125,26",
-  itAliquota: "17%",
-  itIcms: "21,29",
-  itTarifa: "0,670990",
-
-  fin1Valor: "-6,18",
-  fin2Valor: "15,56",
-  fin3Desc: "JUROS MORATÓRIA.",
-  fin3Valor: "0,12",
-  fin4Desc: "MULTA - 06/2023.",
-  fin4Valor: "2,44",
-
-  resAneel: "3130/22",
-
-  unidadeConsumidora: "10009576124",
-  numeroReferencia: "2023067958196",
-  especieDocumento: "MN",
-  nossoNumero: "109/06353774-0",
-  carteira: "109",
-  especieMoeda: "R$",
-
-  unidadeEntrega: "37 / 17",
-  sequencia: "961100",
-  medidor: "10780867-6",
 };
+
+/** Preenche automaticamente tudo que não é dado do cliente. */
+function aplicarAuto(f: EquatorialFormData, force: boolean): EquatorialFormData {
+  const d = baseDatas(f.vencimento);
+  const referencia = String(f.referencia ?? "").trim() || refMesAbrev(d.leituraAtual);
+  const a = autoEquatorial(f.totalPagar, referencia);
+  const keep = (cur: string, next: string) => (force || !String(cur ?? "").trim() ? next : cur);
+
+  return {
+    ...f,
+    referencia,
+    vencimento: keep(f.vencimento, fmtDate(d.venc)),
+
+    notaFiscal: keep(f.notaFiscal, a.notaFiscal),
+    dataEmissao: keep(f.dataEmissao, fmtDate(d.emissao)),
+    horaEmissao: keep(f.horaEmissao, a.horaEmissao),
+
+    leituraAnterior: keep(f.leituraAnterior, fmtDate(d.leituraAnterior)),
+    leituraAtual: keep(f.leituraAtual, fmtDate(d.leituraAtual)),
+    dias: keep(f.dias, String(d.dias)),
+    proximaLeitura: keep(f.proximaLeitura, fmtDate(d.proximaLeitura)),
+
+    infoL1: keep(f.infoL1, a.infoL1),
+    infoL2: keep(f.infoL2, a.infoL2),
+
+    itUnid: keep(f.itUnid, a.itUnid),
+    itQuant: keep(f.itQuant, a.itQuant),
+    itPrecoUnit: keep(f.itPrecoUnit, a.itPrecoUnit),
+    itValor: keep(f.itValor, a.itValor),
+    itPis: keep(f.itPis, a.itPis),
+    itBaseIcms: keep(f.itBaseIcms, a.itBaseIcms),
+    itAliquota: keep(f.itAliquota, a.itAliquota),
+    itIcms: keep(f.itIcms, a.itIcms),
+    itTarifa: keep(f.itTarifa, a.itTarifa),
+
+    fin1Valor: keep(f.fin1Valor, a.fin1Valor),
+    fin2Valor: keep(f.fin2Valor, a.fin2Valor),
+    fin3Desc: keep(f.fin3Desc, a.fin3Desc),
+    fin3Valor: keep(f.fin3Valor, a.fin3Valor),
+    fin4Desc: keep(f.fin4Desc, a.fin4Desc),
+    fin4Valor: keep(f.fin4Valor, a.fin4Valor),
+
+    unidadeConsumidora: keep(f.unidadeConsumidora, a.unidadeConsumidora),
+    numeroReferencia: keep(f.numeroReferencia, a.numeroReferencia),
+    nossoNumero: keep(f.nossoNumero, a.nossoNumero),
+    unidadeEntrega: keep(f.unidadeEntrega, a.unidadeEntrega),
+    sequencia: keep(f.sequencia, a.sequencia),
+    medidor: keep(f.medidor, a.medidor),
+  };
+}
 
 function Section({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
   return (
@@ -321,6 +323,11 @@ export default function EquatorialFormPage() {
   const set = <K extends keyof EquatorialFormData>(key: K) => (value: EquatorialFormData[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  const randomizar = () => {
+    setForm((prev) => aplicarAuto(prev, true));
+    toast({ title: "Valores e códigos gerados automaticamente" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -328,7 +335,14 @@ export default function EquatorialFormPage() {
       toast({ title: "Informe o nome do titular", variant: "destructive" });
       return;
     }
+    if (!form.totalPagar.trim()) {
+      toast({ title: "Informe o total da fatura", variant: "destructive" });
+      return;
+    }
     setLoading(true);
+
+    const f = aplicarAuto(form, false);
+    setForm(f);
 
     try {
       const [templateBase64, templateP2Base64] = await Promise.all([
@@ -337,71 +351,71 @@ export default function EquatorialFormPage() {
       ]);
 
       const bodyData = {
-        nome: form.nome,
-        cpf: form.cpf,
-        endereco: form.endereco,
-        bairro: form.bairro,
-        cep: form.cep,
-        municipio: form.municipio,
-        uf: form.uf,
-        perdas: form.perdas,
+        nome: f.nome,
+        cpf: f.cpf,
+        endereco: f.endereco,
+        bairro: f.bairro,
+        cep: f.cep,
+        municipio: f.municipio,
+        uf: f.uf,
+        perdas: f.perdas,
 
-        classificacao: form.classificacao,
-        tipo_fornecimento: form.tipoFornecimento,
+        classificacao: f.classificacao,
+        tipo_fornecimento: f.tipoFornecimento,
 
-        nota_fiscal: form.notaFiscal,
-        serie_nf: form.serieNf,
-        data_emissao: form.dataEmissao,
-        hora_emissao: form.horaEmissao,
+        nota_fiscal: f.notaFiscal,
+        serie_nf: f.serieNf,
+        data_emissao: f.dataEmissao,
+        hora_emissao: f.horaEmissao,
 
-        referencia: form.referencia,
-        total_pagar: form.totalPagar,
-        vencimento: form.vencimento,
+        referencia: f.referencia,
+        total_pagar: f.totalPagar,
+        vencimento: f.vencimento,
 
-        leitura_anterior: form.leituraAnterior,
-        leitura_atual: form.leituraAtual,
-        dias: form.dias,
-        proxima_leitura: form.proximaLeitura,
+        leitura_anterior: f.leituraAnterior,
+        leitura_atual: f.leituraAtual,
+        dias: f.dias,
+        proxima_leitura: f.proximaLeitura,
 
-        info_l1: form.infoL1,
-        info_l2: form.infoL2,
+        info_l1: f.infoL1,
+        info_l2: f.infoL2,
         info_l3: INFO_L3_FIXED,
-        info_l4: form.infoL4,
+        info_l4: f.infoL4,
 
-        it_unid: form.itUnid,
-        it_quant: form.itQuant,
-        it_preco_unit: form.itPrecoUnit,
-        it_valor: form.itValor,
-        it_pis: form.itPis,
-        it_base_icms: form.itBaseIcms,
-        it_aliquota: form.itAliquota,
-        it_icms: form.itIcms,
-        it_tarifa: form.itTarifa,
+        it_unid: f.itUnid,
+        it_quant: f.itQuant,
+        it_preco_unit: f.itPrecoUnit,
+        it_valor: f.itValor,
+        it_pis: f.itPis,
+        it_base_icms: f.itBaseIcms,
+        it_aliquota: f.itAliquota,
+        it_icms: f.itIcms,
+        it_tarifa: f.itTarifa,
 
         fin1_desc: FIN1_DESC_FIXED,
-        fin1_valor: form.fin1Valor,
+        fin1_valor: f.fin1Valor,
         fin2_desc: FIN2_DESC_FIXED,
-        fin2_valor: form.fin2Valor,
-        fin3_desc: form.fin3Desc,
-        fin3_valor: form.fin3Valor,
-        fin4_desc: form.fin4Desc,
-        fin4_valor: form.fin4Valor,
+        fin2_valor: f.fin2Valor,
+        fin3_desc: f.fin3Desc,
+        fin3_valor: f.fin3Valor,
+        fin4_desc: f.fin4Desc,
+        fin4_valor: f.fin4Valor,
 
-        res_aneel: form.resAneel,
-        res_apresentacao: form.dataEmissao,
+        res_aneel: f.resAneel,
+        res_apresentacao: f.dataEmissao,
 
-        unidade_consumidora: form.unidadeConsumidora,
-        data_documento: form.dataEmissao,
-        numero_referencia: form.numeroReferencia,
-        especie_documento: form.especieDocumento,
-        data_processamento: form.dataEmissao,
-        nosso_numero: form.nossoNumero,
-        carteira: form.carteira,
-        especie_moeda: form.especieMoeda,
+        unidade_consumidora: f.unidadeConsumidora,
+        data_documento: f.dataEmissao,
+        numero_referencia: f.numeroReferencia,
+        especie_documento: f.especieDocumento,
+        data_processamento: f.dataEmissao,
+        nosso_numero: f.nossoNumero,
+        carteira: f.carteira,
+        especie_moeda: f.especieMoeda,
 
-        unidade_entrega: form.unidadeEntrega,
-        sequencia: form.sequencia,
-        medidor: form.medidor,
+        unidade_entrega: f.unidadeEntrega,
+        sequencia: f.sequencia,
+        medidor: f.medidor,
 
         template_base64: templateBase64,
         template_p2_base64: templateP2Base64,
@@ -445,8 +459,8 @@ export default function EquatorialFormPage() {
         Comprovante de Residência — Equatorial Goiás
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Fatura Equatorial Goiás / CELG D (DANF3E NF3e) em 2 páginas. Somente os campos removidos do documento são
-        preenchidos — todo o restante do original é preservado.
+        Informe apenas os dados do cliente e o total da fatura. Consumo, ICMS, PIS/COFINS, tarifas, bônus, multa e
+        todos os códigos são calculados automaticamente para fechar com o total.
       </p>
 
       <div className="mb-5 flex flex-wrap gap-2">
@@ -480,70 +494,57 @@ export default function EquatorialFormPage() {
               </select>
             </div>
           </div>
-          <Field label="Perdas de transformação / ramal" value={form.perdas} onChange={set("perdas")} placeholder="0%" />
-          <Field label="Classificação" value={form.classificacao} onChange={set("classificacao")} full placeholder="B B1 RESIDENCIAL - RESIDENCIAL NORMAL CONVENCIONAL" />
-          <Field label="Tipo de fornecimento" value={form.tipoFornecimento} onChange={set("tipoFornecimento")} placeholder="MONOFÁSICO" />
-          <Field label="Unidade consumidora" value={form.unidadeConsumidora} onChange={set("unidadeConsumidora")} placeholder="10009576124" />
         </Section>
 
-        <Section icon={Receipt} title="Nota fiscal eletrônica">
-          <Field label="Nota fiscal nº" value={form.notaFiscal} onChange={set("notaFiscal")} placeholder="65789409" />
-          <Field label="Série" value={form.serieNf} onChange={set("serieNf")} placeholder="0" />
-          <Field label="Data de emissão" value={form.dataEmissao} onChange={(v) => set("dataEmissao")(maskDate(v))} placeholder="28/07/2023" />
-          <Field label="Hora de emissão" value={form.horaEmissao} onChange={set("horaEmissao")} placeholder="17:26:04" />
-        </Section>
-
-        <Section icon={Home} title="Conta mês, vencimento e total">
-          <Field label="Conta mês (referência)" value={form.referencia} onChange={set("referencia")} placeholder="JUL/2023" />
-          <Field label="Vencimento" value={form.vencimento} onChange={(v) => set("vencimento")(maskDate(v))} placeholder="07/08/2023" />
+        <Section icon={Home} title="Fatura">
           <Field label="Total a pagar (R$)" value={form.totalPagar} onChange={set("totalPagar")} placeholder="137,20" />
+          <Field label="Vencimento" value={form.vencimento} onChange={(v) => set("vencimento")(maskDate(v))} placeholder="07/08/2023" />
+          <Field label="Conta mês (referência) — opcional" value={form.referencia} onChange={set("referencia")} placeholder="JUL/2023" />
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Tipo de fornecimento</label>
+            <select
+              value={form.tipoFornecimento}
+              onChange={(e) => set("tipoFornecimento")(e.target.value)}
+              className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+            >
+              <option value="MONOFÁSICO">MONOFÁSICO</option>
+              <option value="BIFÁSICO">BIFÁSICO</option>
+              <option value="TRIFÁSICO">TRIFÁSICO</option>
+            </select>
+          </div>
         </Section>
 
-        <Section icon={Gauge} title="Datas das leituras">
-          <Field label="Leitura anterior" value={form.leituraAnterior} onChange={(v) => set("leituraAnterior")(maskDate(v))} placeholder="23/06/2023" />
-          <Field label="Leitura atual" value={form.leituraAtual} onChange={(v) => set("leituraAtual")(maskDate(v))} placeholder="25/07/2023" />
-          <Field label="Nº de dias" value={form.dias} onChange={set("dias")} placeholder="32" />
-          <Field label="Próxima leitura" value={form.proximaLeitura} onChange={(v) => set("proximaLeitura")(maskDate(v))} placeholder="24/08/2023" />
-        </Section>
-
-        <Section icon={Info} title="Informações para o cliente">
-          <Field label="Linha 1" value={form.infoL1} onChange={set("infoL1")} full placeholder="PARCELA : USO SISTEMA = R$ ..." />
-          <Field label="Linha 2" value={form.infoL2} onChange={set("infoL2")} full placeholder="PERÍODO DE REFERÊNCIA ..." />
-          <Field label="Linha 4" value={form.infoL4} onChange={set("infoL4")} full placeholder="Aviso adicional" />
-        </Section>
-
-        <Section icon={Gauge} title="Itens de fatura — consumo">
-          <Field label="Unidade" value={form.itUnid} onChange={set("itUnid")} placeholder="kWh" />
-          <Field label="Quantidade" value={form.itQuant} onChange={set("itQuant")} placeholder="150,00" />
-          <Field label="Preço unit. com tributos" value={form.itPrecoUnit} onChange={set("itPrecoUnit")} placeholder="0,835099" />
-          <Field label="Valor (R$)" value={form.itValor} onChange={set("itValor")} placeholder="125,26" />
-          <Field label="PIS/COFINS" value={form.itPis} onChange={set("itPis")} placeholder="3,32" />
-          <Field label="Base cálc. ICMS" value={form.itBaseIcms} onChange={set("itBaseIcms")} placeholder="125,26" />
+        <AutoSection
+          title="Impostos, consumo e códigos"
+          onRandomize={randomizar}
+          description="Consumo, tarifas, ICMS, PIS/COFINS, bônus, juros, multa, unidade consumidora, nosso número e medidor são gerados automaticamente e somam exatamente o total informado."
+        >
+          <Field label="Quantidade (kWh)" value={form.itQuant} onChange={set("itQuant")} placeholder="automático" />
+          <Field label="Preço unit. com tributos" value={form.itPrecoUnit} onChange={set("itPrecoUnit")} placeholder="automático" />
+          <Field label="Valor do consumo (R$)" value={form.itValor} onChange={set("itValor")} placeholder="automático" />
+          <Field label="PIS/COFINS" value={form.itPis} onChange={set("itPis")} placeholder="automático" />
+          <Field label="Base cálc. ICMS" value={form.itBaseIcms} onChange={set("itBaseIcms")} placeholder="automático" />
           <Field label="Alíquota ICMS" value={form.itAliquota} onChange={set("itAliquota")} placeholder="17%" />
-          <Field label="ICMS" value={form.itIcms} onChange={set("itIcms")} placeholder="21,29" />
-          <Field label="Tarifa unit." value={form.itTarifa} onChange={set("itTarifa")} placeholder="0,670990" />
-        </Section>
-
-        <Section icon={Receipt} title="Itens financeiros (opcional)">
-          <Field label="Valor 1 (bônus Itaipu)" value={form.fin1Valor} onChange={set("fin1Valor")} placeholder="-6,18" />
-          <Field label="Valor 2 (contrib. ilum. pública)" value={form.fin2Valor} onChange={set("fin2Valor")} placeholder="15,56" />
-          <Field label="Descrição 3" value={form.fin3Desc} onChange={set("fin3Desc")} placeholder="JUROS MORATÓRIA." />
-          <Field label="Valor 3" value={form.fin3Valor} onChange={set("fin3Valor")} placeholder="0,12" />
-          <Field label="Descrição 4" value={form.fin4Desc} onChange={set("fin4Desc")} placeholder="MULTA - 06/2023." />
-          <Field label="Valor 4" value={form.fin4Valor} onChange={set("fin4Valor")} placeholder="2,44" />
-        </Section>
-
-        <Section icon={Landmark} title="Ficha de compensação e página 2">
-          <Field label="Resolução ANEEL" value={form.resAneel} onChange={set("resAneel")} placeholder="3130/22" />
-          <Field label="Número de referência" value={form.numeroReferencia} onChange={set("numeroReferencia")} placeholder="2023067958196" />
-          <Field label="Espécie documento" value={form.especieDocumento} onChange={set("especieDocumento")} placeholder="MN" />
-          <Field label="Nosso número" value={form.nossoNumero} onChange={set("nossoNumero")} placeholder="109/06353774-0" />
-          <Field label="Carteira" value={form.carteira} onChange={set("carteira")} placeholder="109" />
-          <Field label="Espécie moeda" value={form.especieMoeda} onChange={set("especieMoeda")} placeholder="R$" />
-          <Field label="P2: Unid. de entrega" value={form.unidadeEntrega} onChange={set("unidadeEntrega")} placeholder="37 / 17" />
-          <Field label="P2: Sequência" value={form.sequencia} onChange={set("sequencia")} placeholder="961100" />
-          <Field label="P2: Nº medidor" value={form.medidor} onChange={set("medidor")} placeholder="10780867-6" />
-        </Section>
+          <Field label="ICMS" value={form.itIcms} onChange={set("itIcms")} placeholder="automático" />
+          <Field label="Tarifa unit." value={form.itTarifa} onChange={set("itTarifa")} placeholder="automático" />
+          <Field label="Bônus Itaipu" value={form.fin1Valor} onChange={set("fin1Valor")} placeholder="automático" />
+          <Field label="Contrib. ilum. pública" value={form.fin2Valor} onChange={set("fin2Valor")} placeholder="automático" />
+          <Field label="Juros" value={form.fin3Valor} onChange={set("fin3Valor")} placeholder="automático" />
+          <Field label="Multa" value={form.fin4Valor} onChange={set("fin4Valor")} placeholder="automático" />
+          <Field label="Nota fiscal nº" value={form.notaFiscal} onChange={set("notaFiscal")} placeholder="automático" />
+          <Field label="Data de emissão" value={form.dataEmissao} onChange={(v) => set("dataEmissao")(maskDate(v))} placeholder="automático" />
+          <Field label="Leitura anterior (data)" value={form.leituraAnterior} onChange={(v) => set("leituraAnterior")(maskDate(v))} placeholder="automático" />
+          <Field label="Leitura atual (data)" value={form.leituraAtual} onChange={(v) => set("leituraAtual")(maskDate(v))} placeholder="automático" />
+          <Field label="Nº de dias" value={form.dias} onChange={set("dias")} placeholder="30" />
+          <Field label="Próxima leitura" value={form.proximaLeitura} onChange={(v) => set("proximaLeitura")(maskDate(v))} placeholder="automático" />
+          <Field label="Unidade consumidora" value={form.unidadeConsumidora} onChange={set("unidadeConsumidora")} placeholder="automático" />
+          <Field label="Número de referência" value={form.numeroReferencia} onChange={set("numeroReferencia")} placeholder="automático" />
+          <Field label="Nosso número" value={form.nossoNumero} onChange={set("nossoNumero")} placeholder="automático" />
+          <Field label="Nº medidor" value={form.medidor} onChange={set("medidor")} placeholder="automático" />
+          <Field label="Unid. de entrega (pág. 2)" value={form.unidadeEntrega} onChange={set("unidadeEntrega")} placeholder="automático" />
+          <Field label="Sequência (pág. 2)" value={form.sequencia} onChange={set("sequencia")} placeholder="automático" />
+          <Field label="Aviso adicional ao cliente (opcional)" value={form.infoL4} onChange={set("infoL4")} full placeholder="" />
+        </AutoSection>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
           {loading ? (
