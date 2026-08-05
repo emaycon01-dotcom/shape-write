@@ -25,7 +25,7 @@ const ESTADOS = [
   "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins",
 ];
 
-// titleCase / dataExtenso vivem em @/lib/text
+import { titleCase, dataExtenso } from "@/lib/text";
 
 /** Título conferido com flexão de gênero conforme a modalidade do curso. */
 const TITULO_CURSO: Record<Modalidade, (curso: string, fem: boolean) => string> = {

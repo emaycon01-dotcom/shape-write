@@ -25,7 +25,7 @@ const ESTADOS = [
   "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins",
 ];
 
-// titleCase / dataExtenso vivem em @/lib/text
+import { titleCase, dataExtenso } from "@/lib/text";
 
 const PREFIXO_CURSO: Record<Modalidade, string> = {
   bacharelado: "Curso de",
