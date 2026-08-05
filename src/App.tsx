@@ -9,7 +9,8 @@ import { DeviceSecurityProvider } from "@/contexts/DeviceSecurityContext";
 import SupportWidget from "@/components/SupportWidget";
 import GenerationOverlay from "@/components/GenerationOverlay";
 
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
+import { lazyRetry as lazy } from "@/lib/lazy-retry";
 import LoginPage from "./pages/LoginPage";
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
