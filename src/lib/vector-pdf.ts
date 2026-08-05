@@ -441,53 +441,56 @@ function collectLines(node: Text): LineRun[] {
   const text = node.nodeValue || "";
   const range = node.ownerDocument!.createRange();
   const runs: LineRun[] = [];
-  let current: { chars: string[]; rects: DOMRect[] } | null = null;
+  type Entry = { ch: string; rect: DOMRect | null };
+  let current: Entry[] = [];
+
+  const flush = () => {
+    if (current.length) {
+      const run = finishRun(current);
+      if (run) runs.push(run);
+    }
+    current = [];
+  };
 
   for (let i = 0; i < text.length; i += 1) {
     range.setStart(node, i);
     range.setEnd(node, i + 1);
-    const rects = range.getClientRects();
-    const r = rects.length ? (rects[0] as DOMRect) : null;
+    const list = range.getClientRects();
+    const r = list.length ? (list[0] as DOMRect) : null;
     if (!r || r.height <= 0) {
-      if (current && !text[i].trim()) current.chars.push(text[i]);
+      if (current.length) current.push({ ch: text[i], rect: null });
       continue;
     }
-    const sameLine = current && Math.abs(current.rects[0].top - r.top) < r.height * 0.5;
-    if (!sameLine) {
-      if (current) runs.push(finishRun(current));
-      current = { chars: [], rects: [] };
-    }
-    current!.chars.push(text[i]);
-    current!.rects.push(r);
+    const prev = current.find((e) => e.rect);
+    if (prev && Math.abs(prev.rect!.top - r.top) > r.height * 0.5) flush();
+    current.push({ ch: text[i], rect: r });
   }
-  if (current) runs.push(finishRun(current));
+  flush();
   range.detach?.();
-  return runs.filter((run) => run.text.length > 0 && run.rect.width > 0);
+  return runs;
 }
 
-function finishRun(acc: { chars: string[]; rects: DOMRect[] }): LineRun {
-  // remove espaços das pontas sem perder o alinhamento medido
+function finishRun(entries: { ch: string; rect: DOMRect | null }[]): LineRun | null {
   let start = 0;
-  let end = acc.chars.length - 1;
-  while (start <= end && !acc.chars[start].trim()) start += 1;
-  while (end >= start && !acc.chars[end].trim()) end -= 1;
-  const visible = acc.rects.filter((_, i) => i >= start - (acc.chars.length - acc.rects.length) && true);
-  const rects = acc.rects;
+  let end = entries.length - 1;
+  while (start <= end && !entries[start].ch.trim()) start += 1;
+  while (end >= start && !entries[end].ch.trim()) end -= 1;
+  if (start > end) return null;
+
+  const slice = entries.slice(start, end + 1);
+  const rects = slice.map((e) => e.rect).filter(Boolean) as DOMRect[];
+  if (!rects.length) return null;
+
   const left = Math.min(...rects.map((r) => r.left));
   const right = Math.max(...rects.map((r) => r.right));
   const top = Math.min(...rects.map((r) => r.top));
   const bottom = Math.max(...rects.map((r) => r.bottom));
-  void visible;
-  const text = acc.chars.slice(start, end + 1).join("");
-  // recalcula extremos apenas com os caracteres visíveis quando possível
-  const visRects = rects.slice(
-    Math.max(0, start - Math.max(0, acc.chars.length - rects.length)),
-    rects.length,
-  );
-  const l = visRects.length ? Math.min(...visRects.map((r) => r.left)) : left;
+  if (right - left <= 0) return null;
+
   return {
-    text,
-    rect: new DOMRect(l, top, right - l, bottom - top),
+    text: slice.map((e) => e.ch).join(""),
+    rect: new DOMRect(left, top, right - left, bottom - top),
+
   };
 }
 
