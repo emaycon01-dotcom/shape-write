@@ -660,6 +660,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.72,
     copy: () => loadDeclaracaoFieldPositions() ?? {},
   },
+  receita: {
+    key: "receita",
+    title: "Receita Médica",
+    storageKey: RECEITA_ALIGN_STORAGE_KEY,
+    defaults: defaultReceitaFields,
+    bg: templateReceitaBgUrl,
+    font: RECEITA_FONT,
+    mrzFont: RECEITA_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.22,
+    copy: () => loadReceitaFieldPositions() ?? {},
+  },
 };
 
 
