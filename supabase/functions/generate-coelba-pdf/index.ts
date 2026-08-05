@@ -163,17 +163,31 @@ export function buildCoelbaHtml(d: Record<string, string>, fieldPositions?: unkn
     "aviso_suspensao",
     "rodape_referencia", "rodape_vencimento", "rodape_total",
   ]);
+  /** Campos que devem caber em uma única linha dentro da célula do template. */
+  const NOWRAP = new Set([
+    "danfe_titulo", "emissor_l1", "emissor_l2", "emissor_l3",
+    "cliente_nome", "cliente_cpf", "cliente_endereco", "cliente_bairro", "cliente_cep",
+    "referencia_topo", "total_topo", "vencimento_topo",
+    "val_leitura_anterior", "val_leitura_atual", "val_dias", "val_proxima",
+    "med_postos", "med_leitura_anterior", "med_leitura_atual", "med_constante", "med_consumo",
+    "aviso_suspensao",
+    "rodape_referencia", "rodape_vencimento", "rodape_total",
+    "p2_nome", "p2_endereco", "p2_bairro", "p2_cep",
+  ]);
+  const CENTER = new Set(["referencia_topo", "vencimento_topo", "med_postos"]);
 
   const field = (id: string, text: string, extra = "") => {
     const pos = p[id];
     if (!pos || !text) return "";
     const width = pos.w ?? 200;
-    const fit = fitTextStyle(text, pos.fontSize, width);
-    const align = RIGHT.has(id) ? "right" : "left";
-    const weight = BOLD.has(id) ? 700 : 400;
+    const bold = BOLD.has(id);
+    const fit = fitTextStyle(text, pos.fontSize, width, 0.55, bold);
+    const align = RIGHT.has(id) ? "right" : CENTER.has(id) ? "center" : "left";
+    const weight = bold ? 700 : 400;
+    const wrap = NOWRAP.has(id) ? "white-space:nowrap;" : "";
     const html = escapeHtml(text).replace(/\n/g, "<br/>");
     const top = pos.y >= PAGE_H ? pos.y - PAGE_H : pos.y;
-    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${extra}">${html}</div>`;
+    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${wrap}${extra}">${html}</div>`;
   };
 
   const up = (v: string) => (v || "").toUpperCase();
