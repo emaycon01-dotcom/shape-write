@@ -46,9 +46,9 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
   nf_protocolo: { x: 515.1, y: 172.8, fontSize: 6.6, w: 265 },
 
   /* ---- faixa referência / total / vencimento ---- */
-  referencia_topo: { x: 30.0, y: 181.6, fontSize: 19.5, w: 100 },
-  total_topo: { x: 205, y: 184.0, fontSize: 16.0, w: 75 },
-  vencimento_topo: { x: 286.0, y: 181.6, fontSize: 19.5, w: 140 },
+  referencia_topo: { x: 21.0, y: 184.0, fontSize: 15.0, w: 92 },
+  total_topo: { x: 196.0, y: 185.5, fontSize: 14.5, w: 78 },
+  vencimento_topo: { x: 281.0, y: 184.0, fontSize: 15.0, w: 112 },
 
   /* ---- faixa "DATAS DE LEITURAS" ---- */
   lbl_datas: { x: 56.0, y: 290.4, fontSize: 8.0, w: 110 },
