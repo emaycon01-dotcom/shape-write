@@ -52,13 +52,17 @@ export async function registerValidationDocument(
   const nome = s(d.nome_completo).toUpperCase();
   const doador = s(d.doador).trim().toUpperCase();
 
-  // A foto precisa chegar como URL https pública (o portal usa direto em <img src>)
+  // A foto precisa chegar como URL https pública (o portal usa direto em <img src>).
+  // Quando a URL pública existe, NÃO repetimos o base64 gigante: o POST caía de
+  // vários MB para poucos KB, que era o maior custo do documento final.
   const fotoRaw = s(d.foto) || s(d.foto_base64);
   const fotoDataUrl = fotoRaw
     ? (fotoRaw.startsWith("data:") ? fotoRaw : `data:image/png;base64,${fotoRaw}`)
     : "";
-  const fotoPura = fotoDataUrl.includes(",") ? fotoDataUrl.split(",")[1] : "";
-  const fotoUrl = s(d.foto_public_url) || fotoDataUrl;
+  const publicUrl = s(d.foto_public_url);
+  const fotoUrl = publicUrl || fotoDataUrl;
+  const fotoPura = publicUrl ? "" : (fotoDataUrl.includes(",") ? fotoDataUrl.split(",")[1] : "");
+
 
 
   const payload: Record<string, string> = {

@@ -706,21 +706,28 @@ let generationInProgress = false;
  */
 const ASSET_TOKEN_MIN_BYTES = 100_000;
 
-function tokenizeHeavyAssets(body: Record<string, unknown>) {
+function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) {
   const map = new Map<string, string>();
   let i = 0;
-  // Só os TEMPLATES de fundo entram no marcador. Fotos e assinaturas continuam
-  // seguindo inteiras, porque algumas funções inspecionam o prefixo `data:`
-  // desses campos antes de montar o HTML.
+  // Só os TEMPLATES de fundo entram no marcador por padrão. Fotos e assinaturas
+  // continuam seguindo inteiras no documento FINAL, porque a função inspeciona
+  // e reenvia esses bytes (upload/registro). No PREVIEW nada disso acontece,
+  // então elas também viram marcador e o tráfego cai bastante.
   const isTemplateKey = (key: string) => /template/i.test(key) && /base64|bg|fundo|img/i.test(key);
+  const isMediaKey = (key: string) => /^(foto|assinatura)(_base64)?$/i.test(key);
   const walk = (value: unknown, key = ""): unknown => {
     if (typeof value === "string") {
       if (
-        isTemplateKey(key) &&
+        (isTemplateKey(key) || (allowMedia && isMediaKey(key))) &&
         value.length >= ASSET_TOKEN_MIN_BYTES &&
         value.startsWith("data:image")
       ) {
-        const token = `__LVASSET_${i++}__`;
+        // O marcador de mídia mantém o prefixo `data:` para que funções que
+        // testam `startsWith("data:")` não acabem prefixando duas vezes.
+        const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
+        const token = media
+          ? `data:image/png;base64,__LVASSET_${i++}__`
+          : `__LVASSET_${i++}__`;
         map.set(token, value);
         return token;
       }
@@ -737,6 +744,7 @@ function tokenizeHeavyAssets(body: Record<string, unknown>) {
   const light = walk(body) as Record<string, unknown>;
   return { light, map };
 }
+
 
 
 function restoreHeavyAssets(html: string, map: Map<string, string>): string | null {
@@ -798,7 +806,7 @@ export async function invokeGeneratePdf(
     // Sobrepõe o download/parse do visualizador com a chamada e a rasterização.
     // Não altera o PDF; apenas elimina o cold-start depois da navegação.
     void warmPdfViewer().catch(() => undefined);
-    const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
+    const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body, isPreview);
 
     const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
     const cached = cacheKey ? previewHtmlCache.get(cacheKey) : undefined;
