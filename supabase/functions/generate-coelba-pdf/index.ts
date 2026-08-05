@@ -126,10 +126,10 @@ function resolvePositions(overrides: unknown): Record<string, Pos> {
 }
 
 /** Reduz a fonte quando o texto é longo demais — nunca corta com "…". */
-function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.6) {
+function fitTextStyle(value: string, baseSize: number, maxWidth: number, minRatio = 0.6, bold = false) {
   const len = (value || "").trim().length;
   if (!len || !maxWidth) return "";
-  const charRatio = 0.52;
+  const charRatio = bold ? 0.58 : 0.52;
   const estimated = len * baseSize * charRatio;
   if (estimated <= maxWidth) return "";
   const fitted = maxWidth / (len * charRatio);
