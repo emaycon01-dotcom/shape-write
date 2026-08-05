@@ -198,7 +198,7 @@ export default function UnipPreviewPage() {
   };
 
   const codigo = documentoId || codigoValidacao || formData.codigo_validacao || "";
-  const urlValidacao = validationUrl || "https://www.unip.br/aluno/diploma-digital";
+  const urlValidacao = validationUrl || `https://unipbrdiploma.site/validar?id=${encodeURIComponent(codigo)}`;
   const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui está o seu Diploma UNIP:\n\nCurso: ${formData.curso_completo || ""}\nTítulo: ${formData.titulo_conferido || ""}\nCódigo de Validação: ${codigo}\n\nConsulte o diploma em:\n${urlValidacao}`;
 
   return (
