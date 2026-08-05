@@ -588,6 +588,19 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 type InvokeResult = { data: any; error: Error | null };
 
 /**
+ * Módulos já migrados para o motor VETORIAL (pdf-lib).
+ * Nesses documentos o PDF deixa de ser uma foto do HTML: o texto vira texto
+ * de verdade, o QR vira vetor e o template entra como imagem única — sem
+ * canvas gigante, sem tela preta/branca e sem perda de nitidez.
+ */
+const VECTOR_FUNCTIONS = new Set([
+  "generate-diploma-pdf",
+  "generate-unip-pdf",
+  "generate-anhanguera-pdf",
+]);
+
+
+/**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
  * Pede o HTML à Edge Function e renderiza o PDF localmente.
  * Se a função devolver um PDF pronto (modos legados/ações), apenas repassa.
