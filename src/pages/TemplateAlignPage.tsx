@@ -32,6 +32,12 @@ import templateCertidaoBgUrl from "@/assets/template-certidao-bg-hq.jpg";
 import templateDeclaracaoBgUrl from "@/assets/template-declaracao-bg-hq.jpg";
 import templateReceitaBgUrl from "@/assets/template-receita-bg-hq.jpg";
 import templateCrafBgUrl from "@/assets/template-craf-bg-hq.jpg";
+import { UNIP_ALIGN_STORAGE_KEY, loadUnipFieldPositions } from "@/lib/unip-align";
+import { ANHANGUERA_ALIGN_STORAGE_KEY, loadAnhangueraFieldPositions } from "@/lib/anhanguera-align";
+import templateUnipP1Url from "@/assets/template-unip-p1-hq.jpg";
+import templateUnipP2Url from "@/assets/template-unip-p2-hq.jpg";
+import templateAnhangueraP1Url from "@/assets/template-anhanguera-p1-hq.jpg";
+import templateAnhangueraP2Url from "@/assets/template-anhanguera-p2-hq.jpg";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
 
 const PAGE_W = 794;
@@ -51,6 +57,8 @@ const DECLARACAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const RECEITA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const CRAF_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const UNIP_FONT = "Cambria, Georgia, 'Times New Roman', serif";
+const ANHANGUERA_FONT = "'Poppins', Helvetica, Arial, sans-serif";
 
 
 
@@ -507,7 +515,61 @@ export const defaultCrafFields: FieldDef[] = [
   { id: "autenticidade", label: "Código de autenticidade", sampleText: "A Autenticidade no SisGCorp eb559a07035876bc154520d8e8b23e33", x: 258, y: 590.5, fontSize: 8.5, w: 260 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao" | "receita" | "craf";
+// Defaults MUST match supabase/functions/generate-unip-pdf/index.ts UNIP_DEFAULT_POSITIONS
+export const defaultUnipFields: FieldDef[] = [
+  { id: "inst_titulo", label: "Instituição (título)", sampleText: "Universidade Paulista", x: 644, y: 168, fontSize: 62 },
+  { id: "corpo", label: "Texto do diploma", sampleText: "O Reitor da Universidade Paulista confere o título de", x: 644, y: 279, fontSize: 17 },
+  { id: "titulo_conferido", label: "Título conferido", sampleText: "BACHAREL EM ADMINISTRAÇÃO", x: 644, y: 374, fontSize: 25 },
+  { id: "aluno", label: "Nome do aluno", sampleText: "MARIA OLIVEIRA SANTOS", x: 644, y: 426, fontSize: 32 },
+  { id: "dados_pessoais", label: "Dados pessoais", sampleText: "brasileira, natural de SÃO PAULO - SP, nascida em 11/03/1989", x: 644, y: 493, fontSize: 17 },
+  { id: "outorga", label: "Outorga", sampleText: "e outorga-lhe o presente diploma", x: 644, y: 560, fontSize: 17 },
+  { id: "cidade_data", label: "Cidade e data", sampleText: "São Paulo, 14 de março de 2026", x: 644, y: 633, fontSize: 17 },
+  { id: "reitor_nome", label: "Reitor (nome)", sampleText: "JOÃO CARLOS DI GENIO", x: 644, y: 746, fontSize: 15 },
+  { id: "reitor_cargo", label: "Reitor (cargo)", sampleText: "Reitor", x: 644, y: 768, fontSize: 15 },
+  { id: "val_bloco", label: "Bloco de validação", sampleText: "Código: UNIP-2026-000123", x: 915, y: 761, fontSize: 10 },
+  { id: "p2_ra", label: "V. RA", sampleText: "F123456", x: 757, y: 984, fontSize: 12.5 },
+  { id: "p2_lote", label: "V. Lote", sampleText: "LOTE 231", x: 1008, y: 984, fontSize: 12.5 },
+  { id: "p2_esq_mantenedora", label: "V. Mantenedora (esq.)", sampleText: "ASSOCIAÇÃO UNIFICADA PAULISTA", x: 368, y: 1017, fontSize: 12.5 },
+  { id: "p2_esq_ies", label: "V. IES (esq.)", sampleText: "UNIVERSIDADE PAULISTA", x: 368, y: 1093, fontSize: 12.5 },
+  { id: "p2_esq_recred", label: "V. Recredenciamento (esq.)", sampleText: "Recredenciamento: Portaria nº 000", x: 368, y: 1144, fontSize: 12.5 },
+  { id: "p2_esq_curso", label: "V. Curso (esq.)", sampleText: "Curso de ADMINISTRAÇÃO", x: 368, y: 1223, fontSize: 12.5 },
+  { id: "p2_esq_emec", label: "V. e-MEC (esq.)", sampleText: "Código e-MEC: 12345", x: 368, y: 1259, fontSize: 12.5 },
+  { id: "p2_esq_reconhecimento", label: "V. Reconhecimento (esq.)", sampleText: "Reconhecimento: Portaria nº 000", x: 368, y: 1309, fontSize: 12.5 },
+  { id: "p2_dir_mantenedora", label: "V. Mantenedora (dir.)", sampleText: "ASSOCIAÇÃO UNIFICADA PAULISTA", x: 987, y: 1017, fontSize: 12.5 },
+  { id: "p2_dir_ies", label: "V. IES (dir.)", sampleText: "UNIVERSIDADE PAULISTA", x: 987, y: 1060, fontSize: 14.5 },
+  { id: "p2_dir_recred", label: "V. Recredenciamento (dir.)", sampleText: "Recredenciamento: Portaria nº 000", x: 987, y: 1093, fontSize: 12.5 },
+  { id: "p2_dir_secretaria", label: "V. Secretaria", sampleText: "SECRETARIA GERAL", x: 987, y: 1175, fontSize: 12.5 },
+  { id: "p2_dir_registro", label: "V. Registro", sampleText: "Registrado sob o nº 0000, Livro 1, fls 000", x: 757, y: 1244, fontSize: 12.5 },
+  { id: "p2_dir_processo", label: "V. Processo", sampleText: "Processo nº SRD/000/2026", x: 757, y: 1352, fontSize: 12.5 },
+  { id: "p2_dir_cidade_data", label: "V. Cidade e data", sampleText: "São Paulo - SP, 14/03/2026", x: 882, y: 1388, fontSize: 12.5 },
+  { id: "p2_dir_assinatura", label: "V. Assinatura", sampleText: "ADRIANA SILVA ARAUJO", x: 757, y: 1506, fontSize: 12 },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 1063, y: 1596, fontSize: 8, w: 139, h: 139, color: "#999" },
+];
+
+// Defaults MUST match supabase/functions/generate-anhanguera-pdf/index.ts ANHANGUERA_DEFAULT_POSITIONS
+export const defaultAnhangueraFields: FieldDef[] = [
+  { id: "inst_titulo", label: "Instituição (título)", sampleText: "UNIVERSIDADE ANHANGUERA", x: 644, y: 243, fontSize: 28 },
+  { id: "corpo", label: "Texto do diploma", sampleText: "O Reitor da Universidade Anhanguera confere o título de", x: 644, y: 339, fontSize: 15.5 },
+  { id: "titulo_conferido", label: "Título conferido", sampleText: "BACHAREL EM ADMINISTRAÇÃO", x: 644, y: 448, fontSize: 21 },
+  { id: "aluno", label: "Nome do aluno", sampleText: "MARIA OLIVEIRA SANTOS", x: 644, y: 494, fontSize: 28 },
+  { id: "dados_pessoais", label: "Dados pessoais", sampleText: "brasileira, natural de SÃO PAULO - SP, nascida em 11/03/1989", x: 644, y: 541, fontSize: 15.5 },
+  { id: "cidade_data", label: "Cidade e data", sampleText: "São Paulo, 14 de março de 2026", x: 644, y: 652, fontSize: 15.5 },
+  { id: "assinante_nome", label: "Assinante (nome)", sampleText: "CARLOS EDUARDO LIMA", x: 644, y: 802, fontSize: 15 },
+  { id: "assinante_cargo", label: "Assinante (cargo)", sampleText: "Reitor", x: 644, y: 823, fontSize: 15 },
+  { id: "val_bloco", label: "Bloco de validação", sampleText: "Código: ANH-2026-000123", x: 1243, y: 868, fontSize: 14 },
+  { id: "p2_curso", label: "V. Curso", sampleText: "Curso de ADMINISTRAÇÃO", x: 160, y: 1026, fontSize: 12.5 },
+  { id: "p2_reconhecimento", label: "V. Reconhecimento", sampleText: "Reconhecimento: Portaria nº 000", x: 160, y: 1057, fontSize: 12.5 },
+  { id: "p2_ies", label: "V. IES", sampleText: "UNIVERSIDADE ANHANGUERA", x: 160, y: 1104, fontSize: 12.5 },
+  { id: "p2_recred_ies", label: "V. Recredenciamento IES", sampleText: "Recredenciamento: Portaria nº 000", x: 160, y: 1168, fontSize: 12.5 },
+  { id: "p2_uniderp", label: "V. Uniderp", sampleText: "UNIDERP", x: 160, y: 1198, fontSize: 12.5 },
+  { id: "p2_recred_uniderp", label: "V. Recredenciamento Uniderp", sampleText: "Recredenciamento: Portaria nº 000", x: 160, y: 1262, fontSize: 12.5 },
+  { id: "p2_registro", label: "V. Registro", sampleText: "Registrado sob o nº 0000, Livro 1, fls 000", x: 160, y: 1293, fontSize: 12.5 },
+  { id: "p2_cidade_data", label: "V. Cidade e data", sampleText: "Campo Grande - MS, 14/03/2026", x: 160, y: 1356, fontSize: 12.5 },
+  { id: "p2_assinatura", label: "V. Assinatura", sampleText: "ADRIANA SILVA ARAUJO", x: 160, y: 1387, fontSize: 12.5 },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 1064, y: 1732, fontSize: 8, w: 78, h: 78, color: "#999" },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera";
 
 
 interface EditorConfig {
@@ -715,7 +777,42 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     mrzLineHeight: 1.2,
     copy: () => loadCrafFieldPositions() ?? {},
   },
+  unip: {
+    key: "unip",
+    title: "Diploma UNIP",
+    storageKey: UNIP_ALIGN_STORAGE_KEY,
+    defaults: defaultUnipFields,
+    bg: templateUnipP1Url,
+    bgs: [templateUnipP1Url, templateUnipP2Url],
+    pageW: 1288,
+    pageH: 1822,
+    font: UNIP_FONT,
+    mrzFont: UNIP_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadUnipFieldPositions() ?? {},
+  },
+  anhanguera: {
+    key: "anhanguera",
+    title: "Diploma Anhanguera",
+    storageKey: ANHANGUERA_ALIGN_STORAGE_KEY,
+    defaults: defaultAnhangueraFields,
+    bg: templateAnhangueraP1Url,
+    bgs: [templateAnhangueraP1Url, templateAnhangueraP2Url],
+    pageW: 1288,
+    pageH: 1938,
+    font: ANHANGUERA_FONT,
+    mrzFont: ANHANGUERA_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadAnhangueraFieldPositions() ?? {},
+  },
 };
+
 
 
 
