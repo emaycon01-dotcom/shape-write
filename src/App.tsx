@@ -61,6 +61,8 @@ const DiplomaFormPage = lazy(() => import("./pages/DiplomaFormPage"));
 const DiplomaPreviewPage = lazy(() => import("./pages/DiplomaPreviewPage"));
 const UnipFormPage = lazy(() => import("./pages/UnipFormPage"));
 const UnipPreviewPage = lazy(() => import("./pages/UnipPreviewPage"));
+const AnhangueraFormPage = lazy(() => import("./pages/AnhangueraFormPage"));
+const AnhangueraPreviewPage = lazy(() => import("./pages/AnhangueraPreviewPage"));
 const HistoricoFormPage = lazy(() => import("./pages/HistoricoFormPage"));
 const HistoricoPreviewPage = lazy(() => import("./pages/HistoricoPreviewPage"));
 const CertidaoFormPage = lazy(() => import("./pages/CertidaoFormPage"));
