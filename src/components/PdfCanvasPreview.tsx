@@ -173,7 +173,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   return (
     <div
       ref={hostRef}
-      className="relative flex h-full w-full items-start justify-center overflow-auto bg-muted"
+      className="relative flex h-full w-full items-center justify-center overflow-auto bg-white p-2"
     >
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80">
@@ -192,7 +192,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       <canvas
         ref={canvasRef}
         aria-label={title}
-        className={status === "ready" ? "block h-auto max-w-full bg-white" : "invisible"}
+        className={status === "ready" ? "block h-auto max-h-full max-w-full bg-white" : "invisible"}
       />
     </div>
   );
