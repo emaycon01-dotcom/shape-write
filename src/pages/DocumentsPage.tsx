@@ -126,6 +126,14 @@ const MODULOS: Categoria[] = [
         creditos: 1,
       },
       {
+        id: "certidao-obito",
+        titulo: "Certidão de Óbito",
+        descricao: "Certidão eletrônica de óbito do Registro Civil com dados por extenso",
+        icon: FileText,
+        rota: "/dashboard/documents/certidao-obito",
+        creditos: 1,
+      },
+      {
         id: "declaracao-escolar",
         titulo: "Declaração Escolar",
         descricao: "Declaração de conclusão com brasão do estado selecionado",

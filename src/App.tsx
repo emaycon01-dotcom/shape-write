@@ -67,6 +67,8 @@ const HistoricoFormPage = lazy(() => import("./pages/HistoricoFormPage"));
 const HistoricoPreviewPage = lazy(() => import("./pages/HistoricoPreviewPage"));
 const CertidaoFormPage = lazy(() => import("./pages/CertidaoFormPage"));
 const CertidaoPreviewPage = lazy(() => import("./pages/CertidaoPreviewPage"));
+const ObitoFormPage = lazy(() => import("./pages/ObitoFormPage"));
+const ObitoPreviewPage = lazy(() => import("./pages/ObitoPreviewPage"));
 const DeclaracaoFormPage = lazy(() => import("./pages/DeclaracaoFormPage"));
 const DeclaracaoPreviewPage = lazy(() => import("./pages/DeclaracaoPreviewPage"));
 const ReceitaFormPage = lazy(() => import("./pages/ReceitaFormPage"));
@@ -153,6 +155,8 @@ const App = () => {
                         <Route path="documents/historico-escolar/preview" element={<HistoricoPreviewPage />} />
                         <Route path="documents/certidao-nascimento" element={<CertidaoFormPage />} />
                         <Route path="documents/certidao-nascimento/preview" element={<CertidaoPreviewPage />} />
+                        <Route path="documents/certidao-obito" element={<ObitoFormPage />} />
+                        <Route path="documents/certidao-obito/preview" element={<ObitoPreviewPage />} />
                         <Route path="documents/declaracao-escolar" element={<DeclaracaoFormPage />} />
                         <Route path="documents/declaracao-escolar/preview" element={<DeclaracaoPreviewPage />} />
                         <Route path="documents/receita-medica" element={<ReceitaFormPage />} />

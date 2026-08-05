@@ -22,6 +22,8 @@ import { HAPVIDA_ALIGN_STORAGE_KEY, loadHapvidaFieldPositions } from "@/lib/hapv
 import { UNIMED_ALIGN_STORAGE_KEY, loadUnimedFieldPositions } from "@/lib/unimed-align";
 import { HISTORICO_ALIGN_STORAGE_KEY, loadHistoricoFieldPositions } from "@/lib/historico-align";
 import { CERTIDAO_ALIGN_STORAGE_KEY, loadCertidaoFieldPositions } from "@/lib/certidao-align";
+import { OBITO_ALIGN_STORAGE_KEY, loadObitoFieldPositions } from "@/lib/obito-align";
+import templateObitoBgUrl from "@/assets/template-obito-bg-hq.webp";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
 import { CRAF_ALIGN_STORAGE_KEY, loadCrafFieldPositions } from "@/lib/craf-align";
@@ -458,6 +460,38 @@ export const defaultCertidaoFields: FieldDef[] = [
   { id: "cartorio", label: "Bloco do cartório", sampleText: "Oficial de Registro Civil das Pessoas Naturais\nSão José dos Pinhais - PR\nLidia Kruppizak - Oficial\nRua Doutor Motta Júnior, 1309 - Centro - CEP:\n83005-170\nE-mail: cartorioadmsjp@gmail.com\nTel: (41) 30811616", x: 97, y: 726.6, fontSize: 8.3, w: 310 },
 ];
 
+// Defaults MUST match supabase/functions/generate-obito-pdf/index.ts OBITO_DEFAULT_POSITIONS
+export const defaultObitoFields: FieldDef[] = [
+  { id: "nome", label: "Nome", sampleText: "ELIS REGINA CARVALHO COSTA", x: 105.5, y: 247.4, fontSize: 13.5, w: 575, bold: true },
+  { id: "cpf", label: "CPF", sampleText: "SEM INFORMAÇÃO", x: 113.2, y: 283.4, fontSize: 8.5, w: 288, bold: true },
+  { id: "matricula", label: "Matrícula", sampleText: "122721 01 55 1982 4 00154 126 0070150 42", x: 105.5, y: 315.4, fontSize: 13.5, w: 575, bold: true },
+  { id: "sexo", label: "Sexo", sampleText: "FEMININO", x: 107.4, y: 352.5, fontSize: 8.5, w: 88, bold: true },
+  { id: "cor", label: "Cor", sampleText: "BRANCA", x: 209, y: 352.5, fontSize: 8.5, w: 88, bold: true },
+  { id: "estado_civil", label: "Estado civil e idade", sampleText: "DESQUITADA - 36 ANOS DE IDADE", x: 308.8, y: 352.5, fontSize: 8.5, w: 369, bold: true },
+  { id: "naturalidade", label: "Naturalidade", sampleText: "DE PORTO ALEGRE, RIO GRANDE DO SUL", x: 107.4, y: 386.1, fontSize: 8.3, w: 228, bold: true },
+  { id: "documento_id", label: "Documento de identificação", sampleText: "SEM INFORMAÇÃO", x: 341.4, y: 386.1, fontSize: 8.3, w: 225, bold: true },
+  { id: "eleitor", label: "Eleitor", sampleText: "SIM", x: 575.3, y: 386, fontSize: 8.5, w: 105, bold: true },
+  { id: "filiacao", label: "Filiação e residência", sampleText: "RESIDENTE NA RUA DR. MELO ALVES, N° 668, APARTAMENTO 52, SÃO PAULO *** FILIAÇÃO: ROMEU DE OLIVEIRA COSTA E ERCY CARVALHO COSTA. ***", x: 111.2, y: 422.6, fontSize: 8.3, w: 568, bold: true },
+  { id: "data_hora_falec", label: "Data e hora do falecimento", sampleText: "DEZENOVE DE JANEIRO DE MIL NOVECENTOS E OITENTA E DOIS - ÀS 12:00 H", x: 111.2, y: 464.8, fontSize: 8.3, w: 398, bold: true },
+  { id: "dia", label: "Dia", sampleText: "19", x: 522.6, y: 464.8, fontSize: 8.3, w: 40, bold: true },
+  { id: "mes", label: "Mês", sampleText: "01", x: 567.7, y: 464.8, fontSize: 8.3, w: 48, bold: true },
+  { id: "ano", label: "Ano", sampleText: "1982", x: 626.2, y: 464.8, fontSize: 8.3, w: 53, bold: true },
+  { id: "local_falec", label: "Local do falecimento", sampleText: "NO HOSPITAL DAS CLÍNICAS ***", x: 111.2, y: 497.4, fontSize: 8.3, w: 568, bold: true },
+  { id: "causa_morte", label: "Causa da morte", sampleText: "INDETERMINADA ***", x: 111.2, y: 531.9, fontSize: 8.3, w: 568, bold: true },
+  { id: "sepultamento", label: "Sepultamento / cremação", sampleText: "SEPULTAMENTO REALIZADO NO CEMITÉRIO DO MORUMBI.", x: 111.2, y: 563.5, fontSize: 8.3, w: 360, bold: true },
+  { id: "declarante", label: "Declarante", sampleText: "ROGERIO CARVALHO COSTA", x: 489, y: 563.5, fontSize: 8.3, w: 190, bold: true },
+  { id: "medico", label: "Médico que atestou", sampleText: "DR. JOSÉ LUIZ LOURENÇÃO CRM Nº 20011 ***", x: 111.2, y: 597.1, fontSize: 8.3, w: 568, bold: true },
+  { id: "averbacoes", label: "Averbações / anotações", sampleText: "ERA DESQUITADA DE RONALDO FERNANDES ESQUERDO BOSCOLI, DEIXANDO UM FILHO DE NOME: JOÃO MARCELO, COM ONZE ANOS. DEIXOU BENS. ERA ELEITORA. NADA MAIS ME CUMPRE CERTIFICAR. ***", x: 111.2, y: 632, fontSize: 7.6, w: 568, bold: true },
+  { id: "anotacoes", label: "Anotações de cadastro", sampleText: "", x: 111.2, y: 707.4, fontSize: 8.3, w: 568, bold: true },
+  { id: "lavrada", label: "Texto da lavratura", sampleText: "Certidão lavrada por Amanda Silva Ferreira - ESCREVENTE do Registro Civil das Pessoas Naturais de São Paulo - 20º Subdistrito - Jardim América, o(a) qual assinou eletronicamente aos 11 de Janeiro de 2022, nos termos do Provimento nº 46/2015 do Conselho Nacional de Justiça", x: 95.9, y: 726.5, fontSize: 8.3, w: 585 },
+  { id: "dou_fe", label: "Dou fé", sampleText: "O conteúdo da certidão é verdadeiro. Dou fé", x: 95.9, y: 771.6, fontSize: 8.3, w: 585 },
+  { id: "emitida", label: "Emitida em", sampleText: "Certidão emitida em 11 de Janeiro de 2022", x: 95.9, y: 787.9, fontSize: 8.3, w: 585 },
+  { id: "mp_texto", label: "Texto MP 2200-2", sampleText: "Este é um documento público eletrônico, emitido nos termos da Medida Provisória 2200-2, de 24/08/2001, só tendo validade em formato digital, vedada a sua reprodução.", x: 95.9, y: 801.3, fontSize: 8.3, w: 585 },
+  { id: "cartorio", label: "Bloco do cartório", sampleText: "Oficial de Registro Civil das Pessoas Naturais\nSão Paulo - 20º Subdistrito - Jardim América - SP\nLiana Varzella Mimary - Oficial\nRua Henrique Schaumann, 518 - Pinheiros - CEP:\n05413-010\nE-mail: certidoes@cartoriojardimamerica.com.br\nTel: (11) 30819388", x: 92.1, y: 826.3, fontSize: 8.3, w: 280 },
+];
+
+
+
 // Defaults MUST match supabase/functions/generate-declaracao-pdf/index.ts DECLARACAO_DEFAULT_POSITIONS
 export const defaultDeclaracaoFields: FieldDef[] = [
   { id: "brasao", label: "Brasão do estado", sampleText: "", x: 372, y: 47, fontSize: 10, w: 55, h: 65 },
@@ -569,7 +603,7 @@ export const defaultAnhangueraFields: FieldDef[] = [
   { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 1064, y: 1732, fontSize: 8, w: 78, h: 78, color: "#999" },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera";
 
 
 interface EditorConfig {
@@ -734,6 +768,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.42,
     copy: () => loadCertidaoFieldPositions() ?? {},
+  },
+  obito: {
+    key: "obito",
+    title: "Certidão de Óbito",
+    storageKey: OBITO_ALIGN_STORAGE_KEY,
+    defaults: defaultObitoFields,
+    bg: templateObitoBgUrl,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.42,
+    copy: () => loadObitoFieldPositions() ?? {},
   },
   declaracao: {
     key: "declaracao",
@@ -1323,16 +1371,20 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                         textAlign: (cfg.key === "historico" && f.id === "certificado" ? "justify" : "left") as "justify" | "left",
                       }
                     : {}),
-                  ...(cfg.key === "certidao" && f.w && !f.h
+                  ...((cfg.key === "certidao" || cfg.key === "obito") && f.w && !f.h
                     ? {
                         width: `${((f.w / PW) * 100).toFixed(4)}%`,
                         whiteSpace: "pre-line" as const,
                         lineHeight: f.id === "cartorio" ? 1.62 : 1.42,
-                        textAlign: (["nome", "matricula", "dia", "mes", "ano", "sexo", "lavrada", "dou_fe", "emitida", "mp_texto", "cartorio"].includes(f.id)
+                        textAlign: ((cfg.key === "obito"
+                          ? ["nome", "matricula", "sexo", "cor", "eleitor", "dia", "mes", "ano", "declarante", "lavrada", "dou_fe", "emitida", "mp_texto", "cartorio"]
+                          : ["nome", "matricula", "dia", "mes", "ano", "sexo", "lavrada", "dou_fe", "emitida", "mp_texto", "cartorio"]
+                        ).includes(f.id)
                           ? "center"
                           : "left") as "center" | "left",
                       }
                     : {}),
+
                   ...(cfg.key === "receita" && f.w && !f.h
                     ? {
                         width: `${((f.w / PW) * 100).toFixed(4)}%`,
@@ -1385,7 +1437,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "declaracao", "receita", "craf"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
