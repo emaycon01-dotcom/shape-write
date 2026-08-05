@@ -104,14 +104,17 @@ export async function registerValidationDocument(
     cns: s(d.cns),
     observacao_saude: s(d.observacao_saude).toUpperCase(),
     via: s(d.via),
-    // enviado em vários formatos/chaves para cobrir o que o portal espera
-    foto_base64: fotoUrl,
+    // enviado em vários formatos/chaves para cobrir o que o portal espera.
+    // `foto_base64` só aceita base64 de verdade — mandar URL aí faz o portal
+    // devolver 500 e bloqueia a geração do PDF.
+    foto_base64: publicUrl ? "" : fotoDataUrl,
     foto: fotoUrl,
     foto_url: fotoUrl,
     foto_3x4: fotoUrl,
     photo_url: fotoUrl,
     imagem: fotoUrl,
     foto_raw: fotoPura,
+
   };
 
 
