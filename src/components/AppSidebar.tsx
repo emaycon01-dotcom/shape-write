@@ -15,6 +15,8 @@ import {
   Headphones,
   Coins,
   ScrollText,
+  Crown,
+
 
 } from "lucide-react";
 import {
@@ -42,6 +44,8 @@ const commonItems = [
   { title: "Serviços", url: "/dashboard/documents", icon: FileText },
   { title: "Histórico", url: "/dashboard/history", icon: History },
   { title: "Recarregar", url: "/dashboard/recarregar", icon: CreditCard },
+  { title: "Planos", url: "/dashboard/planos", icon: Crown },
+
 ];
 
 
