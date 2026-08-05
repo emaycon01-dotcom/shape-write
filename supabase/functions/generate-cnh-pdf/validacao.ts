@@ -158,5 +158,7 @@ export function qrSvg(value: string, sizePx: number): string {
       if (qr.isDark(r, c)) rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1"/>`;
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><rect width="${total}" height="${total}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
+  // Sem retângulo branco de fundo: o template não tem QR nenhum, então não há
+  // nada para "tampar". Só os módulos pretos são desenhados.
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><g fill="#000">${rects}</g></svg>`;
 }
