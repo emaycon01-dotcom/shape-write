@@ -267,6 +267,17 @@ serve(async (req) => {
   try {
     const body = await req.json();
 
+    // Anexa ao registro de validação o PDF gerado no navegador.
+    if (body?.attach_pdf && body?.token) {
+      const raw = String(body.attach_pdf).split(",").pop() || "";
+      const bin = Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
+      const url = await attachPdf(String(body.token), bin);
+      return new Response(
+        JSON.stringify({ success: true, pdf_url: url }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const keys = [
       "cidade_unidade", "paciente", "cpf", "nascimento", "emissao", "endereco",
       "medico", "crm", "endereco_clinica", "telefone", "link_farmacia",
@@ -278,18 +289,36 @@ serve(async (req) => {
     for (const k of keys) data[k] = typeof body[k] === "string" ? body[k] : "";
 
     const isPreview = body.preview === true;
-    const token = typeof body.token === "string" && body.token ? body.token : gerarToken();
-    const codigo = typeof body.codigo_acesso === "string" && body.codigo_acesso
+    let token = typeof body.token === "string" && body.token ? body.token : gerarToken();
+    let codigo = typeof body.codigo_acesso === "string" && body.codigo_acesso
       ? body.codigo_acesso
       : gerarCodigoAcesso();
+
+    const medicamentos = parseMedicamentos(body.medicamentos);
+
+    // Só grava no validador na geração final (preview não consome token).
+    if (!isPreview) {
+      let rawMeds: unknown = body.medicamentos;
+      if (typeof rawMeds === "string") {
+        try { rawMeds = JSON.parse(rawMeds); } catch { rawMeds = []; }
+      }
+      const reg = await registerReceita(
+        data,
+        Array.isArray(rawMeds) ? rawMeds : [],
+        { token, codigo_acesso: codigo },
+      );
+      token = reg.token;
+      codigo = reg.codigo_acesso;
+      if (!reg.registered) console.error("Receita não registrada no validador:", reg.error);
+    }
 
     data.token = token;
     data.codigo_acesso = codigo;
 
-    const medicamentos = parseMedicamentos(body.medicamentos);
-    const qrValue = linkValidacao(token);
+    const qrValue = linkValidacao(token, codigo);
 
     const html = buildReceitaHtml(data, medicamentos, body.field_positions, qrValue);
+
 
     return new Response(
       JSON.stringify({
