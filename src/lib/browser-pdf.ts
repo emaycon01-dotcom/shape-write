@@ -205,36 +205,6 @@ function isCanvasBlack(canvas: HTMLCanvasElement): boolean {
   }
 }
 
-/** Rejeita também a falha silenciosa que devolve uma faixa totalmente branca. */
-function isCanvasEmpty(canvas: HTMLCanvasElement): boolean {
-  try {
-    if (canvas.width < 2 || canvas.height < 2) return true;
-    // Reduz a faixa INTEIRA para uma sonda pequena. Diferente de alguns pontos
-    // fixos, isto preserva textos, brasões e linhas finas de documentos claros.
-    const probe = document.createElement("canvas");
-    probe.width = 64;
-    probe.height = 64;
-    const context = probe.getContext("2d", { alpha: false });
-    if (!context) return true;
-    context.drawImage(canvas, 0, 0, probe.width, probe.height);
-    const pixels = context.getImageData(0, 0, probe.width, probe.height).data;
-    let minLuma = 255;
-    let maxLuma = 0;
-    for (let index = 0; index < pixels.length; index += 4) {
-      const luma = (pixels[index] * 3 + pixels[index + 1] * 6 + pixels[index + 2]) / 10;
-      minLuma = Math.min(minLuma, luma);
-      maxLuma = Math.max(maxLuma, luma);
-    }
-    probe.width = 0;
-    probe.height = 0;
-    // Canvas perdido por OOM é uniforme; uma página real tem variação, ainda
-    // que o fundo seja quase todo branco.
-    return maxLuma - minLuma < 2 && (maxLuma < 14 || minLuma > 251);
-  } catch {
-    return true;
-  }
-}
-
 
 
 
@@ -562,7 +532,7 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
           // Quando falta memória (iPad/Android), o navegador devolve um canvas
           // totalmente preto em vez de erro — o PDF final saía todo preto.
           // Detectamos aqui e a tentativa seguinte usa faixas menores.
-          if (isCanvasBlack(canvas) || isCanvasEmpty(canvas)) {
+          if (isCanvasBlack(canvas)) {
             canvas.width = 0;
             canvas.height = 0;
             throw new Error("Rasterização vazia (memória insuficiente).");
