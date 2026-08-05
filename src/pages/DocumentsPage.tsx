@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, IdCardLanyard } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -17,7 +18,15 @@ type Modulo = {
   manutencao?: boolean;
 };
 
-const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
+type Categoria = {
+  grupo: string;
+  subtitulo: string;
+  icon: React.ElementType;
+  itens: Modulo[];
+};
+
+const MODULOS: Categoria[] = [
+
   {
     grupo: "Digitais",
     subtitulo: "Documentos digitais com validação online",
