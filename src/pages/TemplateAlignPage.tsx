@@ -650,7 +650,7 @@ export const defaultComprovanteFields: FieldDef[] = [
   { id: "valor_documento", label: "Rodapé: valor", sampleText: "128,50", x: 563.5, y: 1027.7, fontSize: 12.4, w: 118, bold: true },
   { id: "controle_rodape", label: "Rodapé: nº da conta", sampleText: "511917580397", x: 64.5, y: 1051, fontSize: 12.4, w: 130, bold: true },
   { id: "barcode", label: "Código de barras", sampleText: "[BARRAS]", x: 215, y: 1076, fontSize: 7.4, w: 385, h: 38, color: "#999" },
-  { id: "qrcode", label: "QR Code (PIX)", sampleText: "[QR]", x: 664, y: 951, fontSize: 7.4, w: 104, h: 104, color: "#999" },
+  { id: "qrcode", label: "QR Code (PIX)", sampleText: "[QR]", x: 692, y: 978, fontSize: 7.4, w: 68, h: 68, color: "#999" },
   { id: "controle_p2", label: "P2: Nº da conta", sampleText: "Nº 511917580397", x: 550, y: 1123.6, fontSize: 9.6, w: 126 },
   { id: "unidade_entrega", label: "P2: Unidade de entrega", sampleText: "B4850905", x: 59.6, y: 1604, fontSize: 8.4, w: 70 },
   { id: "sequencia", label: "P2: Sequência", sampleText: "0284", x: 136.1, y: 1604, fontSize: 8.4, w: 50 },
