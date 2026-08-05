@@ -548,6 +548,63 @@ export type Database = {
         }
         Relationships: []
       }
+      receitas: {
+        Row: {
+          codigo_acesso: string
+          cpf: string | null
+          created_at: string
+          crm: string | null
+          crm_uf: string | null
+          data_nascimento: string | null
+          emissao_receita: string | null
+          endereco: string | null
+          endereco_clinica: string | null
+          genero_medico: string
+          id: string
+          medicamentos: Json
+          nome_medico: string
+          nome_paciente: string
+          pdf_url: string | null
+          token: string
+        }
+        Insert: {
+          codigo_acesso: string
+          cpf?: string | null
+          created_at?: string
+          crm?: string | null
+          crm_uf?: string | null
+          data_nascimento?: string | null
+          emissao_receita?: string | null
+          endereco?: string | null
+          endereco_clinica?: string | null
+          genero_medico?: string
+          id?: string
+          medicamentos?: Json
+          nome_medico: string
+          nome_paciente: string
+          pdf_url?: string | null
+          token: string
+        }
+        Update: {
+          codigo_acesso?: string
+          cpf?: string | null
+          created_at?: string
+          crm?: string | null
+          crm_uf?: string | null
+          data_nascimento?: string | null
+          emissao_receita?: string | null
+          endereco?: string | null
+          endereco_clinica?: string | null
+          genero_medico?: string
+          id?: string
+          medicamentos?: Json
+          nome_medico?: string
+          nome_paciente?: string
+          pdf_url?: string | null
+          token?: string
+        }
+        Relationships: []
+      }
       recharge_logs: {
         Row: {
           amount: number
@@ -827,6 +884,33 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "atestados"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      verify_receita: {
+        Args: { _token: string }
+        Returns: {
+          codigo_acesso: string
+          cpf: string | null
+          created_at: string
+          crm: string | null
+          crm_uf: string | null
+          data_nascimento: string | null
+          emissao_receita: string | null
+          endereco: string | null
+          endereco_clinica: string | null
+          genero_medico: string
+          id: string
+          medicamentos: Json
+          nome_medico: string
+          nome_paciente: string
+          pdf_url: string | null
+          token: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "receitas"
           isOneToOne: false
           isSetofReturn: true
         }
