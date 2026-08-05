@@ -439,13 +439,18 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 
   const frame = await createHiddenFrame(html);
   let releaseFonts: () => void = () => undefined;
+  let releaseBlobs: () => void = () => undefined;
   let fontsWarm = false;
 
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
+    // Troca data URLs pesadas por blob: ANTES de esperar/decodificar — cada
+    // clone do html2canvas passa a copiar só uma URL curta.
+    releaseBlobs = await inlineImagesToBlobUrls(doc);
     await waitForAssets(doc);
     releaseFonts = await adoptFontFaces(doc);
+
 
 
     const pages = Array.from(doc.querySelectorAll<HTMLElement>(".page"));
