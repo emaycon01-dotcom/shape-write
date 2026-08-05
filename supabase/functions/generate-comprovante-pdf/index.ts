@@ -67,10 +67,10 @@ export const COMPROVANTE_DEFAULT_POSITIONS: Record<string, Pos> = {
   referencia: { x: 313.4, y: 1027.7, fontSize: 12.4, w: 120 },
   vencimento_rodape: { x: 442.5, y: 1027.7, fontSize: 12.4, w: 118 },
   valor_documento: { x: 563.5, y: 1027.7, fontSize: 12.4, w: 118 },
-  controle_rodape: { x: 64.5, y: 1051, fontSize: 12.4, w: 130 },
+  controle_rodape: { x: 64.5, y: 1052.5, fontSize: 12.4, w: 130 },
 
   barcode: { x: 215, y: 1076, fontSize: 7.4, w: 385, h: 38 },
-  qrcode: { x: 664, y: 951, fontSize: 7.4, w: 104, h: 104 },
+  qrcode: { x: 692, y: 978, fontSize: 7.4, w: 68, h: 68 },
 
   /* --- página 2 --- */
   controle_p2: { x: 550, y: 1123.6, fontSize: 9.6, w: 126 },
