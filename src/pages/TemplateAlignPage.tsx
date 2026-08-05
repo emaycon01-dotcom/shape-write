@@ -927,7 +927,11 @@ const RECEIPT_STYLES: Partial<Record<DocKey, ReceiptStyleCfg>> = {
       "data_emissao", "nota_fiscal_rodape", "referencia", "vencimento_rodape",
       "valor_documento", "controle_rodape",
     ]),
-    nowrap: new Set<string>(),
+    nowrap: new Set([
+      "chave_nf", "nota_fiscal_serie", "linha_digitavel", "pagador",
+      "cliente_nome", "instalacao", "cliente_numero",
+      "mes_ano", "vencimento", "total_pagar",
+    ]),
     wrap: new Set(["mensagens", "cliente_endereco"]),
   },
   coelba: {
