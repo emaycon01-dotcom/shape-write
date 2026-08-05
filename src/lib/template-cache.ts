@@ -4,6 +4,15 @@
  * o que fazia o navegador travar/fechar em dispositivos móveis.
  */
 const cache = new Map<string, Promise<string>>();
+const MAX_CACHED_TEMPLATES = 2;
+
+function trimCache(activeUrl: string) {
+  while (cache.size > MAX_CACHED_TEMPLATES) {
+    const oldest = cache.keys().next().value as string | undefined;
+    if (!oldest || oldest === activeUrl) break;
+    cache.delete(oldest);
+  }
+}
 
 export function loadTemplateBase64(url: string): Promise<string> {
   const hit = cache.get(url);
@@ -22,5 +31,6 @@ export function loadTemplateBase64(url: string): Promise<string> {
 
   p.catch(() => cache.delete(url));
   cache.set(url, p);
+  trimCache(url);
   return p;
 }
