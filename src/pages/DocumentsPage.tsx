@@ -81,7 +81,7 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
     itens: [
       {
         id: "diploma",
-        titulo: "Diploma Superior",
+        titulo: "Diploma Estácio",
         descricao: "Diploma de graduação com verso de registro e QR Code",
         icon: GraduationCap,
         rota: "/dashboard/documents/diploma",
@@ -94,6 +94,15 @@ const MODULOS: { grupo: string; subtitulo: string; itens: Modulo[] }[] = [
         descricao: "Diploma da Universidade Paulista com verso de registro e QR Code",
         icon: GraduationCap,
         rota: "/dashboard/documents/diploma-unip",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
+        id: "diploma-anhanguera",
+        titulo: "Diploma Anhanguera",
+        descricao: "Diploma da Faculdade Anhanguera com verso de registro e QR Code",
+        icon: GraduationCap,
+        rota: "/dashboard/documents/diploma-anhanguera",
         creditos: 1,
         qrcode: true,
       },
