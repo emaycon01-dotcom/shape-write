@@ -211,6 +211,21 @@ const MODULOS: Categoria[] = [
     ],
   },
   {
+    grupo: "FINANCEIRO",
+    subtitulo: "COMPROVANTES DE RENDA E FOLHA DE PAGAMENTO",
+    icon: Wallet,
+    itens: [
+      {
+        id: "holerite",
+        titulo: "HOLERITE",
+        descricao: "Recibo de pagamento de salário em 2 vias, com totais e bases de cálculo",
+        icon: Wallet,
+        rota: "/dashboard/documents/holerite",
+        creditos: 1,
+      },
+    ],
+  },
+  {
     grupo: "ATESTADOS",
     subtitulo: "ATESTADOS MÉDICOS COM VALIDAÇÃO",
     icon: Stethoscope,
