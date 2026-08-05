@@ -887,6 +887,153 @@ export const defaultHoleriteFields: FieldDef[] = HOLERITE_SPEC.flatMap((f) => [
   { id: `${f.key}_b`, label: `2ª via — ${f.label}`, sampleText: f.sample, x: f.x, y: f.y2, fontSize: 9.2, w: f.w },
 ]);
 
+/**
+ * Espelha EXATAMENTE o CSS das funções generate-{comprovante,coelba,equatorial,tim,holerite}-pdf:
+ * largura da caixa, alinhamento, negrito, quebra de linha, line-height e a
+ * redução automática de fonte (fitTextStyle). Sem isso o editor mostrava os
+ * textos em posições/tamanhos diferentes do PDF final.
+ */
+const TIM_RIGHT_ROWS = TIM_ROW_YS.map((_, i) => `l${i + 1}_val`);
+const TIM_CENTER_ROWS = TIM_ROW_YS.flatMap((_, i) => [`l${i + 1}_fran`, `l${i + 1}_cons`, `l${i + 1}_qtd`, `l${i + 1}_dias`, `l${i + 1}_per`]);
+const HOLERITE_RIGHT_KEYS = ["r1_venc", "r1_desc", "r2_venc", "r2_desc", "r3_venc", "r3_desc", "total_venc", "total_desc", "liquido"];
+
+interface ReceiptStyleCfg {
+  lineHeight: number;
+  charRatio: number;
+  boldCharRatio?: number;
+  minRatio: number;
+  defaultW: number;
+  right: Set<string>;
+  center: Set<string>;
+  bold: Set<string>;
+  nowrap: "all" | Set<string>;
+  wrap?: Set<string>;
+}
+
+const RECEIPT_STYLES: Partial<Record<DocKey, ReceiptStyleCfg>> = {
+  comprovante: {
+    lineHeight: 1.32,
+    charRatio: 0.52,
+    minRatio: 0.62,
+    defaultW: 200,
+    right: new Set(["controle_topo", "controle_p2"]),
+    center: new Set([
+      "leitura_anterior", "leitura_atual", "dias_leitura", "proxima_leitura",
+      "instalacao", "cliente_numero", "mes_ano", "vencimento", "total_pagar",
+    ]),
+    bold: new Set([
+      "cliente_nome", "instalacao", "cliente_numero", "chave_nf", "nota_fiscal_serie",
+      "mes_ano", "vencimento", "total_pagar", "linha_digitavel",
+      "data_emissao", "nota_fiscal_rodape", "referencia", "vencimento_rodape",
+      "valor_documento", "controle_rodape",
+    ]),
+    nowrap: new Set<string>(),
+    wrap: new Set(["mensagens", "cliente_endereco"]),
+  },
+  coelba: {
+    lineHeight: 1.2,
+    charRatio: 0.52,
+    boldCharRatio: 0.58,
+    minRatio: 0.6,
+    defaultW: 200,
+    right: new Set([
+      "med_leitura_anterior", "med_leitura_atual", "med_constante", "med_consumo",
+      "total_topo", "rodape_total",
+    ]),
+    center: new Set(["referencia_topo", "vencimento_topo", "med_postos"]),
+    bold: new Set([
+      "danfe_titulo", "emissor_l1", "cliente_nome",
+      "referencia_topo", "total_topo", "vencimento_topo",
+      "val_leitura_anterior", "val_leitura_atual", "val_dias", "val_proxima",
+      "aviso_suspensao", "rodape_referencia", "rodape_vencimento", "rodape_total",
+    ]),
+    nowrap: new Set([
+      "danfe_titulo", "emissor_l1", "emissor_l2", "emissor_l3",
+      "cliente_nome", "cliente_cpf", "cliente_endereco", "cliente_bairro", "cliente_cep",
+      "referencia_topo", "total_topo", "vencimento_topo",
+      "val_leitura_anterior", "val_leitura_atual", "val_dias", "val_proxima",
+      "med_postos", "med_leitura_anterior", "med_leitura_atual", "med_constante", "med_consumo",
+      "aviso_suspensao", "rodape_referencia", "rodape_vencimento", "rodape_total",
+      "p2_nome", "p2_endereco", "p2_bairro", "p2_cep",
+    ]),
+  },
+  equatorial: {
+    lineHeight: 1.15,
+    charRatio: 0.52,
+    minRatio: 0.55,
+    defaultW: 200,
+    right: new Set([
+      "it_consumo_qtd", "it_consumo_preco", "it_consumo_valor", "it_consumo_pis",
+      "it_consumo_base", "it_consumo_aliq", "it_consumo_icms", "it_consumo_tarifa",
+      "fin1_valor", "fin2_valor", "fin3_valor", "fin4_valor", "rod_valor_doc",
+    ]),
+    center: new Set<string>(),
+    bold: new Set([
+      "cliente_nome",
+      "val_leitura_anterior", "val_leitura_atual", "val_dias", "val_proxima",
+      "referencia_topo", "vencimento_topo", "total_topo",
+      "rod_vencimento", "rod_unidade", "rod_referencia", "rod_data_doc", "rod_num_ref",
+      "rod_especie", "rod_data_proc", "rod_nosso_numero", "rod_carteira", "rod_moeda",
+      "rod_valor_doc", "p2_nome",
+    ]),
+    nowrap: "all",
+  },
+  tim: {
+    lineHeight: 1.15,
+    charRatio: 0.52,
+    minRatio: 0.55,
+    defaultW: 200,
+    right: new Set([
+      "valor_topo", "venc_titulo", "venc_data", "emissao", "postagem", "fatura",
+      "cliente_num", "cpf_topo", "acesso_topo",
+      "res_h_valor", "res_valor", "h_valor", "total_label", "total_valor", "stub_valor",
+      ...TIM_RIGHT_ROWS,
+    ]),
+    center: new Set(["h_franquia", "h_consumo", "h_qtd", "h_dias", "h_periodo", ...TIM_CENTER_ROWS]),
+    bold: new Set([
+      "valor_topo", "venc_titulo", "dest_nome", "importante", "res_plano", "res_valor",
+      "veja_abaixo", "total_label", "total_valor", "stub_vencimento", "stub_valor",
+    ]),
+    nowrap: "all",
+  },
+  holerite: {
+    lineHeight: 1,
+    charRatio: 0.6,
+    minRatio: 0.55,
+    defaultW: 120,
+    right: new Set(HOLERITE_RIGHT_KEYS.flatMap((k) => [`${k}_a`, `${k}_b`])),
+    center: new Set<string>(),
+    bold: new Set<string>(),
+    nowrap: "all",
+  },
+};
+
+function receiptStyle(key: DocKey, f: FieldDef, PW: number, scale: number): React.CSSProperties {
+  const st = RECEIPT_STYLES[key];
+  if (!st || f.h) return {}; // caixas (QR / código de barras) mantêm o tratamento de box
+  const w = f.w ?? st.defaultW;
+  const bold = st.bold.has(f.id) || !!f.bold;
+  const text = (f.sampleText || "").trim();
+  const charRatio = bold && st.boldCharRatio ? st.boldCharRatio : st.charRatio;
+
+  let size = f.fontSize;
+  if (!st.wrap?.has(f.id) && w && text.length) {
+    const estimated = text.length * f.fontSize * charRatio;
+    if (estimated > w) size = Math.max(w / (text.length * charRatio), f.fontSize * st.minRatio);
+  }
+
+  const nowrap = st.nowrap === "all" ? true : st.nowrap.has(f.id);
+  return {
+    width: `${((w / PW) * 100).toFixed(4)}%`,
+    fontSize: `${size * scale}px`,
+    fontWeight: bold ? 700 : 400,
+    textAlign: st.right.has(f.id) ? "right" : st.center.has(f.id) ? "center" : "left",
+    whiteSpace: nowrap ? "nowrap" : "pre-line",
+    lineHeight: st.lineHeight,
+    overflow: "visible",
+  };
+}
+
 type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
 
 
@@ -1151,7 +1298,7 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     bg: templateEnelP1Url,
     bgs: [templateEnelP1Url, templateEnelP2Url],
     pageW: 794,
-    pageH: 1123,
+    pageH: 2246, // 2 folhas A4 empilhadas (1123 cada) — igual ao PDF final
     font: CERTIDAO_FONT,
     mrzFont: CERTIDAO_FONT,
     mrzWidth: 400,
@@ -1168,7 +1315,7 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     bg: templateCoelbaP1Url,
     bgs: [templateCoelbaP1Url, templateCoelbaP2Url],
     pageW: 794,
-    pageH: 1123,
+    pageH: 2246, // 2 folhas A4 empilhadas (1123 cada) — igual ao PDF final
     font: CERTIDAO_FONT,
     mrzFont: CERTIDAO_FONT,
     mrzWidth: 400,
@@ -1185,7 +1332,7 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     bg: templateEquatorialP1Url,
     bgs: [templateEquatorialP1Url, templateEquatorialP2Url],
     pageW: 909,
-    pageH: 1211,
+    pageH: 2422, // 2 páginas empilhadas (1211 cada) — igual ao PDF final
     font: CERTIDAO_FONT,
     mrzFont: CERTIDAO_FONT,
     mrzWidth: 400,
@@ -1763,6 +1910,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                       }
                     : {}),
                   ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
+                  ...receiptStyle(cfg.key, f, PW, scale),
                   ...(isBox
                     ? {
                         width: `${(((f.w || 80) / PW) * 100).toFixed(4)}%`,
