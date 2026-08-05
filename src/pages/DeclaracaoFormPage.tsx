@@ -11,6 +11,7 @@ import templateDeclaracaoUrl from "@/assets/template-declaracao-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF, ESTADO_NOMES, loadBrasaoDataUrl } from "@/lib/brasoes-estados";
 
 interface DeclaracaoFormData {
@@ -173,9 +174,8 @@ export default function DeclaracaoFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/declaracao-escolar/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/declaracao-escolar/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar Declaração Escolar:", err);

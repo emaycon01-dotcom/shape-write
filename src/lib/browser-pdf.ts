@@ -130,17 +130,20 @@ function breathe(ms = 16): Promise<void> {
 /**
  * Codifica a faixa em JPEG.
  *
- * `toDataURL` é síncrono: ele CONGELA a interface por centenas de ms em cada
- * faixa (o travamento percebido no Android/iOS) e ainda cria uma string base64
- * ~33% maior que o binário. `toBlob` faz a codificação fora da thread principal
- * na maioria dos navegadores; a conversão para base64 é feita depois pelo
- * FileReader, também assíncrono. Mesma qualidade, sem travar a tela.
+ * `toDataURL` é síncrono e cria uma cópia base64 ~33% maior que o JPEG. Mantemos
+ * cada faixa como bytes até o jsPDF incorporá-la. Assim não coexistem canvas,
+ * string binária e base64 durante a etapa mais pesada da geração.
  */
-function encodeJpeg(canvas: HTMLCanvasElement, quality = 0.95): Promise<string> {
+function encodeJpeg(canvas: HTMLCanvasElement, quality = 0.95): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     if (typeof canvas.toBlob !== "function") {
       try {
-        resolve(canvas.toDataURL("image/jpeg", quality));
+        const encoded = canvas.toDataURL("image/jpeg", quality);
+        const comma = encoded.indexOf(",");
+        const binary = atob(comma >= 0 ? encoded.slice(comma + 1) : encoded);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+        resolve(bytes);
       } catch (e) {
         reject(e as Error);
       }
@@ -152,14 +155,23 @@ function encodeJpeg(canvas: HTMLCanvasElement, quality = 0.95): Promise<string> 
           reject(new Error("Falha ao codificar a faixa."));
           return;
         }
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error("Falha ao ler a faixa."));
-        reader.readAsDataURL(blob);
+        blob.arrayBuffer()
+          .then((buffer) => resolve(new Uint8Array(buffer)))
+          .catch(() => reject(new Error("Falha ao ler a faixa.")));
       },
       "image/jpeg",
       quality,
     );
+  });
+}
+
+/** Converte o Blob final uma única vez, sem criar e dividir uma Data URI gigante. */
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Falha ao finalizar o PDF."));
+    reader.readAsDataURL(blob);
   });
 }
 
@@ -498,7 +510,7 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
         const imgData = await encodeJpeg(canvas, 0.95);
 
 
-        if (imgData.length < 1024) throw new Error("Falha ao rasterizar a página.");
+        if (imgData.byteLength < 1024) throw new Error("Falha ao rasterizar a página.");
         // +0.05pt evita fio branco entre faixas por arredondamento.
         const yPt = top * 0.75;
         const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
@@ -516,9 +528,10 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 
 
     if (!pdf) throw new Error("Documento vazio.");
-    const uri = pdf.output("datauristring");
-    const base64 = uri.split(",").pop() || "";
-    return `data:application/pdf;base64,${base64}`;
+    // `datauristring` + `split` mantinha duas cópias enormes do PDF na memória.
+    // Blob preserva o binário e só cria a Data URL única exigida pelo restante
+    // do app no último instante, reduzindo fortemente o pico em Android/iOS.
+    return await blobToDataUrl(pdf.output("blob"));
 
   } finally {
     releaseFonts();

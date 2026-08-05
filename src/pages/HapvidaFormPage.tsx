@@ -12,6 +12,7 @@ import templateHapvidaUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -250,9 +251,8 @@ export default function HapvidaFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/hapvida/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/hapvida/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar PDF HapVida:", err);

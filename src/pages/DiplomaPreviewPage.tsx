@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { readPreviewPayload } from "@/lib/preview-payload";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -30,13 +31,13 @@ export default function DiplomaPreviewPage() {
   const { addDocument } = useDocuments();
   const { toast } = useToast();
 
-  const { pdfBase64, formData, codigoValidacao, documentoId, validationUrl } = (location.state as {
+  const { pdfBase64, formData, codigoValidacao, documentoId, validationUrl } = readPreviewPayload<{
     pdfBase64: string;
     formData: Record<string, string>;
     codigoValidacao?: string;
     documentoId?: string;
     validationUrl?: string;
-  }) || {};
+  }>(location.state) || {};
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);

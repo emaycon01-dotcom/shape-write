@@ -12,6 +12,7 @@ import templateUnimedUrl from "@/assets/template-unimed-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -339,9 +340,8 @@ export default function UnimedFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/unimed/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/unimed/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar PDF Unimed:", err);

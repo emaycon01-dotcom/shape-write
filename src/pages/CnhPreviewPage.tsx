@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import { readPreviewPayload } from "@/lib/preview-payload";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -32,10 +33,7 @@ export default function CnhPreviewPage() {
   const { addDocument } = useDocuments();
   const { toast } = useToast();
 
-  const { pdfBase64: previewPdf, formData } = (location.state as {
-    pdfBase64: string;
-    formData: Record<string, string>;
-  }) || {};
+  const { pdfBase64: previewPdf, formData } = readPreviewPayload(location.state) || {};
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);

@@ -11,6 +11,7 @@ import templateCertidaoUrl from "@/assets/template-certidao-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskTime, maskCPF, maskPhone, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
 
 interface CertidaoFormData {
@@ -214,9 +215,8 @@ export default function CertidaoFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/certidao-nascimento/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/certidao-nascimento/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar Certidão de Nascimento:", err);

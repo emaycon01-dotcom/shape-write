@@ -14,6 +14,7 @@ import templateChaUrl from "@/assets/template-cha-bg-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 
 /** Categorias oficiais da CHA (Carteira de Habilitação de Amador) */
 export const CHA_CATEGORIAS: { pt: string; en: string }[] = [
@@ -210,9 +211,8 @@ export default function ChaFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/cha/preview", {
-          state: { pdfBase64: pdfResult, formData: bodyData },
-        });
+        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
+        navigate("/dashboard/documents/cha/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar PDF da CNH Marítima:", err);

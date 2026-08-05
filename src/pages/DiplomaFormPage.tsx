@@ -24,6 +24,7 @@ import templateP2Url from "@/assets/template-diploma-p2-hq.jpg";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { storePreviewPayload } from "@/lib/preview-payload";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -368,15 +369,14 @@ export default function DiplomaFormPage() {
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
       } else {
-        navigate("/dashboard/documents/diploma/preview", {
-          state: {
-            pdfBase64: pdfResult,
-            formData: bodyData,
-            codigoValidacao: data?.codigo_validacao,
-            documentoId: data?.documento_id,
-            validationUrl: data?.validation_url,
-          },
+        const previewId = storePreviewPayload({
+          pdfBase64: pdfResult,
+          formData: bodyData,
+          codigoValidacao: data?.codigo_validacao,
+          documentoId: data?.documento_id,
+          validationUrl: data?.validation_url,
         });
+        navigate("/dashboard/documents/diploma/preview", { state: { previewId } });
       }
     } catch (err) {
       console.error("Erro ao gerar PDF do Diploma:", err);
