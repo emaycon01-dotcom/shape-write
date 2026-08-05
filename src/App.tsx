@@ -1,4 +1,3 @@
-import MedTestPage from "@/pages/MedTestPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -115,7 +114,6 @@ const App = () => {
                   <Routes>
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/__medtest" element={<MedTestPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify/:id" element={<VerifyPage />} />
                     <Route path="/consulta-cnh" element={<ConsultaCnhPage />} />
