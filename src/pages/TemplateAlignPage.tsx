@@ -1138,6 +1138,16 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                           : "left") as "center" | "left",
                       }
                     : {}),
+                  ...(cfg.key === "receita" && f.w && !f.h
+                    ? {
+                        width: `${((f.w / PW) * 100).toFixed(4)}%`,
+                        whiteSpace: "pre-line" as const,
+                        lineHeight: f.id === "medicamentos" ? 1.5 : 1.2,
+                        textAlign: (["unidade_cidade", "medico", "endereco_clinica", "telefone", "farmaceutico"].includes(f.id)
+                          ? "center"
+                          : "left") as "center" | "left",
+                      }
+                    : {}),
                   ...(cfg.key === "diploma" ? diplomaStyle(f, PW, scale) : {}),
                   ...(isBox
                     ? {
