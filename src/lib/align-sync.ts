@@ -25,6 +25,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   historico: HISTORICO_ALIGN_STORAGE_KEY,
   certidao: CERTIDAO_ALIGN_STORAGE_KEY,
   declaracao: DECLARACAO_ALIGN_STORAGE_KEY,
+  receita: RECEITA_ALIGN_STORAGE_KEY,
 };
 
 /**
