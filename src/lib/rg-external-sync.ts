@@ -45,10 +45,12 @@ function base64ToBytes(dataUrl: string): Uint8Array {
 
 /** Renderiza TODAS as páginas do PDF, sem recorte e sem rotação, em alta resolução. */
 async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
-  const pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+  // Reaproveita a instância única do app (worker local, já aquecido) em vez de
+  // baixar um segundo pdf.js da CDN a cada envio.
+  const pdfjsLib = await getPdfJs();
 
   const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+
   const pages: string[] = [];
 
   for (let i = 1; i <= pdf.numPages; i++) {
