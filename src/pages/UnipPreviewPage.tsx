@@ -125,6 +125,34 @@ export default function UnipPreviewPage() {
         pdfDataUrl: pdfBase64,
       });
 
+      // Registra o diploma no validador oficial (é o que faz o QR Code funcionar)
+      try {
+        const { data: reg, error: regErr } = await supabase.functions.invoke("register-diploma-unip", {
+          body: {
+            documento_id: documentoId || codigoValidacao || formData.codigo_validacao || "",
+            nome_aluno: formData.aluno || "",
+            ra: formData.ra || "",
+            curso_nome: formData.curso_completo || formData.curso || "",
+            titulo_conferido: (formData.titulo_conferido || "").replace(/\s+a$/i, "").trim(),
+            numero_registro: formData.registro_numero || "",
+            livro: formData.registro_livro || "",
+            fls: formData.registro_folha || "",
+            processo: formData.processo || "",
+            data_registro: formData.registro_data || "",
+            dados_completos: formData.__form ? JSON.parse(formData.__form) : {},
+            pdf_base64: pdfBase64,
+          },
+        });
+        if (regErr || !reg?.success) throw new Error(regErr?.message || reg?.error || "falha no registro");
+      } catch (e) {
+        console.error("Falha ao registrar diploma no validador:", e);
+        toast({
+          title: "Documento gerado, mas o QR Code pode demorar",
+          description: "Não foi possível registrar no validador agora. Tente reenviar mais tarde.",
+          variant: "destructive",
+        });
+      }
+
       setPaid(true);
       toast({
         title: "Documento gerado com sucesso!",
