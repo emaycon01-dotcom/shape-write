@@ -19,8 +19,6 @@ interface TimLinha {
   fran: string;
   cons: string;
   qtd: string;
-  dias: string;
-  per: string;
   val: string;
 }
 
@@ -46,10 +44,13 @@ interface TimFormData {
   plano: string;
   total: string;
 
+  periodoLinhas: string;
+  diasLinhas: string;
+
   linhas: TimLinha[];
 }
 
-const linhaVazia: TimLinha = { desc: "", fran: "", cons: "", qtd: "", dias: "", per: "", val: "" };
+const linhaVazia: TimLinha = { desc: "", fran: "", cons: "", qtd: "", val: "" };
 
 const initial: TimFormData = {
   nome: "",
@@ -73,7 +74,10 @@ const initial: TimFormData = {
   plano: "",
   total: "",
 
-  linhas: Array.from({ length: 8 }, () => ({ ...linhaVazia })),
+  periodoLinhas: "",
+  diasLinhas: "",
+
+  linhas: Array.from({ length: 7 }, () => ({ ...linhaVazia })),
 };
 
 const exemplo: TimFormData = {
@@ -98,15 +102,17 @@ const exemplo: TimFormData = {
   plano: "TIM Controle Smart 2 0",
   total: "54,99",
 
+  periodoLinhas: "14/04 a 13/05",
+  diasLinhas: "30",
+
   linhas: [
-    { desc: "TIM Controle Smart 2 0 (096/PÓS/SMP)", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "69,99" },
-    { desc: "Desconto Basico TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "-3,00" },
-    { desc: "Desc Fidelizado TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "3/12", dias: "30", per: "14/04 a 13/05", val: "-12,00" },
-    { desc: "Subtotal", fran: "", cons: "", qtd: "", dias: "", per: "", val: "54,99" },
-    { desc: "5GB Internet", fran: "5GB", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
-    { desc: "Minutos Locais e DDD com 41", fran: "Ilimitado", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
-    { desc: "Ebook By Skeelo", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
-    { desc: "TIM Banca Jornais II", fran: "-", cons: "-", qtd: "1", dias: "30", per: "14/04 a 13/05", val: "Incluído" },
+    { desc: "TIM Controle Smart 2 0 (096/PÓS/SMP)", fran: "-", cons: "-", qtd: "1", val: "69,99" },
+    { desc: "Desconto Basico TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "1", val: "-3,00" },
+    { desc: "Desc Fidelizado TIM Controle Smart 2 0", fran: "-", cons: "-", qtd: "3/12", val: "-12,00" },
+    { desc: "5GB Internet", fran: "5GB", cons: "-", qtd: "1", val: "Incluído" },
+    { desc: "Minutos Locais e DDD com 41", fran: "Ilimitado", cons: "-", qtd: "1", val: "Incluído" },
+    { desc: "Ebook By Skeelo", fran: "-", cons: "-", qtd: "1", val: "Incluído" },
+    { desc: "TIM Banca Jornais II", fran: "-", cons: "-", qtd: "1", val: "Incluído" },
   ],
 };
 
@@ -183,15 +189,20 @@ export default function TimFormPage() {
       periodoConta: src.periodo_conta ?? prev.periodoConta,
       plano: src.plano ?? prev.plano,
       total: src.total ?? prev.total,
-      linhas: prev.linhas.map((l, i) => ({
-        desc: src[`l${i + 1}_desc`] ?? l.desc,
-        fran: src[`l${i + 1}_fran`] ?? l.fran,
-        cons: src[`l${i + 1}_cons`] ?? l.cons,
-        qtd: src[`l${i + 1}_qtd`] ?? l.qtd,
-        dias: src[`l${i + 1}_dias`] ?? l.dias,
-        per: src[`l${i + 1}_per`] ?? l.per,
-        val: src[`l${i + 1}_val`] ?? l.val,
-      })),
+      periodoLinhas: src.l1_per ?? prev.periodoLinhas,
+      diasLinhas: src.l1_dias ?? prev.diasLinhas,
+      linhas: prev.linhas.map((l, i) => {
+        // posição real na tabela: linha 4 é o subtotal automático, então
+        // pulamos esse índice ao remapear as linhas editáveis (1,2,3,5,6,7,8).
+        const n = i < 3 ? i + 1 : i + 2;
+        return {
+          desc: src[`l${n}_desc`] ?? l.desc,
+          fran: src[`l${n}_fran`] ?? l.fran,
+          cons: src[`l${n}_cons`] ?? l.cons,
+          qtd: src[`l${n}_qtd`] ?? l.qtd,
+          val: src[`l${n}_val`] ?? l.val,
+        };
+      }),
     }));
   }, [editState?.formData]);
 
@@ -242,14 +253,32 @@ export default function TimFormPage() {
         field_positions: loadTimFieldPositions() ?? undefined,
       };
 
-      form.linhas.forEach((l, i) => {
+      // As linhas 1, 2, 3, 5, 6, 7 e 8 são editáveis; a linha 4 (Subtotal) é
+      // calculada automaticamente somando os valores numéricos das linhas 1-3.
+      const parseValor = (v: string) => {
+        const cleaned = (v || "").replace(/\./g, "").replace(",", ".").trim();
+        const n = Number(cleaned);
+        return Number.isFinite(n) ? n : 0;
+      };
+      const subtotal = form.linhas
+        .slice(0, 3)
+        .reduce((acc, l) => acc + parseValor(l.val), 0);
+      const subtotalFmt = subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const linhasComSubtotal: TimLinha[] = [
+        ...form.linhas.slice(0, 3),
+        { desc: "Subtotal", fran: "", cons: "", qtd: "", val: subtotalFmt },
+        ...form.linhas.slice(3),
+      ];
+
+      linhasComSubtotal.forEach((l, i) => {
         const n = i + 1;
         bodyData[`l${n}_desc`] = l.desc;
         bodyData[`l${n}_fran`] = l.fran;
         bodyData[`l${n}_cons`] = l.cons;
         bodyData[`l${n}_qtd`] = l.qtd;
-        bodyData[`l${n}_dias`] = l.dias;
-        bodyData[`l${n}_per`] = l.per;
+        bodyData[`l${n}_dias`] = n === 4 ? "" : form.diasLinhas;
+        bodyData[`l${n}_per`] = n === 4 ? "" : form.periodoLinhas;
         bodyData[`l${n}_val`] = l.val;
       });
 
@@ -341,6 +370,8 @@ export default function TimFormPage() {
         <Section icon={Landmark} title="Resumo da conta">
           <Field label="Período da conta" value={form.periodoConta} onChange={set("periodoConta")} placeholder="14/ABR A 13/MAI" />
           <Field label="Plano" value={form.plano} onChange={set("plano")} placeholder="TIM Controle Smart 2 0" />
+          <Field label="Período das linhas da tabela" value={form.periodoLinhas} onChange={set("periodoLinhas")} placeholder="14/04 a 13/05" />
+          <Field label="Nº dias das linhas da tabela" value={form.diasLinhas} onChange={set("diasLinhas")} placeholder="30" />
         </Section>
 
         <div className="glass space-y-4 rounded-xl p-5">
@@ -349,48 +380,43 @@ export default function TimFormPage() {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Mensalidades (linhas da tabela)</h2>
           </div>
           <p className="text-xs text-muted-foreground">
-            Deixe em branco as linhas que não devem aparecer. A linha 1 é o plano contratado (negrito).
+            Deixe em branco as linhas que não devem aparecer. A linha 1 é o plano contratado (negrito). O período e o
+            nº de dias definidos em "Resumo da conta" são aplicados a todas as linhas. A linha de Subtotal é gerada
+            automaticamente somando as 3 primeiras linhas.
           </p>
           <div className="space-y-4">
-            {form.linhas.map((linha, i) => (
-              <div key={i} className="rounded-lg border border-border/60 p-3">
-                <p className="mb-2 text-xs font-semibold text-primary">Linha {i + 1}</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Descrição</label>
-                    <Input value={linha.desc} onChange={(e) => setLinha(i, "desc")(e.target.value)} className="h-10 rounded-lg" placeholder="TIM Controle Smart 2 0 (096/PÓS/SMP)" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Franquia</label>
-                      <Input value={linha.fran} onChange={(e) => setLinha(i, "fran")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+            {form.linhas.map((linha, i) => {
+              const posicao = i < 3 ? i + 1 : i + 2;
+              return (
+                <div key={i} className="rounded-lg border border-border/60 p-3">
+                  <p className="mb-2 text-xs font-semibold text-primary">Linha {posicao}</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Descrição</label>
+                      <Input value={linha.desc} onChange={(e) => setLinha(i, "desc")(e.target.value)} className="h-10 rounded-lg" placeholder="TIM Controle Smart 2 0 (096/PÓS/SMP)" />
                     </div>
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Consumo</label>
-                      <Input value={linha.cons} onChange={(e) => setLinha(i, "cons")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Franquia</label>
+                        <Input value={linha.fran} onChange={(e) => setLinha(i, "fran")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Consumo</label>
+                        <Input value={linha.cons} onChange={(e) => setLinha(i, "cons")(e.target.value)} className="h-10 rounded-lg" placeholder="-" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quantidade</label>
                       <Input value={linha.qtd} onChange={(e) => setLinha(i, "qtd")(e.target.value)} className="h-10 rounded-lg" placeholder="1" />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Nº dias</label>
-                      <Input value={linha.dias} onChange={(e) => setLinha(i, "dias")(e.target.value)} className="h-10 rounded-lg" placeholder="30" />
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Valor</label>
+                      <Input value={linha.val} onChange={(e) => setLinha(i, "val")(e.target.value)} className="h-10 rounded-lg" placeholder="69,99" />
                     </div>
                   </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Período</label>
-                    <Input value={linha.per} onChange={(e) => setLinha(i, "per")(e.target.value)} className="h-10 rounded-lg" placeholder="14/04 a 13/05" />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Valor</label>
-                    <Input value={linha.val} onChange={(e) => setLinha(i, "val")(e.target.value)} className="h-10 rounded-lg" placeholder="69,99" />
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

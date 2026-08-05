@@ -42,8 +42,8 @@ export const COMPROVANTE_DEFAULT_POSITIONS: Record<string, Pos> = {
   instalacao: { x: 266, y: 158.4, fontSize: 12.6, w: 96 },
   cliente_numero: { x: 266, y: 195.4, fontSize: 12.6, w: 96 },
 
-  chave_nf: { x: 374.3, y: 163.4, fontSize: 9.6, w: 224 },
-  nota_fiscal_serie: { x: 374.3, y: 174.4, fontSize: 9.6, w: 224 },
+  chave_nf: { x: 374.3, y: 162.0, fontSize: 9.2, w: 224 },
+  nota_fiscal_serie: { x: 374.3, y: 176.5, fontSize: 9.2, w: 224 },
 
   mes_ano: { x: 57, y: 229, fontSize: 9.6, w: 66 },
   vencimento: { x: 139, y: 229, fontSize: 9.6, w: 93 },
@@ -60,8 +60,8 @@ export const COMPROVANTE_DEFAULT_POSITIONS: Record<string, Pos> = {
   debito_codigo: { x: 624.2, y: 883.7, fontSize: 9.2, w: 90 },
 
   /* --- ficha de compensação (rodapé) --- */
-  linha_digitavel: { x: 65.9, y: 972.5, fontSize: 12.4, w: 300 },
-  pagador: { x: 125, y: 987, fontSize: 9.2, w: 350 },
+  linha_digitavel: { x: 65.9, y: 972.5, fontSize: 12.4, w: 450 },
+  pagador: { x: 125, y: 999, fontSize: 9.2, w: 350 },
   data_emissao: { x: 65.9, y: 1027.7, fontSize: 12.4, w: 120 },
   nota_fiscal_rodape: { x: 188.3, y: 1027.7, fontSize: 12.4, w: 120 },
   referencia: { x: 313.4, y: 1027.7, fontSize: 12.4, w: 120 },
@@ -186,6 +186,12 @@ export function buildComprovanteHtml(d: Record<string, string>, fieldPositions?:
     "valor_documento", "controle_rodape",
   ]);
   const WRAP = new Set(["mensagens", "cliente_endereco"]);
+  /** Campos que devem caber sempre em uma única linha (evita sobreposição). */
+  const NOWRAP = new Set([
+    "chave_nf", "nota_fiscal_serie", "linha_digitavel", "pagador",
+    "cliente_nome", "instalacao", "cliente_numero",
+    "mes_ano", "vencimento", "total_pagar",
+  ]);
 
   const field = (id: string, text: string, extra = "") => {
     const pos = p[id];
@@ -194,9 +200,10 @@ export function buildComprovanteHtml(d: Record<string, string>, fieldPositions?:
     const fit = WRAP.has(id) ? "" : fitTextStyle(text, pos.fontSize, width);
     const align = CENTER.has(id) ? "center" : RIGHT.has(id) ? "right" : "left";
     const weight = BOLD.has(id) ? 700 : 400;
+    const wrap = NOWRAP.has(id) ? "white-space:nowrap;" : "";
     const html = escapeHtml(text).replace(/\n/g, "<br/>");
     const top = pos.y >= PAGE_H ? pos.y - PAGE_H : pos.y;
-    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${extra}">${html}</div>`;
+    return `<div class="ov" style="top:${top}px;left:${pos.x}px;width:${width}px;font-size:${pos.fontSize}px;${fit}text-align:${align};font-weight:${weight};${wrap}${extra}">${html}</div>`;
   };
 
   /** Bloco livre (tabelas calculadas) ancorado numa posição do editor. */
