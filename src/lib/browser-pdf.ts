@@ -467,7 +467,7 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
  * casos em Android/iOS sem perder nitidez. A escala nunca cai: preview e PDF
  * final percorrem exatamente o mesmo pipeline em 576 DPI.
  */
-async function renderHtmlToDocument(html: string, preview = false): Promise<string> {
+async function renderHtmlToDocument(html: string, _preview = false): Promise<string> {
   // Preview e final usam a mesma escala máxima. Em aparelhos com menos memória
   // mudamos apenas o tamanho das faixas e o transporte dos assets; nenhuma
   // tentativa reduz DPI, resolução, fonte ou qualidade de compressão.
