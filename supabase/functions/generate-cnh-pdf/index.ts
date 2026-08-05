@@ -496,8 +496,8 @@ ${CNH_FONT_FACE}
   }
   .photo-overlay { overflow: hidden; }
   .photo-overlay img { width:100%; height:100%; object-fit:cover; image-rendering: high-quality; }
-  .qr-overlay { background:transparent; z-index: 12; overflow: visible; display:flex; align-items:center; justify-content:center; }
-  .qr-overlay svg { width:82%; height:82%; display:block; }
+  .qr-overlay { background:transparent; z-index:12; overflow:visible; display:flex; align-items:center; justify-content:center; }
+  .qr-overlay svg { display:block; flex:none; max-width:100%; max-height:100%; }
   .mrz-line { display:block; text-align:left; white-space:pre; }
   .sig-overlay { display:block; overflow:hidden !important; clip-path:inset(0); contain:strict; box-sizing:border-box; }
   .sig-overlay img { position:absolute; inset:0; display:block; width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:contain; object-position:center; image-rendering:high-quality; }
