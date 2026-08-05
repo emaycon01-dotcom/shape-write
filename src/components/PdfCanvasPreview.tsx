@@ -54,7 +54,7 @@ function pixelBudget(): number {
  */
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const resumeTimerRef = useRef<number>();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [generationActive, setGenerationActive] = useState(false);
@@ -84,8 +84,8 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     if (generationActive) {
       const canvas = canvasRef.current;
       if (canvas) {
-        canvas.width = 0;
-        canvas.height = 0;
+        canvas.remove();
+        canvasRef.current = null;
       }
       setStatus("loading");
       return;
@@ -104,9 +104,15 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         const page = await pdf.getPage(1);
         if (cancelled) return;
 
-        const canvas = canvasRef.current;
         const host = hostRef.current;
-        if (!canvas || !host) throw new Error("Canvas indisponível");
+        if (!host) throw new Error("Canvas indisponível");
+
+        // Um canvas NOVO a cada documento. Reaproveitar o mesmo elemento (que
+        // é zerado durante a geração) fazia o WebKit/iOS desenhar o PDF final
+        // com transform inválido — página invertida e deslocada.
+        const canvas = document.createElement("canvas");
+        canvas.setAttribute("aria-label", title);
+        canvas.className = "invisible";
 
         const base = page.getViewport({ scale: 1 });
         const availableWidth = Math.max(280, host.clientWidth);
@@ -129,6 +135,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
             canvas.width = Math.ceil(viewport.width);
             canvas.height = Math.ceil(viewport.height);
             canvas.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
+            context.setTransform(1, 0, 0, 1, 0, 0);
             context.fillStyle = "#ffffff";
             context.fillRect(0, 0, canvas.width, canvas.height);
             await page.render({ canvasContext: context, viewport }).promise;
@@ -140,7 +147,15 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           }
         }
 
-        if (!cancelled) setStatus("ready");
+        if (cancelled) return;
+
+        canvas.className = "block h-auto max-w-full bg-white";
+        const previous = canvasRef.current;
+        if (previous) previous.remove();
+        canvasRef.current = canvas;
+        host.appendChild(canvas);
+
+        setStatus("ready");
         page.cleanup();
         await pdf.destroy();
       } catch (error) {
@@ -157,9 +172,11 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       if (canvas) {
         canvas.width = 0;
         canvas.height = 0;
+        canvas.remove();
+        canvasRef.current = null;
       }
     };
-  }, [pdfDataUrl, generationActive]);
+  }, [pdfDataUrl, generationActive, title]);
 
   return (
     <div
@@ -180,11 +197,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           </p>
         </div>
       )}
-      <canvas
-        ref={canvasRef}
-        aria-label={title}
-        className={status === "ready" ? "block h-auto max-w-full bg-white" : "invisible"}
-      />
     </div>
   );
 }
+
