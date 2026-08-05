@@ -624,6 +624,55 @@ type InvokeResult = { data: any; error: Error | null };
 let generationInProgress = false;
 
 /**
+ * Transporte econômico dos assets pesados.
+ *
+ * Antes, cada geração SUBIA o template em base64 (~2–3 MB) para a Edge Function
+ * e BAIXAVA o mesmo base64 de volta dentro do HTML — ~6 MB de rede por preview
+ * e mais 6 MB no documento final. Em 4G isso era a maior parte do tempo de
+ * espera, sem relação nenhuma com a qualidade do render.
+ *
+ * Agora enviamos um marcador curto no lugar de cada data URI grande e
+ * recolocamos o valor original no HTML devolvido — byte a byte, então o
+ * documento renderizado é EXATAMENTE o mesmo. Se a função não devolver todos os
+ * marcadores, refazemos a chamada do jeito antigo (sem marcador), garantindo
+ * que nenhum módulo quebre.
+ */
+const ASSET_TOKEN_MIN_BYTES = 100_000;
+
+function tokenizeHeavyAssets(body: Record<string, unknown>) {
+  const map = new Map<string, string>();
+  let i = 0;
+  const walk = (value: unknown): unknown => {
+    if (typeof value === "string") {
+      if (value.length >= ASSET_TOKEN_MIN_BYTES && value.startsWith("data:image")) {
+        const token = `__LVASSET_${i++}__`;
+        map.set(token, value);
+        return token;
+      }
+      return value;
+    }
+    if (Array.isArray(value)) return value.map(walk);
+    if (value && typeof value === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = walk(v);
+      return out;
+    }
+    return value;
+  };
+  const light = walk(body) as Record<string, unknown>;
+  return { light, map };
+}
+
+function restoreHeavyAssets(html: string, map: Map<string, string>): string | null {
+  let out = html;
+  for (const [token, value] of map) {
+    if (!out.includes(token)) return null; // marcador perdido → usa o caminho antigo
+    out = out.split(token).join(value);
+  }
+  return out;
+}
+
+/**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
  * Pede o HTML à Edge Function e renderiza o PDF localmente.
  * Se a função devolver um PDF pronto (modos legados/ações), apenas repassa.
@@ -635,6 +684,7 @@ export async function invokeGeneratePdf(
   const body = options?.body ?? {};
   const isAction = typeof (body as { action?: unknown }).action === "string";
   const isPreview = body.preview === true;
+
 
   // Um toque duplo antes do React desabilitar o botão iniciava dois iframes,
   // dois conjuntos de canvases e duas cópias do template ao mesmo tempo. Em
