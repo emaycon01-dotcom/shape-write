@@ -62,11 +62,11 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
   val_proxima: { x: 722, y: 287.6, fontSize: 10.3, w: 80 },
 
   /* ---- linha do medidor ---- */
-  med_postos: { x: 169.5, y: 635.8, fontSize: 6.6, w: 45 },
-  med_leitura_anterior: { x: 224, y: 635.8, fontSize: 6.6, w: 52 },
-  med_leitura_atual: { x: 280, y: 635.8, fontSize: 6.6, w: 52 },
-  med_constante: { x: 347, y: 635.8, fontSize: 6.6, w: 52 },
-  med_consumo: { x: 392, y: 635.8, fontSize: 6.6, w: 52 },
+  med_postos: { x: 163.0, y: 638.5, fontSize: 6.6, w: 48 },
+  med_leitura_anterior: { x: 217.0, y: 638.5, fontSize: 6.6, w: 51 },
+  med_leitura_atual: { x: 274.0, y: 638.5, fontSize: 6.6, w: 50 },
+  med_constante: { x: 330.0, y: 638.5, fontSize: 6.6, w: 56 },
+  med_consumo: { x: 392.0, y: 638.5, fontSize: 6.6, w: 57 },
 
   /* ---- aviso e débitos anteriores ---- */
   aviso_suspensao: { x: 22.7, y: 689.0, fontSize: 9.6, w: 560 },
