@@ -455,7 +455,32 @@ export const defaultDeclaracaoFields: FieldDef[] = [
   { id: "data_local", label: "Data e local", sampleText: "04 de Dezembro de 2022, São Paulo - SP", x: 97, y: 623, fontSize: 16, w: 600 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao";
+// Defaults MUST match supabase/functions/generate-receita-pdf/index.ts RECEITA_DEFAULT_POSITIONS
+export const defaultReceitaFields: FieldDef[] = [
+  { id: "unidade_cidade", label: "Cidade da unidade", sampleText: "Vitória", x: 45, y: 76.5, fontSize: 9.5, w: 170, color: "#ffffff", bold: true },
+  { id: "lbl_paciente", label: "Rótulo: Paciente", sampleText: "Paciente:", x: 35.5, y: 112, fontSize: 9.5, bold: true },
+  { id: "paciente", label: "Nome do paciente", sampleText: "TACILA CERQUEIRA LOPES", x: 35.5, y: 126, fontSize: 15.3, w: 470, bold: true },
+  { id: "lbl_cpf", label: "Rótulo: CPF", sampleText: "CPF do Paciente:", x: 35.5, y: 158.5, fontSize: 9.5, bold: true },
+  { id: "cpf", label: "CPF", sampleText: "074.660.925-60", x: 35.5, y: 173, fontSize: 9.5 },
+  { id: "lbl_nascimento", label: "Rótulo: Nascimento", sampleText: "Nascimento:", x: 225, y: 158.5, fontSize: 9.5, bold: true },
+  { id: "nascimento", label: "Nascimento", sampleText: "05/08/1997", x: 225, y: 173, fontSize: 9.5 },
+  { id: "lbl_emissao", label: "Rótulo: Emissão", sampleText: "Emissão:", x: 386, y: 158.5, fontSize: 9.5, bold: true },
+  { id: "emissao", label: "Emissão", sampleText: "30/03/2024 - 17:19:37", x: 386, y: 173, fontSize: 9.5 },
+  { id: "lbl_endereco", label: "Rótulo: Endereço", sampleText: "Endereço:", x: 35.5, y: 198.5, fontSize: 9.5, bold: true },
+  { id: "endereco", label: "Endereço", sampleText: "- 99102312, -", x: 35.5, y: 213, fontSize: 9.5, w: 470 },
+  { id: "qr", label: "QR Code", sampleText: "", x: 530, y: 161, fontSize: 8, w: 88, h: 88 },
+  { id: "lbl_token", label: "Rótulo: Token", sampleText: "Token da receita:", x: 631, y: 174, fontSize: 8.3 },
+  { id: "token", label: "Token", sampleText: "MHYH4JC", x: 631, y: 188, fontSize: 8.8, bold: true },
+  { id: "lbl_codigo", label: "Rótulo: Código de acesso", sampleText: "Código de acesso:", x: 631, y: 211, fontSize: 8.3 },
+  { id: "codigo", label: "Código de acesso", sampleText: "9836", x: 631, y: 225, fontSize: 8.8, bold: true },
+  { id: "medicamentos", label: "Lista de medicamentos", sampleText: "Budesonida (Spray) 32 mcg/Dose, Suspensão nasal (1un)\nAplicar 1 jato nas narinas 3x ao dia\nHexomedine (Spray) 1 mg/mL + 0.5 mg/mL, Colutório (1un)\nbater em garganta 3x ao dia", x: 35.5, y: 305, fontSize: 11.5, w: 722 },
+  { id: "medico", label: "Médico(a) + CRM", sampleText: "Dr(a). Ana Flavia Resende Romanielo  |  CRM 31186 GO", x: 97, y: 1024, fontSize: 10.5, w: 600, bold: true },
+  { id: "endereco_clinica", label: "Endereço da clínica", sampleText: "SCS Quadra 03 Bloco A, Numero 107, Sala 103 - Brasília DF - CEP 70303907", x: 47, y: 1049, fontSize: 9.6, w: 700 },
+  { id: "telefone", label: "Telefone", sampleText: "Telefone: (61) 3221-5350", x: 47, y: 1061, fontSize: 9.6, w: 700 },
+  { id: "farmaceutico", label: "Linha do farmacêutico", sampleText: "Farmacêutico, valide a receita digital em https://farmacias.mevosaude.com.br", x: 47, y: 1075, fontSize: 9, w: 700 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "declaracao" | "receita";
 
 
 interface EditorConfig {
