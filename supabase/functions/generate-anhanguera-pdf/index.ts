@@ -192,7 +192,7 @@ export function buildAnhangueraHtml(
     text("cidade_data", d.cidade_data),
     text("assinante_nome", d.assinante_nome),
     text("assinante_cargo", d.assinante_cargo),
-    text("val_bloco", `${ANHANGUERA_VALIDACAO_URL}\nCódigo de validação: ${d.codigo_validacao}`),
+    text("val_bloco", `${B4_BASE_URL}\nCódigo de validação: ${d.codigo_validacao}`),
   ].join("\n");
 
   const page2 = [
