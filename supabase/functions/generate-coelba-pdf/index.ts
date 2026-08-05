@@ -47,7 +47,7 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
 
   /* ---- faixa referência / total / vencimento ---- */
   referencia_topo: { x: 30.0, y: 181.6, fontSize: 19.5, w: 100 },
-  total_topo: { x: 195, y: 184.0, fontSize: 19.5, w: 85 },
+  total_topo: { x: 205, y: 184.0, fontSize: 16.0, w: 75 },
   vencimento_topo: { x: 286.0, y: 181.6, fontSize: 19.5, w: 140 },
 
   /* ---- faixa "DATAS DE LEITURAS" ---- */
@@ -85,7 +85,7 @@ export const COELBA_DEFAULT_POSITIONS: Record<string, Pos> = {
 
   /* ---- rodapé (ficha do boleto) ---- */
   rodape_referencia: { x: 47.0, y: 905.0, fontSize: 19.5, w: 100 },
-  rodape_vencimento: { x: 470, y: 901.4, fontSize: 17.0, w: 120 },
+  rodape_vencimento: { x: 440, y: 901.4, fontSize: 17.0, w: 95 },
   rodape_total: { x: 640.0, y: 903.6, fontSize: 17.0, w: 110 },
 
   /* ---- página 2 ---- */
