@@ -128,12 +128,13 @@ export async function registerValidationDocument(
 
 /** QR Code vetorial (SVG) — nítido em qualquer resolução do PDF. */
 export function qrSvg(value: string, sizePx: number): string {
-  // Força uma versão alta (módulos menores/mais densos, como no documento oficial)
-  const MIN_TYPE = 12; // 65x65 módulos
+  // Documento oficial: QR bem denso (módulos pequenos) e com aspecto mais claro,
+  // porque a correção de erro é média e há zona de silêncio branca ao redor.
+  const MIN_TYPE = 14; // 73x73 módulos
   let qr: ReturnType<typeof qrcode> | null = null;
   for (let type = MIN_TYPE; type <= 40; type++) {
     try {
-      const candidate = qrcode(type, "H");
+      const candidate = qrcode(type, "M");
       candidate.addData(value);
       candidate.make();
       qr = candidate;
@@ -143,13 +144,14 @@ export function qrSvg(value: string, sizePx: number): string {
     }
   }
   if (!qr) {
-    qr = qrcode(0, "H");
+    qr = qrcode(0, "M");
     qr.addData(value);
     qr.make();
   }
   const count = qr.getModuleCount();
-  const quiet = 0; // zona de silêncio (mesma moldura branca da referência)
+  const quiet = 3; // zona de silêncio branca (deixa o conjunto mais claro)
   const total = count + quiet * 2;
+
   let rects = "";
   for (let r = 0; r < count; r++) {
     for (let c = 0; c < count; c++) {
