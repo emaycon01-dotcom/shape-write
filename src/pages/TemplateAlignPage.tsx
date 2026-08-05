@@ -1665,7 +1665,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf", "comprovante", "coelba"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf", "comprovante", "coelba", "equatorial"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
