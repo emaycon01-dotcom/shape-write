@@ -417,10 +417,86 @@ async function rasterizeSvg(ctx: Ctx, svg: SVGSVGElement, opacity: number) {
   });
 }
 
+/** Escala real aplicada pelos transforms dos ancestrais (ex.: scale(0.87)). */
+function ancestorScale(el: Element): number {
+  let node: Element | null = el;
+  while (node) {
+    const h = (node as HTMLElement).offsetWidth;
+    if (h > 0) {
+      const w = node.getBoundingClientRect().width;
+      if (w > 0) {
+        const s = w / h;
+        return Number.isFinite(s) && s > 0.05 && s < 20 ? s : 1;
+      }
+    }
+    node = node.parentElement;
+  }
+  return 1;
+}
+
+type LineRun = { text: string; rect: DOMRect };
+
+/** Agrupa os caracteres do nó em linhas visuais, usando os rects do navegador. */
+function collectLines(node: Text): LineRun[] {
+  const text = node.nodeValue || "";
+  const range = node.ownerDocument!.createRange();
+  const runs: LineRun[] = [];
+  let current: { chars: string[]; rects: DOMRect[] } | null = null;
+
+  for (let i = 0; i < text.length; i += 1) {
+    range.setStart(node, i);
+    range.setEnd(node, i + 1);
+    const rects = range.getClientRects();
+    const r = rects.length ? (rects[0] as DOMRect) : null;
+    if (!r || r.height <= 0) {
+      if (current && !text[i].trim()) current.chars.push(text[i]);
+      continue;
+    }
+    const sameLine = current && Math.abs(current.rects[0].top - r.top) < r.height * 0.5;
+    if (!sameLine) {
+      if (current) runs.push(finishRun(current));
+      current = { chars: [], rects: [] };
+    }
+    current!.chars.push(text[i]);
+    current!.rects.push(r);
+  }
+  if (current) runs.push(finishRun(current));
+  range.detach?.();
+  return runs.filter((run) => run.text.length > 0 && run.rect.width > 0);
+}
+
+function finishRun(acc: { chars: string[]; rects: DOMRect[] }): LineRun {
+  // remove espaços das pontas sem perder o alinhamento medido
+  let start = 0;
+  let end = acc.chars.length - 1;
+  while (start <= end && !acc.chars[start].trim()) start += 1;
+  while (end >= start && !acc.chars[end].trim()) end -= 1;
+  const visible = acc.rects.filter((_, i) => i >= start - (acc.chars.length - acc.rects.length) && true);
+  const rects = acc.rects;
+  const left = Math.min(...rects.map((r) => r.left));
+  const right = Math.max(...rects.map((r) => r.right));
+  const top = Math.min(...rects.map((r) => r.top));
+  const bottom = Math.max(...rects.map((r) => r.bottom));
+  void visible;
+  const text = acc.chars.slice(start, end + 1).join("");
+  // recalcula extremos apenas com os caracteres visíveis quando possível
+  const visRects = rects.slice(
+    Math.max(0, start - Math.max(0, acc.chars.length - rects.length)),
+    rects.length,
+  );
+  const l = visRects.length ? Math.min(...visRects.map((r) => r.left)) : left;
+  return {
+    text,
+    rect: new DOMRect(l, top, right - l, bottom - top),
+  };
+}
+
 /**
- * Texto: cada caractere é posicionado onde o NAVEGADOR o colocou.
- * Isso preserva centralização, quebra de linha, letter-spacing, escalas de
- * transform e o ajuste dinâmico de fonte (nomes longos) sem recalcular nada.
+ * Texto: cada LINHA é desenhada como texto real, na posição exata em que o
+ * navegador a colocou. O tamanho vem da fonte CSS multiplicada pela escala dos
+ * transforms; qualquer diferença residual de largura é corrigida com Tz, o que
+ * mantém o texto compacto (sem os "buracos" do desenho caractere a caractere)
+ * e com a mesma extensão do preview.
  */
 async function drawTextNode(ctx: Ctx, node: Text, opacity: number) {
   const text = node.nodeValue || "";
@@ -443,39 +519,41 @@ async function drawTextNode(ctx: Ctx, node: Text, opacity: number) {
     cssFontSize,
   );
 
-  const range = ctx.win.document.createRange();
-  for (let i = 0; i < text.length; i += 1) {
-    const ch = text[i];
-    if (!ch.trim()) continue;
-    range.setStart(node, i);
-    range.setEnd(node, i + 1);
-    const rects = range.getClientRects();
-    if (rects.length === 0) continue;
-    const r = rects[0];
-    if (r.width <= 0 || r.height <= 0) continue;
+  const scale = ancestorScale(parent);
+  const sizeCss = cssFontSize * scale;
+  const sizePt = toPt(sizeCss);
+  const lineBox = (ascent + descent) * scale;
 
-    // Escala efetiva (transform dos ancestrais) deduzida da própria altura
-    // da caixa de linha medida pelo navegador.
-    const lineBox = ascent + descent;
-    const scale = lineBox > 0 ? r.height / Math.max(lineBox, parseFloat(cs.lineHeight) || lineBox) : 1;
-    const effScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
-    const baseline = r.top + (r.height - lineBox * effScale) / 2 + ascent * effScale;
+  for (const run of collectLines(node)) {
+    const r = run.rect;
+    const baseline = r.top + (r.height - lineBox) / 2 + ascent * scale;
+    let natural = 0;
+    try {
+      natural = font.widthOfTextAtSize(run.text, sizePt);
+    } catch {
+      natural = 0;
+    }
+    const target = toPt(r.width);
+    const squeeze =
+      natural > 0 && target > 0 ? Math.min(115, Math.max(85, (target / natural) * 100)) : 100;
 
     try {
-      ctx.page.drawText(ch, {
+      if (Math.abs(squeeze - 100) > 0.3) ctx.page.pushOperators(setCharacterSqueeze(squeeze));
+      ctx.page.drawText(run.text, {
         x: xPt(ctx, r.left),
         y: yPt(ctx, baseline),
-        size: toPt(cssFontSize * effScale),
+        size: sizePt,
         font,
         color: rgb(color.r, color.g, color.b),
         opacity: color.a * opacity,
       });
+      if (Math.abs(squeeze - 100) > 0.3) ctx.page.pushOperators(setCharacterSqueeze(100));
     } catch {
-      /* caractere fora da fonte padrão — ignora em vez de quebrar o PDF */
+      /* caractere fora da fonte — ignora em vez de quebrar o PDF */
     }
   }
-  range.detach?.();
 }
+
 
 /** Percorre a página na ordem do DOM (respeita o empilhamento natural). */
 async function walk(ctx: Ctx, node: Node, opacity: number) {
