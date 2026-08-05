@@ -5,7 +5,7 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, FlaskConical, Trash2, User, Home, Zap, Receipt, Barcode } from "lucide-react";
+import { Loader2, FlaskConical, Trash2, User, Home, Receipt } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadComprovanteFieldPositions } from "@/lib/comprovante-align";
 import templateEnelP1Url from "@/assets/template-enel-p1-hq.webp";
@@ -15,6 +15,9 @@ import { maskDate, maskCPF, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
+import { AutoSection } from "@/components/AutoSection";
+import { autoEnel, baseDatas, fmtDate, refMesAno } from "@/lib/fatura-auto";
+
 
 interface ComprovanteFormData {
   nome: string;
