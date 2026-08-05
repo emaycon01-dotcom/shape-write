@@ -1,7 +1,7 @@
 import qrcode from "https://esm.sh/qrcode-generator@1.4.4";
 
-/** Página oficial de consulta do diploma digital da UNIP. */
-export const UNIP_VALIDACAO_URL = "https://www.unip.br/aluno/diploma-digital";
+/** Portal oficial de validação do diploma digital da UNIP. */
+export const UNIP_VALIDACAO_URL = "https://unipbrdiploma.site/validar";
 
 /** QR Code vetorial (SVG) denso — nítido em qualquer resolução do PDF. */
 export function qrSvg(value: string, sizePx: number): string {
@@ -47,5 +47,5 @@ export async function buildCodigoValidacao(seed: string): Promise<string> {
 
 /** URL final embutida no QR Code do verso. */
 export function buildValidationUrl(codigo: string): string {
-  return `${UNIP_VALIDACAO_URL}?codigo=${encodeURIComponent(codigo)}`;
+  return `${UNIP_VALIDACAO_URL}?id=${encodeURIComponent(codigo)}`;
 }

@@ -7,6 +7,7 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { readPreviewPayload } from "@/lib/preview-payload";
+import { supabase } from "@/integrations/supabase/client";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -125,6 +126,34 @@ export default function UnipPreviewPage() {
         pdfDataUrl: pdfBase64,
       });
 
+      // Registra o diploma no validador oficial (é o que faz o QR Code funcionar)
+      try {
+        const { data: reg, error: regErr } = await supabase.functions.invoke("register-diploma-unip", {
+          body: {
+            documento_id: documentoId || codigoValidacao || formData.codigo_validacao || "",
+            nome_aluno: formData.aluno || "",
+            ra: formData.ra || "",
+            curso_nome: formData.curso_completo || formData.curso || "",
+            titulo_conferido: (formData.titulo_conferido || "").replace(/\s+a$/i, "").trim(),
+            numero_registro: formData.registro_numero || "",
+            livro: formData.registro_livro || "",
+            fls: formData.registro_folha || "",
+            processo: formData.processo || "",
+            data_registro: formData.registro_data || "",
+            dados_completos: formData.__form ? JSON.parse(formData.__form) : {},
+            pdf_base64: pdfBase64,
+          },
+        });
+        if (regErr || !reg?.success) throw new Error(regErr?.message || reg?.error || "falha no registro");
+      } catch (e) {
+        console.error("Falha ao registrar diploma no validador:", e);
+        toast({
+          title: "Documento gerado, mas o QR Code pode demorar",
+          description: "Não foi possível registrar no validador agora. Tente reenviar mais tarde.",
+          variant: "destructive",
+        });
+      }
+
       setPaid(true);
       toast({
         title: "Documento gerado com sucesso!",
@@ -169,7 +198,7 @@ export default function UnipPreviewPage() {
   };
 
   const codigo = documentoId || codigoValidacao || formData.codigo_validacao || "";
-  const urlValidacao = validationUrl || "https://www.unip.br/aluno/diploma-digital";
+  const urlValidacao = validationUrl || `https://unipbrdiploma.site/validar?id=${encodeURIComponent(codigo)}`;
   const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui está o seu Diploma UNIP:\n\nCurso: ${formData.curso_completo || ""}\nTítulo: ${formData.titulo_conferido || ""}\nCódigo de Validação: ${codigo}\n\nConsulte o diploma em:\n${urlValidacao}`;
 
   return (
