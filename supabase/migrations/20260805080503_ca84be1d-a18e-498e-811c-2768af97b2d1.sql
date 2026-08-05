@@ -1,0 +1,1 @@
+DELETE FROM public.receitas WHERE token = 'T8AFM34';
