@@ -299,9 +299,9 @@ export function buildComprovanteHtml(d: Record<string, string>, fieldPositions?:
   let tributos = "";
   trib.forEach((t, i) => {
     const dy = 1.2 + i * 9.45;
-    tributos += cell(47, dy, 45, t.base, "right");
-    tributos += cell(79.2, dy, 45, t.aliq, "right");
-    tributos += cell(109.4, dy, 45, t.valor, "right");
+    tributos += cell(16.1, dy, 45, t.base, "right");
+    tributos += cell(48.6, dy, 45, t.aliq, "right");
+    tributos += cell(79.6, dy, 45, t.valor, "right");
   });
 
   /* -------------------------------------------------- consumo histórico */
