@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getPdfJs } from "@/lib/pdfjs-loader";
+
 
 /**
  * Integração do RG Digital com o app externo de consulta (Site 2).
