@@ -175,14 +175,35 @@ function buildMrz(d: Record<string, string>) {
   const first = parts.shift() || "NOME";
   const rest = parts.join("<");
   // Todas as linhas com exatamente 30 caracteres para ficarem perfeitamente alinhadas
-  const line3 = `${first}<<${rest}`.padEnd(31, "<").slice(0, 31);
+  const line3 = `${first}<<${rest}`.padEnd(30, "<").slice(0, 30);
+
 
   return {
+    // brutos (para montagem em grade) e escapados (uso direto em HTML)
+    raw1: line1,
+    raw2: line2,
+    raw3: line3,
     line1: escapeHtml(line1),
     line2: escapeHtml(line2),
     line3: escapeHtml(line3),
   };
 }
+
+/**
+ * Renderiza a linha do MRZ como uma grade de células de largura fixa: assim as
+ * três linhas terminam exatamente na mesma coluna, como no documento oficial.
+ */
+function mrzGridLine(line: string, cell: number) {
+  const cells = line
+    .split("")
+    .map(
+      (ch) =>
+        `<span style="display:inline-block;width:${cell}px;text-align:center;letter-spacing:0;">${escapeHtml(ch)}</span>`
+    )
+    .join("");
+  return `<div class="mrz-line">${cells}</div>`;
+}
+
 
 function cleanCode(value: string) {
   return value.replace(/\s+/g, "").toUpperCase();
@@ -532,11 +553,12 @@ ${CNH_FONT_FACE}
   ${text("local", d.cidade_estado || "")}
   <div class="overlay" style="${base("estado", `width:${ESTADO_BOX_W}px;transform:translateX(-50%);text-align:center;white-space:nowrap;font-weight:normal;font-family:'CNHDigital',Arial,Helvetica,sans-serif;`)}${estadoFitStyle(estadoAcentuado(d.estado_extenso || ""), p.estado.fontSize)}">${escapeHtml(estadoAcentuado(d.estado_extenso || ""))}</div>
   <div class="overlay" style="${rotStyle("reg_vert_bot")}">${escapeHtml(d.registro || "")}</div>
-  <div class="overlay" style="${base("mrz", "width:378px;line-height:1.6;font-family:\'CNHDigital\',monospace;")}">
-    <div class="mrz-line">${mrz.line1}</div>
-    <div class="mrz-line">${mrz.line2}</div>
-    <div class="mrz-line">${mrz.line3}</div>
+  <div class="overlay" style="${base("mrz", "width:378px;line-height:1.6;letter-spacing:0;font-family:\'CNHDigital\',monospace;")}">
+    ${mrzGridLine(mrz.raw1, 378 / 30)}
+    ${mrzGridLine(mrz.raw2, 378 / 30)}
+    ${mrzGridLine(mrz.raw3, 378 / 30)}
   </div>
+
 </div>
 </body>
 </html>`;
@@ -717,7 +739,7 @@ function buildCnhFisicaHtml(d: Record<string, string>) {
   <div class="bg-template">
     ${templateVersoBg ? `<img src="${escapeHtml(templateVersoBg)}" />` : ""}
   </div>
-  <div class="overlay" style="top:422px;left:447px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:1.6px;line-height:1.6;white-space:pre-line;">${mrz.line1}<br>${mrz.line2}<br>${mrz.line3}</div>
+  <div class="overlay" style="top:422px;left:447px;width:460px;font-family:'Courier New',Courier,monospace;font-size:15px;color:#111;letter-spacing:0;line-height:1.6;">${mrzGridLine(mrz.raw1, 460 / 30)}${mrzGridLine(mrz.raw2, 460 / 30)}${mrzGridLine(mrz.raw3, 460 / 30)}</div>
 </div>
 </body>
 </html>`;
