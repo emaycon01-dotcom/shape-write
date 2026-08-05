@@ -75,6 +75,8 @@ const CoelbaFormPage = lazy(() => import("./pages/CoelbaFormPage"));
 const CoelbaPreviewPage = lazy(() => import("./pages/CoelbaPreviewPage"));
 const EquatorialFormPage = lazy(() => import("./pages/EquatorialFormPage"));
 const EquatorialPreviewPage = lazy(() => import("./pages/EquatorialPreviewPage"));
+const TimFormPage = lazy(() => import("./pages/TimFormPage"));
+const TimPreviewPage = lazy(() => import("./pages/TimPreviewPage"));
 const DeclaracaoFormPage = lazy(() => import("./pages/DeclaracaoFormPage"));
 const DeclaracaoPreviewPage = lazy(() => import("./pages/DeclaracaoPreviewPage"));
 const ReceitaFormPage = lazy(() => import("./pages/ReceitaFormPage"));
@@ -169,6 +171,8 @@ const App = () => {
                         <Route path="documents/comprovante-coelba/preview" element={<CoelbaPreviewPage />} />
                         <Route path="documents/comprovante-equatorial" element={<EquatorialFormPage />} />
                         <Route path="documents/comprovante-equatorial/preview" element={<EquatorialPreviewPage />} />
+                        <Route path="documents/comprovante-tim" element={<TimFormPage />} />
+                        <Route path="documents/comprovante-tim/preview" element={<TimPreviewPage />} />
                         <Route path="documents/declaracao-escolar" element={<DeclaracaoFormPage />} />
                         <Route path="documents/declaracao-escolar/preview" element={<DeclaracaoPreviewPage />} />
                         <Route path="documents/receita-medica" element={<ReceitaFormPage />} />

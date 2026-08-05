@@ -30,8 +30,10 @@ import { COELBA_ALIGN_STORAGE_KEY, loadCoelbaFieldPositions } from "@/lib/coelba
 import templateCoelbaP1Url from "@/assets/template-coelba-p1-hq.webp";
 import templateCoelbaP2Url from "@/assets/template-coelba-p2-hq.webp";
 import { EQUATORIAL_ALIGN_STORAGE_KEY, loadEquatorialFieldPositions } from "@/lib/equatorial-align";
+import { TIM_ALIGN_STORAGE_KEY, loadTimFieldPositions } from "@/lib/tim-align";
 import templateEquatorialP1Url from "@/assets/template-equatorial-p1-hq.webp";
 import templateEquatorialP2Url from "@/assets/template-equatorial-p2-hq.webp";
+import templateTimP1Url from "@/assets/template-tim-p1-hq.webp";
 import templateObitoBgUrl from "@/assets/template-obito-bg-hq.webp";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
@@ -780,7 +782,74 @@ export const defaultEquatorialFields: FieldDef[] = [
   { id: "p2_vencimento", label: "P2: Vencimento", sampleText: "07/08/2023", x: 348.1, y: 1963.0, fontSize: 10.0, w: 80 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial";
+// Defaults MUST match supabase/functions/generate-tim-pdf/index.ts TIM_DEFAULT_POSITIONS
+const TIM_ROW_YS = [353.85, 363.6, 373.5, 383.3, 393.2, 403.0, 412.8, 422.7];
+const TIM_COLS: Array<{ key: string; label: string; x: number; w: number; sample: string }> = [
+  { key: "desc", label: "descrição", x: 52.2, w: 180, sample: "Desconto Basico TIM Controle" },
+  { key: "fran", label: "franquia", x: 214.0, w: 80, sample: "-" },
+  { key: "cons", label: "consumo", x: 264.0, w: 80, sample: "-" },
+  { key: "qtd", label: "quantidade", x: 316.0, w: 80, sample: "1" },
+  { key: "dias", label: "nº dias", x: 369.0, w: 80, sample: "30" },
+  { key: "per", label: "período", x: 419.0, w: 100, sample: "14/04 a 13/05" },
+  { key: "val", label: "valor", x: 460.0, w: 90, sample: "69,99" },
+];
+
+export const defaultTimFields: FieldDef[] = [
+  { id: "pagina", label: "Página", sampleText: "Página 1 de 2", x: 500.9, y: 20.1, fontSize: 8.0, w: 60 },
+  { id: "emp_l1", label: "Empresa: razão social", sampleText: "TIM S.A.", x: 45.1, y: 28.6, fontSize: 6.0, w: 200 },
+  { id: "emp_l2", label: "Empresa: endereço", sampleText: "Av.Mato Grosso,4808", x: 45.1, y: 35.9, fontSize: 6.0, w: 200 },
+  { id: "emp_l3", label: "Empresa: cidade", sampleText: "Caranda Bosque-Campo Grande - MS", x: 45.1, y: 43.3, fontSize: 6.0, w: 200 },
+  { id: "emp_l4", label: "Empresa: CNPJ / IE", sampleText: "CNPJ: 02.421.421/0018-60 - I.E.: 28.311.690-0", x: 45.1, y: 50.7, fontSize: 6.0, w: 220 },
+  { id: "emp_l5", label: "Empresa: CNPJ matriz", sampleText: "CNPJ da Matriz: 02.421.421/0001-11", x: 45.1, y: 58.1, fontSize: 6.0, w: 220 },
+  { id: "valor_topo", label: "Valor (topo)", sampleText: "R$ 54,99", x: 459.1, y: 37.1, fontSize: 20.0, w: 90, bold: true },
+  { id: "venc_titulo", label: "Título VENCIMENTO", sampleText: "VENCIMENTO", x: 449.0, y: 62.4, fontSize: 14.0, w: 100, bold: true },
+  { id: "venc_data", label: "Vencimento", sampleText: "07/06/2021", x: 449.0, y: 78.3, fontSize: 14.0, w: 100 },
+  { id: "emissao", label: "Emissão", sampleText: "EMISSÃO: 14/05/2021", x: 399.0, y: 97.1, fontSize: 10.0, w: 150 },
+  { id: "postagem", label: "Postagem", sampleText: "POSTAGEM: 24/05/2021", x: 399.0, y: 110.6, fontSize: 10.0, w: 150 },
+  { id: "fatura", label: "Fatura nº", sampleText: "FATURA: 4483364151", x: 399.0, y: 124.1, fontSize: 10.0, w: 150 },
+  { id: "cliente_num", label: "Cliente nº", sampleText: "CLIENTE: 1.263437159", x: 393.0, y: 143.8, fontSize: 8.0, w: 150 },
+  { id: "cpf_topo", label: "CPF/CNPJ", sampleText: "CPF/CNPJ: 05425098146", x: 393.0, y: 164.8, fontSize: 8.0, w: 150 },
+  { id: "acesso_topo", label: "Acesso", sampleText: "ACESSO: 67-98119-5324", x: 393.0, y: 185.5, fontSize: 8.0, w: 150 },
+  { id: "dest_nome", label: "Destinatário: nome", sampleText: "EVANDRO DA SILVA COUTO", x: 99.8, y: 145.4, fontSize: 8.0, w: 250, bold: true },
+  { id: "dest_endereco", label: "Destinatário: endereço", sampleText: "RUA RENARIO, 54, ESQUINA", x: 99.8, y: 155.1, fontSize: 8.0, w: 250 },
+  { id: "dest_bairro", label: "Destinatário: bairro", sampleText: "JARDIM COLIBRI", x: 99.8, y: 164.9, fontSize: 8.0, w: 250 },
+  { id: "dest_cep", label: "Destinatário: CEP / cidade", sampleText: "79071-590 - CAMPO GRANDE - MS", x: 99.8, y: 174.8, fontSize: 8.0, w: 250 },
+  { id: "importante", label: "IMPORTANTE PARA", sampleText: "IMPORTANTE PARA EVANDRO", x: 91.4, y: 253.1, fontSize: 10.0, w: 240, bold: true },
+  { id: "resumo_periodo", label: "Resumo: período", sampleText: "RESUMO DA SUA CONTA DE 14/ABR A 13/MAI", x: 335.7, y: 253.3, fontSize: 9.0, w: 214 },
+  { id: "res_h_serv", label: "Resumo: cabeçalho", sampleText: "Serviços TIM S.A.", x: 333.7, y: 275.7, fontSize: 8.0, w: 150 },
+  { id: "res_h_valor", label: "Resumo: cabeçalho valor", sampleText: "VALOR", x: 498.0, y: 275.7, fontSize: 8.0, w: 51 },
+  { id: "res_plano", label: "Resumo: plano", sampleText: "TIM Controle Smart 2 0", x: 333.7, y: 295.5, fontSize: 8.0, w: 180, bold: true },
+  { id: "res_valor", label: "Resumo: valor", sampleText: "R$ 54,99", x: 468.0, y: 295.5, fontSize: 8.0, w: 81, bold: true },
+  { id: "veja_abaixo", label: "Veja abaixo o resumo", sampleText: "VEJA ABAIXO O RESUMO DA SUA CONTA PARA O NÚMERO: 67-98119-5324", x: 45.1, y: 321.0, fontSize: 9.0, w: 400, bold: true },
+  { id: "mensalidades", label: "Título MENSALIDADES", sampleText: "MENSALIDADES", x: 45.1, y: 331.9, fontSize: 9.0, w: 200 },
+  { id: "vantagens", label: "Vantagens do plano", sampleText: "Vantagens que seu plano oferece", x: 45.1, y: 343.7, fontSize: 7.0, w: 190 },
+  { id: "h_franquia", label: "Cabeçalho: FRANQUIA", sampleText: "FRANQUIA", x: 214.0, y: 344.0, fontSize: 8.0, w: 80 },
+  { id: "h_consumo", label: "Cabeçalho: CONSUMO", sampleText: "CONSUMO", x: 264.0, y: 344.0, fontSize: 8.0, w: 80 },
+  { id: "h_qtd", label: "Cabeçalho: QUANTIDADE", sampleText: "QUANTIDADE", x: 316.0, y: 344.0, fontSize: 8.0, w: 80 },
+  { id: "h_dias", label: "Cabeçalho: N° DIAS", sampleText: "N° DIAS", x: 369.0, y: 344.0, fontSize: 8.0, w: 80 },
+  { id: "h_periodo", label: "Cabeçalho: PERIODO", sampleText: "PERIODO", x: 419.0, y: 344.0, fontSize: 8.0, w: 100 },
+  { id: "h_valor", label: "Cabeçalho: VALOR", sampleText: "VALOR", x: 460.0, y: 344.0, fontSize: 8.0, w: 90 },
+  ...TIM_ROW_YS.flatMap((y, i) =>
+    TIM_COLS.map((c) => ({
+      id: `l${i + 1}_${c.key}`,
+      label: `Linha ${i + 1}: ${c.label}`,
+      sampleText: c.sample,
+      x: i === 0 && c.key === "desc" ? 45.1 : c.x,
+      y,
+      fontSize: 8.0,
+      w: i === 0 && c.key === "desc" ? 190 : c.w,
+      ...(i === 0 && (c.key === "desc" || c.key === "val") ? { bold: true } : {}),
+    })),
+  ),
+  { id: "total_label", label: "Total de Mensalidades", sampleText: "Total de Mensalidades", x: 380.0, y: 432.7, fontSize: 8.0, w: 125, bold: true },
+  { id: "total_valor", label: "Total: valor", sampleText: "54,99", x: 460.0, y: 432.7, fontSize: 8.0, w: 90, bold: true },
+  { id: "stub_referencia", label: "Ficha: mês de referência", sampleText: "MAI/2021", x: 250.9, y: 734.5, fontSize: 8.0, w: 80 },
+  { id: "stub_emissao", label: "Ficha: data de emissão", sampleText: "14/05/2021", x: 330.6, y: 734.5, fontSize: 8.0, w: 80 },
+  { id: "stub_vencimento", label: "Ficha: vencimento", sampleText: "07/06/2021", x: 416.2, y: 734.7, fontSize: 8.0, w: 80, bold: true },
+  { id: "stub_valor", label: "Ficha: valor", sampleText: "R$ 54,99", x: 453.0, y: 734.7, fontSize: 8.0, w: 80, bold: true },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim";
 
 
 interface EditorConfig {
@@ -1086,6 +1155,22 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.15,
     copy: () => loadEquatorialFieldPositions() ?? {},
+  },
+  tim: {
+    key: "tim",
+    title: "Comprovante TIM",
+    storageKey: TIM_ALIGN_STORAGE_KEY,
+    defaults: defaultTimFields,
+    bg: templateTimP1Url,
+    pageW: 595,
+    pageH: 842,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.15,
+    copy: () => loadTimFieldPositions() ?? {},
   },
 };
 
@@ -1665,7 +1750,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf", "comprovante", "coelba", "equatorial"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf", "comprovante", "coelba", "equatorial", "tim"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}

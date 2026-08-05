@@ -18,6 +18,7 @@ import { ANHANGUERA_ALIGN_STORAGE_KEY } from "@/lib/anhanguera-align";
 import { COMPROVANTE_ALIGN_STORAGE_KEY } from "@/lib/comprovante-align";
 import { COELBA_ALIGN_STORAGE_KEY } from "@/lib/coelba-align";
 import { EQUATORIAL_ALIGN_STORAGE_KEY } from "@/lib/equatorial-align";
+import { TIM_ALIGN_STORAGE_KEY } from "@/lib/tim-align";
 
 /** Mapeia o tipo de documento para a chave usada no cache local. */
 export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
@@ -40,6 +41,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   comprovante: COMPROVANTE_ALIGN_STORAGE_KEY,
   coelba: COELBA_ALIGN_STORAGE_KEY,
   equatorial: EQUATORIAL_ALIGN_STORAGE_KEY,
+  tim: TIM_ALIGN_STORAGE_KEY,
 };
 
 /**
