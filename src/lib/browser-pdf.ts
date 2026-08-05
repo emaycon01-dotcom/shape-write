@@ -7,7 +7,6 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
-import { inlineImagesToBlobUrls, stripHeavyAssets } from "@/lib/asset-transport";
 
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
@@ -446,9 +445,6 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
   try {
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
-    // Troca data URLs pesadas por blob: ANTES de esperar/decodificar — cada
-    // clone do html2canvas passa a copiar só uma URL curta.
-    releaseBlobs = await inlineImagesToBlobUrls(doc);
     await waitForAssets(doc);
     releaseFonts = await adoptFontFaces(doc);
 
@@ -632,12 +628,8 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
-    // Somente templates pesados não sobem nem descem pela rede. Fotos e
-    // assinaturas precisam chegar às integrações de validação dos módulos.
-    const transport = isAction ? null : stripHeavyAssets(body);
-
     const { data, error } = await supabase.functions.invoke(functionName, {
-      body: isAction ? body : { ...(transport?.body ?? body), render: "html" },
+      body: isAction ? body : { ...body, render: "html" },
     });
 
     if (error) return { data, error: error as Error };
@@ -650,7 +642,7 @@ export async function invokeGeneratePdf(
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const html = transport ? transport.restore(payload.html) : payload.html;
+      const html = payload.html;
       const pdfBase64 = await renderHtmlToDocument(html, isPreview);
 
 
