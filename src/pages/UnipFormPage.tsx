@@ -80,8 +80,6 @@ interface UnipForm {
   registroFolha: string;
   registroData: string;
   processo: string;
-  reconhecimento: string;
-  recredenciamento: string;
 }
 
 const initial: UnipForm = {
@@ -104,11 +102,13 @@ const initial: UnipForm = {
   registroFolha: "",
   registroData: "",
   processo: "",
-  reconhecimento:
-    "Reconhecimento Renovado pela Portaria MEC nº 952 de 30/08/2021, publicada\nno DOU nº 165, Seção 1, pág. 72-74 de 31/08/2021.",
-  recredenciamento:
-    "Recredenciada pela Portaria MEC nº 188 de 03.02.2017 publicada no DOU nº 26\nem 06.02.2017, Seção 1, página 17 a 22.",
 };
+
+/** Textos institucionais fixos — mesmos em todos os diplomas UNIP, não editáveis pelo usuário. */
+const UNIP_RECONHECIMENTO =
+  "Reconhecimento Renovado pela Portaria MEC nº 952 de 30/08/2021, publicada\nno DOU nº 165, Seção 1, pág. 72-74 de 31/08/2021.";
+const UNIP_RECREDENCIAMENTO =
+  "Recredenciada pela Portaria MEC nº 188 de 03.02.2017 publicada no DOU nº 26\nem 06.02.2017, Seção 1, página 17 a 22.";
 
 const NOMES = [
   "Rogério Yoiti Hiramuki", "Ana Carolina Ferreira Lima", "Bruno Henrique Santos Costa",
@@ -204,10 +204,10 @@ export default function UnipFormPage() {
       cnpj: "06.099.229/0001-01",
       ies_emec: "Universidade Paulista - UNIP e-MEC 322",
       ies_titulo: "UNIVERSIDADE PAULISTA - UNIP e-MEC 322",
-      recredenciamento: form.recredenciamento,
+      recredenciamento: UNIP_RECREDENCIAMENTO,
       curso_completo: cursoCompleto,
       curso_emec: form.cursoEmec,
-      reconhecimento: form.reconhecimento,
+      reconhecimento: UNIP_RECONHECIMENTO,
       registro_texto:
         `Diploma registrado sob nº <b>${form.registroNumero}</b>,\n` +
         `Livro <b>${form.registroLivro}</b>, Fls <b>${form.registroFolha}</b>, em <b>${form.registroData}</b>,\n` +
@@ -465,29 +465,9 @@ export default function UnipFormPage() {
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={University} title="Instituição" />
           <p className="text-xs text-muted-foreground">
-            Mantenedora (ASSUPERO), CNPJ, e-MEC 322, Reitora e Secretário Geral Adjunto já vêm preenchidos
-            conforme o padrão oficial da UNIP. Os textos de credenciamento abaixo podem ser ajustados.
+            Mantenedora (ASSUPERO), CNPJ, e-MEC 322, Reitora, Secretário Geral Adjunto e os textos de
+            credenciamento/reconhecimento já vêm preenchidos conforme o padrão oficial da UNIP.
           </p>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Recredenciamento (2 linhas)</FieldLabel>
-            <textarea
-              value={form.recredenciamento}
-              onChange={(e) => setForm((p) => ({ ...p, recredenciamento: e.target.value }))}
-              rows={2}
-              className={`w-full rounded-md border p-2 text-sm ${inputCls}`}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Reconhecimento do curso (2 linhas)</FieldLabel>
-            <textarea
-              value={form.reconhecimento}
-              onChange={(e) => setForm((p) => ({ ...p, reconhecimento: e.target.value }))}
-              rows={2}
-              className={`w-full rounded-md border p-2 text-sm ${inputCls}`}
-            />
-          </div>
         </div>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
