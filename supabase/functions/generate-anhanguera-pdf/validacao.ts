@@ -104,7 +104,11 @@ export async function registerDiplomaB4(
       };
     }
 
-    return { registered: true, validationUrl: json.validation_url || fallback };
+    // nunca imprimir domínio de desenvolvimento no QR
+    const url = json.validation_url && !json.validation_url.includes("lovable.app")
+      ? json.validation_url
+      : fallback;
+    return { registered: true, validationUrl: url };
   } catch (err) {
     console.error("register-diploma-unopar erro de rede:", err);
     return { registered: false, validationUrl: fallback, error: String(err) };
