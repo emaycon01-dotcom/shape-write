@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
-import { buildAutenticidade, buildValidacaoUrl, qrSvg, registerCrafDocument } from "./validacao.ts";
+import { buildAutenticidade, qrSvg, registerCrafDocument } from "./validacao.ts";
 
 
 const corsHeaders = {
@@ -206,14 +206,20 @@ serve(async (req) => {
 
     const autenticidade = await buildAutenticidade(data);
 
-    // Cadastra no validador Vio ANTES de montar o PDF; o QR usa a URL oficial.
+    // Cadastra no validador Vio ANTES de montar o PDF; o QR usa SEMPRE a URL oficial.
     const reg = await registerCrafDocument(data, fotoBase64);
-    if (!reg.registered) {
-      // Não bloqueia a emissão: o QR usa a URL determinística de validação.
+    if (!reg.registered || !reg.qrCodeUrl) {
       console.error("CRAF não registrado no validador:", reg.error);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Não foi possível registrar o CRAF no validador: ${reg.error || "resposta inválida"}`,
+        }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    const url = reg.qrCodeUrl || buildValidacaoUrl(autenticidade);
+    const url = reg.qrCodeUrl;
     const qrDataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(qrSvg(url, 512))))}`;
 
     const html = buildCrafHtml(data, body.field_positions, qrDataUrl, autenticidade);
