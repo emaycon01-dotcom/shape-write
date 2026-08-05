@@ -101,8 +101,7 @@ export default function CnhPreviewPage() {
       const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
       syncCnhToExternal(pdfFinal, formData, tipo as "digital" | "fisica")
         .then((ok) => {
-          void ok;
-          else console.warn("CNH external sync failed (non-blocking)");
+          if (!ok) console.warn("CNH external sync failed (non-blocking)");
         })
         .catch((err) => console.error("CNH external sync error:", err));
 
