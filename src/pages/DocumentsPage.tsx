@@ -152,6 +152,15 @@ const MODULOS: Categoria[] = [
         qrcode: true,
       },
       {
+        id: "comprovante-equatorial",
+        titulo: "Comprovante de Residência — Equatorial Goiás",
+        descricao: "Fatura Equatorial Goiás / CELG D (DANF3E NF3e) em 2 páginas, com ficha de compensação",
+        icon: FileText,
+        rota: "/dashboard/documents/comprovante-equatorial",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
         id: "declaracao-escolar",
         titulo: "Declaração Escolar",
         descricao: "Declaração de conclusão com brasão do estado selecionado",

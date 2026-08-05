@@ -29,6 +29,9 @@ import templateEnelP2Url from "@/assets/template-enel-p2-hq.webp";
 import { COELBA_ALIGN_STORAGE_KEY, loadCoelbaFieldPositions } from "@/lib/coelba-align";
 import templateCoelbaP1Url from "@/assets/template-coelba-p1-hq.webp";
 import templateCoelbaP2Url from "@/assets/template-coelba-p2-hq.webp";
+import { EQUATORIAL_ALIGN_STORAGE_KEY, loadEquatorialFieldPositions } from "@/lib/equatorial-align";
+import templateEquatorialP1Url from "@/assets/template-equatorial-p1-hq.webp";
+import templateEquatorialP2Url from "@/assets/template-equatorial-p2-hq.webp";
 import templateObitoBgUrl from "@/assets/template-obito-bg-hq.webp";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
@@ -706,7 +709,78 @@ export const defaultCoelbaFields: FieldDef[] = [
   { id: "p2_cep", label: "P2: CEP / cidade / UF", sampleText: "40220-535 SALVADOR BA", x: 22.7, y: 1677.6, fontSize: 8.3, w: 300 },
 ];
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba";
+// Defaults MUST match supabase/functions/generate-equatorial-pdf/index.ts EQUATORIAL_DEFAULT_POSITIONS
+export const defaultEquatorialFields: FieldDef[] = [
+  { id: "entrega_titulo", label: "Entrega: título", sampleText: "ENDEREÇO DE ENTREGA:", x: 695.0, y: 37.0, fontSize: 6.0, w: 200 },
+  { id: "entrega_l1", label: "Entrega: endereço", sampleText: "RUA SEM NOME, Q. 106, L. 18, S/N", x: 695.0, y: 50.0, fontSize: 6.0, w: 200 },
+  { id: "entrega_l2", label: "Entrega: bairro", sampleText: "JARDIM AMERICA IV", x: 695.0, y: 57.0, fontSize: 6.0, w: 200 },
+  { id: "entrega_l3", label: "Entrega: CEP", sampleText: "CEP: 72910000 AGUAS LINDAS DE GOIAS GO BRASIL", x: 695.0, y: 64.0, fontSize: 6.0, w: 200 },
+  { id: "classificacao", label: "Classificação", sampleText: "Classificação: B B1 RESIDENCIAL - RESIDENCIAL NORMAL CONVENCIONAL", x: 33.0, y: 88.0, fontSize: 8.0, w: 300 },
+  { id: "tipo_fornecimento", label: "Tipo de fornecimento", sampleText: "Tipo de fornecimento: MONOFÁSICO", x: 336.8, y: 90.0, fontSize: 8.0, w: 200 },
+  { id: "cliente_nome", label: "Nome do titular", sampleText: "LEONALDO RIBEIRO DE OLIVEIRA", x: 33.0, y: 126.0, fontSize: 8.0, w: 290, bold: true },
+  { id: "cliente_cpf", label: "CNPJ/CPF", sampleText: "CNPJ/CPF: 610.078.461-00", x: 33.0, y: 135.0, fontSize: 8.0, w: 290 },
+  { id: "cliente_endereco", label: "Endereço", sampleText: "RUA SEM NOME, Q. 106, L. 18, S/N", x: 33.0, y: 144.0, fontSize: 8.0, w: 290 },
+  { id: "cliente_bairro", label: "Bairro", sampleText: "JARDIM AMERICA IV", x: 33.0, y: 154.0, fontSize: 8.0, w: 290 },
+  { id: "cliente_cep", label: "CEP / cidade / UF", sampleText: "CEP: 72910000 AGUAS LINDAS DE GOIAS GO BRASIL", x: 33.0, y: 163.0, fontSize: 8.0, w: 290 },
+  { id: "cliente_perdas", label: "Perdas de transformação", sampleText: "PERDAS DE TRANSFORMAÇÃO / RAMAL: 0%", x: 33.0, y: 172.0, fontSize: 8.0, w: 290 },
+  { id: "val_leitura_anterior", label: "Leitura anterior", sampleText: "23/06/2023", x: 562.4, y: 139.0, fontSize: 10.0, w: 60, bold: true },
+  { id: "val_leitura_atual", label: "Leitura atual", sampleText: "25/07/2023", x: 647.7, y: 139.0, fontSize: 10.0, w: 60, bold: true },
+  { id: "val_dias", label: "Nº de dias", sampleText: "32", x: 745.0, y: 139.0, fontSize: 10.0, w: 32, bold: true },
+  { id: "val_proxima", label: "Próxima leitura", sampleText: "24/08/2023", x: 805.8, y: 139.0, fontSize: 10.0, w: 60, bold: true },
+  { id: "nf_linha", label: "Nota fiscal / emissão", sampleText: "NOTA FISCAL Nº 65789409 - SÉRIE 0 / DATA DE EMISSÃO: 28/07/2023 17:26:04", x: 612.0, y: 176.0, fontSize: 7.0, w: 250 },
+  { id: "referencia_topo", label: "Conta mês", sampleText: "JUL/2023", x: 74.5, y: 254.0, fontSize: 10.0, w: 80, bold: true },
+  { id: "vencimento_topo", label: "Vencimento (topo)", sampleText: "07/08/2023", x: 196.1, y: 254.0, fontSize: 10.0, w: 80, bold: true },
+  { id: "total_topo", label: "Total a pagar (topo)", sampleText: "R$*********137,20", x: 347.3, y: 254.0, fontSize: 10.0, w: 110, bold: true },
+  { id: "info_l1", label: "Informações: linha 1", sampleText: "PARCELA : USO SISTEMA = R$ 59,93 FORNECIMENTO = R$ 52,34", x: 33.0, y: 304.0, fontSize: 6.0, w: 560 },
+  { id: "info_l2", label: "Informações: linha 2", sampleText: "PERÍODO DE REFERÊNCIA DA APURAÇÃO DOS INDICADORES = 5/2023", x: 33.0, y: 312.0, fontSize: 6.0, w: 560 },
+  { id: "info_l3", label: "Informações: linha 3", sampleText: "UNIDADE CONSUMIDORA CADASTRADA PARA AVISO PREFERENCIAL", x: 33.0, y: 320.0, fontSize: 6.0, w: 560 },
+  { id: "info_l4", label: "Informações: linha 4", sampleText: "VOCÊ SOLICITOU CADASTRO COMO CLIENTE VITAL/SOBREVIDA.", x: 33.0, y: 328.0, fontSize: 6.0, w: 700 },
+  { id: "it_grupo", label: "Itens: grupo", sampleText: "FORNECIMENTO", x: 34.0, y: 408.6, fontSize: 5.0, w: 120 },
+  { id: "it_consumo_desc", label: "Itens: descrição", sampleText: "CONSUMO", x: 34.0, y: 418.7, fontSize: 5.0, w: 120 },
+  { id: "it_consumo_unid", label: "Itens: unidade", sampleText: "kWh", x: 229.4, y: 418.7, fontSize: 5.0, w: 30 },
+  { id: "it_consumo_qtd", label: "Itens: quantidade", sampleText: "150,00", x: 236.6, y: 418.7, fontSize: 5.0, w: 50 },
+  { id: "it_consumo_preco", label: "Itens: preço unit.", sampleText: "0,835099", x: 290.5, y: 418.7, fontSize: 5.0, w: 50 },
+  { id: "it_consumo_valor", label: "Itens: valor", sampleText: "125,26", x: 347.4, y: 418.7, fontSize: 5.0, w: 50 },
+  { id: "it_consumo_pis", label: "Itens: PIS/COFINS", sampleText: "3,32", x: 411.2, y: 418.7, fontSize: 5.0, w: 40 },
+  { id: "it_consumo_base", label: "Itens: base ICMS", sampleText: "125,26", x: 451.4, y: 418.7, fontSize: 5.0, w: 50 },
+  { id: "it_consumo_aliq", label: "Itens: alíquota", sampleText: "17%", x: 508.7, y: 418.7, fontSize: 5.0, w: 40 },
+  { id: "it_consumo_icms", label: "Itens: ICMS", sampleText: "21,29", x: 555.2, y: 418.7, fontSize: 5.0, w: 40 },
+  { id: "it_consumo_tarifa", label: "Itens: tarifa unit.", sampleText: "0,670990", x: 590.7, y: 418.7, fontSize: 5.0, w: 50 },
+  { id: "it_fin_titulo", label: "Itens financeiros: título", sampleText: "ITENS FINANCEIROS", x: 34.0, y: 429.0, fontSize: 5.0, w: 120 },
+  { id: "fin1_desc", label: "Financeiro 1: descrição", sampleText: "BONUS ITAIPU ART.21 LEI 10438/02(-)", x: 34.0, y: 439.7, fontSize: 5.0, w: 220 },
+  { id: "fin1_valor", label: "Financeiro 1: valor", sampleText: "-6,18", x: 346.1, y: 439.7, fontSize: 5.0, w: 50 },
+  { id: "fin2_desc", label: "Financeiro 2: descrição", sampleText: "CONTRIB. ILUM. PÚBLICA - MUNICIPAL", x: 34.0, y: 447.7, fontSize: 5.0, w: 220 },
+  { id: "fin2_valor", label: "Financeiro 2: valor", sampleText: "15,56", x: 346.2, y: 447.7, fontSize: 5.0, w: 50 },
+  { id: "fin3_desc", label: "Financeiro 3: descrição", sampleText: "JUROS MORATÓRIA.", x: 34.0, y: 455.7, fontSize: 5.0, w: 220 },
+  { id: "fin3_valor", label: "Financeiro 3: valor", sampleText: "0,12", x: 345.1, y: 455.7, fontSize: 5.0, w: 50 },
+  { id: "fin4_desc", label: "Financeiro 4: descrição", sampleText: "MULTA - 06/2023.", x: 34.0, y: 463.7, fontSize: 5.0, w: 220 },
+  { id: "fin4_valor", label: "Financeiro 4: valor", sampleText: "2,44", x: 345.4, y: 463.7, fontSize: 5.0, w: 50 },
+  { id: "res_aneel", label: "Resolução ANEEL", sampleText: "3130/22", x: 559.0, y: 728.8, fontSize: 8.0, w: 60 },
+  { id: "res_apresentacao", label: "Apresentação", sampleText: "28/07/2023", x: 642.2, y: 728.8, fontSize: 8.0, w: 70 },
+  { id: "rod_vencimento", label: "Rodapé: vencimento", sampleText: "07/08/2023", x: 599.0, y: 943.3, fontSize: 8.0, w: 90, bold: true },
+  { id: "rod_unidade", label: "Rodapé: unidade consumidora", sampleText: "10009576124", x: 341.0, y: 961.3, fontSize: 8.0, w: 120, bold: true },
+  { id: "rod_referencia", label: "Rodapé: referência", sampleText: "JUL/2023", x: 513.0, y: 961.3, fontSize: 8.0, w: 90, bold: true },
+  { id: "rod_data_doc", label: "Rodapé: data documento", sampleText: "28/07/2023", x: 50.0, y: 979.3, fontSize: 8.0, w: 90, bold: true },
+  { id: "rod_num_ref", label: "Rodapé: nº de referência", sampleText: "2023067958196", x: 140.0, y: 979.3, fontSize: 8.0, w: 140, bold: true },
+  { id: "rod_especie", label: "Rodapé: espécie documento", sampleText: "MN", x: 311.0, y: 979.3, fontSize: 8.0, w: 50, bold: true },
+  { id: "rod_data_proc", label: "Rodapé: data processamento", sampleText: "28/07/2023", x: 483.0, y: 979.3, fontSize: 8.0, w: 90, bold: true },
+  { id: "rod_nosso_numero", label: "Rodapé: nosso número", sampleText: "109/06353774-0", x: 599.0, y: 979.3, fontSize: 8.0, w: 110, bold: true },
+  { id: "rod_carteira", label: "Rodapé: carteira", sampleText: "109", x: 204.0, y: 997.3, fontSize: 8.0, w: 50, bold: true },
+  { id: "rod_moeda", label: "Rodapé: espécie moeda", sampleText: "R$", x: 311.0, y: 997.3, fontSize: 8.0, w: 40, bold: true },
+  { id: "rod_valor_doc", label: "Rodapé: valor do documento", sampleText: "137,20", x: 614.1, y: 997.3, fontSize: 8.0, w: 60, bold: true },
+  { id: "p2_unid_entrega", label: "P2: Unid. de entrega", sampleText: "37 / 17", x: 88.7, y: 1712.0, fontSize: 10.0, w: 50 },
+  { id: "p2_sequencia", label: "P2: Sequência", sampleText: "961100", x: 155.0, y: 1712.0, fontSize: 10.0, w: 55 },
+  { id: "p2_medidor", label: "P2: Nº medidor", sampleText: "10780867-6", x: 213.1, y: 1712.0, fontSize: 10.0, w: 80 },
+  { id: "p2_nome", label: "P2: Nome", sampleText: "LEONALDO RIBEIRO DE OLIVEIRA", x: 163.0, y: 1801.0, fontSize: 10.0, w: 300, bold: true },
+  { id: "p2_endereco", label: "P2: Endereço", sampleText: "RUA SEM NOME, Q. 106, L. 18, S/N", x: 163.0, y: 1837.0, fontSize: 10.0, w: 300 },
+  { id: "p2_bairro", label: "P2: Bairro", sampleText: "JARDIM AMERICA IV", x: 163.0, y: 1849.0, fontSize: 10.0, w: 300 },
+  { id: "p2_cep", label: "P2: CEP / cidade / UF", sampleText: "CEP: 72910000 AGUAS LINDAS DE GOIAS GO BRASIL", x: 163.0, y: 1861.0, fontSize: 10.0, w: 300 },
+  { id: "p2_data_emissao", label: "P2: Data de emissão", sampleText: "28/07/2023", x: 178.9, y: 1963.0, fontSize: 10.0, w: 80 },
+  { id: "p2_referencia", label: "P2: Conta referente a", sampleText: "JUL/2023", x: 270.4, y: 1963.0, fontSize: 10.0, w: 80 },
+  { id: "p2_vencimento", label: "P2: Vencimento", sampleText: "07/08/2023", x: 348.1, y: 1963.0, fontSize: 10.0, w: 80 },
+];
+
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial";
 
 
 interface EditorConfig {
@@ -995,6 +1069,23 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.2,
     copy: () => loadCoelbaFieldPositions() ?? {},
+  },
+  equatorial: {
+    key: "equatorial",
+    title: "Comprovante Equatorial GO",
+    storageKey: EQUATORIAL_ALIGN_STORAGE_KEY,
+    defaults: defaultEquatorialFields,
+    bg: templateEquatorialP1Url,
+    bgs: [templateEquatorialP1Url, templateEquatorialP2Url],
+    pageW: 909,
+    pageH: 1211,
+    font: CERTIDAO_FONT,
+    mrzFont: CERTIDAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.15,
+    copy: () => loadEquatorialFieldPositions() ?? {},
   },
 };
 
@@ -1574,7 +1665,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf", "comprovante", "coelba"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "receita", "craf", "comprovante", "coelba", "equatorial"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
