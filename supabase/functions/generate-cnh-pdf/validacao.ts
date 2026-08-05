@@ -160,5 +160,6 @@ export function qrSvg(value: string, sizePx: number): string {
   }
   // Sem retângulo branco de fundo: o template não tem QR nenhum, então não há
   // nada para "tampar". Só os módulos pretos são desenhados.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><g fill="#000">${rects}</g></svg>`;
+  // Cor: cinza-escuro (como o QR impresso na CNH oficial), não preto puro.
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges"><g fill="#4a4a4a">${rects}</g></svg>`;
 }
