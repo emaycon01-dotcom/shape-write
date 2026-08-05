@@ -494,7 +494,9 @@ async function renderOnce(html: string, scaleCap: number, bandDivisor = 1): Prom
 
         // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
         // de codificação/memória do JPEG — o gargalo em Android.
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        // Codificação assíncrona (toBlob): não congela a interface por faixa.
+        const imgData = await encodeJpeg(canvas, 0.95);
+
 
         if (imgData.length < 1024) throw new Error("Falha ao rasterizar a página.");
         // +0.05pt evita fio branco entre faixas por arredondamento.
