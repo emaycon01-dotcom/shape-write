@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, Fragment, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { clearChunkRecovery } from "@/lib/lazy-retry";
@@ -74,7 +74,7 @@ export default class AppErrorBoundary extends Component<Props, State> {
 
   render() {
     if (!this.state.error) {
-      return <div key={this.state.retryKey} className="contents">{this.props.children}</div>;
+      return <Fragment key={this.state.retryKey}>{this.props.children}</Fragment>;
     }
 
     return (
