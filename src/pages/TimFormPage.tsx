@@ -126,43 +126,7 @@ function aplicarAuto(f: TimFormData, force: boolean): TimFormData {
   };
 }
 
-function Section({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
-  return (
-    <div className="glass space-y-4 rounded-xl p-5">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">{title}</h2>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">{children}</div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  full,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  full?: boolean;
-}) {
-  return (
-    <div className={full ? "sm:col-span-2" : undefined}>
-      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</label>
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="h-11 rounded-lg"
-      />
-    </div>
-  );
-}
+import { Section, Field } from "@/components/form/FormFields";
 
 export default function TimFormPage() {
   const navigate = useNavigate();
