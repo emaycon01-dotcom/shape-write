@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { subscribePdfLoading } from "@/lib/pdf-loading";
 
 type PdfCanvasPreviewProps = {
   pdfDataUrl: string;
