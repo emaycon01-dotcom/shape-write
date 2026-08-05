@@ -10,6 +10,15 @@ try {
   console.error("Falha ao aplicar o tema inicial", error);
 }
 
+// Erros de rede em scripts/assets não devem derrubar a interface.
+window.addEventListener("unhandledrejection", (event) => {
+  const msg = String((event.reason as Error)?.message ?? event.reason ?? "");
+  if (/chunk|dynamically imported|module script|failed to fetch/i.test(msg)) {
+    console.warn("Recurso não carregado, seguindo sem interromper:", msg);
+    event.preventDefault();
+  }
+});
+
 const root = document.getElementById("root");
 
 if (root) {
