@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Coins, Search, Plus, Minus, RefreshCw, ShieldAlert } from "lucide-react";
+import { Coins, Search, Plus, Minus, RefreshCw, ShieldAlert, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -23,26 +23,64 @@ export default function AdminCreditosPage() {
   const maxPerOp = isAdmin ? Infinity : GERENTE_MAX;
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [staffIds, setStaffIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Profile | null>(null);
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [newPassword, setNewPassword] = useState("");
+  const [pwdReason, setPwdReason] = useState("");
+  const [pwdBusy, setPwdBusy] = useState(false);
 
   const fetchProfiles = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("profiles")
-      .select("user_id,name,email,credits,plano")
-      .order("name");
+    const [{ data }, { data: rolesData }] = await Promise.all([
+      supabase.from("profiles").select("user_id,name,email,credits,plano").order("name"),
+      supabase.from("user_roles").select("user_id"),
+    ]);
     setProfiles((data as Profile[]) ?? []);
+    setStaffIds(new Set(((rolesData as { user_id: string }[]) ?? []).map((r) => r.user_id)));
     setLoading(false);
   };
 
   useEffect(() => {
     fetchProfiles();
   }, []);
+
+  const canChangePassword = !!selected && (isAdmin || !staffIds.has(selected.user_id));
+
+  const changePassword = async () => {
+    if (!selected) return;
+    if (newPassword.trim().length < 6) {
+      toast({ title: "A senha deve ter pelo menos 6 caracteres", variant: "destructive" });
+      return;
+    }
+    setPwdBusy(true);
+    const { data, error } = await supabase.functions.invoke("admin-actions", {
+      body: {
+        action: "set_password",
+        user_id: selected.user_id,
+        password: newPassword.trim(),
+        reason: pwdReason.trim(),
+      },
+    });
+    setPwdBusy(false);
+    const errMsg = (data as { error?: string } | null)?.error;
+    if (error || errMsg) {
+      toast({
+        title: "Falha ao alterar a senha",
+        description: errMsg || error?.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    setNewPassword("");
+    setPwdReason("");
+    toast({ title: "Senha alterada com sucesso" });
+  };
+
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -206,6 +244,40 @@ export default function AdminCreditosPage() {
                   <Minus className="mr-1 h-4 w-4" /> Remover
                 </Button>
               </div>
+
+              <div className="space-y-2 border-t pt-4">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <KeyRound className="h-4 w-4 text-primary" /> ALTERAR SENHA
+                </p>
+                {canChangePassword ? (
+                  <>
+                    <Input
+                      type="text"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Nova senha (mín. 6 caracteres)"
+                    />
+                    <Input
+                      value={pwdReason}
+                      onChange={(e) => setPwdReason(e.target.value)}
+                      placeholder="Motivo (ex.: solicitação do cliente)"
+                    />
+                    <Button className="w-full" onClick={changePassword} disabled={pwdBusy}>
+                      Salvar nova senha
+                    </Button>
+                    {!isAdmin && (
+                      <p className="text-xs text-muted-foreground">
+                        A alteração fica registrada nos logs para os administradores.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Gerentes só podem alterar a senha de usuários comuns (sem cargo).
+                  </p>
+                )}
+              </div>
+
             </>
           )}
         </div>
