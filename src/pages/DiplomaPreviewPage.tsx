@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { completePdfPresentation } from "@/lib/pdf-loading";
+import { getPdfJs } from "@/lib/pdfjs-loader";
 
 function base64ToBlob(base64DataUrl: string): Blob | null {
   try {
@@ -58,9 +59,7 @@ export default function DiplomaPreviewPage() {
         if (!blob || blob.size === 0) throw new Error("PDF inválido");
         const bytes = new Uint8Array(await blob.arrayBuffer());
 
-        const pdfjsLib = await import("pdfjs-dist");
-        const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
+        const pdfjsLib = await getPdfJs();
         const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
 
         const out: string[] = [];

@@ -7,6 +7,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { awaitPdfPresentation, beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
+import { warmPdfViewer } from "@/lib/pdfjs-loader";
 
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
@@ -34,7 +35,10 @@ export function warmPdfEngine() {
 // Pré-aquece o motor assim que um formulário importa este módulo: o usuário
 // ainda está preenchendo os campos, então o custo fica invisível.
 if (typeof window !== "undefined") {
-  window.setTimeout(() => void warmPdfEngine().catch(() => undefined), 1200);
+  window.setTimeout(() => {
+    void warmPdfEngine().catch(() => undefined);
+    void warmPdfViewer().catch(() => undefined);
+  }, 1200);
 }
 
 
@@ -791,6 +795,9 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
+    // Sobrepõe o download/parse do visualizador com a chamada e a rasterização.
+    // Não altera o PDF; apenas elimina o cold-start depois da navegação.
+    void warmPdfViewer().catch(() => undefined);
     const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body);
 
     const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
