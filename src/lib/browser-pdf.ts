@@ -626,7 +626,11 @@ export async function invokeGeneratePdf(
     if (typeof payload.html !== "string") return { data: payload, error: null };
 
     try {
-      const pdfBase64 = await renderHtmlToDocument(payload.html, isPreview);
+      const useVector = VECTOR_FUNCTIONS.has(functionName);
+      const pdfBase64 = useVector
+        ? await (await import("@/lib/vector-pdf")).renderHtmlToVectorPdf(payload.html)
+        : await renderHtmlToDocument(payload.html, isPreview);
+
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
 
