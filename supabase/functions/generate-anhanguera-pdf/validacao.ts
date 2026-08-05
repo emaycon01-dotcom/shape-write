@@ -49,3 +49,63 @@ export function qrSvg(value: string, sizePx: number): string {
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${count} ${count}" shape-rendering="crispEdges"><rect width="${count}" height="${count}" fill="#fff"/><g fill="#000">${rects}</g></svg>`;
 }
+
+/* --------------------------------------------- validador B4 (Site 2) */
+
+export const B4_BASE_URL = "https://diplomassomosb4web.site";
+const B4_REGISTER_ENDPOINT = `${B4_BASE_URL}/api/public/register-diploma-unopar`;
+
+/** URL pública impressa no QR Code. */
+export function buildB4ValidationUrl(documentoId: string): string {
+  return `${B4_BASE_URL}/validar?id=${encodeURIComponent(documentoId)}`;
+}
+
+export interface B4Result {
+  registered: boolean;
+  validationUrl: string;
+  error?: string;
+}
+
+/** POST idempotente (upsert por documento_id) no validador B4. */
+export async function registerDiplomaB4(
+  documentoId: string,
+  payload: Record<string, unknown>,
+): Promise<B4Result> {
+  const fallback = buildB4ValidationUrl(documentoId);
+  const apiKey = Deno.env.get("DIPLOMA_UNOPAR_API_KEY") || "";
+  if (!apiKey) {
+    return { registered: false, validationUrl: fallback, error: "missing_api_key" };
+  }
+
+  try {
+    const res = await fetch(B4_REGISTER_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ ...payload, documento_id: documentoId }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    const text = await res.text();
+    let json: { success?: boolean; validation_url?: string; error?: string } = {};
+    try {
+      json = JSON.parse(text);
+    } catch { /* resposta não-JSON */ }
+
+    if (!res.ok || json.success === false) {
+      console.error(`register-diploma-unopar falhou [${res.status}] ${documentoId}: ${text.slice(0, 400)}`);
+      return {
+        registered: false,
+        validationUrl: fallback,
+        error: json.error || `HTTP ${res.status}`,
+      };
+    }
+
+    return { registered: true, validationUrl: json.validation_url || fallback };
+  } catch (err) {
+    console.error("register-diploma-unopar erro de rede:", err);
+    return { registered: false, validationUrl: fallback, error: String(err) };
+  }
+}
