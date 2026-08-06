@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
 export interface Document {
   id: string;
@@ -40,35 +41,13 @@ interface DocumentContextType {
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
-/**
- * Converte Data URL sem entregá-la ao fetch(). Safari/WebViews podem recusar
- * URLs de vários megabytes; decodificar em blocos também reduz o pico de
- * memória durante o salvamento no histórico.
- */
-function pdfDataUrlToBlob(value: string): Blob {
-  if (!value.startsWith("data:")) throw new Error("PDF inválido para armazenamento.");
-  const comma = value.indexOf(",");
-  if (comma < 0) throw new Error("PDF inválido para armazenamento.");
-  const header = value.slice(0, comma);
-  const mime = header.match(/^data:([^;,]+)/)?.[1] || "application/pdf";
-  const encoded = value.slice(comma + 1);
-  const parts: BlobPart[] = [];
-  const chunkSize = 1_048_576; // múltiplo de 4, preserva blocos base64
-  for (let offset = 0; offset < encoded.length; offset += chunkSize) {
-    const binary = atob(encoded.slice(offset, offset + chunkSize));
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-    parts.push(bytes.buffer as ArrayBuffer);
-  }
-  return new Blob(parts, { type: mime });
-}
-
 async function uploadPdfToStorage(pdfDataUrl: string, docId: string, userId?: string): Promise<string | null> {
   try {
     const uid = userId || (await supabase.auth.getUser()).data.user?.id;
     if (!uid) return null;
 
     const blob = pdfDataUrlToBlob(pdfDataUrl);
+    if (!blob) throw new Error("PDF inválido para armazenamento.");
     // Caminho isolado por usuário: garante que ninguém acesse o PDF de outro
     const filePath = `${uid}/${docId}.pdf`;
 
