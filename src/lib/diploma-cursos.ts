@@ -529,6 +529,151 @@ const EXTRA_TECNOLOGO: string[] = [
   "VIGILÂNCIA SANITÁRIA",
 ];
 
+/** Cursos técnicos de nível médio (eixos tecnológicos do Catálogo Nacional). */
+export const CURSOS_TECNICO: string[] = [
+  // Controle e processos industriais
+  "AUTOMAÇÃO INDUSTRIAL",
+  "MECÂNICA",
+  "MECATRÔNICA",
+  "ELETROTÉCNICA",
+  "ELETROELETRÔNICA",
+  "ELETRÔNICA",
+  "ELETROMECÂNICA",
+  "MANUTENÇÃO INDUSTRIAL",
+  "MANUTENÇÃO DE MÁQUINAS INDUSTRIAIS",
+  "METALURGIA",
+  "METROLOGIA",
+  "SOLDAGEM",
+  "FABRICAÇÃO MECÂNICA",
+  "USINAGEM",
+  "PLÁSTICOS",
+  "PETRÓLEO E GÁS",
+  "PETROQUÍMICA",
+  "QUÍMICA",
+  "AÇÚCAR E ÁLCOOL",
+  "CELULOSE E PAPEL",
+  "IMPRESSÃO OFFSET",
+  "TÊXTIL",
+  "VESTUÁRIO",
+  "CALÇADOS",
+  "JOALHERIA",
+  "CERVEJARIA",
+  "ALIMENTOS",
+  "PANIFICAÇÃO",
+  "BIOTECNOLOGIA",
+  "BIOCOMBUSTÍVEIS",
+  "ENERGIAS RENOVÁVEIS",
+  "SISTEMAS DE ENERGIA SOLAR FOTOVOLTAICA",
+  "SISTEMAS DE ENERGIA EÓLICA",
+
+  // Infraestrutura
+  "EDIFICAÇÕES",
+  "AGRIMENSURA",
+  "GEOPROCESSAMENTO",
+  "ESTRADAS",
+  "SANEAMENTO",
+  "HIDROLOGIA",
+  "PORTOS",
+  "TRANSPORTE FERROVIÁRIO",
+  "TRANSPORTE RODOVIÁRIO",
+  "TRANSPORTE AQUAVIÁRIO",
+  "MANUTENÇÃO AUTOMOTIVA",
+  "MANUTENÇÃO DE AERONAVES",
+  "MANUTENÇÃO DE MÁQUINAS PESADAS",
+  "REFRIGERAÇÃO E CLIMATIZAÇÃO",
+  "DESENHO DE CONSTRUÇÃO CIVIL",
+
+  // Informação e comunicação
+  "INFORMÁTICA",
+  "INFORMÁTICA PARA INTERNET",
+  "DESENVOLVIMENTO DE SISTEMAS",
+  "MANUTENÇÃO E SUPORTE EM INFORMÁTICA",
+  "REDES DE COMPUTADORES",
+  "TELECOMUNICAÇÕES",
+  "PROGRAMAÇÃO DE JOGOS DIGITAIS",
+  "CIÊNCIA DE DADOS",
+  "COMPUTAÇÃO GRÁFICA",
+
+  // Gestão e negócios
+  "ADMINISTRAÇÃO",
+  "CONTABILIDADE",
+  "RECURSOS HUMANOS",
+  "LOGÍSTICA",
+  "MARKETING",
+  "VENDAS",
+  "COMÉRCIO EXTERIOR",
+  "FINANÇAS",
+  "SECRETARIADO",
+  "SERVIÇOS PÚBLICOS",
+  "SERVIÇOS JURÍDICOS",
+  "SEGUROS",
+  "TRANSAÇÕES IMOBILIÁRIAS",
+  "COOPERATIVISMO",
+  "QUALIDADE",
+
+  // Saúde e ambiente
+  "ENFERMAGEM",
+  "SAÚDE BUCAL",
+  "PRÓTESE DENTÁRIA",
+  "ANÁLISES CLÍNICAS",
+  "FARMÁCIA",
+  "RADIOLOGIA",
+  "IMOBILIZAÇÕES ORTOPÉDICAS",
+  "NUTRIÇÃO E DIETÉTICA",
+  "OPTICA",
+  "MASSOTERAPIA",
+  "PODOLOGIA",
+  "ESTÉTICA",
+  "AGENTE COMUNITÁRIO DE SAÚDE",
+  "CUIDADOS DE IDOSOS",
+  "REGISTROS E INFORMAÇÕES EM SAÚDE",
+  "EQUIPAMENTOS BIOMÉDICOS",
+  "VIGILÂNCIA EM SAÚDE",
+  "MEIO AMBIENTE",
+  "SEGURANÇA DO TRABALHO",
+  "CONTROLE AMBIENTAL",
+  "RESÍDUOS SÓLIDOS",
+
+  // Recursos naturais
+  "AGROPECUÁRIA",
+  "AGRICULTURA",
+  "AGRONEGÓCIO",
+  "AGROINDÚSTRIA",
+  "ZOOTECNIA",
+  "AQUICULTURA",
+  "PESCA",
+  "FLORESTAS",
+  "FRUTICULTURA",
+  "CAFEICULTURA",
+  "VITICULTURA E ENOLOGIA",
+  "MINERAÇÃO",
+  "GEOLOGIA",
+
+  // Desenvolvimento educacional, cultural e social
+  "SEGURANÇA PRIVADA",
+  "GUIA DE TURISMO",
+  "EVENTOS",
+  "HOSPEDAGEM",
+  "COZINHA",
+  "CONFEITARIA",
+  "RESTAURANTE E BAR",
+  "LAZER",
+  "DESIGN DE INTERIORES",
+  "DESIGN DE MÓVEIS",
+  "DESIGN GRÁFICO",
+  "PRODUÇÃO DE ÁUDIO E VÍDEO",
+  "MULTIMÍDIA",
+  "PUBLICIDADE",
+  "TRADUÇÃO E INTERPRETAÇÃO DE LIBRAS",
+  "BIBLIOTECONOMIA",
+  "MUSEOLOGIA",
+  "ARTES VISUAIS",
+  "CANTO",
+  "INSTRUMENTO MUSICAL",
+  "TEATRO",
+  "DANÇA",
+];
+
 const uniqSort = (lista: string[]): string[] =>
   Array.from(new Set(lista.map((c) => c.trim()).filter(Boolean))).sort((a, b) =>
     a.localeCompare(b, "pt-BR"),
@@ -538,10 +683,12 @@ const uniqSort = (lista: string[]): string[] =>
 export const CATALOGO_BACHARELADO = uniqSort([...CURSOS_BACHARELADO, ...EXTRA_BACHARELADO]);
 export const CATALOGO_LICENCIATURA = uniqSort([...CURSOS_LICENCIATURA, ...EXTRA_LICENCIATURA]);
 export const CATALOGO_TECNOLOGO = uniqSort([...CURSOS_TECNOLOGO, ...EXTRA_TECNOLOGO]);
+export const CATALOGO_TECNICO = uniqSort(CURSOS_TECNICO);
 
 export function cursosPorModalidade(m: Modalidade): string[] {
   if (m === "bacharelado") return CATALOGO_BACHARELADO;
   if (m === "licenciatura") return CATALOGO_LICENCIATURA;
+  if (m === "tecnico") return CATALOGO_TECNICO;
   return CATALOGO_TECNOLOGO;
 }
 
@@ -549,6 +696,7 @@ export function cursosPorModalidade(m: Modalidade): string[] {
 export function nomeCursoCompleto(m: Modalidade, curso: string): string {
   if (m === "tecnologo") return `CURSO SUPERIOR DE TECNOLOGIA EM ${curso}`;
   if (m === "licenciatura") return `CURSO DE LICENCIATURA EM ${curso}`;
+  if (m === "tecnico") return `CURSO TÉCNICO EM ${curso}`;
   return `CURSO DE ${curso}`;
 }
 
@@ -557,5 +705,9 @@ export function tituloConferido(m: Modalidade): string {
 }
 
 export const TOTAL_CURSOS =
-  CATALOGO_BACHARELADO.length + CATALOGO_LICENCIATURA.length + CATALOGO_TECNOLOGO.length;
+  CATALOGO_BACHARELADO.length +
+  CATALOGO_LICENCIATURA.length +
+  CATALOGO_TECNOLOGO.length +
+  CATALOGO_TECNICO.length;
+
 
