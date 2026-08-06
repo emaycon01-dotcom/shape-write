@@ -11,6 +11,7 @@ import { HISTORICO_ALIGN_STORAGE_KEY } from "@/lib/historico-align";
 import { CERTIDAO_ALIGN_STORAGE_KEY } from "@/lib/certidao-align";
 import { OBITO_ALIGN_STORAGE_KEY } from "@/lib/obito-align";
 import { DECLARACAO_ALIGN_STORAGE_KEY } from "@/lib/declaracao-align";
+import { DECLARACAO_ETE_ALIGN_STORAGE_KEY } from "@/lib/declaracao-ete-align";
 import { RECEITA_ALIGN_STORAGE_KEY } from "@/lib/receita-align";
 import { CRAF_ALIGN_STORAGE_KEY } from "@/lib/craf-align";
 import { UNIP_ALIGN_STORAGE_KEY } from "@/lib/unip-align";
@@ -35,6 +36,7 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   certidao: CERTIDAO_ALIGN_STORAGE_KEY,
   obito: OBITO_ALIGN_STORAGE_KEY,
   declaracao: DECLARACAO_ALIGN_STORAGE_KEY,
+  "declaracao-ete": DECLARACAO_ETE_ALIGN_STORAGE_KEY,
   receita: RECEITA_ALIGN_STORAGE_KEY,
   craf: CRAF_ALIGN_STORAGE_KEY,
   unip: UNIP_ALIGN_STORAGE_KEY,
