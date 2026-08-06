@@ -76,6 +76,8 @@ const HistoricoMedioSpFormPage = lazy(() => import("./pages/HistoricoMedioSpForm
 const HistoricoMedioSpPreviewPage = lazy(() => import("./pages/HistoricoMedioSpPreviewPage"));
 const HistoricoEjaFormPage = lazy(() => import("./pages/HistoricoEjaFormPage"));
 const HistoricoEjaPreviewPage = lazy(() => import("./pages/HistoricoEjaPreviewPage"));
+const HistoricoFundamentalFormPage = lazy(() => import("./pages/HistoricoFundamentalFormPage"));
+const HistoricoFundamentalPreviewPage = lazy(() => import("./pages/HistoricoFundamentalPreviewPage"));
 const CertidaoFormPage = lazy(() => import("./pages/CertidaoFormPage"));
 const CertidaoPreviewPage = lazy(() => import("./pages/CertidaoPreviewPage"));
 const ObitoFormPage = lazy(() => import("./pages/ObitoFormPage"));
@@ -191,6 +193,8 @@ const App = () => {
                         <Route path="documents/historico-medio-sp/preview" element={<HistoricoMedioSpPreviewPage />} />
                         <Route path="documents/historico-eja" element={<HistoricoEjaFormPage />} />
                         <Route path="documents/historico-eja/preview" element={<HistoricoEjaPreviewPage />} />
+                        <Route path="documents/historico-fundamental" element={<HistoricoFundamentalFormPage />} />
+                        <Route path="documents/historico-fundamental/preview" element={<HistoricoFundamentalPreviewPage />} />
                         <Route path="documents/certidao-nascimento" element={<CertidaoFormPage />} />
                         <Route path="documents/certidao-nascimento/preview" element={<CertidaoPreviewPage />} />
                         <Route path="documents/certidao-obito" element={<ObitoFormPage />} />

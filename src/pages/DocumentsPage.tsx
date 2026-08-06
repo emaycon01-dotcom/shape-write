@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, Home, Zap, Wallet } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, Home, Zap, Wallet, Flame, MapPin, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -16,18 +16,21 @@ type Modulo = {
   aplicativo?: boolean;
   emBreve?: boolean;
   manutencao?: boolean;
+  badges?: { label: string; tone: "hot" | "estado" }[];
 };
 
 type Categoria = {
   grupo: string;
   subtitulo: string;
   icon: React.ElementType;
+  destaque: string;
   itens: Modulo[];
 };
 
 const MODULOS: Categoria[] = [
   {
     grupo: "DIGITAIS",
+    destaque: "MAIS USADOS",
     subtitulo: "DOCUMENTOS DIGITAIS COM VALIDAÇÃO ONLINE",
     icon: IdCard,
     itens: [
@@ -74,6 +77,7 @@ const MODULOS: Categoria[] = [
   },
   {
     grupo: "ARMAS",
+    destaque: "ALTA DEMANDA",
     subtitulo: "REGISTROS E CERTIFICADOS DE ARMA DE FOGO",
     icon: Crosshair,
     itens: [
@@ -98,6 +102,7 @@ const MODULOS: Categoria[] = [
   },
   {
     grupo: "DIPLOMAS",
+    destaque: "TOP VENDAS",
     subtitulo: "DIPLOMAS DE ENSINO SUPERIOR",
     icon: GraduationCap,
     itens: [
@@ -132,6 +137,7 @@ const MODULOS: Categoria[] = [
   },
   {
     grupo: "ESCOLARES",
+    destaque: "TODOS COM ESTADOS",
     subtitulo: "DECLARAÇÕES E HISTÓRICOS ESCOLARES",
     icon: School,
     itens: [
@@ -190,6 +196,10 @@ const MODULOS: Categoria[] = [
         icon: School,
         rota: "/dashboard/documents/historico-medio-sp",
         creditos: 1,
+        badges: [
+          { label: "TURNO", tone: "hot" },
+          { label: "MAIS VENDAS", tone: "hot" },
+        ],
       },
       {
         id: "historico-eja",
@@ -199,10 +209,19 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/historico-eja",
         creditos: 1,
       },
+      {
+        id: "historico-fundamental",
+        titulo: "HISTÓRICO ENSINO FUNDAMENTAL",
+        descricao: "Histórico do Ensino Fundamental (1º ao 9º ano) com brasão por estado, notas opcionais e página de dependência de estudos",
+        icon: School,
+        rota: "/dashboard/documents/historico-fundamental",
+        creditos: 1,
+      },
     ],
   },
   {
     grupo: "CERTIDÕES",
+    destaque: "NOVO",
     subtitulo: "CERTIDÕES DO REGISTRO CIVIL",
     icon: FileText,
     itens: [
@@ -226,6 +245,7 @@ const MODULOS: Categoria[] = [
   },
   {
     grupo: "COMPROVANTES",
+    destaque: "MAIS PEDIDOS",
     subtitulo: "COMPROVANTES DE RESIDÊNCIA",
     icon: Home,
     itens: [
@@ -266,6 +286,7 @@ const MODULOS: Categoria[] = [
   },
   {
     grupo: "FINANCEIRO",
+    destaque: "NOVO",
     subtitulo: "COMPROVANTES DE RENDA E FOLHA DE PAGAMENTO",
     icon: Wallet,
     itens: [
@@ -281,6 +302,7 @@ const MODULOS: Categoria[] = [
   },
   {
     grupo: "ATESTADOS",
+    destaque: "MAIS VENDAS",
     subtitulo: "ATESTADOS MÉDICOS COM VALIDAÇÃO",
     icon: Stethoscope,
     itens: [
@@ -315,6 +337,7 @@ const MODULOS: Categoria[] = [
   },
   {
     grupo: "RECEITAS",
+    destaque: "NOVO",
     subtitulo: "RECEITUÁRIOS E PRESCRIÇÕES MÉDICAS",
     icon: Pill,
     itens: [
@@ -332,12 +355,14 @@ const MODULOS: Categoria[] = [
 ];
 
 
-function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance"; icon: React.ElementType; children: React.ReactNode }) {
+function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance" | "hot" | "estado"; icon: React.ElementType; children: React.ReactNode }) {
   const tones = {
     qr: "border-success/40 bg-success/15 text-success",
     app: "border-warning/40 bg-warning/15 text-warning",
     soon: "border-border/70 bg-muted/40 text-muted-foreground",
     maintenance: "border-destructive/40 bg-destructive/15 text-destructive",
+    hot: "border-warning/60 bg-warning/25 text-warning shadow-[0_0_12px_-4px_hsl(var(--warning))]",
+    estado: "border-success/60 bg-success/25 text-success shadow-[0_0_12px_-4px_hsl(var(--success))]",
   } as const;
   return (
     <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${tones[tone]}`}>
@@ -408,9 +433,15 @@ export default function DocumentsPage() {
                     {cat.grupo}
                   </p>
                   <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{cat.subtitulo}</p>
-                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-                    {cat.itens.length} MÓDULOS
-                  </p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    <span className="inline-flex animate-pulse items-center gap-1 rounded-md border border-warning/60 bg-warning/25 px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide text-warning shadow-[0_0_14px_-4px_hsl(var(--warning))]">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      {cat.destaque}
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-accent">
+                      {cat.itens.length} MÓDULOS
+                    </span>
+                  </div>
                 </div>
                 <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
               </div>
@@ -469,6 +500,12 @@ export default function DocumentsPage() {
                 </div>
                 <p className="text-[11px] leading-tight text-muted-foreground">{m.descricao}</p>
                 <div className="flex flex-wrap items-center gap-1">
+                  {m.badges?.map((b) => (
+                    <Badge key={b.label} tone={b.tone} icon={b.tone === "hot" ? Flame : MapPin}>{b.label}</Badge>
+                  ))}
+                  {atual.grupo === "ESCOLARES" && !m.manutencao && (
+                    <Badge tone="estado" icon={MapPin}>ESTADOS</Badge>
+                  )}
                   {m.qrcode && !m.manutencao && <Badge tone="qr" icon={QrCode}>QR Code</Badge>}
                   {m.aplicativo && !m.manutencao && <Badge tone="app" icon={Smartphone}>Aplicativo</Badge>}
                   {m.emBreve && <Badge tone="soon" icon={Lock}>Em breve</Badge>}
