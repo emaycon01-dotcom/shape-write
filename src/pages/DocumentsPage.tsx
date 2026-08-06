@@ -151,7 +151,7 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/declaracao-ete",
         creditos: 1,
       },
-
+      {
         id: "historico-escolar",
         titulo: "HISTÓRICO + CERTIFICADO",
         descricao: "Histórico do Ensino Médio com certificado de conclusão e brasão do estado",
