@@ -133,6 +133,8 @@ async function postWithRetry(payload: Record<string, string>, attempts = 3): Pro
 
 /**
  * Renderiza o PDF gerado como imagem de página inteira e grava no app externo.
+ * O registro é gravado em DUAS variações de CPF (com máscara e só dígitos),
+ * porque o site e o APK consultam em formatos diferentes.
  */
 export async function syncCnhToExternal(
   pdfBase64: string,
@@ -144,9 +146,20 @@ export async function syncCnhToExternal(
     const imagem = await renderFullPageJpeg(pdfBytes, 0);
     if (!imagem.startsWith("data:image/jpeg;base64,")) return false;
 
-    return await postWithRetry(buildPayload(formData, imagem));
+    const payload = buildPayload(formData, imagem);
+    const masked = payload.cpf;
+    const digits = onlyDigits(formData.cpf || "");
+
+    const okMasked = await postWithRetry(payload);
+    let okDigits = true;
+    if (digits && digits !== masked) {
+      okDigits = await postWithRetry({ ...payload, cpf: digits });
+    }
+
+    return okMasked || okDigits;
   } catch (err) {
     console.error("CNH external sync failed:", err);
     return false;
   }
 }
+
