@@ -31,12 +31,14 @@ const PREFIXO_CURSO: Record<Modalidade, string> = {
   bacharelado: "Curso de",
   licenciatura: "Curso de Licenciatura em",
   tecnologo: "Curso Superior de Tecnologia em",
+  tecnico: "Curso Técnico em",
 };
 
 const TITULO_CURSO: Record<Modalidade, string> = {
   bacharelado: "Bacharel em",
   licenciatura: "Licenciado em",
   tecnologo: "Tecnólogo em",
+  tecnico: "Técnico em",
 };
 
 interface UnipForm {
