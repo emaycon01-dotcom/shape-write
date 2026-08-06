@@ -11,6 +11,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "diploma-unip": "/dashboard/documents/diploma-unip",
   "diploma-anhanguera": "/dashboard/documents/diploma-anhanguera",
   "craf": "/dashboard/documents/craf",
+  "porte": "/dashboard/documents/porte",
 
   "cha-amador": "/dashboard/documents/cha-amador",
   "cnh-nautica": "/dashboard/documentos-fisicos/carteirinhas/cnh-nautica",
@@ -41,6 +42,7 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "diploma-unip": "Diploma UNIP",
   "diploma-anhanguera": "Diploma Anhanguera",
   "craf": "CRAF - Registro de Arma",
+  "porte": "Porte Federal de Arma",
 
   "cha-amador": "CHÁ Amador Digital",
   "cnh-nautica": "Arrais Amador Físico",
