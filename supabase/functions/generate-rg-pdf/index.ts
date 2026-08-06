@@ -537,15 +537,19 @@ serve(async (req) => {
 
     // Regra crítica: só imprime o QR Code depois de confirmar o cadastro
     if (!isPreview && !validacao.registered) {
+      const authFail = /token de autentica/i.test(validacao.error ?? "");
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Falha ao registrar o documento na validação. Tente novamente.",
+          error: authFail
+            ? "O portal de validação recusou a credencial do RG (token expirado/rotacionado). Atualize o token de validação para voltar a gerar."
+            : "Falha ao registrar o documento na validação. Tente novamente.",
           detail: validacao.error ?? null,
         }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
 
 
     const html = buildRgHtml(data, body.field_positions, validacao.qrCodeUrl);
