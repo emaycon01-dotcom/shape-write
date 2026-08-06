@@ -119,43 +119,55 @@ export async function registerValidationDocument(
 
 
 
-  // Chave exclusiva desta integração. O nome anterior era compartilhado com
-  // outros portais e uma rotação alheia passou a provocar 401 em todo RG.
-  const token = Deno.env.get("RG_VALIDACAO_API_TOKEN") || Deno.env.get("VALIDACAO_API_TOKEN") || "";
+  // O portal já alternou entre a credencial exclusiva do RG e a credencial
+  // principal desta mesma API. Mantemos ambas somente no servidor e, em caso
+  // de 401, tentamos a segunda antes de interromper a geração. Isso evita que
+  // uma rotação parcial do portal derrube o RG sem jamais expor os tokens.
+  const tokens = Array.from(new Set([
+    Deno.env.get("RG_VALIDACAO_API_TOKEN") || "",
+    Deno.env.get("VALIDACAO_API_TOKEN") || "",
+  ].filter(Boolean)));
 
-  if (!token) {
+  if (tokens.length === 0) {
     return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: "Token de validação não configurado." };
   }
 
   try {
-    const res = await fetch(REGISTER_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-API-Token": token },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(10000),
-    });
+    let lastError = "Token de autenticação inválido.";
+    for (const [index, token] of tokens.entries()) {
+      const res = await fetch(REGISTER_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-API-Token": token },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10000),
+      });
 
-    const text = await res.text();
-    if (!res.ok) {
-      console.error(`register-document falhou [${res.status}]: ${text}`);
-      return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
+      const text = await res.text();
+      if (!res.ok) {
+        lastError = text;
+        console.error(`register-document falhou [${res.status}] credencial=${index + 1}/${tokens.length}: ${text}`);
+        if (res.status === 401 && index < tokens.length - 1) continue;
+        return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
+      }
+
+      let json: { qr_code_url?: string; success?: boolean } = {};
+      try {
+        json = JSON.parse(text);
+      } catch { /* resposta não-JSON */ }
+
+      if (json.success === false) {
+        return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
+      }
+
+      return {
+        documentoId,
+        // A API pode devolver um domínio placeholder — usamos sempre o oficial
+        qrCodeUrl: fallbackUrl,
+        registered: true,
+      };
     }
 
-    let json: { qr_code_url?: string; success?: boolean } = {};
-    try {
-      json = JSON.parse(text);
-    } catch { /* resposta não-JSON */ }
-
-    if (json.success === false) {
-      return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
-    }
-
-    return {
-      documentoId,
-      // A API pode devolver um domínio placeholder — usamos sempre o oficial
-      qrCodeUrl: fallbackUrl,
-      registered: true,
-    };
+    return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: lastError };
   } catch (err) {
     console.error("register-document erro de rede:", err);
     return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: String(err) };
