@@ -41,7 +41,7 @@ export function buildCorpoEscolaridade(d: Record<string, string>): string {
 }
 
 export function buildDeclaracaoEscolaridadeHtml(d: Record<string, string>) {
-  const brasao = d.brasao_base64 || "";
+  const brasao = d.template_brasao_base64 || "";
   const assinatura = d.assinatura_base64 || "";
   const dataLocal = `${(d.cidade || "").trim()}, ${dataPorExtenso(d.data_emissao || "")}`;
 
@@ -116,7 +116,7 @@ serve(async (req) => {
     const keys = [
       "nome_aluno", "rg", "cpf", "nivel_ensino", "ano_conclusao",
       "escola", "escola_curta", "endereco", "estado", "estado_nome",
-      "cidade", "data_emissao", "brasao_base64", "assinatura_base64",
+      "cidade", "data_emissao", "template_brasao_base64", "assinatura_base64",
     ];
 
     const data: Record<string, string> = {};
