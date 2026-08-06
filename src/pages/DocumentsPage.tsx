@@ -191,6 +191,14 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/historico-medio-sp",
         creditos: 1,
       },
+      {
+        id: "historico-eja",
+        titulo: "HISTÓRICO/CERTIFICADO EJA",
+        descricao: "Histórico e certificado do EJA (Ensino Médio) com brasão por estado e notas opcionais",
+        icon: School,
+        rota: "/dashboard/documents/historico-eja",
+        creditos: 1,
+      },
     ],
   },
   {
