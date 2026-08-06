@@ -154,6 +154,7 @@ export default function Ficha19FormPage() {
   const [modo, setModo] = useState<Modo>(navState?.modo === "manual" ? "manual" : "auto");
   const [form, setForm] = useState<FormState>(initial);
   const [discs, setDiscs] = useState<Disciplina[]>(DISCIPLINAS_BASE);
+  const [notasAbertas, setNotasAbertas] = useState(false);
   const [assinaturaSecretario, setAssinaturaSecretario] = useState<string>("");
   const [assinaturaDiretor, setAssinaturaDiretor] = useState<string>("");
   const [loading, setLoading] = useState(false);
