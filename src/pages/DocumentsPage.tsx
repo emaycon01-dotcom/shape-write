@@ -159,6 +159,14 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/historico-escolar",
         creditos: 1,
       },
+      {
+        id: "certificado-medio",
+        titulo: "CERTIFICADO + HISTÓRICO (ENSINO MÉDIO)",
+        descricao: "Certificado e histórico escolar em página única, com notas por série e brasão de todos os estados",
+        icon: School,
+        rota: "/dashboard/documents/certificado-medio",
+        creditos: 1,
+      },
     ],
   },
   {
