@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
 export interface Document {
   id: string;
@@ -45,17 +46,23 @@ async function uploadPdfToStorage(pdfDataUrl: string, docId: string, userId?: st
     const uid = userId || (await supabase.auth.getUser()).data.user?.id;
     if (!uid) return null;
 
-    const res = await fetch(pdfDataUrl);
-    const blob = await res.blob();
+    const blob = pdfDataUrlToBlob(pdfDataUrl);
+    if (!blob) throw new Error("PDF inválido para armazenamento.");
     // Caminho isolado por usuário: garante que ninguém acesse o PDF de outro
     const filePath = `${uid}/${docId}.pdf`;
 
-    const { error } = await supabase.storage
-      .from("documents-pdf")
-      .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
+    let uploadError: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const { error } = await supabase.storage
+        .from("documents-pdf")
+        .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
+      uploadError = error;
+      if (!error) break;
+      await new Promise((resolve) => window.setTimeout(resolve, 400 * (attempt + 1)));
+    }
 
-    if (error) {
-      console.error("Upload error:", error);
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
       return null;
     }
 

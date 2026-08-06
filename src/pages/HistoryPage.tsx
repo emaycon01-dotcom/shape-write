@@ -113,6 +113,10 @@ export default function HistoryPage() {
   const [deleteDoc, setDeleteDoc] = useState<Document | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const isIosSafari = () =>
+    /iP(ad|hone|od)/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
   // Busca o PDF direto do armazenamento (blob local) — nada de abrir link externo
   const fetchPdfBlob = async (doc: Document): Promise<Blob | null> => {
     const paths = [doc.userId ? `${doc.userId}/${doc.id}.pdf` : null, `${doc.id}.pdf`].filter(Boolean) as string[];
@@ -132,27 +136,45 @@ export default function HistoryPage() {
   };
 
   const handleView = async (doc: Document) => {
+    // A nova aba precisa nascer no gesto do toque; depois de um await o Safari
+    // considera window.open um popup e bloqueia silenciosamente.
+    const pendingTab = isIosSafari() ? window.open("about:blank", "_blank") : null;
     const blob = await fetchPdfBlob(doc);
     if (!blob) {
+      pendingTab?.close();
       toast({ title: "Não foi possível abrir o PDF", variant: "destructive" });
       return;
     }
     const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
-    window.open(blobUrl, "_blank");
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    if (pendingTab) pendingTab.location.href = blobUrl;
+    else window.open(blobUrl, "_blank", "noopener,noreferrer");
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 120000);
   };
 
   const handleDownload = async (doc: Document) => {
+    const pendingTab = isIosSafari() ? window.open("about:blank", "_blank") : null;
     const blob = await fetchPdfBlob(doc);
     if (!blob) {
+      pendingTab?.close();
       toast({ title: "Erro ao baixar PDF", variant: "destructive" });
       return;
     }
     const blobUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+    if (pendingTab) {
+      // iOS ignora `download` para Blob. Abrir o PDF permite Salvar em Arquivos
+      // ou compartilhar pelo visualizador nativo, sem parecer que o botão falhou.
+      pendingTab.location.href = blobUrl;
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 120000);
+      toast({ title: "PDF aberto", description: "Use Compartilhar para salvar no celular." });
+      return;
+    }
     const link = document.createElement("a");
     link.href = blobUrl;
     link.download = `${doc.type}-${doc.id}.pdf`;
+    link.style.display = "none";
+    document.body.appendChild(link);
     link.click();
+    link.remove();
     setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
     toast({ title: "PDF baixado com sucesso!" });
   };

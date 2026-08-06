@@ -480,6 +480,8 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
         { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
         { cap: RENDER_SCALE, bandDivisor: 1, blobs: false },
         { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
+         { cap: RENDER_SCALE, bandDivisor: 4, blobs: false },
+         { cap: RENDER_SCALE, bandDivisor: 8, blobs: false },
       ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor, blobs } of attempts) {
