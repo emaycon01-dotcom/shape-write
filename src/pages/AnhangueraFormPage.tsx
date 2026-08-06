@@ -32,6 +32,7 @@ const TITULO_CURSO: Record<Modalidade, (curso: string, fem: boolean) => string> 
   bacharelado: (c, f) => `${f ? "Bacharela" : "Bacharel"} em ${c}`,
   licenciatura: (c, f) => `${f ? "Licenciada" : "Licenciado"} em ${c}`,
   tecnologo: (c, f) => `${f ? "Tecnóloga" : "Tecnólogo"} em ${c}`,
+  tecnico: (c, f) => `${f ? "Técnica" : "Técnico"} em ${c}`,
 };
 
 interface AnhangueraForm {
