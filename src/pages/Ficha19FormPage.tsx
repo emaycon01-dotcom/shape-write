@@ -689,7 +689,6 @@ export default function Ficha19FormPage() {
           </div>
 
           <div className="space-y-2">
-          <div className="space-y-2">
             <button
               type="button"
               onClick={() => setNotasAbertas((v) => !v)}
