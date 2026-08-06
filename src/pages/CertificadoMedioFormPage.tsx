@@ -538,13 +538,28 @@ export default function CertificadoMedioFormPage() {
           </div>
         </div>
 
-        {/* NOTAS */}
+        {/* NOTAS (opcional) */}
         <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={BookOpen} title="Base Nacional Comum" />
-          <TabelaDisciplinas grupo="comum" linhas={comum} />
-          <SectionHeader icon={BookOpen} title="Base diversificada" />
-          <TabelaDisciplinas grupo="div" linhas={diversificada} />
+          <button
+            type="button"
+            onClick={() => setNotasAbertas((v) => !v)}
+            className="flex w-full items-center justify-between rounded-lg border border-border/60 bg-secondary/40 px-3 py-2 text-left"
+          >
+            <span className="text-sm font-semibold text-primary">
+              Notas e carga horária <span className="font-normal text-muted-foreground">(opcional)</span>
+            </span>
+            <span className="text-xs text-muted-foreground">{notasAbertas ? "Ocultar" : "Preencher"}</span>
+          </button>
+          {notasAbertas && (
+            <>
+              <SectionHeader icon={BookOpen} title="Base Nacional Comum" />
+              <TabelaDisciplinas grupo="comum" linhas={comum} />
+              <SectionHeader icon={BookOpen} title="Base diversificada" />
+              <TabelaDisciplinas grupo="div" linhas={diversificada} />
+            </>
+          )}
         </div>
+
 
         {/* ESTABELECIMENTOS */}
         <div className="glass space-y-4 rounded-xl p-6">
