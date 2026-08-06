@@ -175,6 +175,14 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/ficha19",
         creditos: 1,
       },
+      {
+        id: "declaracao-escolaridade",
+        titulo: "DECLARAÇÃO DE ESCOLARIDADE",
+        descricao: "Declaração de conclusão com brasão de todos os estados e upload do carimbo/assinatura",
+        icon: School,
+        rota: "/dashboard/documents/declaracao-escolaridade",
+        creditos: 1,
+      },
     ],
   },
   {
