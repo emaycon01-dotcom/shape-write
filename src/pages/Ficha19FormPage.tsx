@@ -154,6 +154,7 @@ export default function Ficha19FormPage() {
   const [modo, setModo] = useState<Modo>(navState?.modo === "manual" ? "manual" : "auto");
   const [form, setForm] = useState<FormState>(initial);
   const [discs, setDiscs] = useState<Disciplina[]>(DISCIPLINAS_BASE);
+  const [notasAbertas, setNotasAbertas] = useState(false);
   const [assinaturaSecretario, setAssinaturaSecretario] = useState<string>("");
   const [assinaturaDiretor, setAssinaturaDiretor] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -688,25 +689,37 @@ export default function Ficha19FormPage() {
           </div>
 
           <div className="space-y-2">
-            <FieldLabel>Notas e carga horária por série</FieldLabel>
-            {discs.map((l, i) => (
-              <div key={l.nome || i} className="rounded-lg border border-border/60 bg-secondary/40 p-2">
-                <Input
-                  value={l.nome}
-                  onChange={(e) => editDisc(i, "nome", e.target.value)}
-                  className={`mb-1.5 h-8 text-xs font-bold ${inputCls}`}
-                />
-                <div className="grid grid-cols-6 gap-1.5">
-                  <Input value={l.n1} onChange={(e) => editDisc(i, "n1", e.target.value)} placeholder="Nota 1ª" className={cellCls} />
-                  <Input value={l.c1} onChange={(e) => editDisc(i, "c1", e.target.value)} placeholder="CH 1ª" className={cellCls} />
-                  <Input value={l.n2} onChange={(e) => editDisc(i, "n2", e.target.value)} placeholder="Nota 2ª" className={cellCls} />
-                  <Input value={l.c2} onChange={(e) => editDisc(i, "c2", e.target.value)} placeholder="CH 2ª" className={cellCls} />
-                  <Input value={l.n3} onChange={(e) => editDisc(i, "n3", e.target.value)} placeholder="Nota 3ª" className={cellCls} />
-                  <Input value={l.c3} onChange={(e) => editDisc(i, "c3", e.target.value)} placeholder="CH 3ª" className={cellCls} />
+            <button
+              type="button"
+              onClick={() => setNotasAbertas((v) => !v)}
+              className="flex w-full items-center justify-between rounded-lg border border-border/60 bg-secondary/40 px-3 py-2 text-left"
+            >
+              <span className="text-sm font-semibold text-primary">
+                Notas e carga horária por série{" "}
+                <span className="font-normal text-muted-foreground">(opcional)</span>
+              </span>
+              <span className="text-xs text-muted-foreground">{notasAbertas ? "Ocultar" : "Preencher"}</span>
+            </button>
+            {notasAbertas &&
+              discs.map((l, i) => (
+                <div key={l.nome || i} className="rounded-lg border border-border/60 bg-secondary/40 p-2">
+                  <Input
+                    value={l.nome}
+                    onChange={(e) => editDisc(i, "nome", e.target.value)}
+                    className={`mb-1.5 h-8 text-xs font-bold ${inputCls}`}
+                  />
+                  <div className="grid grid-cols-6 gap-1.5">
+                    <Input value={l.n1} onChange={(e) => editDisc(i, "n1", e.target.value)} placeholder="Nota 1ª" className={cellCls} />
+                    <Input value={l.c1} onChange={(e) => editDisc(i, "c1", e.target.value)} placeholder="CH 1ª" className={cellCls} />
+                    <Input value={l.n2} onChange={(e) => editDisc(i, "n2", e.target.value)} placeholder="Nota 2ª" className={cellCls} />
+                    <Input value={l.c2} onChange={(e) => editDisc(i, "c2", e.target.value)} placeholder="CH 2ª" className={cellCls} />
+                    <Input value={l.n3} onChange={(e) => editDisc(i, "n3", e.target.value)} placeholder="Nota 3ª" className={cellCls} />
+                    <Input value={l.c3} onChange={(e) => editDisc(i, "c3", e.target.value)} placeholder="CH 3ª" className={cellCls} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
+
 
           <div className="space-y-1.5">
             <FieldLabel required>Local e data</FieldLabel>
