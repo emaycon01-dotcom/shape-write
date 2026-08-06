@@ -86,9 +86,9 @@ export default function DeclaracaoEtePreviewPage() {
 
       await addDocument({
         name: formData.nome_aluno || "",
-        identification: formData.escola || "",
+        identification: formData.cpf || "",
         date: formData.data_emissao || "",
-        description: `Declaração de Matrícula - ${formData.cidade || ""} - ${formData.uf || ""}`,
+        description: `Declaração de Matrícula (ETE) - ${formData.curso || ""} - ${formData.cidade || ""}`,
         additionalInfo: JSON.stringify(formData),
         type: "declaracao-ete",
         userId: user.id,
