@@ -183,6 +183,14 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/declaracao-escolaridade",
         creditos: 1,
       },
+      {
+        id: "historico-medio-sp",
+        titulo: "HISTÓRICO ESCOLAR (ENSINO MÉDIO)",
+        descricao: "Histórico com brasão por estado, notas opcionais e turno (manhã, tarde, noite, integral)",
+        icon: School,
+        rota: "/dashboard/documents/historico-medio-sp",
+        creditos: 1,
+      },
     ],
   },
   {
