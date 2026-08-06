@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { PenLine, Upload, FileSignature } from "lucide-react";
 
-const FORM_ROUTE = "/dashboard/documents/ficha19";
+const FORM_ROUTE = "/dashboard/documents/ficha19/form";
 
 export default function Ficha19ModePage() {
   const navigate = useNavigate();
