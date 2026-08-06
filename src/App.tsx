@@ -84,6 +84,8 @@ const DeclaracaoPreviewPage = lazy(() => import("./pages/DeclaracaoPreviewPage")
 const ReceitaFormPage = lazy(() => import("./pages/ReceitaFormPage"));
 const CrafFormPage = lazy(() => import("./pages/CrafFormPage"));
 const CrafPreviewPage = lazy(() => import("./pages/CrafPreviewPage"));
+const PorteFormPage = lazy(() => import("./pages/PorteFormPage"));
+const PortePreviewPage = lazy(() => import("./pages/PortePreviewPage"));
 const ReceitaPreviewPage = lazy(() => import("./pages/ReceitaPreviewPage"));
 
 
@@ -185,6 +187,8 @@ const App = () => {
                         <Route path="documents/receita-medica/preview" element={<ReceitaPreviewPage />} />
                         <Route path="documents/craf" element={<CrafFormPage />} />
                         <Route path="documents/craf/preview" element={<CrafPreviewPage />} />
+                        <Route path="documents/porte" element={<PorteFormPage />} />
+                        <Route path="documents/porte/preview" element={<PortePreviewPage />} />
                         <Route path="history" element={<HistoryPage />} />
                       </Route>
 
