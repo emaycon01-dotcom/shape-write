@@ -109,8 +109,10 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
         const base = page.getViewport({ scale: 1 });
         const availableWidth = Math.max(280, host.clientWidth);
-        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-        let scale = Math.min(2.25, (availableWidth * pixelRatio) / base.width);
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+        // Supersampling: rasteriza acima da densidade da tela para que zoom e
+        // textos pequenos (MRZ, campos do cartão) fiquem nítidos como no PDF.
+        let scale = Math.min(5, ((availableWidth * pixelRatio) / base.width) * 1.75);
 
         // Nunca ultrapassa o orçamento de pixels do aparelho — acima disso o
         // navegador descarta o bitmap e a tela sai preta/vazia.
