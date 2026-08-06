@@ -48,7 +48,7 @@ function pixelBudget(): number {
  */
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const resumeTimerRef = useRef<number>();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [generationActive, setGenerationActive] = useState(false);
@@ -59,9 +59,6 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       if (state.generating) {
         setGenerationActive(true);
       } else {
-        // `invokeGeneratePdf` encerra o loading imediatamente antes de entregar
-        // o PDF final à página. Este pequeno atraso evita remontar primeiro o
-        // preview antigo e, logo depois, o final (duas renderizações seguidas).
         resumeTimerRef.current = window.setTimeout(() => setGenerationActive(false), 120);
       }
     });
@@ -72,15 +69,20 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   }, []);
 
   useEffect(() => {
-    // Durante a geração final o canvas do preview concorria com os canvases de
-    // 576 DPI. Liberá-lo temporariamente reduz o pico de memória; ao concluir,
-    // o preview é montado novamente com o PDF final recebido pela página.
-    if (generationActive) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.remove();
-        canvasRef.current = null;
+    const clearStage = () => {
+      const stage = stageRef.current;
+      if (stage) {
+        stage.querySelectorAll("canvas").forEach((c) => {
+          c.width = 0;
+          c.height = 0;
+        });
+        stage.remove();
+        stageRef.current = null;
       }
+    };
+
+    if (generationActive) {
+      clearStage();
       setStatus("loading");
       return;
     }
@@ -95,67 +97,72 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         const loadingTask = pdfjs.getDocument({ data: dataUrlToBytes(pdfDataUrl) });
         destroyLoadingTask = () => loadingTask.destroy();
         const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(1);
         if (cancelled) return;
 
         const host = hostRef.current;
         if (!host) throw new Error("Canvas indisponível");
 
-        // Um canvas NOVO a cada documento. Reaproveitar o mesmo elemento (que
-        // é zerado durante a geração) fazia o WebKit/iOS desenhar o PDF final
-        // com transform inválido — página invertida e deslocada.
-        const canvas = document.createElement("canvas");
-        canvas.setAttribute("aria-label", title);
-        canvas.className = "invisible";
+        // Um container NOVO a cada documento. Reaproveitar elementos existentes
+        // fazia o WebKit/iOS desenhar com transform inválido.
+        const stage = document.createElement("div");
+        stage.className = "flex w-full flex-col items-center gap-3 py-1";
 
-        const base = page.getViewport({ scale: 1 });
+        const pageCount = pdf.numPages;
         const availableWidth = Math.max(280, host.clientWidth);
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
-        // Supersampling: rasteriza acima da densidade da tela para que zoom e
-        // textos pequenos (MRZ, campos do cartão) fiquem nítidos como no PDF.
-        let scale = Math.min(5, ((availableWidth * pixelRatio) / base.width) * 1.75);
+        // Orçamento dividido entre as páginas para não estourar memória.
+        const budget = pixelBudget() / Math.max(1, pageCount);
 
-        // Nunca ultrapassa o orçamento de pixels do aparelho — acima disso o
-        // navegador descarta o bitmap e a tela sai preta/vazia.
-        const budget = pixelBudget();
-        const area = base.width * base.height * scale * scale;
-        if (area > budget) scale *= Math.sqrt(budget / area);
-        scale = Math.max(0.4, scale);
+        for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+          const page = await pdf.getPage(pageNumber);
+          if (cancelled) return;
 
-        let rendered = false;
-        for (let attempt = 0; attempt < 3 && !rendered; attempt += 1) {
-          const viewport = page.getViewport({ scale: scale / (attempt === 0 ? 1 : attempt * 2) });
-          try {
-            const context = canvas.getContext("2d", { alpha: false });
-            if (!context) throw new Error("Contexto 2D indisponível");
-            canvas.width = Math.ceil(viewport.width);
-            canvas.height = Math.ceil(viewport.height);
-            canvas.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
-            context.setTransform(1, 0, 0, 1, 0, 0);
-            context.fillStyle = "#ffffff";
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            await page.render({ canvasContext: context, viewport }).promise;
+          const canvas = document.createElement("canvas");
+          canvas.setAttribute("aria-label", `${title} — página ${pageNumber}`);
+          canvas.className = "invisible";
 
-            rendered = true;
-          } catch (err) {
-            if (attempt === 2) throw err;
-            await new Promise((r) => setTimeout(r, 120));
+          const base = page.getViewport({ scale: 1 });
+          // Supersampling: rasteriza acima da densidade da tela para que textos
+          // pequenos (MRZ, notas, campos) fiquem nítidos como no PDF final.
+          let scale = Math.min(6, ((availableWidth * pixelRatio) / base.width) * 2.25);
+          const area = base.width * base.height * scale * scale;
+          if (area > budget) scale *= Math.sqrt(budget / area);
+          scale = Math.max(0.4, scale);
+
+          let rendered = false;
+          for (let attempt = 0; attempt < 3 && !rendered; attempt += 1) {
+            const viewport = page.getViewport({ scale: scale / (attempt === 0 ? 1 : attempt * 2) });
+            try {
+              const context = canvas.getContext("2d", { alpha: false });
+              if (!context) throw new Error("Contexto 2D indisponível");
+              canvas.width = Math.ceil(viewport.width);
+              canvas.height = Math.ceil(viewport.height);
+              canvas.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
+              context.setTransform(1, 0, 0, 1, 0, 0);
+              context.fillStyle = "#ffffff";
+              context.fillRect(0, 0, canvas.width, canvas.height);
+              await page.render({ canvasContext: context, viewport }).promise;
+              rendered = true;
+            } catch (err) {
+              if (attempt === 2) throw err;
+              await new Promise((r) => setTimeout(r, 120));
+            }
+          }
+
+          if (cancelled) return;
+          canvas.className = "block h-auto max-w-full bg-white shadow-sm";
+          stage.appendChild(canvas);
+          page.cleanup();
+
+          if (pageNumber === 1) {
+            clearStage();
+            stageRef.current = stage;
+            host.appendChild(stage);
+            setStatus("ready");
+            requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
           }
         }
 
-        if (cancelled) return;
-
-        canvas.className = "block h-auto max-w-full bg-white";
-        const previous = canvasRef.current;
-        if (previous) previous.remove();
-        canvasRef.current = canvas;
-        host.appendChild(canvas);
-
-        setStatus("ready");
-        // Só libera a transição quando o canvas novo já está no DOM e o browser
-        // teve oportunidade de apresentá-lo na tela.
-        requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
-        page.cleanup();
         await pdf.destroy();
       } catch (error) {
         console.error("Falha ao renderizar preview do PDF:", error);
@@ -170,13 +177,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     return () => {
       cancelled = true;
       if (destroyLoadingTask) void destroyLoadingTask();
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.width = 0;
-        canvas.height = 0;
-        canvas.remove();
-        canvasRef.current = null;
-      }
+      clearStage();
     };
   }, [pdfDataUrl, generationActive, title]);
 
@@ -202,4 +203,5 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     </div>
   );
 }
+
 
