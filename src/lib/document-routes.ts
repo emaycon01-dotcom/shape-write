@@ -23,6 +23,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "exame-toxicologico": "/dashboard/documents/exame-toxicologico",
   "historico-escolar": "/dashboard/documents/historico-escolar",
   "certificado-escolar": "/dashboard/documents/certificado-escolar",
+  "certificado-medio": "/dashboard/documents/certificado-medio",
   "cpf-fisico": "/dashboard/documentos-fisicos/carteirinhas/cpf-fisico",
   "operador-maquinas-digital": "/dashboard/documentos-fisicos/carteirinhas/operador-maquinas-digital",
   "cedula-policia-pe": "/dashboard/documentos-fisicos/carteirinhas/cedula-policia-pe",
