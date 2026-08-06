@@ -1,14 +1,15 @@
 /**
- * Catálogo de cursos superiores usado no módulo Diploma.
- * Três modalidades: Bacharelado, Licenciatura e Tecnólogo (CST).
+ * Catálogo de cursos usado nos módulos de Diploma.
+ * Quatro modalidades: Bacharelado, Licenciatura, Tecnólogo (CST) e Técnico.
  */
 
-export type Modalidade = "bacharelado" | "licenciatura" | "tecnologo";
+export type Modalidade = "bacharelado" | "licenciatura" | "tecnologo" | "tecnico";
 
 export const MODALIDADES: { id: Modalidade; label: string; titulo: string }[] = [
   { id: "bacharelado", label: "Bacharelado", titulo: "BACHAREL (A)" },
   { id: "licenciatura", label: "Licenciatura", titulo: "LICENCIADO (A)" },
   { id: "tecnologo", label: "Tecnólogo (CST)", titulo: "TECNÓLOGO (A)" },
+  { id: "tecnico", label: "Técnico", titulo: "TÉCNICO (A)" },
 ];
 
 export const CURSOS_BACHARELADO: string[] = [
