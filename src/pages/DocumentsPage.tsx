@@ -167,6 +167,14 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/certificado-medio",
         creditos: 1,
       },
+      {
+        id: "ficha19",
+        titulo: "CERTIFICADO + HISTÓRICO (FICHA 19)",
+        descricao: "Modelo Ficha 19 em duas páginas, com assinatura automática ou upload manual das duas assinaturas",
+        icon: School,
+        rota: "/dashboard/documents/ficha19",
+        creditos: 1,
+      },
     ],
   },
   {
