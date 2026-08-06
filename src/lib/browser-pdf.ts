@@ -486,6 +486,12 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
         { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
          { cap: RENDER_SCALE, bandDivisor: 4, blobs: false },
          { cap: RENDER_SCALE, bandDivisor: 8, blobs: false },
+         // Último recurso: só é alcançado quando TODAS as tentativas em 576 DPI
+         // já falharam (o usuário receberia "erro ao gerar"). Nenhuma geração
+         // que hoje funciona muda de qualidade.
+         { cap: 4, bandDivisor: 8, blobs: false },
+         { cap: 3, bandDivisor: 8, blobs: false },
+
       ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor, blobs } of attempts) {

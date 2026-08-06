@@ -220,13 +220,21 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         pdf_url: pdfUrl,
       };
 
-      const { data, error } = await supabase
-        .from("documents")
-        .insert(row)
-        .select()
-        .single();
+      // Falha de rede aqui NÃO pode invalidar uma geração já paga: o insert
+      // pode REJEITAR (não só devolver `error`) em conexões móveis instáveis,
+      // e a exceção subia até a tela de preview, que exibia "erro ao gerar"
+      // depois do crédito já ter sido descontado.
+      let data: unknown = null;
+      let error: unknown = null;
+      try {
+        const res = await supabase.from("documents").insert(row).select().single();
+        data = res.data;
+        error = res.error;
+      } catch (err) {
+        error = err;
+      }
 
-      if (error) {
+      if (error || !data) {
         console.error("Error inserting document:", error);
         const fallback: Document = {
           ...doc,
@@ -238,6 +246,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         };
         setDocuments((prev) => [fallback, ...prev]);
         return fallback;
+
       }
 
       const newDoc = mapRow(data);
