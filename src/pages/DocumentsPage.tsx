@@ -86,6 +86,14 @@ const MODULOS: Categoria[] = [
         creditos: 1,
         qrcode: true,
       },
+      {
+        id: "porte",
+        titulo: "PORTE FEDERAL DE ARMA",
+        descricao: "Autorização de porte de arma de fogo (MJSP / Polícia Federal / SINARM)",
+        icon: Crosshair,
+        rota: "/dashboard/documents/porte",
+        creditos: 1,
+      },
     ],
   },
   {
