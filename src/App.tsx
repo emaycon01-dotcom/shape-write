@@ -84,6 +84,8 @@ const DeclaracaoPreviewPage = lazy(() => import("./pages/DeclaracaoPreviewPage")
 const ReceitaFormPage = lazy(() => import("./pages/ReceitaFormPage"));
 const CrafFormPage = lazy(() => import("./pages/CrafFormPage"));
 const CrafPreviewPage = lazy(() => import("./pages/CrafPreviewPage"));
+const PorteFormPage = lazy(() => import("./pages/PorteFormPage"));
+const PortePreviewPage = lazy(() => import("./pages/PortePreviewPage"));
 const ReceitaPreviewPage = lazy(() => import("./pages/ReceitaPreviewPage"));
 
 
