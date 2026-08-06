@@ -155,7 +155,7 @@ export async function registerValidationDocument(
     }
     return {
       documentoId,
-      qrCodeUrl: `${VALIDACAO_BASE_URL}/atestado?token=${row.token}`,
+      qrCodeUrl: `${VALIDACAO_BASE_URL}/atestado?token=${row.token}&codigo=${row.codigo_acesso}`,
       token: row.token,
       registered: true,
     };
