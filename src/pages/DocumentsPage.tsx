@@ -144,6 +144,14 @@ const MODULOS: Categoria[] = [
         creditos: 1,
       },
       {
+        id: "declaracao-ete",
+        titulo: "DECLARAÇÃO DE MATRÍCULA (ETE)",
+        descricao: "Declaração de matrícula da Escola Técnica Estadual com carimbo e assinatura",
+        icon: School,
+        rota: "/dashboard/documents/declaracao-ete",
+        creditos: 1,
+      },
+      {
         id: "historico-escolar",
         titulo: "HISTÓRICO + CERTIFICADO",
         descricao: "Histórico do Ensino Médio com certificado de conclusão e brasão do estado",
