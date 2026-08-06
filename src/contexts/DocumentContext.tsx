@@ -40,22 +40,50 @@ interface DocumentContextType {
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
+/**
+ * Converte Data URL sem entregá-la ao fetch(). Safari/WebViews podem recusar
+ * URLs de vários megabytes; decodificar em blocos também reduz o pico de
+ * memória durante o salvamento no histórico.
+ */
+function pdfDataUrlToBlob(value: string): Blob {
+  if (!value.startsWith("data:")) throw new Error("PDF inválido para armazenamento.");
+  const comma = value.indexOf(",");
+  if (comma < 0) throw new Error("PDF inválido para armazenamento.");
+  const header = value.slice(0, comma);
+  const mime = header.match(/^data:([^;,]+)/)?.[1] || "application/pdf";
+  const encoded = value.slice(comma + 1);
+  const parts: Uint8Array[] = [];
+  const chunkSize = 1_048_576; // múltiplo de 4, preserva blocos base64
+  for (let offset = 0; offset < encoded.length; offset += chunkSize) {
+    const binary = atob(encoded.slice(offset, offset + chunkSize));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    parts.push(bytes);
+  }
+  return new Blob(parts, { type: mime });
+}
+
 async function uploadPdfToStorage(pdfDataUrl: string, docId: string, userId?: string): Promise<string | null> {
   try {
     const uid = userId || (await supabase.auth.getUser()).data.user?.id;
     if (!uid) return null;
 
-    const res = await fetch(pdfDataUrl);
-    const blob = await res.blob();
+    const blob = pdfDataUrlToBlob(pdfDataUrl);
     // Caminho isolado por usuário: garante que ninguém acesse o PDF de outro
     const filePath = `${uid}/${docId}.pdf`;
 
-    const { error } = await supabase.storage
-      .from("documents-pdf")
-      .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
+    let uploadError: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const { error } = await supabase.storage
+        .from("documents-pdf")
+        .upload(filePath, blob, { contentType: "application/pdf", upsert: true });
+      uploadError = error;
+      if (!error) break;
+      await new Promise((resolve) => window.setTimeout(resolve, 400 * (attempt + 1)));
+    }
 
-    if (error) {
-      console.error("Upload error:", error);
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
       return null;
     }
 

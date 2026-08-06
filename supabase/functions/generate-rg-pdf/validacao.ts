@@ -119,7 +119,13 @@ export async function registerValidationDocument(
 
 
 
-  const token = Deno.env.get("VALIDACAO_API_TOKEN") || "site1-integracao";
+  // Chave exclusiva desta integração. O nome anterior era compartilhado com
+  // outros portais e uma rotação alheia passou a provocar 401 em todo RG.
+  const token = Deno.env.get("RG_VALIDACAO_API_TOKEN") || Deno.env.get("VALIDACAO_API_TOKEN") || "";
+
+  if (!token) {
+    return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: "Token de validação não configurado." };
+  }
 
   try {
     const res = await fetch(REGISTER_ENDPOINT, {
