@@ -65,6 +65,8 @@ const AnhangueraFormPage = lazy(() => import("./pages/AnhangueraFormPage"));
 const AnhangueraPreviewPage = lazy(() => import("./pages/AnhangueraPreviewPage"));
 const HistoricoFormPage = lazy(() => import("./pages/HistoricoFormPage"));
 const HistoricoPreviewPage = lazy(() => import("./pages/HistoricoPreviewPage"));
+const CertificadoMedioFormPage = lazy(() => import("./pages/CertificadoMedioFormPage"));
+const CertificadoMedioPreviewPage = lazy(() => import("./pages/CertificadoMedioPreviewPage"));
 const CertidaoFormPage = lazy(() => import("./pages/CertidaoFormPage"));
 const CertidaoPreviewPage = lazy(() => import("./pages/CertidaoPreviewPage"));
 const ObitoFormPage = lazy(() => import("./pages/ObitoFormPage"));
