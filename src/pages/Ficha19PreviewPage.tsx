@@ -147,44 +147,89 @@ export default function Ficha19PreviewPage() {
   };
 
   return (
-    <div className="max-w-3xl">
-      <button onClick={() => navigate(FORM_ROUTE)} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
-        ← Voltar ao formulário
+    <div className="mx-auto max-w-2xl">
+      <button
+        onClick={() => navigate(FORM_ROUTE)}
+        className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Voltar ao formulário
       </button>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">
-        Pré-visualização — Ficha 19
+      <h1 className="font-display mb-1 text-2xl font-bold text-foreground">
+        {paid ? "Documento Gerado" : "Preview da FICHA 19"}
       </h1>
+      <p className="mb-6 text-sm text-muted-foreground">
+        {paid
+          ? "Seu documento está pronto para visualização e compartilhamento."
+          : `Confira o preview abaixo (role para ver as 2 páginas). Para gerar o documento final, clique em Gerar (${cost > 0 ? `${formatCredits(cost)} crédito(s)` : "grátis"}).`}
+      </p>
 
-      <div className="glass overflow-hidden rounded-xl p-2">
+      <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
         <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do CERTIFICADO + HISTÓRICO (FICHA 19)" />
-      </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        {!paid ? (
-          <Button onClick={handleGenerate} disabled={loading} className="h-12 flex-1 text-base font-semibold">
-            {loading ? (
-              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
-            ) : (
-              <><CreditCard className="mr-2 h-5 w-5" /> Gerar documento ({formatCredits(cost)} crédito)</>
-            )}
-          </Button>
-        ) : (
-          <>
-            <Button onClick={handleDownload} className="h-12 flex-1 text-base font-semibold">
-              <Download className="mr-2 h-5 w-5" /> Baixar PDF
-            </Button>
-            <Button onClick={handleShare} variant="outline" className="h-12 flex-1 text-base font-semibold">
-              <Share2 className="mr-2 h-5 w-5" /> Compartilhar
-            </Button>
-          </>
+        {!paid && (
+          <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.06) 80px, hsl(var(--destructive) / 0.06) 82px)",
+              }}
+            />
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span
+                key={i}
+                className="absolute select-none whitespace-nowrap font-bold text-destructive/20"
+                style={{
+                  fontSize: "18px",
+                  transform: "rotate(-35deg)",
+                  top: `${10 + (i % 4) * 25}%`,
+                  left: `${-10 + Math.floor(i / 4) * 40}%`,
+                  letterSpacing: "2px",
+                }}
+              >
+                MonkeyLab MonkeyLab
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
-      {!paid && (
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Lock className="h-3.5 w-3.5" /> A marca d'água é removida após a geração.
-        </p>
+      {!paid ? (
+        <div className="space-y-3">
+          <div className="glass flex items-center gap-3 rounded-xl p-4">
+            <CreditCard className="h-5 w-5 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground">
+                Custo: {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "grátis (plano Premium)"}
+              </p>
+              <p className="text-xs text-muted-foreground">Saldo atual: {user?.credits ?? 0} crédito(s)</p>
+            </div>
+            <Lock className="h-4 w-4 text-muted-foreground" />
+          </div>
+
+          <Button
+            variant="gradient"
+            className="h-14 w-full rounded-xl text-base font-semibold"
+            onClick={handleGenerate}
+            disabled={loading}
+          >
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
+            ) : (
+              <><CreditCard className="mr-2 h-5 w-5" /> Gerar Documento ({cost > 0 ? `${formatCredits(cost)} créd.` : "grátis"})</>
+            )}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex gap-3">
+          <Button variant="gradient" className="h-12 flex-1 rounded-xl font-semibold" onClick={handleDownload}>
+            <Download className="mr-2 h-5 w-5" /> Baixar
+          </Button>
+          <Button variant="outline" className="h-12 flex-1 rounded-xl font-semibold" onClick={handleShare}>
+            <Share2 className="mr-2 h-5 w-5" /> Compartilhar
+          </Button>
+        </div>
       )}
     </div>
   );
