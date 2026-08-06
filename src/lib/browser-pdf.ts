@@ -469,9 +469,13 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
   // reduzimos somente a altura das faixas, nunca a resolução.
   const attempts: Array<{ cap: number; bandDivisor: number; blobs: boolean }> = preview
     ? [
-        { cap: 2, bandDivisor: 1, blobs: true },
-        { cap: 2, bandDivisor: 1, blobs: false },
-        { cap: 2, bandDivisor: 2, blobs: false },
+        // O preview agora nasce na MESMA resolução do documento final (576 DPI).
+        // Em aparelhos fracos caímos apenas no tamanho das faixas; só na última
+        // tentativa a escala é reduzida, para nunca ficar sem preview.
+        { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
+        { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
+        { cap: RENDER_SCALE, bandDivisor: 4, blobs: false },
+        { cap: 3, bandDivisor: 4, blobs: false },
         { cap: 2, bandDivisor: 4, blobs: false },
       ]
     : [

@@ -36,8 +36,8 @@ function pixelBudget(): number {
   const nav = navigator as Navigator & { deviceMemory?: number };
   const gb = typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 ? nav.deviceMemory : 4;
   const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || gb <= 4;
-  if (gb <= 2) return 3_000_000;
-  return mobile ? 6_000_000 : 12_000_000;
+  if (gb <= 2) return 5_000_000;
+  return mobile ? 11_000_000 : 24_000_000;
 }
 
 /**
@@ -109,8 +109,10 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
         const base = page.getViewport({ scale: 1 });
         const availableWidth = Math.max(280, host.clientWidth);
-        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-        let scale = Math.min(2.25, (availableWidth * pixelRatio) / base.width);
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+        // Supersampling: rasteriza acima da densidade da tela para que zoom e
+        // textos pequenos (MRZ, campos do cartão) fiquem nítidos como no PDF.
+        let scale = Math.min(5, ((availableWidth * pixelRatio) / base.width) * 1.75);
 
         // Nunca ultrapassa o orçamento de pixels do aparelho — acima disso o
         // navegador descarta o bitmap e a tela sai preta/vazia.
