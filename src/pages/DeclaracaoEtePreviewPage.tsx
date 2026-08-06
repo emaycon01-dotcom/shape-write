@@ -139,7 +139,7 @@ export default function DeclaracaoEtePreviewPage() {
     }
   };
 
-  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Sua Declaração de Matrícula está pronta.\n\nAluno: ${formData.nome_aluno || ""}\nEscola: ${formData.escola || ""}\nAno letivo: ${formData.ano_letivo || ""}`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Sua Declaração de Matrícula está pronta.\n\nAluno: ${formData.nome_aluno || ""}\nCurso: ${formData.curso || ""}\nSérie: ${formData.serie || ""}`;
 
   return (
     <div className="mx-auto max-w-2xl">
