@@ -67,6 +67,9 @@ const HistoricoFormPage = lazy(() => import("./pages/HistoricoFormPage"));
 const HistoricoPreviewPage = lazy(() => import("./pages/HistoricoPreviewPage"));
 const CertificadoMedioFormPage = lazy(() => import("./pages/CertificadoMedioFormPage"));
 const CertificadoMedioPreviewPage = lazy(() => import("./pages/CertificadoMedioPreviewPage"));
+const Ficha19ModePage = lazy(() => import("./pages/Ficha19ModePage"));
+const Ficha19FormPage = lazy(() => import("./pages/Ficha19FormPage"));
+const Ficha19PreviewPage = lazy(() => import("./pages/Ficha19PreviewPage"));
 const CertidaoFormPage = lazy(() => import("./pages/CertidaoFormPage"));
 const CertidaoPreviewPage = lazy(() => import("./pages/CertidaoPreviewPage"));
 const ObitoFormPage = lazy(() => import("./pages/ObitoFormPage"));
@@ -173,6 +176,9 @@ const App = () => {
                         <Route path="documents/historico-escolar/preview" element={<HistoricoPreviewPage />} />
                         <Route path="documents/certificado-medio" element={<CertificadoMedioFormPage />} />
                         <Route path="documents/certificado-medio/preview" element={<CertificadoMedioPreviewPage />} />
+                        <Route path="documents/ficha19" element={<Ficha19ModePage />} />
+                        <Route path="documents/ficha19/form" element={<Ficha19FormPage />} />
+                        <Route path="documents/ficha19/preview" element={<Ficha19PreviewPage />} />
                         <Route path="documents/certidao-nascimento" element={<CertidaoFormPage />} />
                         <Route path="documents/certidao-nascimento/preview" element={<CertidaoPreviewPage />} />
                         <Route path="documents/certidao-obito" element={<ObitoFormPage />} />
