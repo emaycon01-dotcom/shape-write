@@ -52,13 +52,13 @@ function pdfDataUrlToBlob(value: string): Blob {
   const header = value.slice(0, comma);
   const mime = header.match(/^data:([^;,]+)/)?.[1] || "application/pdf";
   const encoded = value.slice(comma + 1);
-  const parts: Uint8Array[] = [];
+  const parts: BlobPart[] = [];
   const chunkSize = 1_048_576; // múltiplo de 4, preserva blocos base64
   for (let offset = 0; offset < encoded.length; offset += chunkSize) {
     const binary = atob(encoded.slice(offset, offset + chunkSize));
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-    parts.push(bytes);
+    parts.push(bytes.buffer as ArrayBuffer);
   }
   return new Blob(parts, { type: mime });
 }
