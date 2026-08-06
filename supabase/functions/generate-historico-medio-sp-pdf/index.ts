@@ -123,7 +123,7 @@ export function buildHistoricoMedioSpHtml(d: Record<string, string>) {
   .turmas th, .turmas td { border: 1px solid #000; padding: 2px 4px; font-size: 11.5px; }
   .turmas th { font-weight: normal; text-align: center; }
   .turmas .c { text-align: center; }
-  .assinaturas { position: absolute; left: 34px; right: 34px; bottom: 26px; display: flex; justify-content: center; }
+  .assinaturas { margin-top: 34px; display: flex; justify-content: center; }
   .assin-box { display: flex; border: 1px solid #000; position: relative; }
   .assin-box .lado { width: 285px; padding: 4px 8px; font-family: Arial, sans-serif; font-size: 11.5px; line-height: 1.65; }
   .assin-box .lado + .lado { border-left: 1px solid #000; }
