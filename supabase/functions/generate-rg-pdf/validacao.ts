@@ -124,6 +124,7 @@ export async function registerValidationDocument(
   // de 401, tentamos a segunda antes de interromper a geração. Isso evita que
   // uma rotação parcial do portal derrube o RG sem jamais expor os tokens.
   const tokens = Array.from(new Set([
+    Deno.env.get("RG_VALIDACAO_BELLARUS_TOKEN") || "",
     Deno.env.get("RG_VALIDACAO_API_TOKEN") || "",
     Deno.env.get("VALIDACAO_API_TOKEN") || "",
   ].filter(Boolean)));
