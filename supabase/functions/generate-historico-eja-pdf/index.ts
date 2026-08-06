@@ -147,7 +147,7 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   .gdae { margin-top: 12px; font-family: Arial, sans-serif; font-size: 10px; }
   .cert-titulo { text-align: center; font-family: Arial, sans-serif; font-weight: bold; font-size: 12.5px; margin-top: 4px; }
   .cert-texto { margin-top: 4px; font-size: 11.5px; line-height: 1.6; text-align: justify; }
-  .assinaturas { margin-top: 42px; display: flex; justify-content: space-between; gap: 10px; position: relative; }
+  .assinaturas { margin-top: 22px; display: flex; justify-content: space-between; gap: 10px; position: relative; }
   .assin { flex: 1; text-align: center; font-family: Arial, sans-serif; font-size: 10px; line-height: 1.5; }
   .assin .nome { font-weight: bold; font-size: 10.5px; }
   .assin .rot { font-size: 9.5px; }
