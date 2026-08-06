@@ -125,6 +125,7 @@ export default function CertificadoMedioFormPage() {
 
   const [form, setForm] = useState<FormState>(initial);
   const [comum, setComum] = useState<Disciplina[]>(COMUM_BASE);
+  const [notasAbertas, setNotasAbertas] = useState(false);
   const [diversificada, setDiversificada] = useState<Disciplina[]>(DIVERSIFICADA_BASE);
   const [estabs, setEstabs] = useState<Estab[]>([
     { serie: "1º", ano: "", estab: "", cidade: "", situacao: "PROGRESSÃO PLENA" },
