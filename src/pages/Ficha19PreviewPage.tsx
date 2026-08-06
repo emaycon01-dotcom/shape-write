@@ -157,7 +157,7 @@ export default function Ficha19PreviewPage() {
       </h1>
 
       <div className="glass overflow-hidden rounded-xl p-2">
-        <PdfCanvasPreview pdfBase64={pdfBase64} />
+        <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do CERTIFICADO + HISTÓRICO (FICHA 19)" />
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
