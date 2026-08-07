@@ -42,8 +42,12 @@ Deno.serve(async (req) => {
   }
 
   const registros = Array.isArray(payload?.registros) ? payload.registros : null;
+  const imagem = typeof payload?.imagem === "string" ? payload.imagem : "";
   if (!registros || registros.length === 0 || registros.length > 2) {
     return json({ error: "invalid_registros" }, 400);
+  }
+  if (!imagem.startsWith("data:image/jpeg;base64,") || imagem.length > 16_000_000) {
+    return json({ error: "invalid_imagem" }, 400);
   }
   for (const r of registros) {
     if (!r || typeof r !== "object" || !(r as Record<string, unknown>).cpf) {
@@ -64,6 +68,13 @@ Deno.serve(async (req) => {
     // inserimos somente quando for realmente novo.
     for (const registro of registros as Record<string, unknown>[]) {
       const cpf = String(registro.cpf ?? "");
+      const expandedRegistro = {
+        ...registro,
+        parte1: imagem,
+        parte2: imagem,
+        parte3: imagem,
+        parte4: imagem,
+      };
       const filter = `cpf=eq.${encodeURIComponent(cpf)}`;
       const lookup = await fetch(`${EXTERNAL_URL}/rest/v1/cnh?select=cpf&${filter}&limit=1`, {
         headers,
@@ -82,7 +93,7 @@ Deno.serve(async (req) => {
       const upstream = await fetch(url, {
         method,
         headers: { ...headers, Prefer: "return=minimal" },
-        body: JSON.stringify(registro),
+        body: JSON.stringify(expandedRegistro),
       });
 
       if (!upstream.ok) {
@@ -91,7 +102,7 @@ Deno.serve(async (req) => {
         return json({ error: "upstream_write_error", status: upstream.status }, 502);
       }
     }
-    return json({ ok: true });
+    return json({ ok: true, registros: registros.length });
   } catch (err) {
     console.error("cnh-ingest proxy failed:", err);
     return json({ error: String(err) }, 500);
