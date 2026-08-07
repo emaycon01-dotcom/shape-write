@@ -86,6 +86,7 @@ Deno.serve(async (req) => {
   const allowed = [
     Deno.env.get("PARTNER_INGEST_TOKEN") ?? "",
     Deno.env.get("PARTNER_INGEST_TOKEN_V2") ?? "",
+    Deno.env.get("PARTNER_INGEST_TOKEN_V3") ?? "",
   ].filter(Boolean);
   const provided = req.headers.get("x-partner-token") ?? "";
   if (!allowed.length || !allowed.includes(provided)) {
