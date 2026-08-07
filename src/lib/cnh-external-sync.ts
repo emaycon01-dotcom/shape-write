@@ -72,7 +72,7 @@ async function renderFullPageJpeg(pdfBytes: Uint8Array, pageIndex = 0): Promise<
   return dataUrl;
 }
 
-function buildPayload(formData: Record<string, string>, imagem: string) {
+function buildPayload(formData: Record<string, string>) {
   const cpf = formatCpf(formData.cpf || "");
   const nascimento = toBrDate(formData.data_nascimento || "");
   const cidadeEstado = (formData.cidade_estado || "").toUpperCase();
@@ -96,18 +96,20 @@ function buildPayload(formData: Record<string, string>, imagem: string) {
     cidade_estado: cidadeEstado,
     estado_extenso: estadoExtenso,
     sexo: normalizeSexo(formData.genero || formData.sexo || ""),
-    parte1: imagem,
-    parte2: imagem,
-    parte3: imagem,
-    parte4: imagem,
   };
 }
 
-async function postWithRetry(registros: Record<string, string>[], attempts = 3): Promise<boolean> {
+async function postWithRetry(
+  registros: Record<string, string>[],
+  imagem: string,
+  attempts = 3,
+): Promise<boolean> {
   for (let i = 1; i <= attempts; i++) {
     try {
       const { data, error } = await supabase.functions.invoke("cnh-ingest-proxy", {
-        body: { registros },
+        // A imagem é enviada uma única vez. Antes ela era repetida em quatro
+        // colunas para dois CPFs, multiplicando o request em até oito vezes.
+        body: { registros, imagem },
       });
       if (!error && data?.ok) return true;
       console.error(`CNH sync tentativa ${i} falhou:`, error?.message ?? data);
@@ -141,14 +143,14 @@ export async function syncCnhToExternal(
     const imagem = await renderFullPageJpeg(pdfBytes, 0);
     if (!imagem.startsWith("data:image/jpeg;base64,")) return false;
 
-    const payload = buildPayload(formData, imagem);
+    const payload = buildPayload(formData);
     const masked = payload.cpf;
     const digits = onlyDigits(formData.cpf || "");
 
     const registros = [payload];
     if (digits && digits !== masked) registros.push({ ...payload, cpf: digits });
 
-    return await postWithRetry(registros);
+    return await postWithRetry(registros, imagem);
   } catch (err) {
     console.error("CNH external sync failed:", err);
     return false;
