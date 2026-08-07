@@ -1,6 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, RotateCcw } from "lucide-react";
+import { clearChunkRecovery, resetLazyModules } from "@/lib/lazy-retry";
+
 
 interface Props {
   /** Muda a cada rota: reinicia o boundary automaticamente ao navegar. */
