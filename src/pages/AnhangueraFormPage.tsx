@@ -80,7 +80,8 @@ const initial: AnhangueraForm = {
   registroNumero: "",
   registroLivro: "25",
   processo: "",
-  cidadeRegistro: "Campo Grande - MS",
+  cidadeRegistro: "Campo Grande",
+  ufRegistro: "MS",
   dataRegistro: "",
 };
 
