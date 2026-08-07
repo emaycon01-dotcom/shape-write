@@ -26,13 +26,13 @@ export default defineConfig(({ mode }) => ({
     exclude: ["pdfjs-dist"],
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
       // Dependências opcionais do jsPDF que nunca são executadas aqui.
-      html2canvas: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts"),
-      canvg: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts"),
-      dompurify: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts"),
-    },
+      { find: /^html2canvas$/, replacement: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts") },
+      { find: /^canvg$/, replacement: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts") },
+      { find: /^dompurify$/, replacement: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts") },
+    ],
   },
 
 }));
