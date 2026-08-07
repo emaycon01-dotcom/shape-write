@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppFooter from "@/components/AppFooter";
+import RouteErrorBoundary from "@/components/RouteErrorBoundary";
+
 import { supabase } from "@/integrations/supabase/client";
 import { syncAlignmentsFromDb } from "@/lib/align-sync";
 import { cancelCurrentGeneration } from "@/lib/browser-pdf";
