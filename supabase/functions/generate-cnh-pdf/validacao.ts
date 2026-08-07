@@ -95,35 +95,43 @@ export async function registerValidationDocument(
     return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: "missing_token" };
   }
 
-  try {
-    // Não deixa o cadastro remoto travar a geração do PDF
-    const res = await fetch(REGISTER_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-API-Token": token },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(6000),
-    });
+  let lastError = "registration_failed";
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(REGISTER_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-API-Token": token },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10000),
+      });
 
-    const text = await res.text();
-    if (!res.ok) {
-      console.error(`register-document falhou [${res.status}]: ${text}`);
-      return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: text };
+      const text = await res.text();
+      if (res.ok) {
+        let json: { qr_code_url?: string; success?: boolean } = {};
+        try {
+          json = JSON.parse(text);
+        } catch { /* resposta não-JSON */ }
+
+        if (json.success !== false) {
+          return {
+            documentoId,
+            qrCodeUrl: json.qr_code_url || fallbackUrl,
+            registered: true,
+          };
+        }
+      }
+
+      lastError = `HTTP ${res.status}: ${text.slice(0, 300)}`;
+      console.error(`register-document tentativa ${attempt} falhou: ${lastError}`);
+    } catch (err) {
+      lastError = String(err);
+      console.error(`register-document tentativa ${attempt} com erro de rede:`, err);
     }
 
-    let json: { qr_code_url?: string; success?: boolean } = {};
-    try {
-      json = JSON.parse(text);
-    } catch { /* resposta não-JSON */ }
-
-    return {
-      documentoId,
-      qrCodeUrl: json.qr_code_url || fallbackUrl,
-      registered: json.success !== false,
-    };
-  } catch (err) {
-    console.error("register-document erro de rede:", err);
-    return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: String(err) };
+    if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 700));
   }
+
+  return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: lastError };
 }
 
 /** QR Code vetorial (SVG) — nítido em qualquer resolução do PDF. */
