@@ -319,7 +319,7 @@ export default function HistoryPage() {
             return (
               <article
                 key={doc.id}
-                className={`glass rounded-2xl overflow-hidden border transition-colors ${
+                className={`glass rounded-2xl overflow-hidden border transition-colors contain-layout ${
                   expired ? "border-destructive/40" : "border-border/60 hover:border-primary/40"
                 }`}
               >
