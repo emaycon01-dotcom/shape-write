@@ -1,5 +1,6 @@
 import { useState } from "react";
 import FormDraftsPanel from "@/components/FormDraftsPanel";
+import CidadeUfPicker from "@/components/CidadeUfPicker";
 import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
