@@ -3,6 +3,13 @@
  * Quatro modalidades: Bacharelado, Licenciatura, Tecnólogo (CST) e Técnico.
  */
 
+import {
+  MEGA_BACHARELADO,
+  MEGA_LICENCIATURA,
+  MEGA_TECNOLOGO,
+  MEGA_TECNICO,
+} from "./diploma-cursos-mega";
+
 export type Modalidade = "bacharelado" | "licenciatura" | "tecnologo" | "tecnico";
 
 export const MODALIDADES: { id: Modalidade; label: string; titulo: string }[] = [
@@ -680,10 +687,16 @@ const uniqSort = (lista: string[]): string[] =>
   );
 
 /** Catálogos finais (base + complementos), sem duplicatas e em ordem alfabética. */
-export const CATALOGO_BACHARELADO = uniqSort([...CURSOS_BACHARELADO, ...EXTRA_BACHARELADO]);
-export const CATALOGO_LICENCIATURA = uniqSort([...CURSOS_LICENCIATURA, ...EXTRA_LICENCIATURA]);
-export const CATALOGO_TECNOLOGO = uniqSort([...CURSOS_TECNOLOGO, ...EXTRA_TECNOLOGO]);
-export const CATALOGO_TECNICO = uniqSort(CURSOS_TECNICO);
+export const CATALOGO_BACHARELADO = uniqSort([
+  ...CURSOS_BACHARELADO, ...EXTRA_BACHARELADO, ...MEGA_BACHARELADO,
+]);
+export const CATALOGO_LICENCIATURA = uniqSort([
+  ...CURSOS_LICENCIATURA, ...EXTRA_LICENCIATURA, ...MEGA_LICENCIATURA,
+]);
+export const CATALOGO_TECNOLOGO = uniqSort([
+  ...CURSOS_TECNOLOGO, ...EXTRA_TECNOLOGO, ...MEGA_TECNOLOGO,
+]);
+export const CATALOGO_TECNICO = uniqSort([...CURSOS_TECNICO, ...MEGA_TECNICO]);
 
 export function cursosPorModalidade(m: Modalidade): string[] {
   if (m === "bacharelado") return CATALOGO_BACHARELADO;

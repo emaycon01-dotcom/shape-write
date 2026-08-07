@@ -1,5 +1,6 @@
 import { useState } from "react";
 import FormDraftsPanel from "@/components/FormDraftsPanel";
+import CidadeUfPicker from "@/components/CidadeUfPicker";
 import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,6 +57,8 @@ interface UnipForm {
   identidade: string;
   orgaoExpedidor: string;
   dataExpedicao: string;
+  cidadeCampus: string;
+  ufCampus: string;
   ra: string;
   lote: string;
   registroNumero: string;
@@ -78,6 +81,8 @@ const initial: UnipForm = {
   identidade: "",
   orgaoExpedidor: "SSP/SP",
   dataExpedicao: "",
+  cidadeCampus: "São Paulo",
+  ufCampus: "SP",
   ra: "",
   lote: "",
   registroNumero: "",
@@ -171,7 +176,7 @@ export default function UnipFormPage() {
       dados_pessoais: dadosPessoais,
       outorga:
         "e outorga-lhe o presente Diploma,\na fim de que possa gozar de todos os direitos e prerrogativas legais.",
-      cidade_data: `São Paulo, ${dataExtenso(form.dataExpedicao)}.`,
+      cidade_data: `${form.cidadeCampus} - ${form.ufCampus}, ${dataExtenso(form.dataExpedicao)}.`,
       reitor: "Sandra Rejane Gomes Miessa",
       reitor_cargo: "Reitora",
       // ---------------- verso ----------------
@@ -191,7 +196,7 @@ export default function UnipFormPage() {
         `por delegação de competência do Ministério da Educação, nos termos\n` +
         `da Lei nº 9.394, de 20 de dezembro de 1996, e do Decreto nº 9.235, de\n15 de dezembro de 2017.`,
       processo: form.processo,
-      registro_cidade_data: `São Paulo, ${dataExtenso(form.registroData)}.`,
+      registro_cidade_data: `${form.cidadeCampus} - ${form.ufCampus}, ${dataExtenso(form.registroData)}.`,
       assinatura_bloco:
         "<b>Original Assinado Segundo a Portaria 554/2019/MEC</b>\n<b>Prof. Edison Fernandes</b>\nCPF: 124.974.018-53\nSecretário Geral Adjunto",
       // ---- dados crus ----
@@ -400,6 +405,17 @@ export default function UnipFormPage() {
         {/* REGISTRO */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={FileSignature} title="Expedição e Registro" />
+
+          <CidadeUfPicker
+            uf={form.ufCampus}
+            cidade={form.cidadeCampus}
+            labelUf="UF do campus"
+            labelCidade="Cidade do campus / expedição"
+            onChange={({ uf, cidade }) =>
+              setForm((p) => ({ ...p, ufCampus: uf, cidadeCampus: cidade }))
+            }
+          />
+
 
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">

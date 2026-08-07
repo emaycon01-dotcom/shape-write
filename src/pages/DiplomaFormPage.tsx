@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import FormDraftsPanel from "@/components/FormDraftsPanel";
+import CidadeUfPicker from "@/components/CidadeUfPicker";
 import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -133,6 +134,13 @@ function splitInstituicao(nome: string): { l1: string; l2: string } {
   const meio = Math.ceil(palavras.length / 2);
   return { l1: palavras.slice(0, meio).join(" "), l2: palavras.slice(meio).join(" ") };
 }
+
+/** "Fortaleza - CE" -> { cidade, uf } */
+const splitCidadeUf = (valor: string): { cidade: string; uf: string } => {
+  const m = (valor || "").match(/^(.*?)\s*-\s*([A-Za-z]{2})$/);
+  return m ? { cidade: m[1].trim(), uf: m[2].toUpperCase() } : { cidade: valor || "", uf: "RJ" };
+};
+const juntaCidadeUf = (cidade: string, uf: string) => `${cidade} - ${uf}`;
 
 interface InstituicaoPreset {
   nome: string;
@@ -579,11 +587,17 @@ export default function DiplomaFormPage() {
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={FileSignature} title="Expedição e Registro" />
 
+          <CidadeUfPicker
+            uf={splitCidadeUf(form.cidadeExpedicao).uf}
+            cidade={splitCidadeUf(form.cidadeExpedicao).cidade}
+            labelUf="UF de expedição"
+            labelCidade="Cidade de expedição"
+            onChange={({ uf, cidade }) =>
+              setForm((p) => ({ ...p, cidadeExpedicao: juntaCidadeUf(cidade, uf) }))
+            }
+          />
+
           <div className="grid grid-cols-4 gap-3">
-            <div className="col-span-2 space-y-1.5">
-              <FieldLabel>Cidade de expedição</FieldLabel>
-              <Input value={form.cidadeExpedicao} onChange={set("cidadeExpedicao")} className={inputCls} />
-            </div>
             <div className="space-y-1.5">
               <FieldLabel>Dia</FieldLabel>
               <Input value={form.diaExpedicao} onChange={set("diaExpedicao")} className={inputCls} />
@@ -616,16 +630,20 @@ export default function DiplomaFormPage() {
           </div>
 
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Processo</FieldLabel>
-              <Input value={form.processo} onChange={set("processo")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Cidade do registro</FieldLabel>
-              <Input value={form.registroCidade} onChange={set("registroCidade")} className={inputCls} />
-            </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Processo</FieldLabel>
+            <Input value={form.processo} onChange={set("processo")} className={inputCls} />
           </div>
+
+          <CidadeUfPicker
+            uf={splitCidadeUf(form.registroCidade).uf}
+            cidade={splitCidadeUf(form.registroCidade).cidade}
+            labelUf="UF do registro"
+            labelCidade="Cidade do registro"
+            onChange={({ uf, cidade }) =>
+              setForm((p) => ({ ...p, registroCidade: juntaCidadeUf(cidade, uf) }))
+            }
+          />
 
           <p className="text-xs text-muted-foreground">
             Reitor(a), resolução, livro, folha, nº de série e código de validação são gerados automaticamente.
