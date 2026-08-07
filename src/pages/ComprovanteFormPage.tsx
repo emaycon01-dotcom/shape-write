@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -269,6 +271,7 @@ export default function ComprovanteFormPage() {
       return;
     }
     setLoading(true);
+    saveFormDraft("comprovante", form as unknown as Record<string, unknown>);
 
     const f = aplicarAuto(form, false);
     setForm(f);
@@ -403,6 +406,8 @@ export default function ComprovanteFormPage() {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <FormDraftsPanel docType="comprovante" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* TITULAR */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={User} title="Titular da conta" />

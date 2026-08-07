@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -167,6 +169,7 @@ export default function ChaFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
+    saveFormDraft("cha", form as unknown as Record<string, unknown>);
 
     try {
       const templateBase64 = await imgToBase64(templateChaUrl);
@@ -255,6 +258,8 @@ export default function ChaFormPage() {
       <h1 className="font-display mb-4 text-2xl font-bold text-foreground">CNH Marítima (CHA)</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <FormDraftsPanel docType="cha" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* AMADOR */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={User} title="Dados do Amador" />

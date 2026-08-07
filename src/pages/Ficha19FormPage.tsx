@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -311,6 +313,8 @@ export default function Ficha19FormPage() {
     }
 
     setLoading(true);
+
+    saveFormDraft("ficha19", form as unknown as Record<string, unknown>);
     try {
       const brasaoBase64 = await loadBrasaoDataUrl(form.uf);
 
@@ -466,6 +470,8 @@ export default function Ficha19FormPage() {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <FormDraftsPanel docType="ficha19" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={School} title="Escola (cabeçalho)" />

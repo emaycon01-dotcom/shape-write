@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -152,6 +154,8 @@ export default function ReceitaFormPage() {
 
     setLoading(true);
 
+    saveFormDraft("receita", form as unknown as Record<string, unknown>);
+
     try {
       const templateBase64 = await loadTemplateBase64(templateReceitaUrl);
 
@@ -239,6 +243,8 @@ export default function ReceitaFormPage() {
       <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Receita Médica</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <FormDraftsPanel docType="receita" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* UNIDADE */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={MapPin} title="Unidade" />

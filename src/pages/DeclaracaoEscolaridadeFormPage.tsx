@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -133,6 +135,7 @@ export default function DeclaracaoEscolaridadeFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
+    saveFormDraft("declaracao-escolaridade", form as unknown as Record<string, unknown>);
 
     try {
       const brasao = await loadBrasaoDataUrl(form.estado);
@@ -221,6 +224,8 @@ export default function DeclaracaoEscolaridadeFormPage() {
       <h1 className="font-display mb-4 text-2xl font-bold text-foreground">DECLARAÇÃO DE ESCOLARIDADE</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <FormDraftsPanel docType="declaracao-escolaridade" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ALUNO */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={User} title="Dados do aluno" />

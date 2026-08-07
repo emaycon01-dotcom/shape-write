@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -167,6 +169,7 @@ export default function HoleriteFormPage() {
       return;
     }
     setLoading(true);
+    saveFormDraft("holerite", form as unknown as Record<string, unknown>);
 
     try {
       const templateBase64 = await loadTemplateBase64(templateHoleriteUrl);
@@ -226,6 +229,8 @@ export default function HoleriteFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+
+        <FormDraftsPanel docType="holerite" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         <Section icon={Building2} title="Empregador">
           <Field label="Razão social" value={form.empresa} onChange={set("empresa")} full placeholder="JTI Brasil Ltda." />
           <Field label="CNPJ" value={form.cnpj} onChange={set("cnpj")} placeholder="03.334.170/0001-09" />

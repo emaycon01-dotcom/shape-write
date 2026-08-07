@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -262,6 +264,7 @@ export default function CertificadoMedioFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
+    saveFormDraft("certificado-medio", form as unknown as Record<string, unknown>);
 
     try {
       const brasaoBase64 = await loadBrasaoDataUrl(form.uf);
@@ -387,6 +390,8 @@ export default function CertificadoMedioFormPage() {
       <h1 className="font-display mb-4 text-2xl font-bold text-foreground">CERTIFICADO + HISTÓRICO — Ensino Médio</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <FormDraftsPanel docType="certificado-medio" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={School} title="Escola (cabeçalho)" />
