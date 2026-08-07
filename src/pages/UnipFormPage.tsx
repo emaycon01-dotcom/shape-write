@@ -401,6 +401,17 @@ export default function UnipFormPage() {
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={FileSignature} title="Expedição e Registro" />
 
+          <CidadeUfPicker
+            uf={form.ufCampus}
+            cidade={form.cidadeCampus}
+            labelUf="UF do campus"
+            labelCidade="Cidade do campus / expedição"
+            onChange={({ uf, cidade }) =>
+              setForm((p) => ({ ...p, ufCampus: uf, cidadeCampus: cidade }))
+            }
+          />
+
+
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <FieldLabel required>Data de expedição</FieldLabel>
