@@ -14,6 +14,11 @@ interface State {
   error: Error | null;
   attempt: number;
 }
+function isChunkFailure(error: unknown) {
+  const msg = error instanceof Error ? `${error.message} ${error.name}` : String(error ?? "");
+  return /chunk|dynamically imported|module script|failed to fetch|importing a module/i.test(msg);
+}
+
 
 /**
  * Falhas de geração/preview (memória, canvas, rede) ficam contidas na área do
