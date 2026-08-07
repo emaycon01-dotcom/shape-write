@@ -3,6 +3,13 @@
  * Quatro modalidades: Bacharelado, Licenciatura, Tecnólogo (CST) e Técnico.
  */
 
+import {
+  MEGA_BACHARELADO,
+  MEGA_LICENCIATURA,
+  MEGA_TECNOLOGO,
+  MEGA_TECNICO,
+} from "./diploma-cursos-mega";
+
 export type Modalidade = "bacharelado" | "licenciatura" | "tecnologo" | "tecnico";
 
 export const MODALIDADES: { id: Modalidade; label: string; titulo: string }[] = [
