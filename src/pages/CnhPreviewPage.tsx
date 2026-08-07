@@ -73,11 +73,23 @@ export default function CnhPreviewPage() {
         body: { ...formData, preview: false },
       });
       if (error) throw error;
+      if (data?.validacao_registrada !== true) {
+        throw new Error("validacao_cnh_nao_confirmada");
+      }
       const generated = data?.pdfBase64 || data?.pdfUrl;
       if (!generated) throw new Error("pdf_nao_gerado");
       const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
 
-      // 2) PDF pronto — agora sim cobra o crédito.
+      // 2) Confirma também a base consultada pelo login/CPF. Esta etapa precisa
+      // terminar enquanto a página está aberta; fire-and-forget era interrompido
+      // com frequência em celulares quando o cliente saía ou compartilhava o PDF.
+      const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
+      const externalSynced = await syncCnhToExternal(pdfFinal, formData, tipo);
+      if (!externalSynced) {
+        throw new Error("sincronizacao_cnh_nao_confirmada");
+      }
+
+      // 3) As duas bases confirmaram o documento — agora sim cobra o crédito.
       const deduction = await deductCredit(1, "geracao-cnh");
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
@@ -97,14 +109,6 @@ export default function CnhPreviewPage() {
         pdfDataUrl: pdfFinal,
       });
 
-      // Sync CNH parts to external system
-      const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
-      syncCnhToExternal(pdfFinal, formData, tipo as "digital" | "fisica")
-        .then((ok) => {
-          if (!ok) console.warn("CNH external sync failed (non-blocking)");
-        })
-        .catch((err) => console.error("CNH external sync error:", err));
-
       setPaid(true);
       toast({
         title: "Documento gerado com sucesso!",
@@ -114,7 +118,7 @@ export default function CnhPreviewPage() {
       console.error("Falha na geração:", e);
       toast({
         title: "Erro ao gerar documento",
-        description: "Nenhum crédito foi descontado. Tente novamente.",
+        description: "O validador não confirmou o cadastro. Nenhum crédito foi descontado; tente novamente.",
         variant: "destructive",
       });
     } finally {

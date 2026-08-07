@@ -52,21 +52,44 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const upstream = await fetch(`${EXTERNAL_URL}/rest/v1/cnh`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: WRITE_KEY,
-        Authorization: `Bearer ${WRITE_KEY}`,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(registros),
-    });
+    const headers = {
+      "Content-Type": "application/json",
+      apikey: WRITE_KEY,
+      Authorization: `Bearer ${WRITE_KEY}`,
+    };
 
-    if (!upstream.ok) {
-      const text = await upstream.text();
-      console.error(`cnh-ingest upstream [${upstream.status}]:`, text.slice(0, 500));
-      return json({ error: "upstream_error", status: upstream.status, detail: text.slice(0, 500) }, 502);
+    // Um CPF pode gerar uma renovação/segunda via. POST em lote criava linhas
+    // duplicadas (ou falhava quando havia índice único), e o validador podia
+    // encontrar a versão antiga com limit=1. Atualizamos quando já existe e
+    // inserimos somente quando for realmente novo.
+    for (const registro of registros as Record<string, unknown>[]) {
+      const cpf = String(registro.cpf ?? "");
+      const filter = `cpf=eq.${encodeURIComponent(cpf)}`;
+      const lookup = await fetch(`${EXTERNAL_URL}/rest/v1/cnh?select=cpf&${filter}&limit=1`, {
+        headers,
+      });
+      if (!lookup.ok) {
+        const detail = (await lookup.text()).slice(0, 500);
+        console.error(`cnh-ingest lookup [${lookup.status}]:`, detail);
+        return json({ error: "upstream_lookup_error", status: lookup.status }, 502);
+      }
+
+      const existing = await lookup.json();
+      const method = Array.isArray(existing) && existing.length > 0 ? "PATCH" : "POST";
+      const url = method === "PATCH"
+        ? `${EXTERNAL_URL}/rest/v1/cnh?${filter}`
+        : `${EXTERNAL_URL}/rest/v1/cnh`;
+      const upstream = await fetch(url, {
+        method,
+        headers: { ...headers, Prefer: "return=minimal" },
+        body: JSON.stringify(registro),
+      });
+
+      if (!upstream.ok) {
+        const detail = (await upstream.text()).slice(0, 500);
+        console.error(`cnh-ingest ${method} [${upstream.status}]:`, detail);
+        return json({ error: "upstream_write_error", status: upstream.status }, 502);
+      }
     }
     return json({ ok: true });
   } catch (err) {

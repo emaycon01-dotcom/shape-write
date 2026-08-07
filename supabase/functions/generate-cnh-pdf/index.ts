@@ -795,6 +795,13 @@ serve(async (req) => {
       `Validação: preview=${isPreview} id=${validacao.documentoId} registered=${validacao.registered}${(validacao as { error?: string }).error ? ` error=${(validacao as { error?: string }).error}` : ""}`,
     );
 
+    // Nunca entregue um PDF final cujo QR aponta para um documento que não foi
+    // confirmado pelo portal. Antes este erro era ignorado e o cliente recebia
+    // (e pagava por) uma CNH que o validador ainda não conhecia.
+    if (!isPreview && !validacao.registered) {
+      throw new Error(`CNH_VALIDATION_REGISTRATION_FAILED:${(validacao as { error?: string }).error || "unknown"}`);
+    }
+
 
     const html = isFisica
       ? buildCnhFisicaHtml(data)
