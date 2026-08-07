@@ -500,9 +500,11 @@ async function renderHtmlToDocument(
   let lastError: unknown = null;
   for (const { cap, bandDivisor, blobs } of attempts) {
     try {
-      return await renderOnce(html, cap, bandDivisor, blobs);
+      if (abortSignal?.aborted) throw new Error("Geração cancelada.");
+      return await renderOnce(html, cap, bandDivisor, blobs, abortSignal);
     } catch (e) {
       lastError = e;
+      if (abortSignal?.aborted) break;
       // Pausa maior a cada tentativa: dá tempo do navegador liberar memória.
       await breathe(800);
     }
