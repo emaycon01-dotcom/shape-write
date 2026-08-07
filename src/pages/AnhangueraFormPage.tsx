@@ -390,22 +390,21 @@ export default function AnhangueraFormPage() {
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={FileSignature} title="Diploma e registro" />
 
+          <CidadeUfPicker
+            uf={form.ufDiploma}
+            cidade={form.cidadeDiploma}
+            labelUf="UF do diploma"
+            labelCidade="Cidade do diploma"
+            onChange={({ uf, cidade }) =>
+              setForm((p) => ({ ...p, ufDiploma: uf, cidadeDiploma: cidade }))
+            }
+          />
+
           <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1.5">
-              <FieldLabel required>Cidade do diploma</FieldLabel>
-              <Input value={form.cidadeDiploma} onChange={set("cidadeDiploma")} placeholder="Macapá" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>UF</FieldLabel>
-              <Input value={form.ufDiploma} onChange={set("ufDiploma")} placeholder="AP" maxLength={2} className={inputCls} required />
-            </div>
             <div className="space-y-1.5">
               <FieldLabel required>Data do diploma</FieldLabel>
               <Input value={form.dataDiploma} onChange={setMask("dataDiploma", maskDate)} inputMode="numeric" placeholder="02/04/2022" className={inputCls} required />
             </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <FieldLabel required>Nº do registro</FieldLabel>
               <Input value={form.registroNumero} onChange={set("registroNumero")} placeholder="SRD_1021-1642" className={inputCls} required />
@@ -414,22 +413,28 @@ export default function AnhangueraFormPage() {
               <FieldLabel required>Livro</FieldLabel>
               <Input value={form.registroLivro} onChange={set("registroLivro")} placeholder="25" className={inputCls} required />
             </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>Processo nº</FieldLabel>
-              <Input value={form.processo} onChange={set("processo")} placeholder="1642/2773/2022" className={inputCls} required />
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel required>Cidade do registro</FieldLabel>
-              <Input value={form.cidadeRegistro} onChange={set("cidadeRegistro")} placeholder="Campo Grande - MS" className={inputCls} required />
+              <FieldLabel required>Processo nº</FieldLabel>
+              <Input value={form.processo} onChange={set("processo")} placeholder="1642/2773/2022" className={inputCls} required />
             </div>
             <div className="space-y-1.5">
               <FieldLabel required>Data do registro</FieldLabel>
               <Input value={form.dataRegistro} onChange={setMask("dataRegistro", maskDate)} inputMode="numeric" placeholder="02/04/2022" className={inputCls} required />
             </div>
           </div>
+
+          <CidadeUfPicker
+            uf={form.ufRegistro}
+            cidade={form.cidadeRegistro}
+            labelUf="UF do registro"
+            labelCidade="Cidade do registro"
+            onChange={({ uf, cidade }) =>
+              setForm((p) => ({ ...p, ufRegistro: uf, cidadeRegistro: cidade }))
+            }
+          />
         </div>
 
         {/* INSTITUIÇÃO */}
