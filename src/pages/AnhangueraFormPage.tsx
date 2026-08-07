@@ -1,4 +1,6 @@
 import { useState } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -202,6 +204,7 @@ export default function AnhangueraFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
+    saveFormDraft("anhanguera", form as unknown as Record<string, unknown>);
 
     try {
       const bodyData = await buildBody();
@@ -265,6 +268,8 @@ export default function AnhangueraFormPage() {
       <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Diploma Anhanguera</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 pb-10">
+
+        <FormDraftsPanel docType="anhanguera" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* CURSO */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={GraduationCap} title="Curso" />

@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -350,6 +352,7 @@ export default function DiplomaFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
+    saveFormDraft("diploma", form as unknown as Record<string, unknown>);
 
     try {
       const bodyData = await buildBody();
@@ -422,6 +425,8 @@ export default function DiplomaFormPage() {
       <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Diploma de Ensino Superior</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        <FormDraftsPanel docType="diploma" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* CURSO */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={GraduationCap} title="Curso e Titulação" />

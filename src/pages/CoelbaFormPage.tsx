@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import FormDraftsPanel from "@/components/FormDraftsPanel";
+import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -220,6 +222,7 @@ export default function CoelbaFormPage() {
       return;
     }
     setLoading(true);
+    saveFormDraft("coelba", form as unknown as Record<string, unknown>);
 
     const f = aplicarAuto(form, false);
     setForm(f);
@@ -324,6 +327,8 @@ export default function CoelbaFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+
+        <FormDraftsPanel docType="coelba" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         <Section icon={User} title="Titular">
           <Field label="Nome completo" value={form.nome} onChange={set("nome")} full placeholder="GLEIDSON GALO PEDREIRA" />
           <Field label="CPF" value={form.cpf} onChange={(v) => set("cpf")(maskCPF(v))} placeholder="000.000.000-00" />
