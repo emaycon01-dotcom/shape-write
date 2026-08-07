@@ -68,11 +68,22 @@ Deno.serve(async (req) => {
     }
 
     if (normalizedStatus === "pago") {
-      // O webhook é a fonte oficial do gateway. A consulta é apenas uma checagem
-      // extra: se a API estiver indisponível, o crédito não pode deixar de cair.
-      const confirmed = await confirmElitepayPayment(chargeId);
-      if (!confirmed) {
-        console.warn("ElitePay lookup indisponível; aplicando pagamento pelo webhook:", chargeId);
+      // Um webhook pode ser forjado por qualquer um: só confiamos no status "pago"
+      // se a própria Elite Pay confirmar via API, ou se o segredo compartilhado
+      // do webhook estiver configurado e conferir.
+      const webhookSecret = Deno.env.get("ELITEPAY_WEBHOOK_SECRET") || "";
+      const providedSecret =
+        req.headers.get("x-webhook-secret") ||
+        req.headers.get("x-elitepay-secret") ||
+        "";
+      const secretOk = !!webhookSecret && providedSecret === webhookSecret;
+
+      if (!secretOk) {
+        const confirmed = await confirmElitepayPayment(chargeId);
+        if (!confirmed) {
+          console.error("Webhook 'pago' rejeitado: gateway não confirmou o pagamento:", chargeId);
+          return json({ error: "payment_not_confirmed" }, 202);
+        }
       }
     }
 

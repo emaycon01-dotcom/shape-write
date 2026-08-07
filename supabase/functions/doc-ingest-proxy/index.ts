@@ -1,6 +1,7 @@
 // Proxy seguro: encaminha documentos (rg/cha) para o app externo de consulta.
 // O token de ingestão fica apenas no servidor, nunca no navegador.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { authenticateRequest } from "../_shared/auth.ts";
 
 const TARGET_URL = "https://hfkckowhrjbpjgniaakl.supabase.co/functions/v1/doc-ingest";
 const INGEST_TOKEN = Deno.env.get("DOC_INGEST_TOKEN") ?? "";
@@ -16,6 +17,10 @@ Deno.serve(async (req) => {
 
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!INGEST_TOKEN) return json({ error: "missing_ingest_token" }, 500);
+
+  // Exige sessão válida: o token de ingestão nunca pode ser usado anonimamente.
+  const auth = await authenticateRequest(req, corsHeaders);
+  if (auth instanceof Response) return auth;
 
   let payload: { tabela?: string; dados?: Record<string, unknown> };
   try {

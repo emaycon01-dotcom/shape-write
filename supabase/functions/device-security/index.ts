@@ -45,6 +45,27 @@ Deno.serve(async (req) => {
     }
 
     if (action === "report_violation") {
+      // Só é possível reportar violação da própria sessão. Nunca aceitamos um
+      // user_id vindo do cliente: isso permitiria banir contas de terceiros.
+      let selfUserId: string | null = null;
+      const authHeader = req.headers.get("Authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        const supabaseUser = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!,
+          { global: { headers: { Authorization: authHeader } } }
+        );
+        const { data: { user } } = await supabaseUser.auth.getUser();
+        selfUserId = user?.id ?? null;
+      }
+
+      if (user_id && user_id !== selfUserId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Record a security violation
       await supabaseAdmin.from("login_attempts").insert({
         identifier: `violation:${fingerprint}`,
@@ -65,23 +86,23 @@ Deno.serve(async (req) => {
       if (violationCount >= 3) {
         await supabaseAdmin.from("banned_devices").upsert({
           fingerprint,
-          user_id: user_id || null,
-          user_email: user_email || "",
+          user_id: selfUserId,
+          user_email: selfUserId ? (user_email || "") : "",
           reason: reason || "Auto-ban: múltiplas violações de segurança detectadas",
           banned_by: "system",
         }, { onConflict: "fingerprint" });
 
-        // Also block the user account if we have user_id
-        if (user_id) {
+        // Só bloqueia a conta do próprio autor autenticado da violação
+        if (selfUserId) {
           const { data: existingBlock } = await supabaseAdmin
             .from("blocked_users")
             .select("id")
-            .eq("user_id", user_id)
+            .eq("user_id", selfUserId)
             .maybeSingle();
 
           if (!existingBlock) {
             await supabaseAdmin.from("blocked_users").insert({
-              user_id,
+              user_id: selfUserId,
               user_email: user_email || "",
               user_name: "",
               reason: "Auto-bloqueio: tentativa de burlar segurança do sistema",
