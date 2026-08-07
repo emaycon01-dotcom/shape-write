@@ -15,7 +15,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
-import { pick, rnd } from "@/lib/random";
+import { pick, rnd, rnd60 } from "@/lib/random";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -215,7 +215,7 @@ export default function UnimedFormPage() {
       nascimento: "14/08/2000",
       mae: pick(MAES),
       dataAtendimento: `${dd}/${mm}/${hoje.getFullYear()}`,
-      horaAtendimento: `1${Math.floor(Math.random() * 8)}:${rnd(2)}`,
+      horaAtendimento: `1${Math.floor(Math.random() * 8)}:${rnd60()}`,
       dias: String(Math.floor(Math.random() * 10) + 1),
       cid: pick(CIDS),
       quadro: pick(QUADROS),
@@ -306,7 +306,7 @@ export default function UnimedFormPage() {
         telefone: form.telefone,
         data_atendimento: form.dataAtendimento,
         hora_atendimento: horaCurta,
-        hora_assinatura: `${horaCurta}:${rnd(2)}`,
+        hora_assinatura: `${horaCurta}:${rnd60()}`,
         dias: form.dias,
         cid: form.cid,
         quadro: form.quadro,
