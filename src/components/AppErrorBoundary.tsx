@@ -1,7 +1,7 @@
 import { Component, Fragment, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { clearChunkRecovery } from "@/lib/lazy-retry";
+import { clearChunkRecovery, resetLazyModules } from "@/lib/lazy-retry";
 
 interface Props {
   children: ReactNode;
@@ -50,6 +50,7 @@ export default class AppErrorBoundary extends Component<Props, State> {
     // Falha transitória de carregamento: tenta remontar em silêncio antes de mostrar erro.
     if (isChunkFailure(error) && this.softRetries < MAX_SOFT_RETRIES) {
       this.softRetries += 1;
+      resetLazyModules();
       setTimeout(() => {
         this.setState((s) => ({ error: null, retryKey: s.retryKey + 1 }));
       }, 400 * this.softRetries);
