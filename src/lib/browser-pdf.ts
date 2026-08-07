@@ -136,7 +136,9 @@ function safeScale(width: number): number {
  */
 function bandCssHeight(width: number, scale: number): number {
   const maxDim = detectMaxCanvasDimension();
-  const mobile = isAndroid() || maxDim < 8192;
+  const cores = navigator.hardwareConcurrency || 4;
+  const weakDesktop = cores <= 4 || deviceMemoryGb() <= 4;
+  const mobile = isAndroid() || maxDim < 8192 || weakDesktop;
   // O bitmap RGBA é apenas parte do pico: durante html2canvas também coexistem
   // clone, template decodificado e encoder JPEG. 16 MP ainda chegava a mais de
   // 100 MB reais e fazia WebKit/Android devolver canvas branco ou preto.
