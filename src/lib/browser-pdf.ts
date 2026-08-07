@@ -786,7 +786,9 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
  * Nunca é usado no documento final: lá o QR precisa ser registrado de verdade
  * pela função, e o HTML é sempre diferente do preview.
  */
-const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>();
+const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>(
+  readPersistentPreviewCache(),
+);
 const PREVIEW_CACHE_MAX = 2;
 const PREVIEW_CACHE_STORAGE_KEY = "pdf_preview_html_cache";
 
