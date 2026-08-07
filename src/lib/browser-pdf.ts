@@ -517,6 +517,7 @@ async function renderOnce(
   scaleCap: number,
   bandDivisor = 1,
   blobAssets = false,
+  abortSignal?: AbortSignal | null,
 ): Promise<string> {
 
   const { html2canvas, jsPDF } = await warmPdfEngine();
