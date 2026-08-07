@@ -927,6 +927,7 @@ export async function invokeGeneratePdf(
           if (!oldest) break;
           previewHtmlCache.delete(oldest);
         }
+        writePersistentPreviewCache();
       }
     }
 
