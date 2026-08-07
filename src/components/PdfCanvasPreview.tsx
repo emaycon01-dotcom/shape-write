@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AlertTriangle, Loader2, Search, X } from "lucide-react";
 import { completePdfPresentation, subscribePdfLoading } from "@/lib/pdf-loading";
 import { getPdfJs } from "@/lib/pdfjs-loader";
 
@@ -50,8 +50,79 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const resumeTimerRef = useRef<number>();
+  const lensCanvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [generationActive, setGenerationActive] = useState(false);
+  const [lensOn, setLensOn] = useState(false);
+  const [lensPos, setLensPos] = useState<{ x: number; y: number } | null>(null);
+
+  const LENS_SIZE = 172;
+  const LENS_ZOOM = 3;
+
+  /** Desenha na lupa o recorte do canvas da página que estiver sob o dedo/cursor. */
+  const drawLens = useCallback((clientX: number, clientY: number) => {
+    const host = hostRef.current;
+    const lens = lensCanvasRef.current;
+    if (!host || !lens) return;
+    const hostRect = host.getBoundingClientRect();
+    setLensPos({ x: clientX - hostRect.left, y: clientY - hostRect.top });
+
+    const pages = stageRef.current?.querySelectorAll("canvas");
+    let source: HTMLCanvasElement | null = null;
+    let rect: DOMRect | null = null;
+    pages?.forEach((c) => {
+      const r = c.getBoundingClientRect();
+      if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+        source = c as HTMLCanvasElement;
+        rect = r;
+      }
+    });
+
+    const ctx = lens.getContext("2d");
+    if (!ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    if (lens.width !== LENS_SIZE * dpr) {
+      lens.width = LENS_SIZE * dpr;
+      lens.height = LENS_SIZE * dpr;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, LENS_SIZE, LENS_SIZE);
+    if (!source || !rect) return;
+
+    const src = source as HTMLCanvasElement;
+    const r = rect as DOMRect;
+    // Converte o ponto da tela para pixels reais do canvas renderizado.
+    const ratioX = src.width / r.width;
+    const ratioY = src.height / r.height;
+    const cx = (clientX - r.left) * ratioX;
+    const cy = (clientY - r.top) * ratioY;
+    const sw = (LENS_SIZE / LENS_ZOOM) * ratioX;
+    const sh = (LENS_SIZE / LENS_ZOOM) * ratioY;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(src, cx - sw / 2, cy - sh / 2, sw, sh, 0, 0, LENS_SIZE, LENS_SIZE);
+  }, []);
+
+  useEffect(() => {
+    if (!lensOn) {
+      setLensPos(null);
+      return;
+    }
+    const host = hostRef.current;
+    if (!host) return;
+    const onMove = (event: PointerEvent) => {
+      event.preventDefault();
+      drawLens(event.clientX, event.clientY);
+    };
+    host.addEventListener("pointerdown", onMove, { passive: false });
+    host.addEventListener("pointermove", onMove, { passive: false });
+    return () => {
+      host.removeEventListener("pointerdown", onMove);
+      host.removeEventListener("pointermove", onMove);
+    };
+  }, [lensOn, drawLens, status]);
+
 
   useEffect(() => {
     const unsubscribe = subscribePdfLoading((state) => {
@@ -184,7 +255,9 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   return (
     <div
       ref={hostRef}
-      className="relative flex h-full w-full items-start justify-center overflow-auto bg-muted"
+      className={`relative flex h-full w-full items-start justify-center overflow-auto bg-muted ${
+        lensOn ? "touch-none select-none" : ""
+      }`}
     >
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80">
@@ -200,8 +273,40 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           </p>
         </div>
       )}
+
+      {status === "ready" && (
+        <button
+          type="button"
+          onClick={() => setLensOn((v) => !v)}
+          aria-label={lensOn ? "Desativar lupa" : "Ativar lupa"}
+          className="absolute right-3 top-3 z-20 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-lg backdrop-blur transition hover:bg-background data-[on=true]:bg-primary data-[on=true]:text-primary-foreground"
+          data-on={lensOn}
+        >
+          {lensOn ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+        </button>
+      )}
+
+      <div
+        className="pointer-events-none absolute z-10 overflow-hidden rounded-full border-2 border-primary bg-white shadow-2xl"
+        style={{
+          width: LENS_SIZE,
+          height: LENS_SIZE,
+          left: (lensPos?.x ?? 0) - LENS_SIZE / 2,
+          top: (lensPos?.y ?? 0) - LENS_SIZE - 16,
+          display: lensOn && lensPos ? "block" : "none",
+        }}
+      >
+        <canvas ref={lensCanvasRef} className="h-full w-full" />
+      </div>
+
+      {lensOn && status === "ready" && !lensPos && (
+        <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-foreground/85 px-4 py-2 text-xs font-medium text-background">
+          Arraste o dedo sobre o documento para ampliar
+        </div>
+      )}
     </div>
   );
+
 }
 
 
