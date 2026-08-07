@@ -3,13 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Integração com o app "CNH do Brasil" (Site 2 — fotos).
- * Grava um registro na tabela pública `cnh` do projeto externo.
+ * Grava um registro na tabela `cnh` do projeto externo via Edge Function
+ * `cnh-ingest-proxy` (a chave de escrita nunca vai para o navegador).
  * Todo o processamento (render do PDF -> JPEG base64) acontece NO NAVEGADOR,
  * para não consumir recursos do backend.
  */
-const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
-const EXTERNAL_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
 
 /** largura mínima exigida pelo app (px) */
 const MIN_WIDTH = 2400;
