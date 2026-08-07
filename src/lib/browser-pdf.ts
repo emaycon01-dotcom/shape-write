@@ -788,14 +788,62 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
  */
 const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>();
 const PREVIEW_CACHE_MAX = 2;
+const PREVIEW_CACHE_STORAGE_KEY = "pdf_preview_html_cache";
 
 function previewSignature(functionName: string, body: Record<string, unknown>): string {
-  // Strings pesadas (foto, assinatura, template) entram como tamanho + amostra:
-  // suficiente para detectar troca de arquivo sem varrer megabytes.
-  const seen = JSON.stringify(body, (_k, v) =>
-    typeof v === "string" && v.length > 5_000 ? `${v.length}:${v.slice(0, 64)}` : v,
-  );
-  return `${functionName}::${seen}`;
+  // Hash leve: strings pesadas entram como tamanho + amostra + 4 chars do fim.
+  // Evita JSON.stringify de payloads grandes e mantém detecção de alterações.
+  const parts: string[] = [];
+  const walk = (value: unknown, depth = 0) => {
+    if (depth > 10) return;
+    if (typeof value === "string") {
+      parts.push(value.length > 5_000 ? `${value.length}:${value.slice(0, 32)}:${value.slice(-16)}` : value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      parts.push(`[${value.length}]`);
+      value.forEach((v) => walk(v, depth + 1));
+      return;
+    }
+    if (value && typeof value === "object") {
+      const entries = Object.entries(value as Record<string, unknown>);
+      parts.push(`{${entries.length}}`);
+      entries.forEach(([k, v]) => {
+        parts.push(k);
+        walk(v, depth + 1);
+      });
+    }
+  };
+  walk(body);
+  // Simples combinação com tamanho total para evitar colisões acidentais.
+  let hash = 0;
+  const full = parts.join("|");
+  for (let i = 0; i < full.length; i += 1) {
+    hash = (hash << 5) - hash + full.charCodeAt(i);
+    hash |= 0;
+  }
+  return `${functionName}::${hash}:${full.length}`;
+}
+
+function readPersistentPreviewCache(): [string, { html: string; payload: Record<string, unknown> }][] {
+  try {
+    const raw = sessionStorage.getItem(PREVIEW_CACHE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Record<string, { html: string; payload: Record<string, unknown> }>;
+    return Object.entries(parsed).slice(-PREVIEW_CACHE_MAX);
+  } catch {
+    return [];
+  }
+}
+
+function writePersistentPreviewCache() {
+  try {
+    const entries = Array.from(previewHtmlCache.entries()).slice(-PREVIEW_CACHE_MAX);
+    const obj = Object.fromEntries(entries);
+    sessionStorage.setItem(PREVIEW_CACHE_STORAGE_KEY, JSON.stringify(obj));
+  } catch {
+    /* ignore */
+  }
 }
 
 
