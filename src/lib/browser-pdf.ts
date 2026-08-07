@@ -935,8 +935,11 @@ export async function invokeGeneratePdf(
 
     // Alguma função que não repassa o marcador? Refaz a chamada do jeito
     // original — nenhum módulo depende dessa otimização para funcionar.
-    if (html === null) {
-      if (cacheKey) previewHtmlCache.delete(cacheKey);
+      if (html === null) {
+      if (cacheKey) {
+        previewHtmlCache.delete(cacheKey);
+        writePersistentPreviewCache();
+      }
       const retry = await supabase.functions.invoke(functionName, {
         body: { ...body, render: "html" },
       });
