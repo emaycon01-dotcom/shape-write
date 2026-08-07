@@ -1,4 +1,5 @@
 import { getPdfJs } from "@/lib/pdfjs-loader";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Integração com o app "CNH do Brasil" (Site 2 — fotos).
