@@ -463,7 +463,11 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
  * casos em Android/iOS sem perder nitidez. Só depois de esgotar as faixas
  * menores é que a escala cai, como último recurso para não travar a tela.
  */
-async function renderHtmlToDocument(html: string, preview = false): Promise<string> {
+async function renderHtmlToDocument(
+  html: string,
+  preview = false,
+  abortSignal?: AbortSignal | null,
+): Promise<string> {
   // Preview não precisa carregar um PDF de 576 DPI no iframe do Android. O
   // documento final continua sempre na escala máxima; em aparelhos fracos
   // reduzimos somente a altura das faixas, nunca a resolução.
