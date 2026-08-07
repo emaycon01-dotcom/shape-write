@@ -5,13 +5,11 @@ import { authenticateRequest } from "../_shared/auth.ts";
 
 const EXTERNAL_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
 
-// Chave de serviço do projeto externo (cofre). Enquanto não estiver
-// configurada, cai na chave pública antiga para não quebrar a geração.
-const SERVICE_KEY = Deno.env.get("CNH_EXTERNAL_SERVICE_KEY") ?? "";
-const FALLBACK_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
+// Chave de serviço do projeto externo (cofre). Nunca vai para o navegador.
+const WRITE_KEY = Deno.env.get("CNH_EXTERNAL_SERVICE_KEY") ?? "";
 
-const WRITE_KEY = SERVICE_KEY || FALLBACK_KEY;
+// Token para sites parceiros que geram CNH e precisam gravar na mesma tabela.
+const PARTNER_TOKEN = Deno.env.get("CNH_PARTNER_TOKEN") ?? "";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -23,10 +21,18 @@ Deno.serve(async (req) => {
     });
 
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  if (!WRITE_KEY) return json({ error: "missing_service_key" }, 500);
 
-  // Exige sessão válida: sem login não se grava nada no app externo.
-  const auth = await authenticateRequest(req, corsHeaders);
-  if (auth instanceof Response) return auth;
+  // Dois caminhos de acesso: token de parceiro (outros sites) ou sessão logada.
+  const partner = req.headers.get("x-partner-token") ?? "";
+  const isPartner = PARTNER_TOKEN.length > 0 && partner === PARTNER_TOKEN;
+
+  if (!isPartner) {
+    if (partner) return json({ error: "invalid_partner_token" }, 401);
+    const auth = await authenticateRequest(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+  }
+
 
   let payload: Record<string, unknown>;
   try {
