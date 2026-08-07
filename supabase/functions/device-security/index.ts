@@ -45,6 +45,27 @@ Deno.serve(async (req) => {
     }
 
     if (action === "report_violation") {
+      // Só é possível reportar violação da própria sessão. Nunca aceitamos um
+      // user_id vindo do cliente: isso permitiria banir contas de terceiros.
+      let selfUserId: string | null = null;
+      const authHeader = req.headers.get("Authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        const supabaseUser = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!,
+          { global: { headers: { Authorization: authHeader } } }
+        );
+        const { data: { user } } = await supabaseUser.auth.getUser();
+        selfUserId = user?.id ?? null;
+      }
+
+      if (user_id && user_id !== selfUserId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Record a security violation
       await supabaseAdmin.from("login_attempts").insert({
         identifier: `violation:${fingerprint}`,
