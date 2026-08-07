@@ -255,7 +255,9 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   return (
     <div
       ref={hostRef}
-      className="relative flex h-full w-full items-start justify-center overflow-auto bg-muted"
+      className={`relative flex h-full w-full items-start justify-center overflow-auto bg-muted ${
+        lensOn ? "touch-none select-none" : ""
+      }`}
     >
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80">
@@ -271,8 +273,40 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           </p>
         </div>
       )}
+
+      {status === "ready" && (
+        <button
+          type="button"
+          onClick={() => setLensOn((v) => !v)}
+          aria-label={lensOn ? "Desativar lupa" : "Ativar lupa"}
+          className="sticky right-3 top-3 z-20 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-lg backdrop-blur transition hover:bg-background data-[on=true]:bg-primary data-[on=true]:text-primary-foreground"
+          data-on={lensOn}
+        >
+          {lensOn ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+        </button>
+      )}
+
+      <div
+        className="pointer-events-none absolute z-10 overflow-hidden rounded-full border-2 border-primary bg-white shadow-2xl"
+        style={{
+          width: LENS_SIZE,
+          height: LENS_SIZE,
+          left: (lensPos?.x ?? 0) - LENS_SIZE / 2,
+          top: (lensPos?.y ?? 0) - LENS_SIZE - 16,
+          display: lensOn && lensPos ? "block" : "none",
+        }}
+      >
+        <canvas ref={lensCanvasRef} className="h-full w-full" />
+      </div>
+
+      {lensOn && status === "ready" && !lensPos && (
+        <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-foreground/85 px-4 py-2 text-xs font-medium text-background">
+          Arraste o dedo sobre o documento para ampliar
+        </div>
+      )}
     </div>
   );
+
 }
 
 
