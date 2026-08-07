@@ -35,8 +35,9 @@ function dateOnly(v: string): string {
 
 /** ID determinístico: reenviar o mesmo documento atualiza o registro. */
 export function buildDocumentoId(d: Record<string, string>): string {
-  const cpf = onlyDigits(s(d.cpf)) || "00000000000";
-  const reg = onlyDigits(s(d.registro)) || "0";
+  const cpf = onlyDigits(s(d.cpf));
+  const reg = onlyDigits(s(d.registro));
+  if (cpf.length !== 11 || reg.length < 9) return "CNH-DADOS-INVALIDOS";
   return `CNH-${cpf}-${reg}`;
 }
 
@@ -56,6 +57,15 @@ export async function registerValidationDocument(
 ): Promise<RegisterResult> {
   const documentoId = buildDocumentoId(d);
   const fallbackUrl = `${VALIDACAO_BASE_URL}/validar?id=${encodeURIComponent(documentoId)}`;
+
+  if (documentoId === "CNH-DADOS-INVALIDOS") {
+    return {
+      documentoId,
+      qrCodeUrl: fallbackUrl,
+      registered: false,
+      error: "invalid_cpf_or_registro",
+    };
+  }
 
   const nome = s(d.nome_completo).toUpperCase();
   const uf = (s(d.cidade_estado).split(",").pop() || "").trim().toUpperCase();

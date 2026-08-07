@@ -20,7 +20,7 @@ function onlyDigits(value: string): string {
 
 function formatCpf(value: string): string {
   const digits = onlyDigits(value).slice(0, 11);
-  if (digits.length !== 11) return (value || "").trim();
+  if (digits.length !== 11) return "";
   return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }
 
@@ -133,6 +133,10 @@ export async function syncCnhToExternal(
   _tipo: "digital" | "fisica" = "digital"
 ): Promise<boolean> {
   try {
+    if (onlyDigits(formData.cpf || "").length !== 11) {
+      console.error("CNH external sync rejected: invalid CPF");
+      return false;
+    }
     const pdfBytes = base64ToBytes(pdfBase64);
     const imagem = await renderFullPageJpeg(pdfBytes, 0);
     if (!imagem.startsWith("data:image/jpeg;base64,")) return false;
