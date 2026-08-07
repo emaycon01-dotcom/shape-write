@@ -85,9 +85,11 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const resumeTimerRef = useRef<number>();
   const lensCanvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [retryKey, setRetryKey] = useState(0);
   const [generationActive, setGenerationActive] = useState(false);
   const [lensOn, setLensOn] = useState(false);
   const [lensPos, setLensPos] = useState<{ x: number; y: number } | null>(null);
+
 
   const LENS_SIZE = 172;
   const LENS_ZOOM = 3;
