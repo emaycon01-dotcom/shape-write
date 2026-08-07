@@ -876,7 +876,11 @@ export async function invokeGeneratePdf(
   if (!isAction && generationInProgress) {
     return { data: null, error: new Error("Já existe um documento sendo gerado. Aguarde a conclusão.") };
   }
-  if (!isAction) generationInProgress = true;
+  if (!isAction) {
+    generationInProgress = true;
+    currentGenerationAbort = new AbortController();
+  }
+  const abortSignal = !isAction ? currentGenerationAbort?.signal : null;
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
