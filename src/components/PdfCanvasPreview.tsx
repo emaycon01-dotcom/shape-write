@@ -50,8 +50,79 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const resumeTimerRef = useRef<number>();
+  const lensCanvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [generationActive, setGenerationActive] = useState(false);
+  const [lensOn, setLensOn] = useState(false);
+  const [lensPos, setLensPos] = useState<{ x: number; y: number } | null>(null);
+
+  const LENS_SIZE = 172;
+  const LENS_ZOOM = 3;
+
+  /** Desenha na lupa o recorte do canvas da página que estiver sob o dedo/cursor. */
+  const drawLens = useCallback((clientX: number, clientY: number) => {
+    const host = hostRef.current;
+    const lens = lensCanvasRef.current;
+    if (!host || !lens) return;
+    const hostRect = host.getBoundingClientRect();
+    setLensPos({ x: clientX - hostRect.left, y: clientY - hostRect.top });
+
+    const pages = stageRef.current?.querySelectorAll("canvas");
+    let source: HTMLCanvasElement | null = null;
+    let rect: DOMRect | null = null;
+    pages?.forEach((c) => {
+      const r = c.getBoundingClientRect();
+      if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+        source = c as HTMLCanvasElement;
+        rect = r;
+      }
+    });
+
+    const ctx = lens.getContext("2d");
+    if (!ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    if (lens.width !== LENS_SIZE * dpr) {
+      lens.width = LENS_SIZE * dpr;
+      lens.height = LENS_SIZE * dpr;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, LENS_SIZE, LENS_SIZE);
+    if (!source || !rect) return;
+
+    const src = source as HTMLCanvasElement;
+    const r = rect as DOMRect;
+    // Converte o ponto da tela para pixels reais do canvas renderizado.
+    const ratioX = src.width / r.width;
+    const ratioY = src.height / r.height;
+    const cx = (clientX - r.left) * ratioX;
+    const cy = (clientY - r.top) * ratioY;
+    const sw = (LENS_SIZE / LENS_ZOOM) * ratioX;
+    const sh = (LENS_SIZE / LENS_ZOOM) * ratioY;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(src, cx - sw / 2, cy - sh / 2, sw, sh, 0, 0, LENS_SIZE, LENS_SIZE);
+  }, []);
+
+  useEffect(() => {
+    if (!lensOn) {
+      setLensPos(null);
+      return;
+    }
+    const host = hostRef.current;
+    if (!host) return;
+    const onMove = (event: PointerEvent) => {
+      event.preventDefault();
+      drawLens(event.clientX, event.clientY);
+    };
+    host.addEventListener("pointerdown", onMove, { passive: false });
+    host.addEventListener("pointermove", onMove, { passive: false });
+    return () => {
+      host.removeEventListener("pointerdown", onMove);
+      host.removeEventListener("pointermove", onMove);
+    };
+  }, [lensOn, drawLens, status]);
+
 
   useEffect(() => {
     const unsubscribe = subscribePdfLoading((state) => {
