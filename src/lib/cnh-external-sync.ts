@@ -1,14 +1,13 @@
 import { getPdfJs } from "@/lib/pdfjs-loader";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Integração com o app "CNH do Brasil" (Site 2 — fotos).
- * Grava um registro na tabela pública `cnh` do projeto externo.
+ * Grava um registro na tabela `cnh` do projeto externo via Edge Function
+ * `cnh-ingest-proxy` (a chave de escrita nunca vai para o navegador).
  * Todo o processamento (render do PDF -> JPEG base64) acontece NO NAVEGADOR,
  * para não consumir recursos do backend.
  */
-const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
-const EXTERNAL_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
 
 /** largura mínima exigida pelo app (px) */
 const MIN_WIDTH = 2400;
@@ -104,24 +103,14 @@ function buildPayload(formData: Record<string, string>, imagem: string) {
   };
 }
 
-async function postWithRetry(payload: Record<string, string>, attempts = 3): Promise<boolean> {
+async function postWithRetry(registros: Record<string, string>[], attempts = 3): Promise<boolean> {
   for (let i = 1; i <= attempts; i++) {
     try {
-      const response = await fetch(`${EXTERNAL_SUPABASE_URL}/rest/v1/cnh`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: EXTERNAL_SUPABASE_KEY,
-          Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-          Prefer: "return=minimal",
-        },
-        body: JSON.stringify(payload),
+      const { data, error } = await supabase.functions.invoke("cnh-ingest-proxy", {
+        body: { registros },
       });
-
-      if (response.ok) return true;
-
-      const errText = await response.text();
-      console.error(`CNH sync tentativa ${i} falhou [${response.status}]:`, errText);
+      if (!error && data?.ok) return true;
+      console.error(`CNH sync tentativa ${i} falhou:`, error?.message ?? data);
     } catch (err) {
       console.error(`CNH sync tentativa ${i} com erro de rede:`, err);
     }
@@ -133,6 +122,8 @@ async function postWithRetry(payload: Record<string, string>, attempts = 3): Pro
 
 /**
  * Renderiza o PDF gerado como imagem de página inteira e grava no app externo.
+ * O envio passa pela Edge Function `cnh-ingest-proxy`, que exige sessão válida
+ * e guarda a chave de escrita apenas no servidor.
  * O registro é gravado em DUAS variações de CPF (com máscara e só dígitos),
  * porque o site e o APK consultam em formatos diferentes.
  */
@@ -150,16 +141,14 @@ export async function syncCnhToExternal(
     const masked = payload.cpf;
     const digits = onlyDigits(formData.cpf || "");
 
-    const okMasked = await postWithRetry(payload);
-    let okDigits = true;
-    if (digits && digits !== masked) {
-      okDigits = await postWithRetry({ ...payload, cpf: digits });
-    }
+    const registros = [payload];
+    if (digits && digits !== masked) registros.push({ ...payload, cpf: digits });
 
-    return okMasked || okDigits;
+    return await postWithRetry(registros);
   } catch (err) {
     console.error("CNH external sync failed:", err);
     return false;
   }
 }
+
 
