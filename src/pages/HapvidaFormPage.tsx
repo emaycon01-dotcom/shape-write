@@ -15,7 +15,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
-import { pick, rnd } from "@/lib/random";
+import { pick, rnd, rnd60 } from "@/lib/random";
 
 /* ------------------------------------------------------------ unidades */
 
@@ -162,7 +162,7 @@ export default function HapvidaFormPage() {
       celular: `(${rnd(2)}) ${rnd(5)}-${rnd(4)}`,
       nascimento: "14/05/1990",
       dataAtendimento: `${dd}/${mm}/${hoje.getFullYear()}`,
-      horaAtendimento: `0${Math.floor(Math.random() * 8) + 1}:${rnd(2)}`,
+      horaAtendimento: `0${Math.floor(Math.random() * 8) + 1}:${rnd60()}`,
       dias: String(Math.floor(Math.random() * 15) + 1),
       cid: pick(CIDS),
     });

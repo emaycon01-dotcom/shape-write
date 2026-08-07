@@ -17,7 +17,7 @@ import { splitEndereco } from "@/lib/atestado-endereco";
 import { maskCPF, maskDate, maskDigits, maskTimeSec } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
-import { pick, rnd } from "@/lib/random";
+import { pick, rnd, rnd60 } from "@/lib/random";
 
 
 const MEDICO = "Dr. Abdo";
@@ -119,7 +119,7 @@ export default function AtestadoFormPage() {
     const dd = String(hoje.getDate()).padStart(2, "0");
     const mm = String(hoje.getMonth() + 1).padStart(2, "0");
     const data = `${dd}/${mm}/${hoje.getFullYear()}`;
-    const hora = `0${Math.floor(Math.random() * 8) + 1}:${rnd(2)}:${rnd(2)}`;
+    const hora = `0${Math.floor(Math.random() * 8) + 1}:${rnd60()}:${rnd60()}`;
     setForm({
       ...initial,
       paciente: pick(NOMES),
