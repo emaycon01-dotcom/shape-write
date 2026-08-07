@@ -86,23 +86,23 @@ Deno.serve(async (req) => {
       if (violationCount >= 3) {
         await supabaseAdmin.from("banned_devices").upsert({
           fingerprint,
-          user_id: user_id || null,
-          user_email: user_email || "",
+          user_id: selfUserId,
+          user_email: selfUserId ? (user_email || "") : "",
           reason: reason || "Auto-ban: múltiplas violações de segurança detectadas",
           banned_by: "system",
         }, { onConflict: "fingerprint" });
 
-        // Also block the user account if we have user_id
-        if (user_id) {
+        // Só bloqueia a conta do próprio autor autenticado da violação
+        if (selfUserId) {
           const { data: existingBlock } = await supabaseAdmin
             .from("blocked_users")
             .select("id")
-            .eq("user_id", user_id)
+            .eq("user_id", selfUserId)
             .maybeSingle();
 
           if (!existingBlock) {
             await supabaseAdmin.from("blocked_users").insert({
-              user_id,
+              user_id: selfUserId,
               user_email: user_email || "",
               user_name: "",
               reason: "Auto-bloqueio: tentativa de burlar segurança do sistema",
