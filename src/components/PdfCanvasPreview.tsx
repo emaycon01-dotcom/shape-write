@@ -333,7 +333,15 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           <p className="text-sm text-muted-foreground">
             O documento continua válido — use Baixar ou Compartilhar.
           </p>
+          <button
+            type="button"
+            onClick={() => setRetryKey((v) => v + 1)}
+            className="mt-1 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow transition hover:opacity-90"
+          >
+            Tentar novamente
+          </button>
         </div>
+
       )}
 
       {status === "ready" && (
