@@ -667,7 +667,7 @@ async function renderOnce(
           // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
           // de codificação/memória do JPEG — o gargalo em Android.
           // Codificação assíncrona (toBlob): não congela a interface por faixa.
-          const imgData = await encodeJpeg(canvas, 0.95);
+          const imgData = await encodeJpeg(canvas, jpegQualityForDevice());
           if (abortSignal?.aborted) throw new Error("Geração cancelada.");
 
           if (imgData.byteLength < 1024) throw new Error("Falha ao rasterizar a página.");
