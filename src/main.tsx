@@ -19,6 +19,22 @@ window.addEventListener("unhandledrejection", (event) => {
   }
 });
 
+// Build novo publicado enquanto a aba estava aberta: recarrega uma única vez
+// em vez de mostrar a tela de erro (principal queixa em desktop).
+window.addEventListener("vite:preloadError", (event) => {
+  event.preventDefault();
+  try {
+    const key = "monkeylab_preload_reload";
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, "1");
+      window.location.reload();
+    }
+  } catch {
+    /* armazenamento bloqueado */
+  }
+});
+
+
 const root = document.getElementById("root");
 
 if (root) {

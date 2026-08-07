@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppFooter from "@/components/AppFooter";
+import RouteErrorBoundary from "@/components/RouteErrorBoundary";
+
 import { supabase } from "@/integrations/supabase/client";
 import { syncAlignmentsFromDb } from "@/lib/align-sync";
 import { cancelCurrentGeneration } from "@/lib/browser-pdf";
@@ -57,8 +59,11 @@ export default function DashboardLayout() {
             )}
           </header>
           <main className="flex-1 w-full p-4 sm:p-6 overflow-auto">
-            <Outlet />
+            <RouteErrorBoundary resetKey={location.pathname}>
+              <Outlet />
+            </RouteErrorBoundary>
           </main>
+
           <AppFooter />
         </div>
       </div>
