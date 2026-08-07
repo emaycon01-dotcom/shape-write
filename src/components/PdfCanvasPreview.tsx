@@ -36,9 +36,42 @@ function pixelBudget(): number {
   const nav = navigator as Navigator & { deviceMemory?: number };
   const gb = typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 ? nav.deviceMemory : 4;
   const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || gb <= 4;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   if (gb <= 2) return 8_000_000;
+  // Safari/iOS aborta o canvas acima de ~16,7 milhões de pixels: aí o preview
+  // caía em "não foi possível montar" mesmo com o PDF perfeito.
+  if (ios) return 14_000_000;
   return mobile ? 18_000_000 : 40_000_000;
 }
+
+/** Maior lado de canvas aceito pelo dispositivo (Safari antigo trava em 4096). */
+let cachedMaxSide: number | null = null;
+function maxCanvasSide(): number {
+  if (cachedMaxSide !== null) return cachedMaxSide;
+  for (const size of [16384, 11180, 8192, 4096]) {
+    try {
+      const c = document.createElement("canvas");
+      c.width = size;
+      c.height = 32;
+      const ctx = c.getContext("2d");
+      if (!ctx) continue;
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(size - 2, 0, 2, 2);
+      const ok = ctx.getImageData(size - 1, 1, 1, 1).data[0] === 255;
+      c.width = 0;
+      c.height = 0;
+      if (ok) {
+        cachedMaxSide = size;
+        return size;
+      }
+    } catch {
+      /* tenta o próximo */
+    }
+  }
+  cachedMaxSide = 4096;
+  return 4096;
+}
+
 
 
 /**
