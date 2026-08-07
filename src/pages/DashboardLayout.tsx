@@ -57,8 +57,11 @@ export default function DashboardLayout() {
             )}
           </header>
           <main className="flex-1 w-full p-4 sm:p-6 overflow-auto">
-            <Outlet />
+            <RouteErrorBoundary resetKey={location.pathname}>
+              <Outlet />
+            </RouteErrorBoundary>
           </main>
+
           <AppFooter />
         </div>
       </div>
