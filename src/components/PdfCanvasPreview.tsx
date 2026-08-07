@@ -312,7 +312,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       if (destroyLoadingTask) void destroyLoadingTask();
       clearStage();
     };
-  }, [pdfDataUrl, generationActive, title]);
+  }, [pdfDataUrl, generationActive, title, retryKey]);
 
   return (
     <div
