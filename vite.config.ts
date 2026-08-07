@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Dependências opcionais do jsPDF que nunca são executadas aqui.
+      html2canvas: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts"),
+      canvg: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts"),
+      dompurify: path.resolve(__dirname, "./src/lib/jspdf-optional-stub.ts"),
     },
   },
+
 }));
