@@ -1,4 +1,4 @@
-import { lazy, type ComponentType } from "react";
+import { createElement, lazy, useEffect, useState, type ComponentType, type LazyExoticComponent } from "react";
 
 type Importer<T> = () => Promise<{ default: T }>;
 
@@ -29,19 +29,51 @@ function bumpReload() {
 export function clearChunkRecovery() {
   try {
     sessionStorage.removeItem(RELOAD_KEY);
+    sessionStorage.removeItem("monkeylab_preload_reload");
   } catch {
     /* noop */
   }
+}
+
+/**
+ * React.lazy guarda a promessa REJEITADA para sempre: depois de uma falha de
+ * rede o mesmo componente nunca mais carrega, e todas as telas passam a exibir
+ * a mensagem de erro até o usuário limpar o navegador.
+ * A "geração" abaixo permite recriar os componentes lazy do zero ao tentar de
+ * novo, descartando a promessa rejeitada.
+ */
+let generation = 0;
+const listeners = new Set<() => void>();
+
+export function resetLazyModules() {
+  generation += 1;
+  listeners.forEach((l) => l());
+}
+
+function useGeneration() {
+  const [value, setValue] = useState(generation);
+  useEffect(() => {
+    const listener = () => setValue(generation);
+    listeners.add(listener);
+    listener();
+    return () => {
+      listeners.delete(listener);
+    };
+  }, []);
+  return value;
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Carrega uma página com tentativas automáticas.
- * Falhas de rede/deploy antigo são reprocessadas em silêncio, sem tela de erro.
+ * Falhas de rede/deploy antigo são reprocessadas em silêncio e, ao tentar
+ * novamente, o módulo é buscado outra vez (sem cache de erro).
  */
 export function lazyRetry<T extends ComponentType<never>>(importer: Importer<T>) {
-  return lazy(async () => {
+  const cache = new Map<number, LazyExoticComponent<T>>();
+
+  const load = async () => {
     let lastError: unknown;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
@@ -62,5 +94,20 @@ export function lazyRetry<T extends ComponentType<never>>(importer: Importer<T>)
       await wait(10_000);
     }
     throw lastError;
-  });
+  };
+
+  const get = (gen: number) => {
+    let component = cache.get(gen);
+    if (!component) {
+      component = lazy(load);
+      cache.clear();
+      cache.set(gen, component);
+    }
+    return component;
+  };
+
+  return function LazyRoute(props: Record<string, unknown>) {
+    const gen = useGeneration();
+    return createElement(get(gen) as unknown as ComponentType<Record<string, unknown>>, props);
+  } as unknown as T;
 }
