@@ -20,6 +20,13 @@ export default function DashboardLayout() {
     if (isAuthenticated) void syncAlignmentsFromDb();
   }, [isAuthenticated]);
 
+  // Cancela geração em andamento quando o usuário sai da área de documentos.
+  // Evita processamento pesado em background após navegação.
+  useEffect(() => {
+    const insideGenerationFlow = /\/(form|preview|align)(\/.*)?$/.test(location.pathname);
+    if (!insideGenerationFlow) cancelCurrentGeneration();
+  }, [location.pathname]);
+
 
 
   if (loading) {
