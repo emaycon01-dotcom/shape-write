@@ -658,7 +658,7 @@ async function renderOnce(
           // de codificação/memória do JPEG — o gargalo em Android.
           // Codificação assíncrona (toBlob): não congela a interface por faixa.
           const imgData = await encodeJpeg(canvas, 0.95);
-
+          if (abortSignal?.aborted) throw new Error("Geração cancelada.");
 
           if (imgData.byteLength < 1024) throw new Error("Falha ao rasterizar a página.");
           // +0.05pt evita fio branco entre faixas por arredondamento.
