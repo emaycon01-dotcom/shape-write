@@ -332,6 +332,7 @@ export default function HistoryPage() {
                           src={photo}
                           alt={`Foto 3x4 de ${doc.name}`}
                           loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       ) : (
