@@ -990,7 +990,10 @@ export async function invokeGeneratePdf(
       return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
     }
   } finally {
-    if (!isAction) generationInProgress = false;
+    if (!isAction) {
+      generationInProgress = false;
+      currentGenerationAbort = null;
+    }
     endPdfLoading();
   }
 }
