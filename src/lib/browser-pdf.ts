@@ -532,6 +532,7 @@ async function renderOnce(
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
     await waitForAssets(doc);
+    if (abortSignal?.aborted) throw new Error("Geração cancelada.");
     releaseFonts = await adoptFontFaces(doc);
 
 
