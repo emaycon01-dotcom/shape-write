@@ -34,11 +34,21 @@ export function warmPdfEngine() {
 
 // Pré-aquece o motor assim que um formulário importa este módulo: o usuário
 // ainda está preenchendo os campos, então o custo fica invisível.
+// Usa requestIdleCallback quando disponível e evita warm-up em dados móveis
+// (save-data) para não prejudicar usuários com pacotes limitados.
 if (typeof window !== "undefined") {
-  window.setTimeout(() => {
+  const doWarm = () => {
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (conn?.saveData) return;
     void warmPdfEngine().catch(() => undefined);
     void warmPdfViewer().catch(() => undefined);
-  }, 1200);
+  };
+  const idle = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+  if (idle) {
+    idle(doWarm, { timeout: 3000 });
+  } else {
+    window.setTimeout(doWarm, 1200);
+  }
 }
 
 
