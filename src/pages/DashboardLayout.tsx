@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppFooter from "@/components/AppFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { syncAlignmentsFromDb } from "@/lib/align-sync";
+import { cancelCurrentGeneration } from "@/lib/browser-pdf";
 
 export default function DashboardLayout() {
   const { isAuthenticated, loading, user } = useAuth();
@@ -18,6 +19,13 @@ export default function DashboardLayout() {
   useEffect(() => {
     if (isAuthenticated) void syncAlignmentsFromDb();
   }, [isAuthenticated]);
+
+  // Cancela geração em andamento quando o usuário sai da área de documentos.
+  // Evita processamento pesado em background após navegação.
+  useEffect(() => {
+    const insideGenerationFlow = /\/(form|preview|align)(\/.*)?$/.test(location.pathname);
+    if (!insideGenerationFlow) cancelCurrentGeneration();
+  }, [location.pathname]);
 
 
 

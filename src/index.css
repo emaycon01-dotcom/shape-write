@@ -178,4 +178,20 @@
   .glass {
     @apply bg-card/60 backdrop-blur-xl border border-border/50;
   }
+
+  /* Otimização de renderização: isola seções grandes para que repaints
+     não forcem recálculo de layout em toda a página. */
+  .contain-layout {
+    contain: layout paint;
+  }
+  .contain-strict {
+    contain: strict;
+  }
+}
+
+/* Aplica contain nos containers de preview e páginas do PDF para reduzir
+   custo de composição durante a rasterização e rolagem. */
+.pdf-preview-stage,
+.page {
+  contain: layout paint style;
 }

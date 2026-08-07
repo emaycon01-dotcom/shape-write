@@ -64,7 +64,9 @@ export default function HistoryPage() {
   // e agrupando as atualizações de estado para não re-renderizar a lista inteira a cada foto.
   useEffect(() => {
     let cancelled = false;
-    const pending = userDocs.filter((d) => !requested.current.has(d.id));
+    // Limita fotos base64 aos 20 registros mais recentes para preservar memória.
+    const recentDocs = userDocs.slice(0, 20);
+    const pending = recentDocs.filter((d) => !requested.current.has(d.id));
     if (pending.length === 0) return;
     pending.forEach((d) => requested.current.add(d.id));
 
@@ -317,7 +319,7 @@ export default function HistoryPage() {
             return (
               <article
                 key={doc.id}
-                className={`glass rounded-2xl overflow-hidden border transition-colors ${
+                className={`glass rounded-2xl overflow-hidden border transition-colors contain-layout ${
                   expired ? "border-destructive/40" : "border-border/60 hover:border-primary/40"
                 }`}
               >
@@ -330,6 +332,7 @@ export default function HistoryPage() {
                           src={photo}
                           alt={`Foto 3x4 de ${doc.name}`}
                           loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       ) : (

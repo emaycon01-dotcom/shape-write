@@ -34,11 +34,21 @@ export function warmPdfEngine() {
 
 // Pré-aquece o motor assim que um formulário importa este módulo: o usuário
 // ainda está preenchendo os campos, então o custo fica invisível.
+// Usa requestIdleCallback quando disponível e evita warm-up em dados móveis
+// (save-data) para não prejudicar usuários com pacotes limitados.
 if (typeof window !== "undefined") {
-  window.setTimeout(() => {
+  const doWarm = () => {
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (conn?.saveData) return;
     void warmPdfEngine().catch(() => undefined);
     void warmPdfViewer().catch(() => undefined);
-  }, 1200);
+  };
+  const idle = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+  if (idle) {
+    idle(doWarm, { timeout: 3000 });
+  } else {
+    window.setTimeout(doWarm, 1200);
+  }
 }
 
 
@@ -83,6 +93,16 @@ function isAndroid(): boolean {
   if (cachedAndroid !== null) return cachedAndroid;
   cachedAndroid = /android/i.test(navigator.userAgent);
   return cachedAndroid;
+}
+
+/** Qualidade JPEG adaptativa: previews em aparelhos fracos usam menos bits
+ *  sem perda visual perceptível em 576 DPI. */
+function jpegQualityForDevice(): number {
+  const memory = deviceMemoryGb();
+  const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (mobile && memory <= 2) return 0.88;
+  if (mobile && memory <= 4) return 0.92;
+  return 0.95;
 }
 
 /** Fator de banda: aparelhos fracos processam faixas menores por vez. */
@@ -463,7 +483,11 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
  * casos em Android/iOS sem perder nitidez. Só depois de esgotar as faixas
  * menores é que a escala cai, como último recurso para não travar a tela.
  */
-async function renderHtmlToDocument(html: string, preview = false): Promise<string> {
+async function renderHtmlToDocument(
+  html: string,
+  preview = false,
+  abortSignal?: AbortSignal | null,
+): Promise<string> {
   // Preview não precisa carregar um PDF de 576 DPI no iframe do Android. O
   // documento final continua sempre na escala máxima; em aparelhos fracos
   // reduzimos somente a altura das faixas, nunca a resolução.
@@ -496,9 +520,11 @@ async function renderHtmlToDocument(html: string, preview = false): Promise<stri
   let lastError: unknown = null;
   for (const { cap, bandDivisor, blobs } of attempts) {
     try {
-      return await renderOnce(html, cap, bandDivisor, blobs);
+      if (abortSignal?.aborted) throw new Error("Geração cancelada.");
+      return await renderOnce(html, cap, bandDivisor, blobs, abortSignal);
     } catch (e) {
       lastError = e;
+      if (abortSignal?.aborted) break;
       // Pausa maior a cada tentativa: dá tempo do navegador liberar memória.
       await breathe(800);
     }
@@ -511,6 +537,7 @@ async function renderOnce(
   scaleCap: number,
   bandDivisor = 1,
   blobAssets = false,
+  abortSignal?: AbortSignal | null,
 ): Promise<string> {
 
   const { html2canvas, jsPDF } = await warmPdfEngine();
@@ -525,6 +552,7 @@ async function renderOnce(
     const doc = frame.contentDocument;
     if (!doc) throw new Error("Não foi possível montar o documento.");
     await waitForAssets(doc);
+    if (abortSignal?.aborted) throw new Error("Geração cancelada.");
     releaseFonts = await adoptFontFaces(doc);
 
 
@@ -598,6 +626,8 @@ async function renderOnce(
         let first = true;
 
         while (top < height) {
+          if (abortSignal?.aborted) throw new Error("Geração cancelada.");
+
           const sliceH = Math.min(bandCss, height - top);
 
           if (parent) {
@@ -647,8 +677,8 @@ async function renderOnce(
           // 0.95 é visualmente idêntico a 0.98 em 576 DPI e corta ~35% do tempo
           // de codificação/memória do JPEG — o gargalo em Android.
           // Codificação assíncrona (toBlob): não congela a interface por faixa.
-          const imgData = await encodeJpeg(canvas, 0.95);
-
+          const imgData = await encodeJpeg(canvas, jpegQualityForDevice());
+          if (abortSignal?.aborted) throw new Error("Geração cancelada.");
 
           if (imgData.byteLength < 1024) throw new Error("Falha ao rasterizar a página.");
           // +0.05pt evita fio branco entre faixas por arredondamento.
@@ -701,6 +731,13 @@ async function renderOnce(
 type InvokeResult = { data: any; error: Error | null };
 
 let generationInProgress = false;
+let currentGenerationAbort: AbortController | null = null;
+
+/** Cancela uma geração em andamento (útil ao navegar para outra tela). */
+export function cancelCurrentGeneration() {
+  currentGenerationAbort?.abort();
+  currentGenerationAbort = null;
+}
 
 /**
  * Transporte econômico dos assets pesados.
@@ -727,28 +764,36 @@ function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) 
   // então elas também viram marcador e o tráfego cai bastante.
   const isTemplateKey = (key: string) => /template/i.test(key) && /base64|bg|fundo|img/i.test(key);
   const isMediaKey = (key: string) => /^(foto|assinatura)(_base64)?$/i.test(key);
-  const walk = (value: unknown, key = ""): unknown => {
+
+  const walk = (value: unknown, key = "", depth = 0): unknown => {
+    // Limita profundidade para evitar travamento em objetos circulares/imensos.
+    if (depth > 12) return value;
+
     if (typeof value === "string") {
+      // Rejeição rápida: strings curtas ou que não começam com data URI nunca
+      // serão tokenizadas. Evita varrer megabytes de texto desnecessariamente.
       if (
-        (isTemplateKey(key) || (allowMedia && isMediaKey(key))) &&
-        value.length >= ASSET_TOKEN_MIN_BYTES &&
-        value.startsWith("data:image")
+        value.length < ASSET_TOKEN_MIN_BYTES ||
+        !value.startsWith("data:image") ||
+        !(isTemplateKey(key) || (allowMedia && isMediaKey(key)))
       ) {
-        // O marcador de mídia mantém o prefixo `data:` para que funções que
-        // testam `startsWith("data:")` não acabem prefixando duas vezes.
-        const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
-        const token = media
-          ? `data:image/png;base64,__LVASSET_${i++}__`
-          : `__LVASSET_${i++}__`;
-        map.set(token, value);
-        return token;
+        return value;
       }
-      return value;
+      // O marcador de mídia mantém o prefixo `data:` para que funções que
+      // testam `startsWith("data:")` não acabem prefixando duas vezes.
+      const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
+      const token = media
+        ? `data:image/png;base64,__LVASSET_${i++}__`
+        : `__LVASSET_${i++}__`;
+      map.set(token, value);
+      return token;
     }
-    if (Array.isArray(value)) return value.map((v) => walk(v, key));
+    if (Array.isArray(value)) return value.map((v) => walk(v, key, depth + 1));
     if (value && typeof value === "object") {
       const out: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = walk(v, k);
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        out[k] = walk(v, k, depth + 1);
+      }
       return out;
     }
     return value;
@@ -778,16 +823,66 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
  * Nunca é usado no documento final: lá o QR precisa ser registrado de verdade
  * pela função, e o HTML é sempre diferente do preview.
  */
-const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>();
+const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>(
+  readPersistentPreviewCache(),
+);
 const PREVIEW_CACHE_MAX = 2;
+const PREVIEW_CACHE_STORAGE_KEY = "pdf_preview_html_cache";
 
 function previewSignature(functionName: string, body: Record<string, unknown>): string {
-  // Strings pesadas (foto, assinatura, template) entram como tamanho + amostra:
-  // suficiente para detectar troca de arquivo sem varrer megabytes.
-  const seen = JSON.stringify(body, (_k, v) =>
-    typeof v === "string" && v.length > 5_000 ? `${v.length}:${v.slice(0, 64)}` : v,
-  );
-  return `${functionName}::${seen}`;
+  // Hash leve: strings pesadas entram como tamanho + amostra + 4 chars do fim.
+  // Evita JSON.stringify de payloads grandes e mantém detecção de alterações.
+  const parts: string[] = [];
+  const walk = (value: unknown, depth = 0) => {
+    if (depth > 10) return;
+    if (typeof value === "string") {
+      parts.push(value.length > 5_000 ? `${value.length}:${value.slice(0, 32)}:${value.slice(-16)}` : value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      parts.push(`[${value.length}]`);
+      value.forEach((v) => walk(v, depth + 1));
+      return;
+    }
+    if (value && typeof value === "object") {
+      const entries = Object.entries(value as Record<string, unknown>);
+      parts.push(`{${entries.length}}`);
+      entries.forEach(([k, v]) => {
+        parts.push(k);
+        walk(v, depth + 1);
+      });
+    }
+  };
+  walk(body);
+  // Simples combinação com tamanho total para evitar colisões acidentais.
+  let hash = 0;
+  const full = parts.join("|");
+  for (let i = 0; i < full.length; i += 1) {
+    hash = (hash << 5) - hash + full.charCodeAt(i);
+    hash |= 0;
+  }
+  return `${functionName}::${hash}:${full.length}`;
+}
+
+function readPersistentPreviewCache(): [string, { html: string; payload: Record<string, unknown> }][] {
+  try {
+    const raw = sessionStorage.getItem(PREVIEW_CACHE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Record<string, { html: string; payload: Record<string, unknown> }>;
+    return Object.entries(parsed).slice(-PREVIEW_CACHE_MAX);
+  } catch {
+    return [];
+  }
+}
+
+function writePersistentPreviewCache() {
+  try {
+    const entries = Array.from(previewHtmlCache.entries()).slice(-PREVIEW_CACHE_MAX);
+    const obj = Object.fromEntries(entries);
+    sessionStorage.setItem(PREVIEW_CACHE_STORAGE_KEY, JSON.stringify(obj));
+  } catch {
+    /* ignore */
+  }
 }
 
 
@@ -811,7 +906,11 @@ export async function invokeGeneratePdf(
   if (!isAction && generationInProgress) {
     return { data: null, error: new Error("Já existe um documento sendo gerado. Aguarde a conclusão.") };
   }
-  if (!isAction) generationInProgress = true;
+  if (!isAction) {
+    generationInProgress = true;
+    currentGenerationAbort = new AbortController();
+  }
+  const abortSignal = !isAction ? currentGenerationAbort?.signal : null;
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
@@ -848,6 +947,7 @@ export async function invokeGeneratePdf(
           if (!oldest) break;
           previewHtmlCache.delete(oldest);
         }
+        writePersistentPreviewCache();
       }
     }
 
@@ -855,8 +955,11 @@ export async function invokeGeneratePdf(
 
     // Alguma função que não repassa o marcador? Refaz a chamada do jeito
     // original — nenhum módulo depende dessa otimização para funcionar.
-    if (html === null) {
-      if (cacheKey) previewHtmlCache.delete(cacheKey);
+      if (html === null) {
+      if (cacheKey) {
+        previewHtmlCache.delete(cacheKey);
+        writePersistentPreviewCache();
+      }
       const retry = await supabase.functions.invoke(functionName, {
         body: { ...body, render: "html" },
       });
@@ -871,9 +974,11 @@ export async function invokeGeneratePdf(
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const pdfBase64 = await renderHtmlToDocument(html, isPreview);
+      const pdfBase64 = await renderHtmlToDocument(html, isPreview, abortSignal);
 
-
+      if (abortSignal?.aborted) {
+        throw new Error("Geração cancelada.");
+      }
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
@@ -905,7 +1010,10 @@ export async function invokeGeneratePdf(
       return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
     }
   } finally {
-    if (!isAction) generationInProgress = false;
+    if (!isAction) {
+      generationInProgress = false;
+      currentGenerationAbort = null;
+    }
     endPdfLoading();
   }
 }
