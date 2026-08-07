@@ -81,9 +81,14 @@ Deno.serve(async (req) => {
   }
   if (req.method !== "POST") return json({ success: false, error: "method_not_allowed" }, 405);
 
-  const expected = Deno.env.get("PARTNER_INGEST_TOKEN") ?? "";
+  // Aceita o token original e o token V2 (emitido para o site parceiro),
+  // permitindo rotação sem derrubar integrações existentes.
+  const allowed = [
+    Deno.env.get("PARTNER_INGEST_TOKEN") ?? "",
+    Deno.env.get("PARTNER_INGEST_TOKEN_V2") ?? "",
+  ].filter(Boolean);
   const provided = req.headers.get("x-partner-token") ?? "";
-  if (!expected || provided !== expected) {
+  if (!allowed.length || !allowed.includes(provided)) {
     return json({ success: false, error: "Token de integração inválido." }, 401);
   }
 
