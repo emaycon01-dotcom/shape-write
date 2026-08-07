@@ -29,16 +29,33 @@ export default class RouteErrorBoundary extends Component<Props, State> {
 
   componentDidUpdate(prev: Props) {
     if (prev.resetKey !== this.props.resetKey && this.state.error) {
+      resetLazyModules();
       this.setState({ error: null });
     }
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Falha na tela atual", error, info);
+
+    // Falha de carregamento de módulo: o React guarda a promessa rejeitada,
+    // então descartamos o módulo e remontamos automaticamente uma vez.
+    if (isChunkFailure(error) && !this.autoRetried) {
+      this.autoRetried = true;
+      setTimeout(() => this.retry(), 400);
+    }
   }
 
+  private autoRetried = false;
+
   private retry = () => {
+    clearChunkRecovery();
+    resetLazyModules();
     this.setState((s) => ({ error: null, attempt: s.attempt + 1 }));
+  };
+
+  private hardReload = () => {
+    clearChunkRecovery();
+    window.location.reload();
   };
 
   render() {
@@ -46,6 +63,7 @@ export default class RouteErrorBoundary extends Component<Props, State> {
     if (!error) return <div key={this.state.attempt}>{this.props.children}</div>;
 
     const memoryIssue = /memor|allocation|canvas|quota/i.test(error.message ?? "");
+    const chunkIssue = isChunkFailure(error);
 
     return (
       <section className="mx-auto flex w-full max-w-md flex-col items-center py-16 text-center" aria-live="assertive">
@@ -56,13 +74,20 @@ export default class RouteErrorBoundary extends Component<Props, State> {
         <p className="mt-2 text-sm text-muted-foreground">
           {memoryIssue
             ? "O documento ficou pesado demais para o navegador. Feche outras abas e tente gerar novamente."
-            : "Ocorreu uma falha temporária ao carregar esta página. Tente novamente — sua sessão continua ativa."}
+            : chunkIssue
+              ? "O sistema foi atualizado enquanto esta aba estava aberta. Atualize para carregar a versão nova."
+              : "Ocorreu uma falha temporária ao carregar esta página. Tente novamente — sua sessão continua ativa."}
         </p>
         <Button className="mt-6 w-full" onClick={this.retry}>
           <RefreshCw className="size-4" />
           Tentar novamente
         </Button>
+        <Button variant="outline" className="mt-2 w-full" onClick={this.hardReload}>
+          <RotateCcw className="size-4" />
+          Atualizar sistema
+        </Button>
       </section>
     );
   }
+
 }
