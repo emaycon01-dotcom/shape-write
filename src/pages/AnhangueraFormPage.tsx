@@ -180,7 +180,7 @@ export default function AnhangueraFormPage() {
       recredenciamento_universidade: ANHANGUERA_RECREDENCIAMENTO_UNIVERSIDADE,
       registro_texto:
         `Diploma registrado sob nº <b>${form.registroNumero}</b> Livro <b>${form.registroLivro}</b> Processo nº <b>${form.processo}</b>, nos termos da Lei 9394 de 20/12/1996 e Decreto nº 9.235 de\n15/12/2017.`,
-      registro_cidade_data: `${form.cidadeRegistro} ${dataExtenso(form.dataRegistro)}.`,
+      registro_cidade_data: `${form.cidadeRegistro} - ${form.ufRegistro}, ${dataExtenso(form.dataRegistro)}.`,
       registrador_nome: "Angela Cristina Granado Willamowius",
       registrador_cargo: "Gerente Documentação e Diplomas",
       // ---- dados crus ----
