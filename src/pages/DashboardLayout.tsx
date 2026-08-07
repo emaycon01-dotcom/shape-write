@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppFooter from "@/components/AppFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { syncAlignmentsFromDb } from "@/lib/align-sync";
+import { cancelCurrentGeneration } from "@/lib/browser-pdf";
 
 export default function DashboardLayout() {
   const { isAuthenticated, loading, user } = useAuth();
