@@ -25,7 +25,11 @@ function dateOnly(v: string): string {
 /** "05:53:23" -> "05:53" */
 function toHm(v: string): string {
   const m = s(v).match(/(\d{1,2}):(\d{2})/);
-  return m ? `${m[1].padStart(2, "0")}:${m[2]}` : "";
+  if (!m) return "";
+  // Clampa valores inválidos (ex.: "05:64") para evitar erro no portal de validação.
+  const h = Math.min(23, Math.max(0, Number(m[1])));
+  const min = Math.min(59, Math.max(0, Number(m[2])));
+  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 }
 
 /** "2023-11-08" -> "08/11/2023" (mantém já formatado em BR) */
