@@ -57,6 +57,7 @@ interface AnhangueraForm {
   registroLivro: string;
   processo: string;
   cidadeRegistro: string;
+  ufRegistro: string;
   dataRegistro: string;
 }
 
