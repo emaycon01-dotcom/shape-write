@@ -9,3 +9,8 @@ export function rnd(len: number): string {
 export function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+/** Minutos/segundos válidos (00–59) para horários gerados nos testes. */
+export function rnd60(): string {
+  return String(Math.floor(Math.random() * 60)).padStart(2, "0");
+}
