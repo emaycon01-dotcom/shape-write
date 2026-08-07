@@ -701,6 +701,13 @@ async function renderOnce(
 type InvokeResult = { data: any; error: Error | null };
 
 let generationInProgress = false;
+let currentGenerationAbort: AbortController | null = null;
+
+/** Cancela uma geração em andamento (útil ao navegar para outra tela). */
+export function cancelCurrentGeneration() {
+  currentGenerationAbort?.abort();
+  currentGenerationAbort = null;
+}
 
 /**
  * Transporte econômico dos assets pesados.
