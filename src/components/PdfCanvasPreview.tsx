@@ -216,14 +216,12 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
         // Orçamento dividido entre as páginas para não estourar memória.
         const budget = pixelBudget() / Math.max(1, pageCount);
+        const sideLimit = maxCanvasSide();
+        let pagesRendered = 0;
 
         for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
           const page = await pdf.getPage(pageNumber);
           if (cancelled) return;
-
-          const canvas = document.createElement("canvas");
-          canvas.setAttribute("aria-label", `${title} — página ${pageNumber}`);
-          canvas.className = "invisible";
 
           const base = page.getViewport({ scale: 1 });
           // Supersampling: rasteriza acima da densidade da tela para que textos
@@ -231,34 +229,60 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           let scale = Math.min(6, ((availableWidth * pixelRatio) / base.width) * 2.25);
           const area = base.width * base.height * scale * scale;
           if (area > budget) scale *= Math.sqrt(budget / area);
+          // Nenhum lado pode ultrapassar o limite físico de canvas do aparelho.
+          const sideScale = sideLimit / Math.max(base.width, base.height);
+          scale = Math.min(scale, sideScale);
           scale = Math.max(0.4, scale);
 
-          let rendered = false;
-          for (let attempt = 0; attempt < 3 && !rendered; attempt += 1) {
-            const viewport = page.getViewport({ scale: scale / (attempt === 0 ? 1 : attempt * 2) });
+          // Escada de segurança: qualidade máxima primeiro; se o aparelho não
+          // aguentar, cai degrau a degrau em vez de quebrar o preview.
+          const ladder = [1, 0.75, 0.55, 0.4, 0.28].map((f) =>
+            Math.max(0.35, Math.min(scale * f, sideScale)),
+          );
+
+          let canvas: HTMLCanvasElement | null = null;
+          for (const attemptScale of ladder) {
+            // Canvas novo a cada tentativa: no WebKit um canvas que já falhou
+            // na alocação continua inutilizável mesmo após redimensionar.
+            const candidate = document.createElement("canvas");
+            candidate.setAttribute("aria-label", `${title} — página ${pageNumber}`);
+            candidate.className = "invisible";
+            const viewport = page.getViewport({ scale: attemptScale });
             try {
-              const context = canvas.getContext("2d", { alpha: false });
+              const context = candidate.getContext("2d", { alpha: false });
               if (!context) throw new Error("Contexto 2D indisponível");
-              canvas.width = Math.ceil(viewport.width);
-              canvas.height = Math.ceil(viewport.height);
-              canvas.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
+              candidate.width = Math.ceil(viewport.width);
+              candidate.height = Math.ceil(viewport.height);
+              candidate.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
               context.setTransform(1, 0, 0, 1, 0, 0);
               context.fillStyle = "#ffffff";
-              context.fillRect(0, 0, canvas.width, canvas.height);
+              context.fillRect(0, 0, candidate.width, candidate.height);
               await page.render({ canvasContext: context, viewport }).promise;
-              rendered = true;
+              // Verifica se o canvas realmente recebeu pixels (iOS às vezes
+              // devolve tudo em branco/preto sem lançar erro).
+              const probe = context.getImageData(0, 0, 1, 1).data;
+              if (probe[3] === 0) throw new Error("Rasterização vazia");
+              canvas = candidate;
+              break;
             } catch (err) {
-              if (attempt === 2) throw err;
+              candidate.width = 0;
+              candidate.height = 0;
+              console.warn(`Preview: página ${pageNumber} falhou em ${attemptScale.toFixed(2)}x`, err);
               await new Promise((r) => setTimeout(r, 120));
             }
+            if (cancelled) return;
           }
 
           if (cancelled) return;
-          canvas.className = "block h-auto max-w-full bg-white shadow-sm";
-          stage.appendChild(canvas);
+
+          if (canvas) {
+            canvas.className = "block h-auto max-w-full bg-white shadow-sm";
+            stage.appendChild(canvas);
+            pagesRendered += 1;
+          }
           page.cleanup();
 
-          if (pageNumber === 1) {
+          if (pagesRendered === 1 && stageRef.current !== stage) {
             clearStage();
             stageRef.current = stage;
             host.appendChild(stage);
@@ -266,6 +290,9 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
             requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
           }
         }
+
+        if (pagesRendered === 0) throw new Error("Nenhuma página pôde ser rasterizada");
+
 
         await pdf.destroy();
       } catch (error) {
