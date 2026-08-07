@@ -605,6 +605,8 @@ async function renderOnce(
         let first = true;
 
         while (top < height) {
+          if (abortSignal?.aborted) throw new Error("Geração cancelada.");
+
           const sliceH = Math.min(bandCss, height - top);
 
           if (parent) {
