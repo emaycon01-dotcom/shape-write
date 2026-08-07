@@ -630,24 +630,20 @@ export default function DiplomaFormPage() {
           </div>
 
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Processo</FieldLabel>
-              <Input value={form.processo} onChange={set("processo")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Cidade do registro</FieldLabel>
-              <CidadeUfPicker
-                uf={splitCidadeUf(form.registroCidade).uf}
-                cidade={splitCidadeUf(form.registroCidade).cidade}
-                labelUf="UF"
-                labelCidade="Cidade"
-                onChange={({ uf, cidade }) =>
-                  setForm((p) => ({ ...p, registroCidade: juntaCidadeUf(cidade, uf) }))
-                }
-              />
-            </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Processo</FieldLabel>
+            <Input value={form.processo} onChange={set("processo")} className={inputCls} />
           </div>
+
+          <CidadeUfPicker
+            uf={splitCidadeUf(form.registroCidade).uf}
+            cidade={splitCidadeUf(form.registroCidade).cidade}
+            labelUf="UF do registro"
+            labelCidade="Cidade do registro"
+            onChange={({ uf, cidade }) =>
+              setForm((p) => ({ ...p, registroCidade: juntaCidadeUf(cidade, uf) }))
+            }
+          />
 
           <p className="text-xs text-muted-foreground">
             Reitor(a), resolução, livro, folha, nº de série e código de validação são gerados automaticamente.
