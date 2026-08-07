@@ -95,6 +95,16 @@ function isAndroid(): boolean {
   return cachedAndroid;
 }
 
+/** Qualidade JPEG adaptativa: previews em aparelhos fracos usam menos bits
+ *  sem perda visual perceptível em 576 DPI. */
+function jpegQualityForDevice(): number {
+  const memory = deviceMemoryGb();
+  const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (mobile && memory <= 2) return 0.88;
+  if (mobile && memory <= 4) return 0.92;
+  return 0.95;
+}
+
 /** Fator de banda: aparelhos fracos processam faixas menores por vez. */
 function memoryAreaFactor(): number {
   const gb = deviceMemoryGb();
