@@ -279,7 +279,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           type="button"
           onClick={() => setLensOn((v) => !v)}
           aria-label={lensOn ? "Desativar lupa" : "Ativar lupa"}
-          className="sticky right-3 top-3 z-20 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-lg backdrop-blur transition hover:bg-background data-[on=true]:bg-primary data-[on=true]:text-primary-foreground"
+          className="absolute right-3 top-3 z-20 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-lg backdrop-blur transition hover:bg-background data-[on=true]:bg-primary data-[on=true]:text-primary-foreground"
           data-on={lensOn}
         >
           {lensOn ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
