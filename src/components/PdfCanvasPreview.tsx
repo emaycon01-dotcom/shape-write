@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AlertTriangle, Loader2, Search, X } from "lucide-react";
 import { completePdfPresentation, subscribePdfLoading } from "@/lib/pdf-loading";
 import { getPdfJs } from "@/lib/pdfjs-loader";
 
