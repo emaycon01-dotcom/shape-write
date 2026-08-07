@@ -18,6 +18,10 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!INGEST_TOKEN) return json({ error: "missing_ingest_token" }, 500);
 
+  // Exige sessão válida: o token de ingestão nunca pode ser usado anonimamente.
+  const auth = await authenticateRequest(req, corsHeaders);
+  if (auth instanceof Response) return auth;
+
   let payload: { tabela?: string; dados?: Record<string, unknown> };
   try {
     payload = await req.json();
