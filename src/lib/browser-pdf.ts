@@ -940,9 +940,11 @@ export async function invokeGeneratePdf(
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const pdfBase64 = await renderHtmlToDocument(html, isPreview);
+      const pdfBase64 = await renderHtmlToDocument(html, isPreview, abortSignal);
 
-
+      if (abortSignal?.aborted) {
+        throw new Error("Geração cancelada.");
+      }
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;
