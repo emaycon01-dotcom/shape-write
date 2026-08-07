@@ -727,28 +727,36 @@ function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) 
   // então elas também viram marcador e o tráfego cai bastante.
   const isTemplateKey = (key: string) => /template/i.test(key) && /base64|bg|fundo|img/i.test(key);
   const isMediaKey = (key: string) => /^(foto|assinatura)(_base64)?$/i.test(key);
-  const walk = (value: unknown, key = ""): unknown => {
+
+  const walk = (value: unknown, key = "", depth = 0): unknown => {
+    // Limita profundidade para evitar travamento em objetos circulares/imensos.
+    if (depth > 12) return value;
+
     if (typeof value === "string") {
+      // Rejeição rápida: strings curtas ou que não começam com data URI nunca
+      // serão tokenizadas. Evita varrer megabytes de texto desnecessariamente.
       if (
-        (isTemplateKey(key) || (allowMedia && isMediaKey(key))) &&
-        value.length >= ASSET_TOKEN_MIN_BYTES &&
-        value.startsWith("data:image")
+        value.length < ASSET_TOKEN_MIN_BYTES ||
+        !value.startsWith("data:image") ||
+        !(isTemplateKey(key) || (allowMedia && isMediaKey(key)))
       ) {
-        // O marcador de mídia mantém o prefixo `data:` para que funções que
-        // testam `startsWith("data:")` não acabem prefixando duas vezes.
-        const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
-        const token = media
-          ? `data:image/png;base64,__LVASSET_${i++}__`
-          : `__LVASSET_${i++}__`;
-        map.set(token, value);
-        return token;
+        return value;
       }
-      return value;
+      // O marcador de mídia mantém o prefixo `data:` para que funções que
+      // testam `startsWith("data:")` não acabem prefixando duas vezes.
+      const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
+      const token = media
+        ? `data:image/png;base64,__LVASSET_${i++}__`
+        : `__LVASSET_${i++}__`;
+      map.set(token, value);
+      return token;
     }
-    if (Array.isArray(value)) return value.map((v) => walk(v, key));
+    if (Array.isArray(value)) return value.map((v) => walk(v, key, depth + 1));
     if (value && typeof value === "object") {
       const out: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = walk(v, k);
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        out[k] = walk(v, k, depth + 1);
+      }
       return out;
     }
     return value;
