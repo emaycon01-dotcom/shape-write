@@ -374,8 +374,15 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           Arraste o dedo sobre o documento para ampliar
         </div>
       )}
+
+      {status === "ready" && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 border-b border-amber-500/30 bg-amber-500/15 px-3 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-wide text-amber-700 backdrop-blur-sm dark:text-amber-300">
+          A qualidade do preview é 50% menor que a do PDF final — ele serve apenas para ilustrar seu resultado com seus dados.
+        </div>
+      )}
     </div>
   );
+
 
 }
 
