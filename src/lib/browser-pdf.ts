@@ -928,6 +928,12 @@ function writePersistentPreviewCache() {
   }
 }
 
+/**
+ * Módulos migrados para o motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`).
+ * Os demais seguem no motor de rasterização de HTML.
+ */
+const CANVAS_ENGINE_FUNCTIONS = new Set(["generate-cnh-pdf", "generate-rg-pdf"]);
+
 
 /**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
@@ -1017,7 +1023,11 @@ export async function invokeGeneratePdf(
       // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
       // experimental criava resultados diferentes entre documentos e foi
       // removida para eliminar essa duplicidade de engines.
-      const pdfBase64 = await renderHtmlToDocument(html, isPreview, abortSignal);
+      // CNH e RG usam o motor CANVAS (desenho direto + jsPDF): mais rápido e
+      // com texto nitidamente melhor, porque nada é "fotografado" do DOM.
+      const pdfBase64 = CANVAS_ENGINE_FUNCTIONS.has(functionName)
+        ? await (await import("@/lib/canvas-pdf")).renderHtmlToPdfCanvas(html, isPreview, abortSignal)
+        : await renderHtmlToDocument(html, isPreview, abortSignal);
 
       if (abortSignal?.aborted) {
         throw new Error("Geração cancelada.");
