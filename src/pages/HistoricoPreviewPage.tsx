@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
-import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
@@ -25,6 +25,15 @@ export default function HistoricoPreviewPage() {
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
+
+  // Pré-registro em segundo plano enquanto o cliente confere o preview.
+  useEffect(() => {
+    if (!formData || finalPdf) return;
+    const id = window.setTimeout(() => {
+      prefetchGeneratePdf("generate-historico-pdf", { ...formData, preview: false });
+    }, 1200);
+    return () => window.clearTimeout(id);
+  }, [formData, finalPdf]);
 
   if (!pdfBase64 || !formData) {
     return (
