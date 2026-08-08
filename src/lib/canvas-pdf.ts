@@ -621,6 +621,18 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
     const letterSpacing = cs.letterSpacing === "normal" ? 0 : parseFloat(cs.letterSpacing) || 0;
     const font = fontShorthand(cs);
     const color = cs.color;
+    const decorationLine = cs.textDecorationLine || cs.textDecoration || "";
+    const hasUnderline = decorationLine.includes("underline");
+    const hasLineThrough = decorationLine.includes("line-through");
+    const decoration =
+      hasUnderline || hasLineThrough
+        ? {
+            underline: hasUnderline,
+            lineThrough: hasLineThrough,
+            color: cs.textDecorationColor || color,
+            thickness: parseFloat(cs.textDecorationThickness) || Math.max(1, parseFloat(cs.fontSize) / 16),
+          }
+        : null;
 
     el.childNodes.forEach((child) => {
       if (child.nodeType === Node.TEXT_NODE) {
@@ -637,6 +649,7 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
             font,
             color,
             letterSpacing,
+            decoration,
             z: localZ,
             order: order++,
             clip: localClip,
@@ -649,6 +662,7 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
       }
     });
   };
+
 
   if (canvasRoot) {
     // A raiz do desenho agora é o `.canvas`: usamos a caixa natural (0,0 a
