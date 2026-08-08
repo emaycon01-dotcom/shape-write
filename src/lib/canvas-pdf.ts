@@ -820,9 +820,26 @@ function drawText(ctx: CanvasRenderingContext2D, item: TextItem) {
   }
 
   ctx.fillText(item.text, item.x, y);
+
+  if (item.decoration) {
+    const metrics = ctx.measureText(item.text);
+    const width = metrics.width;
+    ctx.fillStyle = item.decoration.color;
+    const { underline, lineThrough, thickness } = item.decoration;
+    if (underline) {
+      const uy = y + (metrics.fontBoundingBoxDescent || metrics.actualBoundingBoxDescent || 2) + thickness * 0.5;
+      ctx.fillRect(item.x, uy, width, thickness);
+    }
+    if (lineThrough) {
+      const em = parseFloat(ctx.font) || 12;
+      const sy = y - em * 0.35;
+      ctx.fillRect(item.x, sy, width, thickness);
+    }
+  }
 }
 
 function paintBand(
+
   ctx: CanvasRenderingContext2D,
   items: Item[],
   scale: number,
