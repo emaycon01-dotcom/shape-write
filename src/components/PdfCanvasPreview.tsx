@@ -90,7 +90,6 @@ function maxCanvasSide(): number {
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const repaintRef = useRef<((zoom: number) => void) | null>(null);
   const lensCanvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [retryKey, setRetryKey] = useState(0);
@@ -220,14 +219,32 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
       const stage = document.createElement("div");
       stage.className = "flex w-full flex-col items-center gap-3 py-1";
+      const availableWidth = Math.max(280, host.clientWidth);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const budget = pixelBudget() / Math.max(1, pages.length);
       const sideLimit = maxCanvasSide();
 
-      // Decodifica cada faixa uma única vez. Com as imagens em memória o
-      // preview pode ser repintado em resoluções maiores durante o zoom sem
-      // reprocessar o PDF — é isso que eliminava o "borrão" seguido do nítido.
-      const decoded: Array<{ page: (typeof pages)[number]; images: HTMLImageElement[] }> = [];
       for (const page of pages) {
-        const images: HTMLImageElement[] = [];
+        let scale = Math.min(4, ((availableWidth * pixelRatio) / page.width) * 1.25);
+        const area = page.width * page.height * scale * scale;
+        if (area > budget) scale *= Math.sqrt(budget / area);
+        scale = Math.max(0.4, Math.min(scale, sideLimit / Math.max(page.width, page.height)));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(page.width * scale);
+        canvas.height = Math.ceil(page.height * scale);
+        canvas.style.aspectRatio = `${page.width} / ${page.height}`;
+        canvas.className = "block h-auto max-w-full bg-white shadow-sm";
+        canvas.setAttribute("aria-label", title);
+        const ctx = canvas.getContext("2d", { alpha: false });
+        if (!ctx) {
+          releaseCanvas(canvas);
+          return false;
+        }
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingQuality = "high";
+
         for (const band of page.bands) {
           const img = new Image();
           const ok = await new Promise<boolean>((resolve) => {
@@ -236,73 +253,25 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
             img.src = band.url;
           });
           if (cancelled) return true;
-          if (!ok) return false;
-          images.push(img);
+          if (!ok) {
+            releaseCanvas(canvas);
+            return false;
+          }
+          ctx.drawImage(
+            img,
+            0,
+            Math.round(band.top * scale),
+            canvas.width,
+            Math.ceil(band.height * scale),
+          );
         }
-        decoded.push({ page, images });
+        stage.appendChild(canvas);
       }
 
-      const canvases: HTMLCanvasElement[] = [];
-
-      const paint = (zoom: number) => {
-        const availableWidth = Math.max(280, host.clientWidth);
-        const pixelRatio = Math.min((window.devicePixelRatio || 1) * zoom, 4);
-        const budget = pixelBudget() / Math.max(1, decoded.length);
-
-        decoded.forEach(({ page, images }, index) => {
-          // Nunca acima da densidade real das faixas geradas: acima disso só
-          // gastaria memória sem ganho visual.
-          const nativeScale = (images[0]?.naturalWidth || page.width) / page.width;
-          let scale = Math.min(nativeScale, ((availableWidth * pixelRatio) / page.width) * 1.15);
-          const area = page.width * page.height * scale * scale;
-          if (area > budget) scale *= Math.sqrt(budget / area);
-          scale = Math.max(0.4, Math.min(scale, sideLimit / Math.max(page.width, page.height)));
-
-          const canvas = canvases[index] ?? document.createElement("canvas");
-          const width = Math.ceil(page.width * scale);
-          if (canvases[index] && Math.abs(canvas.width - width) < canvas.width * 0.12) return;
-          canvas.width = width;
-          canvas.height = Math.ceil(page.height * scale);
-          canvas.style.aspectRatio = `${page.width} / ${page.height}`;
-          canvas.className = "block h-auto max-w-full bg-white shadow-sm";
-          canvas.setAttribute("aria-label", title);
-          const ctx = canvas.getContext("2d", { alpha: false });
-          if (!ctx) return;
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = "high";
-
-          page.bands.forEach((band, bandIndex) => {
-            const img = images[bandIndex];
-            if (!img) return;
-            ctx.drawImage(
-              img,
-              0,
-              Math.round(band.top * scale),
-              canvas.width,
-              Math.ceil(band.height * scale),
-            );
-          });
-
-          if (!canvases[index]) {
-            canvases[index] = canvas;
-            stage.appendChild(canvas);
-          }
-        });
-      };
-
-      paint(1);
-      if (canvases.length === 0) return false;
       if (cancelled) return true;
-      repaintRef.current = (zoom: number) => {
-        if (!cancelled) paint(zoom);
-      };
       await presentStage(stage, host);
       return true;
     };
-
-
 
     const render = async () => {
       setStatus("loading");
@@ -427,31 +396,6 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       clearStage();
     };
   }, [pdfDataUrl, title, retryKey]);
-
-  /**
-   * Ao dar zoom (pinça ou zoom do navegador) o canvas antigo era apenas
-   * esticado — daí o efeito de "borrão". Aqui o documento é repintado na
-   * densidade do zoom atual, usando as faixas já decodificadas em memória.
-   */
-  useEffect(() => {
-    if (status !== "ready") return;
-    let timer: number | undefined;
-    const schedule = () => {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        const zoom = window.visualViewport?.scale ?? 1;
-        repaintRef.current?.(Math.min(Math.max(zoom, 1), 3));
-      }, 220);
-    };
-    const vv = window.visualViewport;
-    vv?.addEventListener("resize", schedule);
-    window.addEventListener("resize", schedule);
-    return () => {
-      window.clearTimeout(timer);
-      vv?.removeEventListener("resize", schedule);
-      window.removeEventListener("resize", schedule);
-    };
-  }, [status]);
 
   return (
     <div
