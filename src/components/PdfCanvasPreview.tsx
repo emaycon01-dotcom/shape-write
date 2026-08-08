@@ -192,7 +192,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       host.appendChild(stage);
       void stage.offsetHeight;
       await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
       );
       if (cancelled) {
         stage.remove();
