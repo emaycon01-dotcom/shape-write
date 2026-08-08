@@ -28,6 +28,19 @@ export default function CnhPreviewPage() {
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
 
+  // Pré-registro: enquanto o cliente confere o preview, o HTML final (com o QR
+  // já validado) é montado em segundo plano. Ao clicar em Gerar, só falta
+  // rasterizar — é o que torna a geração praticamente instantânea.
+  useEffect(() => {
+    if (!formData || finalPdf) return;
+    const id = window.setTimeout(() => {
+      prefetchGeneratePdf("generate-cnh-pdf", { ...formData, preview: false });
+    }, 1200);
+    return () => window.clearTimeout(id);
+  }, [formData, finalPdf]);
+
+
+
   if (!pdfBase64 || !formData) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
