@@ -276,7 +276,7 @@ function textLines(node: Text, origin: DOMRect, whiteSpace: string): { text: str
     if (!current || Math.abs(r.top - current.top) > 1) {
       if (current) {
         lines.push({
-          text: current.chars.join("").trim(),
+          text: preserve ? current.chars.join("").replace(/\n/g, "") : current.chars.join("").trim(),
           rect: {
             x: current.left - origin.left,
             y: current.top - origin.top,
@@ -294,7 +294,7 @@ function textLines(node: Text, origin: DOMRect, whiteSpace: string): { text: str
   }
   if (current) {
     lines.push({
-      text: current.chars.join("").trim(),
+      text: preserve ? current.chars.join("").replace(/\n/g, "") : current.chars.join("").trim(),
       rect: {
         x: current.left - origin.left,
         y: current.top - origin.top,
@@ -465,7 +465,7 @@ async function buildItems(page: HTMLElement, scale: number): Promise<{ items: It
       if (child.nodeType === Node.TEXT_NODE) {
         const node = child as Text;
         if (!(node.nodeValue || "").trim()) return;
-        for (const line of textLines(node, origin)) {
+        for (const line of textLines(node, origin, cs.whiteSpace)) {
           push({
             kind: "text",
             text: applyTextTransform(line.text, cs.textTransform),
