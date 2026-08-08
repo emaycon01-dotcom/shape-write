@@ -247,7 +247,7 @@ function svgToImage(svg: SVGElement, w: number, h: number, scale: number): Promi
  * Divide o conteúdo de um nó de texto nas linhas REAIS montadas pelo navegador
  * (respeita quebra automática, `white-space`, alinhamento e centralização).
  */
-function textLines(node: Text, origin: DOMRect, whiteSpace: string): { text: string; rect: Rect }[] {
+function textLines(node: Text, origin: { left: number; top: number }, whiteSpace: string): { text: string; rect: Rect }[] {
   const doc = node.ownerDocument;
   const range = doc.createRange();
   range.selectNodeContents(node);
@@ -314,15 +314,94 @@ function textLines(node: Text, origin: DOMRect, whiteSpace: string): { text: str
  * Percorre a página e devolve a lista de desenho, em coordenadas CSS relativas
  * ao topo/esquerda da própria página.
  */
-async function buildItems(page: HTMLElement, scale: number): Promise<{ items: Item[]; width: number; height: number }> {
+type BuildItemsResult = {
+  items: Item[];
+  width: number;
+  height: number;
+  coordScale?: number;
+  visualW?: number;
+  visualH?: number;
+  offsetX?: number;
+  offsetY?: number;
+};
+
+/**
+ * Alguns templates (diploma, UNIP, Anhanguera) usam um container `.canvas`
+ * filho único da página, desenhado em resolução "natural" e depois encolhido
+ * com `transform: scale(S)` para caber na página visual. Detectamos esse
+ * padrão para poder medir/desenhar no sistema de coordenadas natural e só
+ * mapear para o tamanho visual na hora de pintar (mantendo o texto nítido).
+ */
+function findScaledCanvasRoot(
+  page: HTMLElement,
+  win: Window,
+): { el: HTMLElement; matrix: Matrix } | null {
+  const children = Array.from(page.children).filter(
+    (c): c is HTMLElement => c instanceof HTMLElement && c.tagName === "DIV",
+  );
+  if (children.length !== 1) return null;
+  const el = children[0];
+  if (!el.classList.contains("canvas")) return null;
+  const cs = win.getComputedStyle(el);
+  const m = parseMatrix(cs.transform);
+  if (!m) return null;
+  const isUniformScale =
+    m[1] === 0 && m[2] === 0 && m[0] === m[3] && m[0] > 0 && m[4] === 0 && m[5] === 0;
+  if (!isUniformScale || isIdentity(m)) return null;
+  return { el, matrix: m };
+}
+
+async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsResult> {
   const win = page.ownerDocument.defaultView!;
-  const origin = page.getBoundingClientRect();
+  const pageOrigin = page.getBoundingClientRect();
+
+  const scaledCanvas = findScaledCanvasRoot(page, win);
+  let coordScale: number | undefined;
+  let offsetX: number | undefined;
+  let offsetY: number | undefined;
+  let visualW: number | undefined;
+  let visualH: number | undefined;
+  let canvasPrevTransform: string | null = null;
+  let canvasRoot: HTMLElement | null = null;
+  let naturalBox: Rect = { x: 0, y: 0, w: pageOrigin.width, h: pageOrigin.height };
+
+  if (scaledCanvas) {
+    canvasRoot = scaledCanvas.el;
+    canvasPrevTransform = canvasRoot.style.transform;
+    canvasRoot.style.transform = "none";
+
+    const rect = canvasRoot.getBoundingClientRect();
+    naturalBox = {
+      x: rect.left - pageOrigin.left,
+      y: rect.top - pageOrigin.top,
+      w: rect.width,
+      h: rect.height,
+    };
+
+    const cs = win.getComputedStyle(canvasRoot);
+    const [oxRaw, oyRaw] = cs.transformOrigin.split(" ");
+    const ox = parseFloat(oxRaw) || 0;
+    const oy = parseFloat(oyRaw) || 0;
+
+    coordScale = scaledCanvas.matrix[0];
+    offsetX = (naturalBox.x + ox) * (1 - coordScale);
+    offsetY = (naturalBox.y + oy) * (1 - coordScale);
+    visualW = naturalBox.w * coordScale;
+    visualH = naturalBox.h * coordScale;
+  }
+
+  // Origem usada para medir todas as caixas: a página, ou o topo/esquerda
+  // natural do `.canvas`, quando presente.
+  const origin: { left: number; top: number } = canvasRoot
+    ? { left: pageOrigin.left + naturalBox.x, top: pageOrigin.top + naturalBox.y }
+    : pageOrigin;
 
   // Os transforms precisam ser desligados ANTES de medir: com eles ligados o
   // navegador devolve a caixa já rotacionada e o texto sairia torto. Guardamos
   // a matriz de cada elemento e reaplicamos na hora de desenhar.
   const transformed: { el: HTMLElement; matrix: Matrix; ox: number; oy: number; prev: string }[] = [];
   page.querySelectorAll<HTMLElement>("*").forEach((el) => {
+    if (el === canvasRoot) return;
     const cs = win.getComputedStyle(el);
     const m = parseMatrix(cs.transform);
     if (!m || isIdentity(m)) return;
@@ -493,21 +572,60 @@ async function buildItems(page: HTMLElement, scale: number): Promise<{ items: It
     });
   };
 
-  const pageCs = win.getComputedStyle(page);
-  const pageBox = boxOf(page);
-  if (!isTransparent(pageCs.backgroundColor)) {
+  if (canvasRoot) {
+    // A raiz do desenho agora é o `.canvas`: usamos a caixa natural (0,0 a
+    // largura/altura naturais) como clip inicial e sempre adicionamos um
+    // fundo branco cobrindo toda a página visual — o `.canvas` pode ser menor
+    // que a página (letterboxing) quando a proporção não bate exatamente.
+    const naturalPageRect: Rect = {
+      x: -(offsetX ?? 0) / (coordScale ?? 1),
+      y: -(offsetY ?? 0) / (coordScale ?? 1),
+      w: pageOrigin.width / (coordScale ?? 1),
+      h: pageOrigin.height / (coordScale ?? 1),
+    };
     items.push({
       kind: "fill",
-      rect: pageBox,
-      color: pageCs.backgroundColor,
-      z: -1,
+      rect: naturalPageRect,
+      color: "#ffffff",
+      z: -2,
       order: order++,
       clip: null,
       matrix: null,
-      bounds: pageBox,
+      bounds: naturalPageRect,
     });
+
+    const canvasBox: Rect = { x: 0, y: 0, w: naturalBox.w, h: naturalBox.h };
+    const canvasCs = win.getComputedStyle(canvasRoot);
+    if (!isTransparent(canvasCs.backgroundColor)) {
+      items.push({
+        kind: "fill",
+        rect: canvasBox,
+        color: canvasCs.backgroundColor,
+        z: -1,
+        order: order++,
+        clip: null,
+        matrix: null,
+        bounds: canvasBox,
+      });
+    }
+    Array.from(canvasRoot.children).forEach((child) => walk(child as HTMLElement, canvasBox, null, 0));
+  } else {
+    const pageCs = win.getComputedStyle(page);
+    const pageBox = boxOf(page);
+    if (!isTransparent(pageCs.backgroundColor)) {
+      items.push({
+        kind: "fill",
+        rect: pageBox,
+        color: pageCs.backgroundColor,
+        z: -1,
+        order: order++,
+        clip: null,
+        matrix: null,
+        bounds: pageBox,
+      });
+    }
+    Array.from(page.children).forEach((child) => walk(child as HTMLElement, pageBox, null, 0));
   }
-  Array.from(page.children).forEach((child) => walk(child as HTMLElement, pageBox, null, 0));
 
   await Promise.all(pending);
 
@@ -516,9 +634,22 @@ async function buildItems(page: HTMLElement, scale: number): Promise<{ items: It
     if (t.prev) t.el.style.transform = t.prev;
     else t.el.style.removeProperty("transform");
   });
+  if (canvasRoot) {
+    if (canvasPrevTransform) canvasRoot.style.transform = canvasPrevTransform;
+    else canvasRoot.style.removeProperty("transform");
+  }
 
   items.sort((a, b) => (a.z === b.z ? a.order - b.order : a.z - b.z));
-  return { items, width: pageBox.w, height: pageBox.h };
+  return {
+    items,
+    width: pageOrigin.width,
+    height: pageOrigin.height,
+    coordScale,
+    visualW,
+    visualH,
+    offsetX,
+    offsetY,
+  };
 }
 
 /* ------------------------------------------------------------------ *
@@ -578,16 +709,29 @@ function paintBand(
   top: number,
   width: number,
   height: number,
+  coordScale = 1,
+  offsetX = 0,
+  offsetY = 0,
 ) {
   ctx.save();
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width * scale, height * scale);
-  ctx.setTransform(scale, 0, 0, scale, 0, -top * scale);
+  ctx.setTransform(
+    scale * coordScale,
+    0,
+    0,
+    scale * coordScale,
+    offsetX * scale,
+    (offsetY - top) * scale,
+  );
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
 
-  const bandTop = top;
-  const bandBottom = top + height;
+  // `top`/`height` chegam em coordenadas visuais (tamanho da página); os itens
+  // estão em coordenadas naturais quando há um `.canvas` escalado, então a
+  // faixa de corte também precisa ser convertida antes de comparar.
+  const bandTop = (top - offsetY) / coordScale;
+  const bandBottom = (top + height - offsetY) / coordScale;
 
   for (const item of items) {
     if (item.bounds.y > bandBottom || item.bounds.y + item.bounds.h < bandTop) continue;
@@ -678,7 +822,13 @@ async function renderOnce(
     for (const page of targets) {
       if (abortSignal?.aborted) throw new Error("Geração cancelada.");
 
-      const { items, width, height } = await buildItems(page, scale);
+      const buildResult = await buildItems(page, scale);
+      const { items } = buildResult;
+      const width = buildResult.visualW ?? buildResult.width;
+      const height = buildResult.visualH ?? buildResult.height;
+      const coordScale = buildResult.coordScale ?? 1;
+      const offsetX = buildResult.offsetX ?? 0;
+      const offsetY = buildResult.offsetY ?? 0;
       if (width < 1 || height < 1) continue;
 
       const usableScale = Math.max(1.5, Math.min(scale, maxCanvasDimension() / width));
@@ -708,7 +858,7 @@ async function renderOnce(
         const ctx = canvas.getContext("2d", { alpha: false });
         if (!ctx) throw new Error("Canvas indisponível neste aparelho.");
 
-        paintBand(ctx, items, usableScale, top, width, sliceH);
+        paintBand(ctx, items, usableScale, top, width, sliceH, coordScale, offsetX, offsetY);
         const bytes = await encodeJpeg(canvas, jpegQuality());
         if (bytes.byteLength < 512) throw new Error("Falha ao rasterizar a página.");
 
