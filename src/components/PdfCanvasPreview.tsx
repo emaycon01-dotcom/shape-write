@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader2, Search, X } from "lucide-react";
 import { completePdfPresentation } from "@/lib/pdf-loading";
 import { getPdfJs } from "@/lib/pdfjs-loader";
@@ -109,13 +109,13 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     const hostRect = host.getBoundingClientRect();
     setLensPos({ x: clientX - hostRect.left, y: clientY - hostRect.top });
 
-    const pages = stageRef.current?.querySelectorAll("canvas");
-    let source: HTMLCanvasElement | null = null;
+    const pages = stageRef.current?.querySelectorAll("canvas, img");
+    let source: CanvasImageSource | null = null;
     let rect: DOMRect | null = null;
     pages?.forEach((c) => {
       const r = c.getBoundingClientRect();
       if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
-        source = c as HTMLCanvasElement;
+        source = c as CanvasImageSource;
         rect = r;
       }
     });
@@ -132,11 +132,13 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     ctx.fillRect(0, 0, LENS_SIZE, LENS_SIZE);
     if (!source || !rect) return;
 
-    const src = source as HTMLCanvasElement;
+    const src = source as CanvasImageSource;
     const r = rect as DOMRect;
     // Converte o ponto da tela para pixels reais do canvas renderizado.
-    const ratioX = src.width / r.width;
-    const ratioY = src.height / r.height;
+    const sourceWidth = src instanceof HTMLImageElement ? src.naturalWidth : src.width;
+    const sourceHeight = src instanceof HTMLImageElement ? src.naturalHeight : src.height;
+    const ratioX = sourceWidth / r.width;
+    const ratioY = sourceHeight / r.height;
     const cx = (clientX - r.left) * ratioX;
     const cy = (clientY - r.top) * ratioY;
     const sw = (LENS_SIZE / LENS_ZOOM) * ratioX;
@@ -166,18 +168,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   }, [lensOn, drawLens, status]);
 
 
-  useEffect(() => {
-    const clearStage = () => {
-      const stage = stageRef.current;
-      if (stage) {
-        stage.querySelectorAll("canvas").forEach((c) => {
-          releaseCanvas(c);
-        });
-        stage.remove();
-        stageRef.current = null;
-      }
-    };
-
+  useLayoutEffect(() => {
     let cancelled = false;
     let destroyLoadingTask: (() => Promise<void>) | null = null;
 
@@ -226,26 +217,13 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       const sideLimit = maxCanvasSide();
 
       for (const page of pages) {
-        let scale = Math.min(6, ((availableWidth * pixelRatio) / page.width) * 2);
-        const area = page.width * page.height * scale * scale;
-        if (area > budget) scale *= Math.sqrt(budget / area);
-        scale = Math.max(0.4, Math.min(scale, sideLimit / Math.max(page.width, page.height)));
-
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.ceil(page.width * scale);
-        canvas.height = Math.ceil(page.height * scale);
-        canvas.style.aspectRatio = `${page.width} / ${page.height}`;
-        canvas.className = "block h-auto max-w-full bg-white shadow-sm";
-        canvas.setAttribute("aria-label", title);
-        const ctx = canvas.getContext("2d", { alpha: false });
-        if (!ctx) {
-          releaseCanvas(canvas);
-          return false;
-        }
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.imageSmoothingQuality = "high";
-
+        // As faixas já são JPEGs finais. Exibi-las como <img> evita criar outro
+        // bitmap RGBA gigante apenas para o preview — backing stores de canvas
+        // são descartados silenciosamente pelo Safari e reaparecem pretos.
+        const pageStage = document.createElement("div");
+        pageStage.className = "flex w-full max-w-full flex-col overflow-hidden bg-white shadow-sm";
+        pageStage.style.aspectRatio = `${page.width} / ${page.height}`;
+        pageStage.setAttribute("aria-label", title);
         for (const band of page.bands) {
           const img = new Image();
           const ok = await new Promise<boolean>((resolve) => {
@@ -255,48 +233,16 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           });
           if (cancelled) return true;
           if (!ok) {
-            releaseCanvas(canvas);
+            pageStage.remove();
             return false;
           }
-          ctx.drawImage(
-            img,
-            0,
-            Math.round(band.top * scale),
-            canvas.width,
-            Math.ceil(band.height * scale),
-          );
+          img.alt = "";
+          img.draggable = false;
+          img.className = "block h-auto w-full max-w-full shrink-0 bg-white";
+          img.style.aspectRatio = `${page.width} / ${band.height}`;
+          pageStage.appendChild(img);
         }
-        // Uma URL pode decodificar sem erro mesmo quando o WebKit perdeu o
-        // bitmap por memória. Nesse caso não apresentamos o quadro preto:
-        // descartamos este caminho e deixamos o PDF.js reconstruir a página.
-        try {
-          const probe = document.createElement("canvas");
-          probe.width = 16;
-          probe.height = 16;
-          const probeCtx = probe.getContext("2d", { willReadFrequently: true });
-          if (probeCtx) {
-            probeCtx.drawImage(canvas, 0, 0, probe.width, probe.height);
-            const pixels = probeCtx.getImageData(0, 0, probe.width, probe.height).data;
-            let black = 0;
-            for (let index = 0; index < pixels.length; index += 4) {
-              if (pixels[index] < 14 && pixels[index + 1] < 14 && pixels[index + 2] < 14) black += 1;
-            }
-            probe.width = 0;
-            probe.height = 0;
-            if (black / (pixels.length / 4) > 0.975) {
-              releaseCanvas(canvas);
-              stage.querySelectorAll("canvas").forEach((item) => releaseCanvas(item));
-              stage.remove();
-              return false;
-            }
-          }
-        } catch {
-          releaseCanvas(canvas);
-          stage.querySelectorAll("canvas").forEach((item) => releaseCanvas(item));
-          stage.remove();
-          return false;
-        }
-        stage.appendChild(canvas);
+        stage.appendChild(pageStage);
       }
 
       if (cancelled) return true;
@@ -424,9 +370,17 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     return () => {
       cancelled = true;
       if (destroyLoadingTask) void destroyLoadingTask();
-      clearStage();
     };
   }, [pdfDataUrl, title, retryKey]);
+
+  // O stage antigo só é removido por presentStage, depois de o substituto ter
+  // sido composto. Na desmontagem real do componente, o host já será removido;
+  // aqui apenas liberamos explicitamente eventuais backing stores de canvas.
+  useEffect(() => () => {
+    const stage = stageRef.current;
+    stage?.querySelectorAll("canvas").forEach((canvas) => releaseCanvas(canvas));
+    stageRef.current = null;
+  }, []);
 
   return (
     <div
