@@ -573,17 +573,64 @@ export default function DiplomaFormPage() {
           <SectionHeader icon={University} title="Instituição" />
 
           <div className="space-y-1.5">
-            <FieldLabel>Instituição</FieldLabel>
-            <Select value={form.instituicao} onValueChange={selectInstituicao}>
+            <FieldLabel>Nome da instituição</FieldLabel>
+            <Select
+              value={form.instituicaoModo}
+              onValueChange={(v) => setForm((p) => ({ ...p, instituicaoModo: v as "auto" | "manual" }))}
+            >
               <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
               <SelectContent>
-                {INSTITUICOES.map((i) => <SelectItem key={i.nome} value={i.nome}>{i.nome}</SelectItem>)}
+                <SelectItem value="auto">Automático (lista de unidades)</SelectItem>
+                <SelectItem value="manual">Manual (digitar)</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">
-              Cabeçalho, mantenedora, CNPJ, reitor, secretário e portarias de credenciamento/reconhecimento são preenchidos automaticamente.
-            </p>
           </div>
+
+          {form.instituicaoModo === "auto" ? (
+            <div className="space-y-1.5">
+              <FieldLabel>Instituição</FieldLabel>
+              <Select value={form.instituicao} onValueChange={selectInstituicao}>
+                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {INSTITUICOES.map((i) => <SelectItem key={i.nome} value={i.nome}>{i.nome}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Cabeçalho, mantenedora, CNPJ, reitor, secretário e portarias de credenciamento/reconhecimento são preenchidos automaticamente.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <FieldLabel required>Instituição (manual)</FieldLabel>
+                <Input
+                  value={form.instituicao}
+                  onChange={(e) => {
+                    const nome = e.target.value;
+                    const { l1, l2 } = splitInstituicao(nome);
+                    setForm((p) => ({ ...p, instituicao: nome, instituicaoL1: l1, instituicaoL2: l2 }));
+                  }}
+                  placeholder="CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ"
+                  className={inputCls}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <FieldLabel>Linha 1 do cabeçalho</FieldLabel>
+                  <Input value={form.instituicaoL1} onChange={set("instituicaoL1")} className={inputCls} />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Linha 2 do cabeçalho</FieldLabel>
+                  <Input value={form.instituicaoL2} onChange={set("instituicaoL2")} className={inputCls} />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                No modo manual, mantenedora, CNPJ e reitor continuam com os últimos valores selecionados.
+              </p>
+            </div>
+          )}
+
 
         </div>
 
