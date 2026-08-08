@@ -977,11 +977,23 @@ export function prefetchGeneratePdf(functionName: string, body: Record<string, u
 
 
 /**
+ * Reaproveitamento do preview (padrão "WYSIWYG cirúrgico").
+ * Quando o HTML do documento FINAL é byte a byte igual ao HTML que já foi
+ * rasterizado no preview — o caso de todos os módulos sem QR/validação — não
+ * há motivo para desenhar tudo de novo: o PDF do preview JÁ é o documento
+ * final. Isso elimina a segunda rasterização (a que produzia o quadro preto
+ * com marca d'água em aparelhos com pouca memória) e torna o "Gerar"
+ * instantâneo. Só vale quando o preview saiu na densidade máxima (6x).
+ */
+let lastPreviewRender: { html: string; pdfBase64: string; full: boolean } | null = null;
+
+/**
  * Motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`) como padrão para todos os
  * módulos. O html2canvas-pro permanece como fallback de segurança enquanto
  * refinamos o suporte a recursos mais complexos (bordas, gradientes, etc.).
  */
 const CANVAS_ENGINE_FUNCTIONS = new Set<string>(); // vazio = todos usam canvas
+
 
 
 
