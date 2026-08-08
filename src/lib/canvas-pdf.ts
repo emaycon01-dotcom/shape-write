@@ -499,18 +499,19 @@ function drawText(ctx: CanvasRenderingContext2D, item: TextItem) {
   if (item.letterSpacing) {
     const spaced = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
     if (typeof spaced.letterSpacing === "string") {
-      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${item.letterSpacing}px`;
-      ctx.fillText(item.text, item.x, y);
-      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
+      spaced.letterSpacing = `${item.letterSpacing}px`;
+      spaced.fillText(item.text, item.x, y);
+      spaced.letterSpacing = "0px";
       return;
     }
     let cursor = item.x;
     for (const char of item.text) {
-      ctx.fillText(char, cursor, y);
-      cursor += ctx.measureText(char).width + item.letterSpacing;
+      spaced.fillText(char, cursor, y);
+      cursor += spaced.measureText(char).width + item.letterSpacing;
     }
     return;
   }
+
   ctx.fillText(item.text, item.x, y);
 }
 
