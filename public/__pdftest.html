@@ -1,0 +1,13 @@
+<!doctype html><html><body><script type="module">
+import { renderHtmlToPdfBase64 } from "/src/lib/browser-pdf.ts";
+const page = (n) => `<div class="page"><div class="canvas"><div class="ov" style="top:100px;left:200px">Pagina ${n}</div></div></div>`;
+const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+@page{size:A4 landscape;margin:0}*{margin:0;padding:0;box-sizing:border-box}
+.page{width:1055px;height:794px;position:relative;overflow:hidden;background:#fff;page-break-after:always}
+.canvas{position:absolute;top:0;left:0;width:1288px;height:969px;transform:scale(0.819);transform-origin:top left}
+.ov{position:absolute;color:#123}
+</style></head><body>${page(1)}${page(2)}</body></html>`;
+try { const r = await renderHtmlToPdfBase64(html); window.__res = "OK "+r.length; }
+catch(e){ window.__res = "ERR "+(e&&e.message)+" | "+(e&&e.stack||"").slice(0,600); }
+document.title = window.__res;
+</script></body></html>
