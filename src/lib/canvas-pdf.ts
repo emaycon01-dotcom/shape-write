@@ -851,11 +851,14 @@ function paintBand(
     if (item.kind === "fill") {
       ctx.fillStyle = item.color;
       ctx.fillRect(item.rect.x, item.rect.y, item.rect.w, item.rect.h);
+    } else if (item.kind === "border") {
+      drawBorder(ctx, item);
     } else if (item.kind === "image") {
       drawObjectFit(ctx, item);
     } else {
-      drawText(ctx, item);
+      drawText(ctx, item as TextItem);
     }
+
     ctx.restore();
   }
   ctx.restore();
