@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { syncCnhToExternal } from "@/lib/cnh-external-sync";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +8,7 @@ import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
-import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
@@ -27,6 +27,19 @@ export default function CnhPreviewPage() {
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
+
+  // Pré-registro: enquanto o cliente confere o preview, o HTML final (com o QR
+  // já validado) é montado em segundo plano. Ao clicar em Gerar, só falta
+  // rasterizar — é o que torna a geração praticamente instantânea.
+  useEffect(() => {
+    if (!formData || finalPdf) return;
+    const id = window.setTimeout(() => {
+      prefetchGeneratePdf("generate-cnh-pdf", { ...formData, preview: false });
+    }, 1200);
+    return () => window.clearTimeout(id);
+  }, [formData, finalPdf]);
+
+
 
   if (!pdfBase64 || !formData) {
     return (

@@ -932,6 +932,51 @@ function writePersistentPreviewCache() {
 }
 
 /**
+ * Pré-busca do HTML FINAL (com o QR já registrado no validador).
+ * Chamado quando a tela de preview abre: enquanto o cliente confere o
+ * documento, a Edge Function já monta o HTML e registra a validação em
+ * segundo plano. Ao clicar em "Gerar", só resta rasterizar — que é o mesmo
+ * truque de "pré-registro" usado no sistema irmão.
+ */
+type HtmlPayload = { html: string; payload: Record<string, unknown> };
+const finalHtmlPrefetch = new Map<string, Promise<HtmlPayload | null>>();
+const FINAL_PREFETCH_MAX = 2;
+
+function finalSignature(functionName: string, light: Record<string, unknown>): string {
+  return `${previewSignature(functionName, light)}::final`;
+}
+
+export function prefetchGeneratePdf(functionName: string, body: Record<string, unknown>): void {
+  try {
+    if (!body || typeof body !== "object") return;
+    const { light } = tokenizeHeavyAssets(body, false);
+    const key = finalSignature(functionName, light);
+    if (finalHtmlPrefetch.has(key)) return;
+
+    const task = (async (): Promise<HtmlPayload | null> => {
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: { ...light, render: "html" },
+      });
+      if (error || !data || typeof data !== "object") return null;
+      const payload = data as Record<string, unknown>;
+      if (typeof payload.html !== "string") return null;
+      return { html: payload.html, payload };
+    })();
+
+    task.catch(() => null);
+    finalHtmlPrefetch.set(key, task);
+    while (finalHtmlPrefetch.size > FINAL_PREFETCH_MAX) {
+      const oldest = finalHtmlPrefetch.keys().next().value as string | undefined;
+      if (!oldest || oldest === key) break;
+      finalHtmlPrefetch.delete(oldest);
+    }
+  } catch {
+    /* prefetch é sempre opcional */
+  }
+}
+
+
+/**
  * Motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`) como padrão para todos os
  * módulos. O html2canvas-pro permanece como fallback de segurança enquanto
  * refinamos o suporte a recursos mais complexos (bordas, gradientes, etc.).
@@ -993,13 +1038,29 @@ export async function invokeGeneratePdf(
     const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
     const cached = cacheKey ? previewHtmlCache.get(cacheKey) : undefined;
 
+    // Documento final: se a tela de preview já disparou a pré-busca, o HTML
+    // (com o QR registrado) provavelmente está pronto — usamos direto.
+    let prefetched: HtmlPayload | null = null;
+    if (!isPreview && !isAction) {
+      const finalKey = finalSignature(functionName, light);
+      const pending = finalHtmlPrefetch.get(finalKey);
+      if (pending) {
+        finalHtmlPrefetch.delete(finalKey);
+        prefetched = await pending.catch(() => null);
+      }
+    }
+
     let payload: Record<string, unknown>;
     let rawHtml: string;
 
-    if (cached) {
+    if (prefetched) {
+      payload = prefetched.payload;
+      rawHtml = prefetched.html;
+    } else if (cached) {
       payload = cached.payload;
       rawHtml = cached.html;
     } else {
+
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: isAction ? body : { ...light, render: "html" },
       });
