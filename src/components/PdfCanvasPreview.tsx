@@ -41,9 +41,10 @@ function pixelBudget(): number {
   // de saída. Usar o limite teórico do Safari (16,7 MP) podia consumir mais de
   // 120 MB durante essa duplicação e matar a renderização mesmo em iPhones
   // novos. Estes limites consideram o pico real, não apenas o canvas final.
-  if (gb <= 2) return 3_000_000;
-  if (ios) return 5_000_000;
-  return mobile ? 8_000_000 : 20_000_000;
+  if (gb <= 2) return 4_000_000;
+  if (ios) return 7_500_000;
+  return mobile ? 11_000_000 : 26_000_000;
+
 }
 
 function releaseCanvas(canvas: HTMLCanvasElement) {
