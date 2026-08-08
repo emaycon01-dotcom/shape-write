@@ -211,8 +211,60 @@ function parseSolidShadow(value: string): { color: string; dx: number; dy: numbe
   return { color: colorMatch[0], dx, dy, spread };
 }
 
+function parseBorderColor(value: string): string {
+  if (!value || value === "transparent") return "";
+  return value;
+}
+
+function parseBorderWidth(value: string): number {
+  if (!value || value === "medium" || value === "thick" || value === "thin") return 0;
+  const n = parseFloat(value);
+  return Number.isNaN(n) || n <= 0 ? 0 : n;
+}
+
+/**
+ * Lê as bordas CSS de um elemento. Por enquanto suportamos estilo `solid`
+ * (ou qualquer estilo não-zero) como linha retangular; cores transparentes são
+ * ignoradas. Radius é capturado para futuro arredondamento, mas aqui usamos
+ * caixas retangulares — já é suficiente para as grades dos históricos e
+ * diplomas.
+ */
+function parseBorders(cs: CSSStyleDeclaration): {
+  widths: [number, number, number, number];
+  colors: [string, string, string, string];
+  radius: [number, number, number, number];
+} | null {
+  const wt = parseBorderWidth(cs.borderTopWidth);
+  const wr = parseBorderWidth(cs.borderRightWidth);
+  const wb = parseBorderWidth(cs.borderBottomWidth);
+  const wl = parseBorderWidth(cs.borderLeftWidth);
+  if (wt === 0 && wr === 0 && wb === 0 && wl === 0) return null;
+
+  const ct = parseBorderColor(cs.borderTopColor);
+  const cr = parseBorderColor(cs.borderRightColor);
+  const cb = parseBorderColor(cs.borderBottomColor);
+  const cl = parseBorderColor(cs.borderLeftColor);
+
+  const radius = (val: string) => {
+    const n = parseFloat(val);
+    return Number.isNaN(n) ? 0 : n;
+  };
+
+  return {
+    widths: [wt, wr, wb, wl],
+    colors: [ct, cr, cb, cl],
+    radius: [
+      radius(cs.borderTopLeftRadius),
+      radius(cs.borderTopRightRadius),
+      radius(cs.borderBottomRightRadius),
+      radius(cs.borderBottomLeftRadius),
+    ],
+  };
+}
+
 /** Aplica `text-transform` ao texto lido do DOM (o nó guarda o valor original). */
 function applyTextTransform(text: string, transform: string): string {
+
   if (transform === "uppercase") return text.toUpperCase();
   if (transform === "lowercase") return text.toLowerCase();
   if (transform === "capitalize") return text.replace(/(^|\s)(\S)/g, (_, s, c) => s + c.toUpperCase());
