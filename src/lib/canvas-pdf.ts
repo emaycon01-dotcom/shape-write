@@ -341,9 +341,17 @@ function storePreviewPages(key: string, pages: PreviewPage[]) {
   // Mesmo PDF pode ser recriado com uma Data URL idêntica em uma repetição.
   // As novas faixas são outros object URLs; portanto as anteriores precisam
   // ser liberadas independentemente da igualdade da chave.
-  previewPages.forEach((page) => page.bands.forEach((band) => URL.revokeObjectURL(band.url)));
+  const stalePages = previewPages;
   previewPagesKey = previewKey(key);
   previewPages = pages;
+  // Não revoga as imagens que o visualizador ainda está exibindo. O novo PDF
+  // chega ao React logo depois desta chamada; alguns segundos de sobreposição
+  // garantem uma troca atômica também no WebKit sem manter lixo na sessão.
+  if (stalePages.length) {
+    window.setTimeout(() => {
+      stalePages.forEach((page) => page.bands.forEach((band) => URL.revokeObjectURL(band.url)));
+    }, 10_000);
+  }
 }
 
 /** Libera imediatamente as faixas do preview anterior antes da geração final. */

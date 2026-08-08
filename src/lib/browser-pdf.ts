@@ -1022,13 +1022,10 @@ export async function invokeGeneratePdf(
       requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
     );
 
-    // O preview anterior mantém JPEGs em blob: para exibição instantânea. Na
-    // geração final eles competiam com os canvases de 576 DPI; o overlay já
-    // cobre a área, então podemos soltá-los com segurança antes de rasterizar.
-    if (!isPreview && !isAction) {
-      const canvasEngine = await import("@/lib/canvas-pdf");
-      canvasEngine.releasePreviewPages();
-    }
+    // O preview atualmente visível continua vivo durante a geração final.
+    // Revogar seus blob: aqui fazia Safari/iOS apagar as imagens antes de o
+    // React receber o PDF novo, revelando exatamente o quadro preto com marca
+    // d'água. A troca e a liberação agora são feitas só depois da apresentação.
 
     // Sobrepõe o download/parse do visualizador com a chamada e a rasterização.
     // Não altera o PDF; apenas elimina o cold-start depois da navegação.
