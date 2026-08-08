@@ -155,6 +155,8 @@ const App = () => {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify/:id" element={<VerifyPage />} />
                     <Route path="/consulta-cnh" element={<ConsultaCnhPage />} />
+                    <Route path="/test-canvas" element={<TestCanvasPage />} />
+
                     <Route path="/dashboard" element={<DashboardLayout />}>
                       <Route index element={<DashboardHome />} />
                       <Route path="documents" element={<DocumentsPage />} />
