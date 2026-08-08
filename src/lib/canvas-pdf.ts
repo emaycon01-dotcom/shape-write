@@ -69,16 +69,16 @@ function isWeakDevice(): boolean {
  */
 function previewScale(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 2;
-  if (isWeakDevice()) return 2.5;
-  return 4;
+  if (gb <= 2) return 2.5;
+  if (isWeakDevice()) return 3.5;
+  return 5;
 }
 
 function jpegQuality(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 0.9;
-  if (isWeakDevice()) return 0.94;
-  return 0.96;
+  if (gb <= 2) return 0.92;
+  if (isWeakDevice()) return 0.95;
+  return 0.97;
 }
 
 /* ------------------------------------------------------------------ *
