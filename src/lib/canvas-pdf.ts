@@ -181,6 +181,34 @@ function fontShorthand(cs: CSSStyleDeclaration) {
   return `${style}${weight}${parseFloat(cs.fontSize) || 12}px ${cs.fontFamily}`;
 }
 
+/**
+ * Sombra sólida sem desfoque (`0 0 0 3px #fff`): no layout dos documentos ela
+ * é usada como moldura, então vira um retângulo preenchido atrás do elemento.
+ */
+function parseSolidShadow(value: string): { color: string; dx: number; dy: number; spread: number } | null {
+  if (!value || value === "none") return null;
+  if (value.includes("inset")) return null;
+  const colorMatch = value.match(/rgba?\([^)]+\)|#[0-9a-fA-F]{3,8}/);
+  if (!colorMatch) return null;
+  const rest = value.replace(colorMatch[0], " ");
+  const nums = (rest.match(/-?\d*\.?\d+px/g) || []).map(parseFloat);
+  if (nums.length < 3) return null;
+  const [dx, dy, blur, spread = 0] = nums;
+  if (blur > 0.5 || spread <= 0) return null;
+  if (isTransparent(colorMatch[0])) return null;
+  return { color: colorMatch[0], dx, dy, spread };
+}
+
+/** Aplica `text-transform` ao texto lido do DOM (o nó guarda o valor original). */
+function applyTextTransform(text: string, transform: string): string {
+  if (transform === "uppercase") return text.toUpperCase();
+  if (transform === "lowercase") return text.toLowerCase();
+  if (transform === "capitalize") return text.replace(/(^|\s)(\S)/g, (_, s, c) => s + c.toUpperCase());
+  return text;
+}
+
+
+
 /** Serializa um <svg> inline num bitmap de alta resolução (QR Codes). */
 function svgToImage(svg: SVGElement, w: number, h: number, scale: number): Promise<HTMLImageElement> {
   const clone = svg.cloneNode(true) as SVGElement;
