@@ -51,8 +51,10 @@ const commonItems = [
 
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { state, isMobile } = useSidebar();
+  // No celular o menu abre como painel (sheet): o estado "collapsed" do desktop
+  // não deve esconder os textos, senão só aparecem os ícones.
+  const collapsed = state === "collapsed" && !isMobile;
   const { user, logout } = useAuth();
   const { count: openTickets } = useOpenTickets();
   const { count: pendingApprovals } = usePendingApprovals();
