@@ -40,9 +40,12 @@ if (typeof window !== "undefined") {
   const doWarm = () => {
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     if (conn?.saveData) return;
-    void warmPdfEngine().catch(() => undefined);
+    // Só o motor CANVAS (jsPDF) é aquecido: o html2canvas-pro é apenas
+    // fallback e baixá-lo sempre custava banda e parse sem necessidade.
+    void import("@/lib/canvas-pdf").then((m) => m.preloadJsPdf()).catch(() => undefined);
     void warmPdfViewer().catch(() => undefined);
   };
+
   const idle = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
   if (idle) {
     idle(doWarm, { timeout: 3000 });
