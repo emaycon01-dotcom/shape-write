@@ -929,10 +929,13 @@ function writePersistentPreviewCache() {
 }
 
 /**
- * Módulos migrados para o motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`).
- * Os demais seguem no motor de rasterização de HTML.
+ * Motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`) como padrão para todos os
+ * módulos. O html2canvas-pro permanece como fallback de segurança enquanto
+ * refinamos o suporte a recursos mais complexos (bordas, gradientes, etc.).
  */
-const CANVAS_ENGINE_FUNCTIONS = new Set(["generate-cnh-pdf", "generate-rg-pdf"]);
+const CANVAS_ENGINE_FUNCTIONS = new Set<string>(); // vazio = todos usam canvas
+const CANVAS_FALLBACK_FUNCTIONS = new Set(["generate-certificado-medio-pdf", "generate-ficha19-pdf", "generate-historico-pdf", "generate-historico-eja-pdf", "generate-historico-fundamental-pdf", "generate-historico-medio-sp-pdf"]);
+
 
 
 /**
