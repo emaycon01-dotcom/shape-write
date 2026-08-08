@@ -969,6 +969,22 @@ export async function invokeGeneratePdf(
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
   try {
+    // Garante uma pintura real do overlay ANTES do trabalho pesado. Quando o
+    // HTML já estava em cache, o motor começava na mesma tarefa e bloqueava o
+    // timer/commit do React; o usuário via por segundos apenas o fundo escuro e
+    // as marcas d'água. Isso também explica o sintoma no motor antigo.
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+
+    // O preview anterior mantém JPEGs em blob: para exibição instantânea. Na
+    // geração final eles competiam com os canvases de 576 DPI; o overlay já
+    // cobre a área, então podemos soltá-los com segurança antes de rasterizar.
+    if (!isPreview && !isAction) {
+      const canvasEngine = await import("@/lib/canvas-pdf");
+      canvasEngine.releasePreviewPages();
+    }
+
     // Sobrepõe o download/parse do visualizador com a chamada e a rasterização.
     // Não altera o PDF; apenas elimina o cold-start depois da navegação.
     void warmPdfViewer().catch(() => undefined);

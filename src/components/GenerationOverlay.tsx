@@ -6,9 +6,10 @@ import logo from "@/assets/logo.webp";
  * Tela cheia de carregamento (cor do painel) exibida durante o preview e a
  * geração final. Também esconde a remontagem do documento (troca do QR Code).
  *
- * A exibição é estabilizada: só aparece se a etapa passar de 200ms e fica no
- * mínimo 500ms. Isso elimina as "piscadas" (tela preta/branca) quando várias
- * etapas curtas de geração acontecem em sequência.
+ * A exibição é imediata e fica no mínimo 500ms. Ela precisa ser montada antes
+ * de qualquer rasterização síncrona: em gerações com HTML em cache, atrasar o
+ * overlay permitia que o canvas ocupasse a thread principal antes do timer e
+ * deixava visível o fundo do preview com a marca d'água.
  */
 export default function GenerationOverlay() {
   const [state, setState] = useState({ active: false, label: "" });
@@ -21,10 +22,8 @@ export default function GenerationOverlay() {
     let timer: number | undefined;
     if (state.active) {
       if (visible) return;
-      timer = window.setTimeout(() => {
-        shownAt.current = Date.now();
-        setVisible(true);
-      }, 200);
+      shownAt.current = Date.now();
+      setVisible(true);
     } else if (visible) {
       const remaining = Math.max(0, 500 - (Date.now() - shownAt.current));
       timer = window.setTimeout(() => setVisible(false), remaining);

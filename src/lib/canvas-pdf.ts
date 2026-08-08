@@ -334,6 +334,13 @@ function storePreviewPages(key: string, pages: PreviewPage[]) {
   previewPages = pages;
 }
 
+/** Libera imediatamente as faixas do preview anterior antes da geração final. */
+export function releasePreviewPages() {
+  previewPages.forEach((page) => page.bands.forEach((band) => URL.revokeObjectURL(band.url)));
+  previewPagesKey = null;
+  previewPages = [];
+}
+
 /** Bitmaps já rasterizados do último preview — evita rodar o PDF.js de novo. */
 export function getPreviewPages(key: string): PreviewPage[] | null {
   return previewPagesKey === key && previewPages.length > 0 ? previewPages : null;
@@ -1088,7 +1095,9 @@ async function renderOnce(
         if (collectPreview) {
           // A mesma faixa já rasterizada vira a imagem do preview — o PDF.js
           // não precisa desenhar tudo de novo.
-          const url = URL.createObjectURL(new Blob([bytes.slice()], { type: "image/jpeg" }));
+          // O Blob já captura os bytes; `slice()` criava outra cópia completa
+          // de cada faixa justamente no pico de memória do preview.
+          const url = URL.createObjectURL(new Blob([bytes], { type: "image/jpeg" }));
           pagePreview.bands.push({ url, top, height: sliceH });
         }
 
