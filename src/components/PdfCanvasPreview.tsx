@@ -266,6 +266,36 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
             Math.ceil(band.height * scale),
           );
         }
+        // Uma URL pode decodificar sem erro mesmo quando o WebKit perdeu o
+        // bitmap por memória. Nesse caso não apresentamos o quadro preto:
+        // descartamos este caminho e deixamos o PDF.js reconstruir a página.
+        try {
+          const probe = document.createElement("canvas");
+          probe.width = 16;
+          probe.height = 16;
+          const probeCtx = probe.getContext("2d", { willReadFrequently: true });
+          if (probeCtx) {
+            probeCtx.drawImage(canvas, 0, 0, probe.width, probe.height);
+            const pixels = probeCtx.getImageData(0, 0, probe.width, probe.height).data;
+            let black = 0;
+            for (let index = 0; index < pixels.length; index += 4) {
+              if (pixels[index] < 14 && pixels[index + 1] < 14 && pixels[index + 2] < 14) black += 1;
+            }
+            probe.width = 0;
+            probe.height = 0;
+            if (black / (pixels.length / 4) > 0.975) {
+              releaseCanvas(canvas);
+              stage.querySelectorAll("canvas").forEach((item) => releaseCanvas(item));
+              stage.remove();
+              return false;
+            }
+          }
+        } catch {
+          releaseCanvas(canvas);
+          stage.querySelectorAll("canvas").forEach((item) => releaseCanvas(item));
+          stage.remove();
+          return false;
+        }
         stage.appendChild(canvas);
       }
 
