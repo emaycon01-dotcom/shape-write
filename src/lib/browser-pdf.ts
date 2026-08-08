@@ -559,8 +559,13 @@ async function renderOnce(
 
 
 
-    const pages = Array.from(doc.querySelectorAll<HTMLElement>(".page"));
+    // Alguns módulos (diplomas) nomeiam as folhas como `.sheet` em vez de
+    // `.page`. Sem isso o alvo virava o próprio <body>, que era embrulhado num
+    // <div> — e um body fora do <html> deixa `document.body` nulo, quebrando o
+    // html2canvas com "Cannot read properties of null (reading 'appendChild')".
+    const pages = Array.from(doc.querySelectorAll<HTMLElement>(".page, .sheet"));
     const targets = pages.length > 0 ? pages : [doc.body];
+
 
     let pdf: import("jspdf").jsPDF | null = null;
 
