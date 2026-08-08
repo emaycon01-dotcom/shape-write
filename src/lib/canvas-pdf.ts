@@ -243,7 +243,7 @@ function svgToImage(svg: SVGElement, w: number, h: number, scale: number): Promi
  * Divide o conteúdo de um nó de texto nas linhas REAIS montadas pelo navegador
  * (respeita quebra automática, `white-space`, alinhamento e centralização).
  */
-function textLines(node: Text, origin: DOMRect): { text: string; rect: Rect }[] {
+function textLines(node: Text, origin: DOMRect, whiteSpace: string): { text: string; rect: Rect }[] {
   const doc = node.ownerDocument;
   const range = doc.createRange();
   range.selectNodeContents(node);
@@ -251,17 +251,18 @@ function textLines(node: Text, origin: DOMRect): { text: string; rect: Rect }[] 
   const raw = node.nodeValue || "";
   if (rects.length === 0) return [];
 
-
-
+  // Em `pre`/`pre-wrap` os espaços são significativos (blocos MRZ).
+  const preserve = whiteSpace.startsWith("pre");
 
   if (rects.length === 1) {
     const r = rects[0];
-    const text = raw.replace(/\s+/g, " ").trim();
-    if (!text) return [];
+    const text = preserve ? raw.replace(/\n/g, "") : raw.replace(/\s+/g, " ").trim();
+    if (!text.trim()) return [];
     return [
-      { text: raw.trim() === raw ? raw : text, rect: { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height } },
+      { text, rect: { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height } },
     ];
   }
+
 
   // Texto quebrado em várias linhas: agrupa caractere a caractere.
   const lines: { text: string; rect: Rect }[] = [];
