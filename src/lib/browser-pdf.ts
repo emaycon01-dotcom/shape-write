@@ -258,6 +258,18 @@ function applyBlobAssetsInHtml(html: string): string {
   });
 }
 
+/** Solta todos os `blob:` de template (usado quando uma tentativa falha). */
+function releaseBlobAssets() {
+  blobAssetCache.forEach((url) => {
+    try {
+      URL.revokeObjectURL(url);
+    } catch {
+      /* ignora */
+    }
+  });
+  blobAssetCache.clear();
+}
+
 
 
 
