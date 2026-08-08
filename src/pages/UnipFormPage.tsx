@@ -45,7 +45,10 @@ const TITULO_CURSO: Record<Modalidade, string> = {
 };
 
 interface UnipForm {
+  instituicaoModo: "auto" | "manual";
+  instituicaoManual: string;
   modalidade: Modalidade;
+
   curso: string;
   cursoEmec: string;
   dataConclusao: string;
@@ -69,7 +72,10 @@ interface UnipForm {
 }
 
 const initial: UnipForm = {
+  instituicaoModo: "auto",
+  instituicaoManual: "",
   modalidade: "tecnologo",
+
   curso: "GESTÃO FINANCEIRA",
   cursoEmec: "120717",
   dataConclusao: "",
