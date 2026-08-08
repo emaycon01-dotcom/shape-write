@@ -1023,9 +1023,11 @@ async function renderOnce(
   scale: number,
   bandDivisor: number,
   abortSignal?: AbortSignal | null,
+  collectPreview = false,
 ): Promise<string> {
   const jsPDFCtor = await preloadJsPdf();
   const frame = await createHiddenFrame(html);
+  const collected: PreviewPage[] = [];
   try {
     const doc = frame.contentDocument!;
     await waitForAssets(doc);
@@ -1065,6 +1067,7 @@ async function renderOnce(
       const band = Math.max(64, Math.floor(bandHeight(width, usableScale) / bandDivisor));
       const canvas = document.createElement("canvas");
       canvas.width = Math.round(width * usableScale);
+      const pagePreview: PreviewPage = { width, height, bands: [] };
 
       let top = 0;
       while (top < height) {
@@ -1082,16 +1085,30 @@ async function renderOnce(
         const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
         pdf.addImage(bytes, "JPEG", 0, yPt, wPt, hSlicePt, undefined, "NONE");
 
+        if (collectPreview) {
+          // A mesma faixa já rasterizada vira a imagem do preview — o PDF.js
+          // não precisa desenhar tudo de novo.
+          const url = URL.createObjectURL(new Blob([bytes.slice()], { type: "image/jpeg" }));
+          pagePreview.bands.push({ url, top, height: sliceH });
+        }
+
         top += sliceH;
         if (top < height) await new Promise((r) => setTimeout(r, 8));
       }
+
+      if (collectPreview) collected.push(pagePreview);
 
       canvas.width = 0;
       canvas.height = 0;
     }
 
     if (!pdf) throw new Error("Documento vazio.");
-    return await blobToDataUrl(pdf.output("blob"));
+    const dataUrl = await blobToDataUrl(pdf.output("blob"));
+    if (collectPreview && collected.length) storePreviewPages(dataUrl, collected);
+    return dataUrl;
+  } catch (error) {
+    collected.forEach((p) => p.bands.forEach((b) => URL.revokeObjectURL(b.url)));
+    throw error;
   } finally {
     frame.remove();
   }
@@ -1120,12 +1137,15 @@ export async function renderHtmlToPdfCanvas(
   for (const attempt of attempts) {
     try {
       if (abortSignal?.aborted) throw new Error("Geração cancelada.");
-      return await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal);
+      return await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal, preview);
     } catch (error) {
       lastError = error;
       if (abortSignal?.aborted) break;
+      // Uma tentativa que falhou por memória deixa bitmaps presos no processo.
+      if (attempt.bandDivisor >= 4) releaseBitmapCache();
       await new Promise((r) => setTimeout(r, 120));
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Não foi possível gerar o documento.");
 }
+
