@@ -401,9 +401,16 @@ ${RG_FONT_FACE}
   ${text("orgao_expedidor", d.orgao_expedidor || "")}
   ${text("local_emissao", d.local_emissao || "")}
   ${text("data_emissao", d.data_emissao || "")}
-  <div class="overlay mrz-block" style="${base("mrz", `font-family:'RGOcrb','Courier New',monospace;font-weight:700;letter-spacing:-0.35px;word-spacing:0;line-height:${(p.mrz.fontSize * 1.22).toFixed(2)}px;`)}">${mrz.line1}
-${mrz.line2}
-${mrz.line3}</div>
+  ${[mrz.line1, mrz.line2, mrz.line3]
+    .map((line, i) => {
+      const lh = p.mrz.fontSize * 1.28;
+      const style =
+        `top:${(p.mrz.y + i * lh).toFixed(2)}px;left:${p.mrz.x}px;font-size:${p.mrz.fontSize}px;` +
+        `font-family:'RGOcrb','Courier New',monospace;font-weight:700;letter-spacing:0;word-spacing:0;` +
+        `line-height:${lh.toFixed(2)}px;white-space:pre;`;
+      return `<div class="overlay mrz-block" style="${style}">${line}</div>`;
+    })
+    .join("\n  ")}
 
 
   <!-- OUTRAS INFORMAÇÕES -->
