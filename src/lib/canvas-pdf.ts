@@ -747,12 +747,40 @@ function drawObjectFit(
   ctx.drawImage(item.source, rect.x, rect.y, rect.w, rect.h);
 }
 
+function drawBorder(ctx: CanvasRenderingContext2D, item: BorderItem) {
+  const { rect, widths, colors } = item;
+  const [wt, wr, wb, wl] = widths;
+  const [ct, cr, cb, cl] = colors;
+
+  // Desenha cada lado como um retângulo preenchido. Isso cobre a grande
+  // maioria dos casos (grades, caixas) sem precisar de path arredondado.
+  ctx.save();
+  if (wt > 0 && ct) {
+    ctx.fillStyle = ct;
+    ctx.fillRect(rect.x, rect.y, rect.w, wt);
+  }
+  if (wb > 0 && cb) {
+    ctx.fillStyle = cb;
+    ctx.fillRect(rect.x, rect.y + rect.h - wb, rect.w, wb);
+  }
+  if (wl > 0 && cl) {
+    ctx.fillStyle = cl;
+    ctx.fillRect(rect.x, rect.y, wl, rect.h);
+  }
+  if (wr > 0 && cr) {
+    ctx.fillStyle = cr;
+    ctx.fillRect(rect.x + rect.w - wr, rect.y, wr, rect.h);
+  }
+  ctx.restore();
+}
+
 function drawText(ctx: CanvasRenderingContext2D, item: TextItem) {
   ctx.font = item.font;
   ctx.fillStyle = item.color;
   ctx.textBaseline = "alphabetic";
 
   const metrics = ctx.measureText(item.text);
+
   const asc = metrics.fontBoundingBoxAscent || metrics.actualBoundingBoxAscent || 0;
   const desc = metrics.fontBoundingBoxDescent || metrics.actualBoundingBoxDescent || 0;
   const total = asc + desc;
