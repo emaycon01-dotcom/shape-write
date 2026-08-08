@@ -428,6 +428,31 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     };
   }, [pdfDataUrl, title, retryKey]);
 
+  /**
+   * Ao dar zoom (pinça ou zoom do navegador) o canvas antigo era apenas
+   * esticado — daí o efeito de "borrão". Aqui o documento é repintado na
+   * densidade do zoom atual, usando as faixas já decodificadas em memória.
+   */
+  useEffect(() => {
+    if (status !== "ready") return;
+    let timer: number | undefined;
+    const schedule = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const zoom = window.visualViewport?.scale ?? 1;
+        repaintRef.current?.(Math.min(Math.max(zoom, 1), 3));
+      }, 220);
+    };
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", schedule);
+    window.addEventListener("resize", schedule);
+    return () => {
+      window.clearTimeout(timer);
+      vv?.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [status]);
+
   return (
     <div
       ref={hostRef}
