@@ -1097,7 +1097,9 @@ async function renderOnce(
           // não precisa desenhar tudo de novo.
           // O Blob já captura os bytes; `slice()` criava outra cópia completa
           // de cada faixa justamente no pico de memória do preview.
-          const url = URL.createObjectURL(new Blob([bytes], { type: "image/jpeg" }));
+          const url = URL.createObjectURL(
+            new Blob([bytes.buffer as ArrayBuffer], { type: "image/jpeg" }),
+          );
           pagePreview.bands.push({ url, top, height: sliceH });
         }
 
