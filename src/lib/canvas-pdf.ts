@@ -580,22 +580,33 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
     if (tag === "img") {
       const img = el as HTMLImageElement;
       if (img.naturalWidth > 0 && box.w > 0 && box.h > 0) {
-        push({
-          kind: "image",
-          source: img,
+        const captured = { z: localZ, order: order++, clip: localClip, matrix: localMatrix };
+        const base = {
+          kind: "image" as const,
           sw: img.naturalWidth,
           sh: img.naturalHeight,
           rect: box,
           fit: cs.objectFit || "fill",
-          z: localZ,
-          order: order++,
-          clip: localClip,
-          matrix: localMatrix,
+          ...captured,
           bounds: transformedBounds(box, localMatrix),
-        });
+        };
+        // Template pesado: decodifica UMA vez por sessão (ImageBitmap em cache).
+        // Sem isso, cada faixa e cada nova geração redecodificavam o mesmo
+        // JPEG de 3300x4660 — o maior gargalo em celulares.
+        const bitmap = cachedBitmap(img);
+        if (bitmap) {
+          pending.push(
+            bitmap
+              .then((bmp) => push({ ...base, source: bmp }))
+              .catch(() => push({ ...base, source: img })),
+          );
+        } else {
+          push({ ...base, source: img });
+        }
       }
       return;
     }
+
 
     if (tag === "svg") {
       if (box.w > 0 && box.h > 0) {
