@@ -98,6 +98,13 @@ type BaseItem = {
 };
 
 type FillItem = BaseItem & { kind: "fill"; rect: Rect; color: string };
+type BorderItem = BaseItem & {
+  kind: "border";
+  rect: Rect;
+  widths: [number, number, number, number];
+  colors: [string, string, string, string];
+  radius: [number, number, number, number];
+};
 type ImageItem = BaseItem & {
   kind: "image";
   source: CanvasImageSource;
@@ -116,7 +123,8 @@ type TextItem = BaseItem & {
   letterSpacing: number;
 };
 
-type Item = FillItem | ImageItem | TextItem;
+type Item = FillItem | BorderItem | ImageItem | TextItem;
+
 
 const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
 
