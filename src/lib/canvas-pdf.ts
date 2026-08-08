@@ -1016,6 +1016,41 @@ function encodeJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Uint8Ar
   });
 }
 
+/**
+ * WebKit pode aceitar a alocação do canvas e, mesmo assim, perder o backing
+ * store por pressão de memória. Nesse caso nenhuma API lança erro: o JPEG sai
+ * quase totalmente preto e acabava sendo publicado no preview e no PDF final.
+ *
+ * A amostra distribuída evita ler a faixa inteira. Não tratamos branco como
+ * falha porque documentos podem ter áreas legitimamente vazias.
+ */
+function isBlackCanvas(canvas: HTMLCanvasElement): boolean {
+  try {
+    if (canvas.width < 2 || canvas.height < 2) return false;
+    const probe = document.createElement("canvas");
+    probe.width = 24;
+    probe.height = 24;
+    const ctx = probe.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return false;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(canvas, 0, 0, probe.width, probe.height);
+    const pixels = ctx.getImageData(0, 0, probe.width, probe.height).data;
+    let black = 0;
+    let transparent = 0;
+    const total = pixels.length / 4;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index] < 14 && pixels[index + 1] < 14 && pixels[index + 2] < 14) black += 1;
+      if (pixels[index + 3] < 8) transparent += 1;
+    }
+    probe.width = 0;
+    probe.height = 0;
+    return black / total > 0.975 || transparent / total > 0.995;
+  } catch {
+    // Se a leitura do backing store falhar, a faixa não é segura para publicar.
+    return true;
+  }
+}
+
 /* ------------------------------------------------------------------ *
  * Motor
  * ------------------------------------------------------------------ */
@@ -1097,6 +1132,9 @@ async function renderOnce(
         if (!ctx) throw new Error("Canvas indisponível neste aparelho.");
 
         paintBand(ctx, items, usableScale, top, width, sliceH, coordScale, offsetX, offsetY);
+        if (isBlackCanvas(canvas)) {
+          throw new Error("O aparelho descartou a faixa de imagem durante a rasterização.");
+        }
         const bytes = await encodeJpeg(canvas, jpegQuality());
         if (bytes.byteLength < 512) throw new Error("Falha ao rasterizar a página.");
 
