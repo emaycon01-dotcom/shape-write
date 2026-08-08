@@ -497,8 +497,8 @@ function drawText(ctx: CanvasRenderingContext2D, item: TextItem) {
   const y = total > 0 ? item.baseline - desc : item.baseline;
 
   if (item.letterSpacing) {
-    const supported = "letterSpacing" in ctx;
-    if (supported) {
+    const spaced = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
+    if (typeof spaced.letterSpacing === "string") {
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${item.letterSpacing}px`;
       ctx.fillText(item.text, item.x, y);
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
