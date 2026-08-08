@@ -37,11 +37,19 @@ function pixelBudget(): number {
   const gb = typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 ? nav.deviceMemory : 4;
   const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || gb <= 4;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if (gb <= 2) return 8_000_000;
-  // Safari/iOS aborta o canvas acima de ~16,7 milhões de pixels: aí o preview
-  // caía em "não foi possível montar" mesmo com o PDF perfeito.
-  if (ios) return 14_000_000;
-  return mobile ? 18_000_000 : 40_000_000;
+  // O PDF.js mantém simultaneamente a imagem decodificada da página e o canvas
+  // de saída. Usar o limite teórico do Safari (16,7 MP) podia consumir mais de
+  // 120 MB durante essa duplicação e matar a renderização mesmo em iPhones
+  // novos. Estes limites consideram o pico real, não apenas o canvas final.
+  if (gb <= 2) return 3_000_000;
+  if (ios) return 5_000_000;
+  return mobile ? 8_000_000 : 20_000_000;
+}
+
+function releaseCanvas(canvas: HTMLCanvasElement) {
+  canvas.width = 1;
+  canvas.height = 1;
+  canvas.remove();
 }
 
 /** Maior lado de canvas aceito pelo dispositivo (Safari antigo trava em 4096). */
@@ -179,8 +187,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       const stage = stageRef.current;
       if (stage) {
         stage.querySelectorAll("canvas").forEach((c) => {
-          c.width = 0;
-          c.height = 0;
+          releaseCanvas(c);
         });
         stage.remove();
         stageRef.current = null;
@@ -215,7 +222,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
         const pageCount = pdf.numPages;
         const availableWidth = Math.max(280, host.clientWidth);
-        const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
         // Orçamento dividido entre as páginas para não estourar memória.
         const budget = pixelBudget() / Math.max(1, pageCount);
         const sideLimit = maxCanvasSide();
@@ -226,9 +233,10 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           if (cancelled) return;
 
           const base = page.getViewport({ scale: 1 });
-          // Supersampling: rasteriza acima da densidade da tela para que textos
-          // pequenos (MRZ, notas, campos) fiquem nítidos como no PDF final.
-          let scale = Math.min(6, ((availableWidth * pixelRatio) / base.width) * 2.25);
+          // Rasteriza ligeiramente acima da densidade física da tela. O fator
+          // antigo de 2,25x criava outro bitmap de 14–18 MP em cima do PDF já
+          // decodificado; isso era a causa da falha intermitente por aparelho.
+          let scale = Math.min(4, ((availableWidth * pixelRatio) / base.width) * 1.25);
           const area = base.width * base.height * scale * scale;
           if (area > budget) scale *= Math.sqrt(budget / area);
           // Nenhum lado pode ultrapassar o limite físico de canvas do aparelho.
@@ -238,8 +246,8 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
           // Escada de segurança: qualidade máxima primeiro; se o aparelho não
           // aguentar, cai degrau a degrau em vez de quebrar o preview.
-          const ladder = [1, 0.75, 0.55, 0.4, 0.28].map((f) =>
-            Math.max(0.35, Math.min(scale * f, sideScale)),
+          const ladder = [1, 0.72, 0.5, 0.34, 0.24].map((f) =>
+            Math.max(0.3, Math.min(scale * f, sideScale)),
           );
 
           let canvas: HTMLCanvasElement | null = null;
@@ -251,10 +259,10 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
             candidate.className = "invisible";
             const viewport = page.getViewport({ scale: attemptScale });
             try {
-              const context = candidate.getContext("2d", { alpha: false });
-              if (!context) throw new Error("Contexto 2D indisponível");
               candidate.width = Math.ceil(viewport.width);
               candidate.height = Math.ceil(viewport.height);
+              const context = candidate.getContext("2d", { alpha: false });
+              if (!context) throw new Error("Contexto 2D indisponível");
               candidate.style.aspectRatio = `${viewport.width} / ${viewport.height}`;
               context.setTransform(1, 0, 0, 1, 0, 0);
               context.fillStyle = "#ffffff";
@@ -267,10 +275,13 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
               canvas = candidate;
               break;
             } catch (err) {
-              candidate.width = 0;
-              candidate.height = 0;
+              releaseCanvas(candidate);
               console.warn(`Preview: página ${pageNumber} falhou em ${attemptScale.toFixed(2)}x`, err);
-              await new Promise((r) => setTimeout(r, 120));
+              // Dois frames + pausa dão ao WebKit tempo para desalocar o bitmap
+              // que falhou antes de tentar um canvas menor.
+              await new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => window.setTimeout(resolve, 180))),
+              );
             }
             if (cancelled) return;
           }

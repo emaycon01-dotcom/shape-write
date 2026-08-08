@@ -62,12 +62,16 @@ function isWeakDevice(): boolean {
   return mobile || (navigator.hardwareConcurrency || 4) <= 4 || deviceMemoryGb() <= 4;
 }
 
-/** Preview: desenhar em canvas é barato, então podemos manter mais nitidez. */
+/**
+ * O preview será rasterizado uma segunda vez pelo PDF.js. Manter 4–6x aqui
+ * duplicava dois bitmaps enormes na memória e fazia alguns aparelhos falharem.
+ * O PDF final continua sempre em FINAL_SCALE (576 DPI).
+ */
 function previewScale(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 3;
-  if (isWeakDevice()) return 4;
-  return FINAL_SCALE;
+  if (gb <= 2) return 2;
+  if (isWeakDevice()) return 2.5;
+  return 4;
 }
 
 function jpegQuality(): number {
