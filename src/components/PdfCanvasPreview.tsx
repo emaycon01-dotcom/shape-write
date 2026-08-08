@@ -110,12 +110,12 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     setLensPos({ x: clientX - hostRect.left, y: clientY - hostRect.top });
 
     const pages = stageRef.current?.querySelectorAll("canvas, img");
-    let source: CanvasImageSource | null = null;
+    let source: HTMLCanvasElement | HTMLImageElement | null = null;
     let rect: DOMRect | null = null;
     pages?.forEach((c) => {
       const r = c.getBoundingClientRect();
       if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
-        source = c as CanvasImageSource;
+        source = c as HTMLCanvasElement | HTMLImageElement;
         rect = r;
       }
     });
@@ -132,7 +132,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     ctx.fillRect(0, 0, LENS_SIZE, LENS_SIZE);
     if (!source || !rect) return;
 
-    const src = source as CanvasImageSource;
+    const src = source as HTMLCanvasElement | HTMLImageElement;
     const r = rect as DOMRect;
     // Converte o ponto da tela para pixels reais do canvas renderizado.
     const sourceWidth = src instanceof HTMLImageElement ? src.naturalWidth : src.width;
@@ -211,11 +211,6 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
       const stage = document.createElement("div");
       stage.className = "flex w-full flex-col items-center gap-3 py-1";
-      const availableWidth = Math.max(280, host.clientWidth);
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      const budget = pixelBudget() / Math.max(1, pages.length);
-      const sideLimit = maxCanvasSide();
-
       for (const page of pages) {
         // As faixas já são JPEGs finais. Exibi-las como <img> evita criar outro
         // bitmap RGBA gigante apenas para o preview — backing stores de canvas
