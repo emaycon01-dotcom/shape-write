@@ -121,7 +121,9 @@ type TextItem = BaseItem & {
   font: string;
   color: string;
   letterSpacing: number;
+  decoration: { underline: boolean; lineThrough: boolean; color: string; thickness: number } | null;
 };
+
 
 type Item = FillItem | BorderItem | ImageItem | TextItem;
 
