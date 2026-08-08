@@ -41,9 +41,10 @@ function pixelBudget(): number {
   // de saída. Usar o limite teórico do Safari (16,7 MP) podia consumir mais de
   // 120 MB durante essa duplicação e matar a renderização mesmo em iPhones
   // novos. Estes limites consideram o pico real, não apenas o canvas final.
-  if (gb <= 2) return 3_000_000;
-  if (ios) return 5_000_000;
-  return mobile ? 8_000_000 : 20_000_000;
+  if (gb <= 2) return 4_000_000;
+  if (ios) return 7_500_000;
+  return mobile ? 11_000_000 : 26_000_000;
+
 }
 
 function releaseCanvas(canvas: HTMLCanvasElement) {
@@ -225,7 +226,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       const sideLimit = maxCanvasSide();
 
       for (const page of pages) {
-        let scale = Math.min(4, ((availableWidth * pixelRatio) / page.width) * 1.25);
+        let scale = Math.min(6, ((availableWidth * pixelRatio) / page.width) * 2);
         const area = page.width * page.height * scale * scale;
         if (area > budget) scale *= Math.sqrt(budget / area);
         scale = Math.max(0.4, Math.min(scale, sideLimit / Math.max(page.width, page.height)));

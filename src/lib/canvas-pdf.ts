@@ -63,23 +63,24 @@ function isWeakDevice(): boolean {
 }
 
 /**
- * O preview será rasterizado uma segunda vez pelo PDF.js. Manter 4–6x aqui
- * duplicava dois bitmaps enormes na memória e fazia alguns aparelhos falharem.
- * O PDF final continua sempre em FINAL_SCALE (576 DPI).
+ * O preview agora é exibido direto das faixas JPEG (sem re-rasterização pelo
+ * PDF.js), então ele pode usar a mesma densidade do PDF final. Mantemos um
+ * piso de 4x mesmo em aparelhos fracos para que o preview seja WYSIWYG.
  */
 function previewScale(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 2;
-  if (isWeakDevice()) return 2.5;
-  return 4;
+  if (gb <= 2) return 3;
+  if (isWeakDevice()) return 4;
+  return Math.max(4, FINAL_SCALE);
 }
 
 function jpegQuality(): number {
   const gb = deviceMemoryGb();
-  if (gb <= 2) return 0.9;
-  if (isWeakDevice()) return 0.94;
-  return 0.96;
+  if (gb <= 2) return 0.92;
+  if (isWeakDevice()) return 0.96;
+  return 0.97;
 }
+
 
 /* ------------------------------------------------------------------ *
  * Lista de desenho
