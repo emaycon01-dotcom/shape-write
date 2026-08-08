@@ -90,6 +90,7 @@ function maxCanvasSide(): number {
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const repaintRef = useRef<((zoom: number) => void) | null>(null);
   const lensCanvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [retryKey, setRetryKey] = useState(0);
