@@ -274,6 +274,71 @@ function applyTextTransform(text: string, transform: string): string {
 }
 
 
+/* ------------------------------------------------------------------ *
+ * Cache de bitmaps (templates baixam/decodificam UMA vez por sessão)
+ * ------------------------------------------------------------------ */
+
+const BITMAP_CACHE_MAX = 6;
+const bitmapCache = new Map<string, Promise<ImageBitmap>>();
+
+/** Chave curta e estável para data URLs gigantes (não guarda o base64 inteiro). */
+function bitmapKey(src: string): string {
+  if (src.length < 512) return src;
+  let hash = 5381;
+  for (let i = 0; i < src.length; i += 97) hash = ((hash * 33) ^ src.charCodeAt(i)) >>> 0;
+  return `${src.length}:${src.slice(0, 64)}:${hash}`;
+}
+
+function cachedBitmap(img: HTMLImageElement): Promise<ImageBitmap> | null {
+  if (typeof createImageBitmap !== "function") return null;
+  const src = img.currentSrc || img.src;
+  if (!src) return null;
+  const key = bitmapKey(src);
+  const hit = bitmapCache.get(key);
+  if (hit) return hit;
+
+  const created = createImageBitmap(img);
+  created.catch(() => bitmapCache.delete(key));
+  bitmapCache.set(key, created);
+  while (bitmapCache.size > BITMAP_CACHE_MAX) {
+    const oldest = bitmapCache.keys().next().value as string | undefined;
+    if (!oldest || oldest === key) break;
+    const stale = bitmapCache.get(oldest);
+    bitmapCache.delete(oldest);
+    void stale?.then((b) => b.close?.()).catch(() => undefined);
+  }
+  return created;
+}
+
+/** Libera todos os bitmaps (usado quando uma geração falha por memória). */
+export function releaseBitmapCache() {
+  bitmapCache.forEach((p) => void p.then((b) => b.close?.()).catch(() => undefined));
+  bitmapCache.clear();
+}
+
+/* ------------------------------------------------------------------ *
+ * Preview direto (sem re-rasterizar o PDF com o PDF.js)
+ * ------------------------------------------------------------------ */
+
+export type PreviewBand = { url: string; top: number; height: number };
+export type PreviewPage = { width: number; height: number; bands: PreviewBand[] };
+
+let previewPagesKey: string | null = null;
+let previewPages: PreviewPage[] = [];
+
+function storePreviewPages(key: string, pages: PreviewPage[]) {
+  if (previewPagesKey !== key) {
+    previewPages.forEach((p) => p.bands.forEach((b) => URL.revokeObjectURL(b.url)));
+  }
+  previewPagesKey = key;
+  previewPages = pages;
+}
+
+/** Bitmaps já rasterizados do último preview — evita rodar o PDF.js de novo. */
+export function getPreviewPages(key: string): PreviewPage[] | null {
+  return previewPagesKey === key && previewPages.length > 0 ? previewPages : null;
+}
+
 
 /** Serializa um <svg> inline num bitmap de alta resolução (QR Codes). */
 function svgToImage(svg: SVGElement, w: number, h: number, scale: number): Promise<HTMLImageElement> {
@@ -580,22 +645,33 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
     if (tag === "img") {
       const img = el as HTMLImageElement;
       if (img.naturalWidth > 0 && box.w > 0 && box.h > 0) {
-        push({
-          kind: "image",
-          source: img,
+        const captured = { z: localZ, order: order++, clip: localClip, matrix: localMatrix };
+        const base = {
+          kind: "image" as const,
           sw: img.naturalWidth,
           sh: img.naturalHeight,
           rect: box,
           fit: cs.objectFit || "fill",
-          z: localZ,
-          order: order++,
-          clip: localClip,
-          matrix: localMatrix,
+          ...captured,
           bounds: transformedBounds(box, localMatrix),
-        });
+        };
+        // Template pesado: decodifica UMA vez por sessão (ImageBitmap em cache).
+        // Sem isso, cada faixa e cada nova geração redecodificavam o mesmo
+        // JPEG de 3300x4660 — o maior gargalo em celulares.
+        const bitmap = cachedBitmap(img);
+        if (bitmap) {
+          pending.push(
+            bitmap
+              .then((bmp) => push({ ...base, source: bmp }))
+              .catch(() => push({ ...base, source: img })),
+          );
+        } else {
+          push({ ...base, source: img });
+        }
       }
       return;
     }
+
 
     if (tag === "svg") {
       if (box.w > 0 && box.h > 0) {
@@ -947,9 +1023,11 @@ async function renderOnce(
   scale: number,
   bandDivisor: number,
   abortSignal?: AbortSignal | null,
+  collectPreview = false,
 ): Promise<string> {
   const jsPDFCtor = await preloadJsPdf();
   const frame = await createHiddenFrame(html);
+  const collected: PreviewPage[] = [];
   try {
     const doc = frame.contentDocument!;
     await waitForAssets(doc);
@@ -989,6 +1067,7 @@ async function renderOnce(
       const band = Math.max(64, Math.floor(bandHeight(width, usableScale) / bandDivisor));
       const canvas = document.createElement("canvas");
       canvas.width = Math.round(width * usableScale);
+      const pagePreview: PreviewPage = { width, height, bands: [] };
 
       let top = 0;
       while (top < height) {
@@ -1006,16 +1085,30 @@ async function renderOnce(
         const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
         pdf.addImage(bytes, "JPEG", 0, yPt, wPt, hSlicePt, undefined, "NONE");
 
+        if (collectPreview) {
+          // A mesma faixa já rasterizada vira a imagem do preview — o PDF.js
+          // não precisa desenhar tudo de novo.
+          const url = URL.createObjectURL(new Blob([bytes.slice()], { type: "image/jpeg" }));
+          pagePreview.bands.push({ url, top, height: sliceH });
+        }
+
         top += sliceH;
         if (top < height) await new Promise((r) => setTimeout(r, 8));
       }
+
+      if (collectPreview) collected.push(pagePreview);
 
       canvas.width = 0;
       canvas.height = 0;
     }
 
     if (!pdf) throw new Error("Documento vazio.");
-    return await blobToDataUrl(pdf.output("blob"));
+    const dataUrl = await blobToDataUrl(pdf.output("blob"));
+    if (collectPreview && collected.length) storePreviewPages(dataUrl, collected);
+    return dataUrl;
+  } catch (error) {
+    collected.forEach((p) => p.bands.forEach((b) => URL.revokeObjectURL(b.url)));
+    throw error;
   } finally {
     frame.remove();
   }
@@ -1044,12 +1137,15 @@ export async function renderHtmlToPdfCanvas(
   for (const attempt of attempts) {
     try {
       if (abortSignal?.aborted) throw new Error("Geração cancelada.");
-      return await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal);
+      return await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal, preview);
     } catch (error) {
       lastError = error;
       if (abortSignal?.aborted) break;
+      // Uma tentativa que falhou por memória deixa bitmaps presos no processo.
+      if (attempt.bandDivisor >= 4) releaseBitmapCache();
       await new Promise((r) => setTimeout(r, 120));
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Não foi possível gerar o documento.");
 }
+
