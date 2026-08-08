@@ -274,6 +274,71 @@ function applyTextTransform(text: string, transform: string): string {
 }
 
 
+/* ------------------------------------------------------------------ *
+ * Cache de bitmaps (templates baixam/decodificam UMA vez por sessão)
+ * ------------------------------------------------------------------ */
+
+const BITMAP_CACHE_MAX = 6;
+const bitmapCache = new Map<string, Promise<ImageBitmap>>();
+
+/** Chave curta e estável para data URLs gigantes (não guarda o base64 inteiro). */
+function bitmapKey(src: string): string {
+  if (src.length < 512) return src;
+  let hash = 5381;
+  for (let i = 0; i < src.length; i += 97) hash = ((hash * 33) ^ src.charCodeAt(i)) >>> 0;
+  return `${src.length}:${src.slice(0, 64)}:${hash}`;
+}
+
+function cachedBitmap(img: HTMLImageElement): Promise<ImageBitmap> | null {
+  if (typeof createImageBitmap !== "function") return null;
+  const src = img.currentSrc || img.src;
+  if (!src) return null;
+  const key = bitmapKey(src);
+  const hit = bitmapCache.get(key);
+  if (hit) return hit;
+
+  const created = createImageBitmap(img);
+  created.catch(() => bitmapCache.delete(key));
+  bitmapCache.set(key, created);
+  while (bitmapCache.size > BITMAP_CACHE_MAX) {
+    const oldest = bitmapCache.keys().next().value as string | undefined;
+    if (!oldest || oldest === key) break;
+    const stale = bitmapCache.get(oldest);
+    bitmapCache.delete(oldest);
+    void stale?.then((b) => b.close?.()).catch(() => undefined);
+  }
+  return created;
+}
+
+/** Libera todos os bitmaps (usado quando uma geração falha por memória). */
+export function releaseBitmapCache() {
+  bitmapCache.forEach((p) => void p.then((b) => b.close?.()).catch(() => undefined));
+  bitmapCache.clear();
+}
+
+/* ------------------------------------------------------------------ *
+ * Preview direto (sem re-rasterizar o PDF com o PDF.js)
+ * ------------------------------------------------------------------ */
+
+export type PreviewBand = { url: string; top: number; height: number };
+export type PreviewPage = { width: number; height: number; bands: PreviewBand[] };
+
+let previewPagesKey: string | null = null;
+let previewPages: PreviewPage[] = [];
+
+function storePreviewPages(key: string, pages: PreviewPage[]) {
+  if (previewPagesKey !== key) {
+    previewPages.forEach((p) => p.bands.forEach((b) => URL.revokeObjectURL(b.url)));
+  }
+  previewPagesKey = key;
+  previewPages = pages;
+}
+
+/** Bitmaps já rasterizados do último preview — evita rodar o PDF.js de novo. */
+export function getPreviewPages(key: string): PreviewPage[] | null {
+  return previewPagesKey === key && previewPages.length > 0 ? previewPages : null;
+}
+
 
 /** Serializa um <svg> inline num bitmap de alta resolução (QR Codes). */
 function svgToImage(svg: SVGElement, w: number, h: number, scale: number): Promise<HTMLImageElement> {
