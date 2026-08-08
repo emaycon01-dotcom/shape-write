@@ -934,7 +934,7 @@ function writePersistentPreviewCache() {
  * refinamos o suporte a recursos mais complexos (bordas, gradientes, etc.).
  */
 const CANVAS_ENGINE_FUNCTIONS = new Set<string>(); // vazio = todos usam canvas
-const CANVAS_FALLBACK_FUNCTIONS = new Set(["generate-certificado-medio-pdf", "generate-ficha19-pdf", "generate-historico-pdf", "generate-historico-eja-pdf", "generate-historico-fundamental-pdf", "generate-historico-medio-sp-pdf"]);
+
 
 
 
