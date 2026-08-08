@@ -40,8 +40,8 @@ function VerifiedGate() {
 
 
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
-const TestCanvasPage = lazy(() => import("./pages/TestCanvasPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
+
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
 
