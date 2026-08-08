@@ -928,6 +928,12 @@ function writePersistentPreviewCache() {
   }
 }
 
+/**
+ * Módulos migrados para o motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`).
+ * Os demais seguem no motor de rasterização de HTML.
+ */
+const CANVAS_ENGINE_FUNCTIONS = new Set(["generate-cnh-pdf", "generate-rg-pdf"]);
+
 
 /**
  * Substitui `supabase.functions.invoke("generate-*-pdf", { body })`.
