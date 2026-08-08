@@ -977,17 +977,6 @@ export function prefetchGeneratePdf(functionName: string, body: Record<string, u
 
 
 /**
- * Reaproveitamento do preview (padrão "WYSIWYG cirúrgico").
- * Quando o HTML do documento FINAL é byte a byte igual ao HTML que já foi
- * rasterizado no preview — o caso de todos os módulos sem QR/validação — não
- * há motivo para desenhar tudo de novo: o PDF do preview JÁ é o documento
- * final. Isso elimina a segunda rasterização (a que produzia o quadro preto
- * com marca d'água em aparelhos com pouca memória) e torna o "Gerar"
- * instantâneo. Só vale quando o preview saiu na densidade máxima (6x).
- */
-let lastPreviewRender: { html: string; pdfBase64: string; full: boolean } | null = null;
-
-/**
  * Motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`) como padrão para todos os
  * módulos. O html2canvas-pro permanece como fallback de segurança enquanto
  * refinamos o suporte a recursos mais complexos (bordas, gradientes, etc.).
@@ -1119,33 +1108,18 @@ export async function invokeGeneratePdf(
       let pdfBase64: string;
       const canvasMod = await import("@/lib/canvas-pdf");
 
-      // Módulos sem QR/validação devolvem exatamente o mesmo HTML no preview e
-      // no final — nesse caso o PDF do preview JÁ é o documento definitivo.
-      const reusable =
-        !isPreview &&
-        lastPreviewRender !== null &&
-        lastPreviewRender.full &&
-        lastPreviewRender.html === html;
-
-      if (reusable && lastPreviewRender) {
-        pdfBase64 = lastPreviewRender.pdfBase64;
-      } else {
-        try {
-          pdfBase64 = await canvasMod.renderHtmlToPdfCanvas(html, isPreview, abortSignal);
-        } catch (canvasError) {
-          if (abortSignal?.aborted) throw canvasError;
-          console.warn(`[PDF] Motor canvas falhou para ${functionName}, usando html2canvas fallback:`, canvasError);
-          pdfBase64 = await renderHtmlToDocument(html, isPreview, abortSignal);
-          lastPreviewRender = null;
-        }
-
-        if (isPreview) {
-          lastPreviewRender = {
-            html,
-            pdfBase64,
-            full: canvasMod.getLastRenderScale() >= canvasMod.FINAL_RENDER_SCALE,
-          };
-        }
+      // O preview serve somente para conferência. O arquivo definitivo sempre
+      // recebe uma montagem própria: reutilizar a Data URL do preview fazia o
+      // visualizador continuar mostrando as faixas JPEG corretas em memória,
+      // enquanto o download podia receber um PDF sem conteúdo em alguns
+      // navegadores. A segunda montagem mantém o mesmo HTML/escala, mas garante
+      // que o jsPDF finalize e incorpore todas as páginas no arquivo baixado.
+      try {
+        pdfBase64 = await canvasMod.renderHtmlToPdfCanvas(html, isPreview, abortSignal);
+      } catch (canvasError) {
+        if (abortSignal?.aborted) throw canvasError;
+        console.warn(`[PDF] Motor canvas falhou para ${functionName}, usando html2canvas fallback:`, canvasError);
+        pdfBase64 = await renderHtmlToDocument(html, isPreview, abortSignal);
       }
 
       if (abortSignal?.aborted) {
