@@ -163,9 +163,13 @@ export default function UnipFormPage() {
     const cursoCompleto = `${PREFIXO_CURSO[form.modalidade]} ${curso}`;
     const tituloConferido = `${TITULO_CURSO[form.modalidade]} ${curso}`;
     const fem = form.sexo === "F";
+    const nomeInstituicao =
+      form.instituicaoModo === "manual" && form.instituicaoManual.trim()
+        ? form.instituicaoManual.trim()
+        : "Universidade Paulista";
 
     const corpo =
-      `A ${fem ? "Reitora" : "Reitora"} da Universidade Paulista, no uso de suas atribuições\n` +
+      `A ${fem ? "Reitora" : "Reitora"} da ${nomeInstituicao}, no uso de suas atribuições\n` +
       `e tendo em vista a conclusão do ${cursoCompleto},\n` +
       `na data de ${form.dataConclusao}, e a Colação de Grau na data de ${form.dataColacao}, confere o título de`;
 
@@ -175,7 +179,8 @@ export default function UnipFormPage() {
       `R.G. nº ${form.identidade} ${form.orgaoExpedidor}`;
 
     return {
-      instituicao_titulo: "Universidade Paulista",
+      instituicao_titulo: nomeInstituicao,
+
       corpo,
       titulo_conferido: `${tituloConferido}  a`,
       aluno: form.aluno,
