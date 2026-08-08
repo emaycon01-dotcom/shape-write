@@ -401,14 +401,18 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     <div
       ref={hostRef}
       className={`relative isolate flex h-full w-full items-start justify-center overflow-auto bg-background ${
-        lensOn ? "touch-none select-none" : ""
-      }`}
+        // Enquanto carrega (ou em erro) o componente sobe acima das camadas
+        // irmãs da página (marca d'água). Sem isso o usuário via o fundo escuro
+        // do container com as marcas d'água por cima — o "quadro preto".
+        status === "ready" ? "" : "z-40 "
+      }${lensOn ? "touch-none select-none" : ""}`}
     >
       {status === "loading" && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-background">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
+
       {status === "error" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background p-8 text-center">
           <AlertTriangle className="h-10 w-10 text-destructive" />
