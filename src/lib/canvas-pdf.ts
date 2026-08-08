@@ -366,6 +366,14 @@ export function getPreviewPages(key: string): PreviewPage[] | null {
   return previewPagesKey === previewKey(key) && previewPages.length > 0 ? previewPages : null;
 }
 
+/** Escala usada na última rasterização (permite reaproveitar o preview). */
+let lastRenderScale = 0;
+export function getLastRenderScale(): number {
+  return lastRenderScale;
+}
+export const FINAL_RENDER_SCALE = FINAL_SCALE;
+
+
 
 /** Serializa um <svg> inline num bitmap de alta resolução (QR Codes). */
 function svgToImage(svg: SVGElement, w: number, h: number, scale: number): Promise<HTMLImageElement> {
@@ -1209,7 +1217,10 @@ export async function renderHtmlToPdfCanvas(
       // As mesmas faixas que entram no jsPDF também alimentam o visualizador.
       // Isso evita que o PDF final recém-gerado seja decodificado e rasterizado
       // inteiro outra vez pelo PDF.js logo após a geração em 576 DPI.
-      return await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal, true);
+      const result = await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal, true);
+      lastRenderScale = attempt.scale;
+      return result;
+
     } catch (error) {
       lastError = error;
       if (abortSignal?.aborted) break;
