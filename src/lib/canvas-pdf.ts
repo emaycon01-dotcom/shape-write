@@ -467,7 +467,7 @@ async function buildItems(page: HTMLElement, scale: number): Promise<{ items: It
         for (const line of textLines(node, origin)) {
           push({
             kind: "text",
-            text: line.text,
+            text: applyTextTransform(line.text, cs.textTransform),
             x: line.rect.x,
             // A linha da caixa de texto cobre ascendente + descendente da
             // fonte; a baseline é reconstituída proporcionalmente na pintura.
