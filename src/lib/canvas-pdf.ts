@@ -349,6 +349,28 @@ async function buildItems(page: HTMLElement, scale: number): Promise<{ items: It
       items.push(item);
     };
 
+    // Sombra sólida (spread sem blur) — usada como "moldura" branca ao redor
+    // da foto no RG. Vai antes do fundo para ficar realmente atrás.
+    const shadow = parseSolidShadow(cs.boxShadow);
+    if (shadow && box.w > 0 && box.h > 0) {
+      const rect: Rect = {
+        x: box.x + shadow.dx - shadow.spread,
+        y: box.y + shadow.dy - shadow.spread,
+        w: box.w + shadow.spread * 2,
+        h: box.h + shadow.spread * 2,
+      };
+      push({
+        kind: "fill",
+        rect,
+        color: shadow.color,
+        z: localZ,
+        order: order++,
+        clip: clip,
+        matrix: localMatrix,
+        bounds: transformedBounds(rect, localMatrix),
+      });
+    }
+
     if (!isTransparent(cs.backgroundColor) && box.w > 0 && box.h > 0) {
       push({
         kind: "fill",
@@ -361,6 +383,7 @@ async function buildItems(page: HTMLElement, scale: number): Promise<{ items: It
         bounds: transformedBounds(box, localMatrix),
       });
     }
+
 
     const tag = el.tagName.toLowerCase();
 
