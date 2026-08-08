@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader2, Search, X } from "lucide-react";
-import { completePdfPresentation, subscribePdfLoading } from "@/lib/pdf-loading";
+import { completePdfPresentation } from "@/lib/pdf-loading";
 import { getPdfJs } from "@/lib/pdfjs-loader";
 
 type PdfCanvasPreviewProps = {
@@ -90,11 +90,9 @@ function maxCanvasSide(): number {
 export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const resumeTimerRef = useRef<number>();
   const lensCanvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [retryKey, setRetryKey] = useState(0);
-  const [generationActive, setGenerationActive] = useState(false);
   const [lensOn, setLensOn] = useState(false);
   const [lensPos, setLensPos] = useState<{ x: number; y: number } | null>(null);
 
@@ -168,21 +166,6 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
 
 
   useEffect(() => {
-    const unsubscribe = subscribePdfLoading((state) => {
-      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
-      if (state.generating) {
-        setGenerationActive(true);
-      } else {
-        resumeTimerRef.current = window.setTimeout(() => setGenerationActive(false), 120);
-      }
-    });
-    return () => {
-      unsubscribe();
-      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
     const clearStage = () => {
       const stage = stageRef.current;
       if (stage) {
@@ -194,13 +177,39 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       }
     };
 
-    if (generationActive) {
-      clearStage();
-      setStatus("loading");
-      return;
-    }
     let cancelled = false;
     let destroyLoadingTask: (() => Promise<void>) | null = null;
+
+    /**
+     * O Safari/WebKit pode levar alguns frames para promover um canvas grande
+     * à camada visível. Revelar o stage e retirar o overlay no mesmo frame
+     * mostrava por alguns segundos apenas o fundo preto e as marcas d'água.
+     * Mantemos a troca atômica: o novo documento só aparece depois de composto.
+     */
+    const presentStage = async (stage: HTMLDivElement, host: HTMLDivElement) => {
+      if (cancelled) return;
+      stage.style.visibility = "hidden";
+      host.appendChild(stage);
+      void stage.offsetHeight;
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      );
+      if (cancelled) {
+        stage.remove();
+        return;
+      }
+      stage.style.visibility = "visible";
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => window.setTimeout(resolve, 180))),
+      );
+      if (cancelled) return;
+      const previous = stageRef.current;
+      stageRef.current = stage;
+      previous?.querySelectorAll("canvas").forEach((canvas) => releaseCanvas(canvas));
+      previous?.remove();
+      setStatus("ready");
+      completePdfPresentation();
+    };
 
     const renderFromBands = async (): Promise<boolean> => {
       const { getPreviewPages } = await import("@/lib/canvas-pdf");
@@ -260,11 +269,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       }
 
       if (cancelled) return true;
-      clearStage();
-      stageRef.current = stage;
-      host.appendChild(stage);
-      setStatus("ready");
-      requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
+      await presentStage(stage, host);
       return true;
     };
 
@@ -367,11 +372,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
           page.cleanup();
 
           if (pagesRendered === 1 && stageRef.current !== stage) {
-            clearStage();
-            stageRef.current = stage;
-            host.appendChild(stage);
-            setStatus("ready");
-            requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
+            await presentStage(stage, host);
           }
         }
 
@@ -394,17 +395,17 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       if (destroyLoadingTask) void destroyLoadingTask();
       clearStage();
     };
-  }, [pdfDataUrl, generationActive, title, retryKey]);
+  }, [pdfDataUrl, title, retryKey]);
 
   return (
     <div
       ref={hostRef}
-      className={`relative flex h-full w-full items-start justify-center overflow-auto bg-muted ${
+      className={`relative isolate flex h-full w-full items-start justify-center overflow-auto bg-background ${
         lensOn ? "touch-none select-none" : ""
       }`}
     >
       {status === "loading" && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
