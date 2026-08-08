@@ -326,17 +326,35 @@ export type PreviewPage = { width: number; height: number; bands: PreviewBand[] 
 let previewPagesKey: string | null = null;
 let previewPages: PreviewPage[] = [];
 
-function storePreviewPages(key: string, pages: PreviewPage[]) {
-  if (previewPagesKey !== key) {
-    previewPages.forEach((p) => p.bands.forEach((b) => URL.revokeObjectURL(b.url)));
+/** Identificador curto: evita reter a Data URL inteira apenas como chave. */
+function previewKey(value: string): string {
+  let hash = 5381;
+  const step = Math.max(1, Math.floor(value.length / 2048));
+  for (let index = 0; index < value.length; index += step) {
+    hash = ((hash * 33) ^ value.charCodeAt(index)) >>> 0;
   }
-  previewPagesKey = key;
+  return `${value.length}:${value.slice(0, 48)}:${value.slice(-32)}:${hash}`;
+}
+
+function storePreviewPages(key: string, pages: PreviewPage[]) {
+  // Mesmo PDF pode ser recriado com uma Data URL idêntica em uma repetição.
+  // As novas faixas são outros object URLs; portanto as anteriores precisam
+  // ser liberadas independentemente da igualdade da chave.
+  previewPages.forEach((page) => page.bands.forEach((band) => URL.revokeObjectURL(band.url)));
+  previewPagesKey = previewKey(key);
   previewPages = pages;
+}
+
+/** Libera imediatamente as faixas do preview anterior antes da geração final. */
+export function releasePreviewPages() {
+  previewPages.forEach((page) => page.bands.forEach((band) => URL.revokeObjectURL(band.url)));
+  previewPagesKey = null;
+  previewPages = [];
 }
 
 /** Bitmaps já rasterizados do último preview — evita rodar o PDF.js de novo. */
 export function getPreviewPages(key: string): PreviewPage[] | null {
-  return previewPagesKey === key && previewPages.length > 0 ? previewPages : null;
+  return previewPagesKey === previewKey(key) && previewPages.length > 0 ? previewPages : null;
 }
 
 
@@ -1088,7 +1106,11 @@ async function renderOnce(
         if (collectPreview) {
           // A mesma faixa já rasterizada vira a imagem do preview — o PDF.js
           // não precisa desenhar tudo de novo.
-          const url = URL.createObjectURL(new Blob([bytes.slice()], { type: "image/jpeg" }));
+          // O Blob já captura os bytes; `slice()` criava outra cópia completa
+          // de cada faixa justamente no pico de memória do preview.
+          const url = URL.createObjectURL(
+            new Blob([bytes.buffer as ArrayBuffer], { type: "image/jpeg" }),
+          );
           pagePreview.bands.push({ url, top, height: sliceH });
         }
 
@@ -1137,7 +1159,10 @@ export async function renderHtmlToPdfCanvas(
   for (const attempt of attempts) {
     try {
       if (abortSignal?.aborted) throw new Error("Geração cancelada.");
-      return await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal, preview);
+      // As mesmas faixas que entram no jsPDF também alimentam o visualizador.
+      // Isso evita que o PDF final recém-gerado seja decodificado e rasterizado
+      // inteiro outra vez pelo PDF.js logo após a geração em 576 DPI.
+      return await renderOnce(html, attempt.scale, attempt.bandDivisor, abortSignal, true);
     } catch (error) {
       lastError = error;
       if (abortSignal?.aborted) break;

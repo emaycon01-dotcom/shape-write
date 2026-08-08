@@ -1,16 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw, Copy, Check } from "lucide-react";
+import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { supabase } from "@/integrations/supabase/client";
-import { completePdfPresentation } from "@/lib/pdf-loading";
-import { getPdfJs } from "@/lib/pdfjs-loader";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 
 export default function UnipPreviewPage() {
   const location = useLocation();
@@ -29,62 +28,7 @@ export default function UnipPreviewPage() {
 
   const [paid, setPaid] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [pages, setPages] = useState<string[]>([]);
-  const [pdfError, setPdfError] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!pdfBase64) return;
-    let cancelled = false;
-    const objectUrls: string[] = [];
-
-    (async () => {
-      try {
-        const blob = pdfDataUrlToBlob(pdfBase64);
-        if (!blob || blob.size === 0) throw new Error("PDF inválido");
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-
-        const pdfjsLib = await getPdfJs();
-        const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
-
-        const out: string[] = [];
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 2 });
-          const canvas = document.createElement("canvas");
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) continue;
-          await page.render({ canvasContext: ctx, viewport }).promise;
-          const imageBlob = await new Promise<Blob | null>((resolve) =>
-            canvas.toBlob(resolve, "image/jpeg", 0.9),
-          );
-          canvas.width = 0;
-          canvas.height = 0;
-          if (!imageBlob) continue;
-          const objectUrl = URL.createObjectURL(imageBlob);
-          objectUrls.push(objectUrl);
-          out.push(objectUrl);
-        }
-        if (!cancelled) {
-          setPages(out);
-          setPdfError(out.length === 0);
-          requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
-        }
-      } catch {
-        if (!cancelled) {
-          setPdfError(true);
-          completePdfPresentation();
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      objectUrls.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [pdfBase64]);
 
   if (!pdfBase64 || !formData) {
     return (
@@ -224,27 +168,9 @@ export default function UnipPreviewPage() {
       </p>
 
       <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
-        {pdfError ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
-            <AlertTriangle className="h-12 w-12 text-destructive" />
-            <p className="font-semibold text-foreground">Erro ao carregar o preview do PDF</p>
-            <Button variant="outline" onClick={() => navigate("/dashboard/documents/diploma-unip")} className="gap-1.5">
-              <RefreshCw className="h-4 w-4" /> Tentar novamente
-            </Button>
-          </div>
-        ) : pages.length ? (
-          <div className="h-full w-full overflow-auto bg-white p-2">
-            {pages.map((src, i) => (
-              <img key={i} src={src} alt={`Diploma UNIP página ${i + 1}`} className="mb-3 w-full rounded shadow-sm last:mb-0" />
-            ))}
-          </div>
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
+        <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do Diploma UNIP" />
 
-        {!paid && !pdfError && (
+        {!paid && (
           <div className="pointer-events-none absolute inset-0 flex select-none items-center justify-center overflow-hidden">
             <div
               className="absolute inset-0"
