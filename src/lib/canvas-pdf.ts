@@ -327,9 +327,10 @@ let previewPagesKey: string | null = null;
 let previewPages: PreviewPage[] = [];
 
 function storePreviewPages(key: string, pages: PreviewPage[]) {
-  if (previewPagesKey !== key) {
-    previewPages.forEach((p) => p.bands.forEach((b) => URL.revokeObjectURL(b.url)));
-  }
+  // Mesmo PDF pode ser recriado com uma Data URL idêntica em uma repetição.
+  // As novas faixas são outros object URLs; portanto as anteriores precisam
+  // ser liberadas independentemente da igualdade da chave.
+  previewPages.forEach((page) => page.bands.forEach((band) => URL.revokeObjectURL(band.url)));
   previewPagesKey = key;
   previewPages = pages;
 }
