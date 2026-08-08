@@ -29,6 +29,17 @@ export default function RgPreviewPage() {
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
 
+  // Pré-registro em segundo plano enquanto o cliente confere o preview.
+  useEffect(() => {
+    if (!formData || finalPdf) return;
+    const id = window.setTimeout(() => {
+      prefetchGeneratePdf("generate-rg-pdf", { ...formData, preview: false });
+    }, 1200);
+    return () => window.clearTimeout(id);
+  }, [formData, finalPdf]);
+
+
+
   if (!pdfBase64 || !formData) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
