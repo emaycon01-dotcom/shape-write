@@ -556,8 +556,24 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
       });
     }
 
+    const borders = parseBorders(cs);
+    if (borders && box.w > 0 && box.h > 0) {
+      push({
+        kind: "border",
+        rect: box,
+        widths: borders.widths,
+        colors: borders.colors,
+        radius: borders.radius,
+        z: localZ,
+        order: order++,
+        clip: localClip,
+        matrix: localMatrix,
+        bounds: transformedBounds(box, localMatrix),
+      });
+    }
 
     const tag = el.tagName.toLowerCase();
+
 
     if (tag === "img") {
       const img = el as HTMLImageElement;
