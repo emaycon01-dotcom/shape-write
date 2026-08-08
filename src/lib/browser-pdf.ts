@@ -485,39 +485,57 @@ export async function renderHtmlToPdfBase64(html: string): Promise<string> {
  * casos em Android/iOS sem perder nitidez. Só depois de esgotar as faixas
  * menores é que a escala cai, como último recurso para não travar a tela.
  */
+/** Aparelho frágil (celular, tablet ou PC fraco) — onde o pico de memória mata a aba. */
+function isWeakDevice(): boolean {
+  const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  const cores = navigator.hardwareConcurrency || 4;
+  return mobile || cores <= 4 || deviceMemoryGb() <= 4;
+}
+
+/**
+ * Escala do PREVIEW por aparelho. O documento FINAL nunca muda (576 DPI):
+ * aqui só definimos com que nitidez a pré-visualização é montada. Em celulares
+ * 576 DPI no preview é o que estoura a memória do WebKit — 288 DPI é
+ * indistinguível na tela e a lupa (3x) cobre a conferência de detalhes.
+ */
+function previewScaleCap(): number {
+  const gb = deviceMemoryGb();
+  if (gb <= 2) return 2;
+  if (isWeakDevice()) return 3;
+  return RENDER_SCALE;
+}
+
 async function renderHtmlToDocument(
   html: string,
   preview = false,
   abortSignal?: AbortSignal | null,
 ): Promise<string> {
+  const weak = isWeakDevice();
+  const previewCap = previewScaleCap();
   // Preview não precisa carregar um PDF de 576 DPI no iframe do Android. O
   // documento final continua sempre na escala máxima; em aparelhos fracos
   // reduzimos somente a altura das faixas, nunca a resolução.
   const attempts: Array<{ cap: number; bandDivisor: number; blobs: boolean }> = preview
     ? [
-        // O preview agora nasce na MESMA resolução do documento final (576 DPI).
-        // Em aparelhos fracos caímos apenas no tamanho das faixas; só na última
-        // tentativa a escala é reduzida, para nunca ficar sem preview.
-        { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
-        { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
-        { cap: RENDER_SCALE, bandDivisor: 4, blobs: false },
-        { cap: 3, bandDivisor: 4, blobs: false },
-        { cap: 2, bandDivisor: 4, blobs: false },
+        { cap: previewCap, bandDivisor: weak ? 2 : 1, blobs: true },
+        { cap: previewCap, bandDivisor: weak ? 4 : 2, blobs: false },
+        { cap: Math.min(previewCap, 3), bandDivisor: 4, blobs: false },
+        { cap: 2, bandDivisor: 6, blobs: false },
+        { cap: 1.5, bandDivisor: 8, blobs: false },
       ]
     : [
         // Começa conservador em vez de provocar OOM e repetir com a memória já
-        // pressionada. As duas tentativas preservam integralmente os 576 DPI.
-        { cap: RENDER_SCALE, bandDivisor: 1, blobs: true },
-        { cap: RENDER_SCALE, bandDivisor: 1, blobs: false },
-        { cap: RENDER_SCALE, bandDivisor: 2, blobs: false },
-         { cap: RENDER_SCALE, bandDivisor: 4, blobs: false },
-         { cap: RENDER_SCALE, bandDivisor: 8, blobs: false },
-         // Último recurso: só é alcançado quando TODAS as tentativas em 576 DPI
-         // já falharam (o usuário receberia "erro ao gerar"). Nenhuma geração
-         // que hoje funciona muda de qualidade.
-         { cap: 4, bandDivisor: 8, blobs: false },
-         { cap: 3, bandDivisor: 8, blobs: false },
-
+        // pressionada. Todas as tentativas abaixo preservam os 576 DPI.
+        { cap: RENDER_SCALE, bandDivisor: weak ? 2 : 1, blobs: true },
+        { cap: RENDER_SCALE, bandDivisor: weak ? 4 : 1, blobs: false },
+        { cap: RENDER_SCALE, bandDivisor: weak ? 6 : 2, blobs: false },
+        { cap: RENDER_SCALE, bandDivisor: 8, blobs: false },
+        { cap: RENDER_SCALE, bandDivisor: 12, blobs: false },
+        // Último recurso: só é alcançado quando TODAS as tentativas em 576 DPI
+        // já falharam (o usuário receberia "erro ao gerar"). Nenhuma geração
+        // que hoje funciona muda de qualidade.
+        { cap: 4, bandDivisor: 12, blobs: false },
+        { cap: 3, bandDivisor: 12, blobs: false },
       ];
   let lastError: unknown = null;
   for (const { cap, bandDivisor, blobs } of attempts) {
