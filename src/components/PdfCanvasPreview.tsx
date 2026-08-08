@@ -226,7 +226,7 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       const sideLimit = maxCanvasSide();
 
       for (const page of pages) {
-        let scale = Math.min(4, ((availableWidth * pixelRatio) / page.width) * 1.25);
+        let scale = Math.min(6, ((availableWidth * pixelRatio) / page.width) * 2);
         const area = page.width * page.height * scale * scale;
         if (area > budget) scale *= Math.sqrt(budget / area);
         scale = Math.max(0.4, Math.min(scale, sideLimit / Math.max(page.width, page.height)));
