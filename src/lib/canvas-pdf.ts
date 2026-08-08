@@ -366,6 +366,14 @@ export function getPreviewPages(key: string): PreviewPage[] | null {
   return previewPagesKey === previewKey(key) && previewPages.length > 0 ? previewPages : null;
 }
 
+/** Escala usada na última rasterização (permite reaproveitar o preview). */
+let lastRenderScale = 0;
+export function getLastRenderScale(): number {
+  return lastRenderScale;
+}
+export const FINAL_RENDER_SCALE = FINAL_SCALE;
+
+
 
 /** Serializa um <svg> inline num bitmap de alta resolução (QR Codes). */
 function svgToImage(svg: SVGElement, w: number, h: number, scale: number): Promise<HTMLImageElement> {
