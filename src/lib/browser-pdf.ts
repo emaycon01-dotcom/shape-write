@@ -1038,13 +1038,29 @@ export async function invokeGeneratePdf(
     const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
     const cached = cacheKey ? previewHtmlCache.get(cacheKey) : undefined;
 
+    // Documento final: se a tela de preview já disparou a pré-busca, o HTML
+    // (com o QR registrado) provavelmente está pronto — usamos direto.
+    let prefetched: HtmlPayload | null = null;
+    if (!isPreview && !isAction) {
+      const finalKey = finalSignature(functionName, light);
+      const pending = finalHtmlPrefetch.get(finalKey);
+      if (pending) {
+        finalHtmlPrefetch.delete(finalKey);
+        prefetched = await pending.catch(() => null);
+      }
+    }
+
     let payload: Record<string, unknown>;
     let rawHtml: string;
 
-    if (cached) {
+    if (prefetched) {
+      payload = prefetched.payload;
+      rawHtml = prefetched.html;
+    } else if (cached) {
       payload = cached.payload;
       rawHtml = cached.html;
     } else {
+
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: isAction ? body : { ...light, render: "html" },
       });
