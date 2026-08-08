@@ -9,20 +9,7 @@ import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { completePdfPresentation } from "@/lib/pdf-loading";
 import { getPdfJs } from "@/lib/pdfjs-loader";
-
-function base64ToBlob(base64DataUrl: string): Blob | null {
-  try {
-    const parts = base64DataUrl.split(",");
-    const mime = parts[0]?.match(/:(.*?);/)?.[1] || "application/pdf";
-    const raw = atob(parts[1]);
-    const arr = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-    return new Blob([arr], { type: mime });
-  } catch (e) {
-    console.error("Failed to convert base64 to blob:", e);
-    return null;
-  }
-}
+import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
 export default function AnhangueraPreviewPage() {
   const location = useLocation();
@@ -52,7 +39,7 @@ export default function AnhangueraPreviewPage() {
 
     (async () => {
       try {
-        const blob = base64ToBlob(pdfBase64);
+        const blob = pdfDataUrlToBlob(pdfBase64);
         if (!blob || blob.size === 0) throw new Error("PDF inválido");
         const bytes = new Uint8Array(await blob.arrayBuffer());
 
@@ -156,7 +143,7 @@ export default function AnhangueraPreviewPage() {
 
   const handleDownload = () => {
     try {
-      const blob = base64ToBlob(pdfBase64);
+      const blob = pdfDataUrlToBlob(pdfBase64);
       if (!blob) throw new Error("Failed to create PDF blob");
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -172,7 +159,7 @@ export default function AnhangueraPreviewPage() {
 
   const handleShare = async () => {
     try {
-      const blob = base64ToBlob(pdfBase64);
+      const blob = pdfDataUrlToBlob(pdfBase64);
       if (!blob) throw new Error("Failed to create PDF blob");
       const file = new File([blob], "diploma-anhanguera.pdf", { type: "application/pdf" });
       if (navigator.share && navigator.canShare({ files: [file] })) {

@@ -11,20 +11,7 @@ import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import { readPreviewPayload } from "@/lib/preview-payload";
-
-function base64ToBlob(base64DataUrl: string): Blob | null {
-  try {
-    const parts = base64DataUrl.split(",");
-    const mime = parts[0]?.match(/:(.*?);/)?.[1] || "application/pdf";
-    const raw = atob(parts[1]);
-    const arr = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-    return new Blob([arr], { type: mime });
-  } catch (e) {
-    console.error("Failed to convert base64 to blob:", e);
-    return null;
-  }
-}
+import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
 export default function CnhPreviewPage() {
   const location = useLocation();
@@ -127,7 +114,7 @@ export default function CnhPreviewPage() {
   };
 
   const getPdfBlob = (): Blob | null => {
-    return base64ToBlob(pdfBase64);
+    return pdfDataUrlToBlob(pdfBase64);
   };
 
   const handleShare = async () => {
