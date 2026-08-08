@@ -223,8 +223,8 @@ function textLines(node: Text, origin: DOMRect): { text: string; rect: Rect }[] 
   const raw = node.nodeValue || "";
   if (rects.length === 0) return [];
 
-  const rel = (r: DOMRect | Rect & { left?: number; top?: number }) => r;
-  void rel;
+
+
 
   if (rects.length === 1) {
     const r = rects[0];
