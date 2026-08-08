@@ -545,6 +545,9 @@ async function renderHtmlToDocument(
     } catch (e) {
       lastError = e;
       if (abortSignal?.aborted) break;
+      // Uma tentativa que falhou por memória deixa os `blob:` dos templates
+      // presos no processo. Soltamos tudo antes de tentar de novo.
+      releaseBlobAssets();
       // Pausa maior a cada tentativa: dá tempo do navegador liberar memória.
       await breathe(800);
     }
