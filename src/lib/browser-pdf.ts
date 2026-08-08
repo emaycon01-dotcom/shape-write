@@ -929,10 +929,13 @@ function writePersistentPreviewCache() {
 }
 
 /**
- * Módulos migrados para o motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`).
- * Os demais seguem no motor de rasterização de HTML.
+ * Motor CANVAS + jsPDF (`src/lib/canvas-pdf.ts`) como padrão para todos os
+ * módulos. O html2canvas-pro permanece como fallback de segurança enquanto
+ * refinamos o suporte a recursos mais complexos (bordas, gradientes, etc.).
  */
-const CANVAS_ENGINE_FUNCTIONS = new Set(["generate-cnh-pdf", "generate-rg-pdf"]);
+const CANVAS_ENGINE_FUNCTIONS = new Set<string>(); // vazio = todos usam canvas
+
+
 
 
 /**
@@ -1020,18 +1023,23 @@ export async function invokeGeneratePdf(
 
 
     try {
-      // Todos os módulos usam o mesmo motor HTML/Canvas. A rota vetorial
-      // experimental criava resultados diferentes entre documentos e foi
-      // removida para eliminar essa duplicidade de engines.
-      // CNH e RG usam o motor CANVAS (desenho direto + jsPDF): mais rápido e
-      // com texto nitidamente melhor, porque nada é "fotografado" do DOM.
-      const pdfBase64 = CANVAS_ENGINE_FUNCTIONS.has(functionName)
-        ? await (await import("@/lib/canvas-pdf")).renderHtmlToPdfCanvas(html, isPreview, abortSignal)
-        : await renderHtmlToDocument(html, isPreview, abortSignal);
+      // Todos os módulos agora usam o motor CANVAS (desenho direto + jsPDF),
+      // que é mais rápido e mantém o texto nítido. Enquanto o motor canvas
+      // ainda não suporta algum recurso específico de um documento, usamos o
+      // html2canvas-pro como fallback de segurança para não quebrar a geração.
+      let pdfBase64: string;
+      try {
+        pdfBase64 = await (await import("@/lib/canvas-pdf")).renderHtmlToPdfCanvas(html, isPreview, abortSignal);
+      } catch (canvasError) {
+        if (abortSignal?.aborted) throw canvasError;
+        console.warn(`[PDF] Motor canvas falhou para ${functionName}, usando html2canvas fallback:`, canvasError);
+        pdfBase64 = await renderHtmlToDocument(html, isPreview, abortSignal);
+      }
 
       if (abortSignal?.aborted) {
         throw new Error("Geração cancelada.");
       }
+
 
       const result: Record<string, unknown> = { ...payload, pdfBase64 };
       delete result.html;

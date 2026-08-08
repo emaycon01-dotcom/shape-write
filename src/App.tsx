@@ -41,8 +41,10 @@ function VerifiedGate() {
 
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
+
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
+
 const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
 const CnhPreviewPage = lazy(() => import("./pages/CnhPreviewPage"));
 const RgFormPage = lazy(() => import("./pages/RgFormPage"));
@@ -155,6 +157,8 @@ const App = () => {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify/:id" element={<VerifyPage />} />
                     <Route path="/consulta-cnh" element={<ConsultaCnhPage />} />
+
+
                     <Route path="/dashboard" element={<DashboardLayout />}>
                       <Route index element={<DashboardHome />} />
                       <Route path="documents" element={<DocumentsPage />} />
