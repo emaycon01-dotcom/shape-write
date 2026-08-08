@@ -202,10 +202,81 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     let cancelled = false;
     let destroyLoadingTask: (() => Promise<void>) | null = null;
 
+    const renderFromBands = async (): Promise<boolean> => {
+      const { getPreviewPages } = await import("@/lib/canvas-pdf");
+      const pages = getPreviewPages(pdfDataUrl);
+      const host = hostRef.current;
+      if (!pages || !host) return false;
+
+      const stage = document.createElement("div");
+      stage.className = "flex w-full flex-col items-center gap-3 py-1";
+      const availableWidth = Math.max(280, host.clientWidth);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const budget = pixelBudget() / Math.max(1, pages.length);
+      const sideLimit = maxCanvasSide();
+
+      for (const page of pages) {
+        let scale = Math.min(4, ((availableWidth * pixelRatio) / page.width) * 1.25);
+        const area = page.width * page.height * scale * scale;
+        if (area > budget) scale *= Math.sqrt(budget / area);
+        scale = Math.max(0.4, Math.min(scale, sideLimit / Math.max(page.width, page.height)));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(page.width * scale);
+        canvas.height = Math.ceil(page.height * scale);
+        canvas.style.aspectRatio = `${page.width} / ${page.height}`;
+        canvas.className = "block h-auto max-w-full bg-white shadow-sm";
+        canvas.setAttribute("aria-label", title);
+        const ctx = canvas.getContext("2d", { alpha: false });
+        if (!ctx) {
+          releaseCanvas(canvas);
+          return false;
+        }
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingQuality = "high";
+
+        for (const band of page.bands) {
+          const img = new Image();
+          const ok = await new Promise<boolean>((resolve) => {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = band.url;
+          });
+          if (cancelled) return true;
+          if (!ok) {
+            releaseCanvas(canvas);
+            return false;
+          }
+          ctx.drawImage(
+            img,
+            0,
+            Math.round(band.top * scale),
+            canvas.width,
+            Math.ceil(band.height * scale),
+          );
+        }
+        stage.appendChild(canvas);
+      }
+
+      if (cancelled) return true;
+      clearStage();
+      stageRef.current = stage;
+      host.appendChild(stage);
+      setStatus("ready");
+      requestAnimationFrame(() => requestAnimationFrame(completePdfPresentation));
+      return true;
+    };
+
     const render = async () => {
       setStatus("loading");
       try {
+        // Caminho rápido: as faixas já rasterizadas na geração são exibidas
+        // direto, sem o PDF.js redesenhar o documento inteiro outra vez.
+        if (await renderFromBands()) return;
+
         const pdfjs = await getPdfJs();
+
 
         const loadingTask = pdfjs.getDocument({ data: dataUrlToBytes(pdfDataUrl) });
         destroyLoadingTask = () => loadingTask.destroy();
