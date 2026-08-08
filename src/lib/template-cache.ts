@@ -4,7 +4,7 @@
  * o que fazia o navegador travar/fechar em dispositivos móveis.
  */
 const cache = new Map<string, Promise<string>>();
-const MAX_CACHED_TEMPLATES = 2;
+const MAX_CACHED_TEMPLATES = 4;
 
 function trimCache(activeUrl: string) {
   while (cache.size > MAX_CACHED_TEMPLATES) {
