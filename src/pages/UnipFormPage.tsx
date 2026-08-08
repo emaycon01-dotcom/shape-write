@@ -45,7 +45,10 @@ const TITULO_CURSO: Record<Modalidade, string> = {
 };
 
 interface UnipForm {
+  instituicaoModo: "auto" | "manual";
+  instituicaoManual: string;
   modalidade: Modalidade;
+
   curso: string;
   cursoEmec: string;
   dataConclusao: string;
@@ -69,7 +72,10 @@ interface UnipForm {
 }
 
 const initial: UnipForm = {
+  instituicaoModo: "auto",
+  instituicaoManual: "",
   modalidade: "tecnologo",
+
   curso: "GESTÃO FINANCEIRA",
   cursoEmec: "120717",
   dataConclusao: "",
@@ -157,9 +163,13 @@ export default function UnipFormPage() {
     const cursoCompleto = `${PREFIXO_CURSO[form.modalidade]} ${curso}`;
     const tituloConferido = `${TITULO_CURSO[form.modalidade]} ${curso}`;
     const fem = form.sexo === "F";
+    const nomeInstituicao =
+      form.instituicaoModo === "manual" && form.instituicaoManual.trim()
+        ? form.instituicaoManual.trim()
+        : "Universidade Paulista";
 
     const corpo =
-      `A ${fem ? "Reitora" : "Reitora"} da Universidade Paulista, no uso de suas atribuições\n` +
+      `A ${fem ? "Reitora" : "Reitora"} da ${nomeInstituicao}, no uso de suas atribuições\n` +
       `e tendo em vista a conclusão do ${cursoCompleto},\n` +
       `na data de ${form.dataConclusao}, e a Colação de Grau na data de ${form.dataColacao}, confere o título de`;
 
@@ -169,7 +179,8 @@ export default function UnipFormPage() {
       `R.G. nº ${form.identidade} ${form.orgaoExpedidor}`;
 
     return {
-      instituicao_titulo: "Universidade Paulista",
+      instituicao_titulo: nomeInstituicao,
+
       corpo,
       titulo_conferido: `${tituloConferido}  a`,
       aluno: form.aluno,
@@ -460,6 +471,34 @@ export default function UnipFormPage() {
         {/* INSTITUIÇÃO */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={University} title="Instituição" />
+
+          <div className="space-y-1.5">
+            <FieldLabel>Nome da instituição</FieldLabel>
+            <Select
+              value={form.instituicaoModo}
+              onValueChange={(v) => setForm((p) => ({ ...p, instituicaoModo: v as "auto" | "manual" }))}
+            >
+              <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">Automático (Universidade Paulista)</SelectItem>
+                <SelectItem value="manual">Manual (digitar)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {form.instituicaoModo === "manual" && (
+            <div className="space-y-1.5">
+              <FieldLabel required>Instituição (manual)</FieldLabel>
+              <Input
+                value={form.instituicaoManual}
+                onChange={set("instituicaoManual")}
+                placeholder="Universidade Paulista"
+                className={inputCls}
+                required
+              />
+            </div>
+          )}
+
           <p className="text-xs text-muted-foreground">
             Mantenedora (ASSUPERO), CNPJ, e-MEC 322, Reitora, Secretário Geral Adjunto e os textos de
             credenciamento/reconhecimento já vêm preenchidos conforme o padrão oficial da UNIP.
