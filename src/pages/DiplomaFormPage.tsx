@@ -36,7 +36,9 @@ const MESES = [
 ];
 
 interface DiplomaForm {
+  instituicaoModo: "auto" | "manual";
   instituicao: string;
+
   instituicaoL1: string;
   instituicaoL2: string;
   mantenedora: string;
@@ -80,7 +82,9 @@ interface DiplomaForm {
 const DIPLOMA_SECRETARIO = "ADRIANA SILVA ARAUJO";
 
 const initial: DiplomaForm = {
+  instituicaoModo: "auto",
   instituicao: "CENTRO UNIVERSITÁRIO ESTÁCIO DO CEARÁ",
+
   instituicaoL1: "CENTRO UNIVERSITÁRIO",
   instituicaoL2: "ESTÁCIO DO CEARÁ",
   mantenedora: "SOCIEDADE DE ENSINO SUPERIOR, MÉDIO E FUNDAMENTAL LTDA",
