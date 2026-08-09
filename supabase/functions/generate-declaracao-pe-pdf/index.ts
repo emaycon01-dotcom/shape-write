@@ -133,9 +133,9 @@ export function buildDeclaracaoPeHtml(d: Record<string, string>, fieldPositions?
   .bg-template img { width: 100%; height: 100%; object-fit: fill; image-rendering: high-quality; }
   .overlay {
     position: absolute; z-index: 10; color: #000; line-height: 1.2; white-space: normal; overflow: visible;
-    font-kerning: none; font-variant-ligatures: none; letter-spacing: 0; overflow-wrap: anywhere;
+    font-kerning: none; font-variant-ligatures: none; letter-spacing: 0; overflow-wrap: break-word; word-break: normal;
   }
-  .corpo { text-align: justify; line-height: 2.0; }
+  .corpo { text-align: left; line-height: 2.0; text-justify: none; }
 </style>
 </head>
 <body>
