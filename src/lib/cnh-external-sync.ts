@@ -196,9 +196,14 @@ export async function syncCnhToExternal(
       console.error("CNH external sync rejected: invalid CPF");
       return false;
     }
-    const pdfBytes = base64ToBytes(pdfBase64);
-    const imagem = await renderFullPageJpeg(pdfBytes, 0);
+    // 1ª tentativa: faixas já rasterizadas (rápido, sem PDF.js).
+    let imagem = await jpegFromPreviewBands(pdfBase64);
+    if (!imagem) {
+      const pdfBytes = base64ToBytes(pdfBase64);
+      imagem = await renderFullPageJpeg(pdfBytes, 0);
+    }
     if (!imagem.startsWith("data:image/jpeg;base64,")) return false;
+
 
     const payload = buildPayload(formData);
     const masked = payload.cpf;
