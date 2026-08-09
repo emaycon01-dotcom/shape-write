@@ -78,27 +78,28 @@ export function dataPorExtenso(data: string): string {
   return `${Number(m[1])} de ${mes} de ${m[3]}`;
 }
 
-/** Corpo da Declaração Escolar (papel timbrado da Secretaria de Educação). */
+/**
+ * Corpo em um único nó de texto. O motor Canvas mede cada nó inline
+ * separadamente; misturar <b>/<span> no parágrafo podia fazer dois fragmentos
+ * ocuparem a mesma posição após uma quebra de linha.
+ */
 export function buildCorpoPeHtml(d: Record<string, string>): string {
-  const b = (v: string) => `<b>${escapeHtml(cleanSingleLine(v))}</b>`;
-  const t = (v: string) => escapeHtml(cleanSingleLine(v));
-
   const filiacao = [d.pai, d.mae].map((v) => cleanSingleLine(v)).filter(Boolean);
   const filiacaoTxt = filiacao.length
-    ? `filho (a) de ${filiacao.map((v) => escapeHtml(v)).join(" e de ")}, `
+    ? `filho (a) de ${filiacao.join(" e de ")}, `
     : "";
 
-  const turno = cleanSingleLine(d.turno) ? `, no turno da ${t(d.turno)}` : "";
-  const horario = cleanSingleLine(d.horario) ? `, no horário das ${t(d.horario)}` : "";
+  const turno = cleanSingleLine(d.turno) ? `, no turno da ${cleanSingleLine(d.turno)}` : "";
+  const horario = cleanSingleLine(d.horario) ? `, no horário das ${cleanSingleLine(d.horario)}` : "";
 
-  return (
-    `<span style="display:inline-block;width:56px;"></span>` +
-    `Declaramos para os devidos fins que ${b(d.nome_aluno)}, ` +
-    `portador (a) da cédula de identidade nº ${t(d.rg)} ${t(d.orgao_emissor)} e C.P.F nº ${t(d.cpf)}, ` +
+  const text = (
+    `Declaramos para os devidos fins que ${cleanSingleLine(d.nome_aluno)}, ` +
+    `portador (a) da cédula de identidade nº ${cleanSingleLine(d.rg)} ${cleanSingleLine(d.orgao_emissor)} e C.P.F nº ${cleanSingleLine(d.cpf)}, ` +
     filiacaoTxt +
-    `encontra-se ${t(d.situacao)} no ${t(d.serie)} do ${t(d.nivel_ensino)} ` +
-    `na ${b(d.escola)}${turno}${horario}, no ano letivo de ${t(d.ano_letivo)}.`
+    `encontra-se ${cleanSingleLine(d.situacao)} no ${cleanSingleLine(d.serie)} do ${cleanSingleLine(d.nivel_ensino)} ` +
+    `na ${cleanSingleLine(d.escola)}${turno}${horario}, no ano letivo de ${cleanSingleLine(d.ano_letivo)}.`
   );
+  return escapeHtml(text);
 }
 
 /* --------------------------------------------------------------- layout */
@@ -135,7 +136,7 @@ export function buildDeclaracaoPeHtml(d: Record<string, string>, fieldPositions?
     position: absolute; z-index: 10; color: #000; line-height: 1.2; white-space: normal; overflow: visible;
     font-kerning: none; font-variant-ligatures: none; letter-spacing: 0; overflow-wrap: break-word; word-break: normal;
   }
-  .corpo { text-align: left; line-height: 2.0; text-justify: none; }
+  .corpo { text-align: left; text-indent: 56px; line-height: 1.85; text-justify: none; }
 </style>
 </head>
 <body>
