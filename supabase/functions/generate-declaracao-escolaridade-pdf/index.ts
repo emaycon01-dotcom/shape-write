@@ -14,6 +14,14 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;");
 }
 
+function cleanSingleLine(value: string) {
+  return String(value ?? "")
+    .normalize("NFC")
+    .replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 const MESES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
   "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
@@ -58,7 +66,7 @@ export function buildDeclaracaoEscolaridadeHtml(d: Record<string, string>) {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     -webkit-font-smoothing: antialiased;
-    text-rendering: geometricPrecision;
+    text-rendering: auto;
     background: #fff;
     width: 794px;
     font-family: 'Calibri', 'Carlito', 'Segoe UI', Arial, sans-serif;
@@ -69,7 +77,20 @@ export function buildDeclaracaoEscolaridadeHtml(d: Record<string, string>) {
   .cabecalho img { width: 96px; height: 96px; object-fit: contain; }
   .cabecalho .linhas { min-width: 0; flex: 1; font-size: 15.5px; font-weight: bold; line-height: 1.55; padding-top: 4px; }
   .cabecalho .escola { font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
-  .cabecalho .endereco { margin-top: 7px; font-size: 11.5px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+  .cabecalho .endereco {
+    display: block;
+    width: 100%;
+    margin-top: 7px;
+    font-family: Arial, sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-kerning: none;
+    font-variant-ligatures: none;
+    letter-spacing: 0;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
   .titulo { text-align: center; font-size: 16px; font-weight: bold; text-decoration: underline; margin-top: 80px; }
   .corpo { margin-top: 60px; font-size: 16px; text-align: justify; line-height: 1.9; }
   .firmo { margin-top: 50px; text-align: center; font-size: 16px; }
@@ -86,7 +107,7 @@ export function buildDeclaracaoEscolaridadeHtml(d: Record<string, string>) {
       <div>GOVERNO DO ESTADO DE ${escapeHtml((d.estado_nome || "").toUpperCase())}</div>
       <div>SECRETARIA DE ESTADO DE EDUCAÇÃO</div>
       <div class="escola">${escapeHtml(d.escola || "")}</div>
-      <div class="endereco">${escapeHtml(d.endereco || "")}</div>
+      <div class="endereco">${escapeHtml(cleanSingleLine(d.endereco || ""))}</div>
     </div>
   </div>
 
