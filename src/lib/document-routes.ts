@@ -23,6 +23,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "historico-eja": "/dashboard/documents/historico-eja",
   "historico-fundamental": "/dashboard/documents/historico-fundamental",
   "declaracao-ete": "/dashboard/documents/declaracao-ete",
+  "declaracao-pe": "/dashboard/documents/declaracao-pe",
   "comprovante-residencia": "/dashboard/documents/comprovante-residencia",
   "exame-toxicologico": "/dashboard/documents/exame-toxicologico",
   "historico-escolar": "/dashboard/documents/historico-escolar",
