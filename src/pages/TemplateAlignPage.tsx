@@ -39,6 +39,7 @@ import templateHoleriteUrl from "@/assets/template-holerite-p1-hq.webp";
 import templateObitoBgUrl from "@/assets/template-obito-bg-hq.webp";
 import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/lib/declaracao-align";
 import { DECLARACAO_ETE_ALIGN_STORAGE_KEY, loadDeclaracaoEteFieldPositions } from "@/lib/declaracao-ete-align";
+import { DECLARACAO_PE_ALIGN_STORAGE_KEY, loadDeclaracaoPeFieldPositions } from "@/lib/declaracao-pe-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
 import { CRAF_ALIGN_STORAGE_KEY, loadCrafFieldPositions } from "@/lib/craf-align";
 import templateHapvidaBgUrl from "@/assets/template-hapvida-bg-hq.jpg";
@@ -47,6 +48,7 @@ import templateHistoricoBgUrl from "@/assets/template-historico-bg-hq.webp";
 import templateCertidaoBgUrl from "@/assets/template-certidao-bg-hq.webp";
 import templateDeclaracaoBgUrl from "@/assets/template-declaracao-bg-hq.jpg";
 import templateDeclaracaoEteAsset from "@/assets/template-declaracao-ete-bg.jpg.asset.json";
+import templateDeclaracaoPeAsset from "@/assets/template-declaracao-pe-bg.jpg.asset.json";
 import templateReceitaBgUrl from "@/assets/template-receita-bg-hq.jpg";
 import templateCrafBgUrl from "@/assets/template-craf-bg-hq.webp";
 import { UNIP_ALIGN_STORAGE_KEY, loadUnipFieldPositions } from "@/lib/unip-align";
@@ -520,6 +522,12 @@ export const defaultDeclaracaoFields: FieldDef[] = [
 export const defaultDeclaracaoEteFields: FieldDef[] = [
   { id: "corpo", label: "Corpo da declaração", sampleText: "Declaramos para os devidos fins de comprovação que RAQUEL SOUZA BARROS DA SILVA, portador (a) da cédula de identidade nº 11.020.359 SDS/PE e C.P.F nº 718.608.124-06, filho (a) de MARCÍLIO BARROS DA SILVA e de CRISTIANE MARIA DE SOUZA SILVA, está regularmente matriculado (a) no 3º ano do ensino médio, no curso Técnico em ADMINISTRAÇÃO, na modalidade Integrado ao Profissional, onde cursa de segunda à sexta-feira, no horário das 7h30 às 17h nesta unidade de ensino.", x: 86, y: 355, fontSize: 16, w: 637 },
   { id: "data_local", label: "Cidade e data", sampleText: "Paulista, 15 de agosto de 2022.", x: 393, y: 545, fontSize: 16, w: 330 },
+];
+
+// Defaults MUST match supabase/functions/generate-declaracao-pe-pdf/index.ts DECLARACAO_PE_DEFAULT_POSITIONS
+export const defaultDeclaracaoPeFields: FieldDef[] = [
+  { id: "corpo", label: "Corpo da declaração", sampleText: "Declaramos para os devidos fins que RAQUEL SOUZA BARROS DA SILVA, portador (a) da cédula de identidade nº 11.020.359 SDS/PE e C.P.F nº 718.608.124-06, filho (a) de MARCÍLIO BARROS DA SILVA e de CRISTIANE MARIA DE SOUZA SILVA, encontra-se regularmente matriculado (a) no 3º ano do ensino médio na ESCOLA TÉCNICA ESTADUAL JOSÉ ALENCAR GOMES DA SILVA, no turno da manhã, no ano letivo de 2022.", x: 86, y: 320, fontSize: 16, w: 630 },
+  { id: "data_local", label: "Cidade e data", sampleText: "Paulista, 15 de agosto de 2022.", x: 386, y: 620, fontSize: 16, w: 330 },
 ];
 
 // Defaults MUST match supabase/functions/generate-receita-pdf/index.ts RECEITA_DEFAULT_POSITIONS
@@ -1046,7 +1054,7 @@ function receiptStyle(key: DocKey, f: FieldDef, PW: number, scale: number): Reac
   };
 }
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "declaracao-pe" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
 
 
 interface EditorConfig {
@@ -1253,6 +1261,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 2.0,
     copy: () => loadDeclaracaoEteFieldPositions() ?? {},
+  },
+  "declaracao-pe": {
+    key: "declaracao-pe",
+    title: "Declaração Escolar",
+    storageKey: DECLARACAO_PE_ALIGN_STORAGE_KEY,
+    defaults: defaultDeclaracaoPeFields,
+    bg: templateDeclaracaoPeAsset.url,
+    font: DECLARACAO_FONT,
+    mrzFont: DECLARACAO_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 2.0,
+    copy: () => loadDeclaracaoPeFieldPositions() ?? {},
   },
   receita: {
     key: "receita",
@@ -1978,7 +2000,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "declaracao-ete", "receita", "craf", "comprovante", "coelba", "equatorial", "tim", "holerite"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "declaracao-ete", "declaracao-pe", "receita", "craf", "comprovante", "coelba", "equatorial", "tim", "holerite"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}

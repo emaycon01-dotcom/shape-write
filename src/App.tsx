@@ -98,6 +98,8 @@ const DeclaracaoFormPage = lazy(() => import("./pages/DeclaracaoFormPage"));
 const DeclaracaoPreviewPage = lazy(() => import("./pages/DeclaracaoPreviewPage"));
 const DeclaracaoEteFormPage = lazy(() => import("./pages/DeclaracaoEteFormPage"));
 const DeclaracaoEtePreviewPage = lazy(() => import("./pages/DeclaracaoEtePreviewPage"));
+const DeclaracaoPeFormPage = lazy(() => import("./pages/DeclaracaoPeFormPage"));
+const DeclaracaoPePreviewPage = lazy(() => import("./pages/DeclaracaoPePreviewPage"));
 const ReceitaFormPage = lazy(() => import("./pages/ReceitaFormPage"));
 const CrafFormPage = lazy(() => import("./pages/CrafFormPage"));
 const CrafPreviewPage = lazy(() => import("./pages/CrafPreviewPage"));
@@ -217,6 +219,8 @@ const App = () => {
                         <Route path="documents/declaracao-escolar/preview" element={<DeclaracaoPreviewPage />} />
                         <Route path="documents/declaracao-ete" element={<DeclaracaoEteFormPage />} />
                         <Route path="documents/declaracao-ete/preview" element={<DeclaracaoEtePreviewPage />} />
+                        <Route path="documents/declaracao-pe" element={<DeclaracaoPeFormPage />} />
+                        <Route path="documents/declaracao-pe/preview" element={<DeclaracaoPePreviewPage />} />
                         <Route path="documents/receita-medica" element={<ReceitaFormPage />} />
                         <Route path="documents/receita-medica/preview" element={<ReceitaPreviewPage />} />
                         <Route path="documents/craf" element={<CrafFormPage />} />
