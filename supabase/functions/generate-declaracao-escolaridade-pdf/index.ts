@@ -67,7 +67,9 @@ export function buildDeclaracaoEscolaridadeHtml(d: Record<string, string>) {
   .page { width: 794px; height: 1123px; position: relative; background: #fff; overflow: hidden; padding: 90px 70px; }
   .cabecalho { display: flex; align-items: flex-start; gap: 20px; }
   .cabecalho img { width: 96px; height: 96px; object-fit: contain; }
-  .cabecalho .linhas { font-size: 15.5px; font-weight: bold; line-height: 1.55; padding-top: 4px; }
+  .cabecalho .linhas { min-width: 0; flex: 1; font-size: 15.5px; font-weight: bold; line-height: 1.55; padding-top: 4px; }
+  .cabecalho .escola { font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+  .cabecalho .endereco { margin-top: 7px; font-size: 11.5px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
   .titulo { text-align: center; font-size: 16px; font-weight: bold; text-decoration: underline; margin-top: 80px; }
   .corpo { margin-top: 60px; font-size: 16px; text-align: justify; line-height: 1.9; }
   .firmo { margin-top: 50px; text-align: center; font-size: 16px; }
@@ -83,8 +85,8 @@ export function buildDeclaracaoEscolaridadeHtml(d: Record<string, string>) {
     <div class="linhas">
       <div>GOVERNO DO ESTADO DE ${escapeHtml((d.estado_nome || "").toUpperCase())}</div>
       <div>SECRETARIA DE ESTADO DE EDUCAÇÃO</div>
-      <div>${escapeHtml(d.escola || "")}</div>
-      <div>${escapeHtml(d.endereco || "")}</div>
+      <div class="escola">${escapeHtml(d.escola || "")}</div>
+      <div class="endereco">${escapeHtml(d.endereco || "")}</div>
     </div>
   </div>
 
