@@ -405,9 +405,16 @@ export function gerarGrade(curso: string, semestres = 8): DisciplinaGrade[][] {
   });
 
   // Disciplinas próprias do curso (nome do curso vira eixo temático)
+  const MINUSCULAS = new Set(["de", "da", "do", "das", "dos", "e", "em", "a", "o"]);
   const eixo = curso
     .replace(/^(TECNOLOGIA EM|GESTÃO EM|CURSO SUPERIOR DE TECNOLOGIA EM)\s+/i, "")
-    .trim();
+    .trim()
+    .toLocaleLowerCase("pt-BR")
+    .split(/\s+/)
+    .map((w, i) =>
+      i > 0 && MINUSCULAS.has(w) ? w : w.charAt(0).toLocaleUpperCase("pt-BR") + w.slice(1),
+    )
+    .join(" ");
   const proprias = [
     `Fundamentos de ${eixo}|60`,
     `Introdução a ${eixo}|60`,
