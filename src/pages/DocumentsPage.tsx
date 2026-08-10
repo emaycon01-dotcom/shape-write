@@ -16,7 +16,9 @@ type Modulo = {
   aplicativo?: boolean;
   emBreve?: boolean;
   manutencao?: boolean;
-  badges?: { label: string; tone: "hot" | "estado" | "exclusivo" }[];
+  emDestaque?: boolean;
+  badges?: { label: string; tone: "hot" | "estado" | "exclusivo" | "novo" }[];
+
 };
 
 type Categoria = {
