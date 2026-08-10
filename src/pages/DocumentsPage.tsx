@@ -142,10 +142,17 @@ const MODULOS: Categoria[] = [
         icon: BookOpen,
         rota: "/dashboard/documents/historico-superior",
         creditos: 1,
-        badges: [{ label: "TODOS OS CURSOS", tone: "exclusivo" }],
+        emDestaque: true,
+        badges: [
+          { label: "NOVO", tone: "novo" },
+          { label: "3 PÁGINAS", tone: "hot" },
+          { label: "TODOS OS CURSOS", tone: "exclusivo" },
+          { label: "NOTAS AUTOMÁTICAS", tone: "estado" },
+        ],
       },
     ],
   },
+
   {
     grupo: "ESCOLARES",
     destaque: "TODOS COM ESTADOS",
