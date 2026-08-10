@@ -21,33 +21,33 @@
 Você colou a `service_role` no chat. Ela é chave de administrador total.
 Vá em **Supabase → Settings → API → Rotate** e gere uma nova antes de publicar.
 
-### 2. Deploy das Edge Functions (60+ funções em `supabase/functions/`)
-Não dá para enviar daqui sem o seu *Access Token* pessoal do Supabase.
-No seu computador, dentro do repositório do GitHub:
+### 2. Deploy das Edge Functions — ✅ FEITO
+As **48 funções** foram publicadas no projeto `mpcepkwpzdzofnhdnjlu` (todas ACTIVE, versão 1).
+As públicas (`generate-cnh-pdf`, `generate-cha-pdf`, `rg-foto`, `verify-captcha`,
+`elitepay-webhook`) foram publicadas com `--no-verify-jwt`.
 
+Para republicar depois de mudanças:
 ```bash
-npm i -g supabase
-supabase login                       # abre o navegador
-supabase link --project-ref mpcepkwpzdzofnhdnjlu
-supabase functions deploy            # envia TODAS as funções
+supabase functions deploy --project-ref mpcepkwpzdzofnhdnjlu --use-api
 ```
 
 ### 3. Secrets das Edge Functions
-Os valores atuais são **write-only** (nem eu consigo ler). Você precisa cadastrar
-de novo, com os valores originais dos parceiros:
+Já cadastrados no projeto novo: `ELITEPAY_API_KEY`, `ELITEPAY_SECRET_KEY`,
+`PARTNER_INGEST_TOKEN_V3`, `BELLARUS_API_KEY`.
+
+Ainda faltam (valores write-only no projeto antigo — preciso que você me mande):
 
 ```bash
-supabase secrets set \
-  ELITEPAY_API_KEY=... \
-  ELITEPAY_SECRET_KEY=... \
+supabase secrets set --project-ref mpcepkwpzdzofnhdnjlu \
   ELITEPAY_WEBHOOK_SECRET=... \
   TURNSTILE_SECRET_KEY=... \
   TURNSTILE_SITE_KEY=... \
   DOC_INGEST_TOKEN=... \
-  PARTNER_INGEST_TOKEN=... PARTNER_INGEST_TOKEN_V2=... PARTNER_INGEST_TOKEN_V3=... \
+  PARTNER_INGEST_TOKEN=... PARTNER_INGEST_TOKEN_V2=... \
   RG_VALIDACAO_BELLARUS_TOKEN=... RG_VALIDACAO_API_TOKEN=... VALIDACAO_API_TOKEN=... \
-  BELLARUS_API_KEY=... ATESTADO_PUBLIC_TOKEN=... ATESTADO_VERIFY_API_KEY=... \
+  ATESTADO_PUBLIC_TOKEN=... ATESTADO_VERIFY_API_KEY=... \
   CNH_EXTERNAL_SERVICE_KEY=... CNH_PARTNER_TOKEN=... \
+
   CRAF_INGEST_KEY=... CRAF_INGEST_KEY_V3=... \
   DIPLOMA_UNIP_API_KEY=... DIPLOMA_UNOPAR_API_KEY=... \
   PORTAL_VALIDACAO_API_KEY=... \
