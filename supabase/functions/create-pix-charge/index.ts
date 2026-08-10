@@ -1,7 +1,7 @@
 // PIX charge (Elite Pay) — redeploy v2
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
-import { ELITEPAY_BASE_URL, applyPaidTransaction, confirmElitepayPayment } from "../_shared/elitepay.ts";
+import { applyPaidTransaction, confirmElitepayPayment, elitepayFetch } from "../_shared/elitepay.ts";
 
 const PLAN_BASE_PRICES: Record<string, number> = { Basic: 150, Pro: 450, Premium: 999.99 };
 
