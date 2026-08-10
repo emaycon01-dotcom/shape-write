@@ -132,6 +132,10 @@ export function buildAnhangueraHistoricoHtml(
     <div>Se impresso, para conferência acesse o site ${escapeHtml(d.site_validacao || "http://sada.anhanguera.com")} e informe o código de documento: ${escapeHtml(d.codigo_documento || "")}.</div>
   </div>`;
 
+  const cols = `<colgroup>
+    <col class="w7"><col class="w12"><col class="wd"><col class="w7"><col class="w8"><col class="w9"><col class="w13">
+  </colgroup>`;
+
   const tabelaHead = `
     <tr>
       <th class="w7">ANO</th>
@@ -186,14 +190,14 @@ export function buildAnhangueraHistoricoHtml(
       const ultima = idx === total - 1;
       const corpo = grupos
         .map(
-          (g) => `<table class="notas">${g.map(linhaHtml).join("")}</table>`,
+          (g) => `<table class="notas">${cols}${g.map(linhaHtml).join("")}</table>`,
         )
         .join("");
       return `
 <div class="page">
   ${cabecalho}
   <div class="tabelas">
-    <table class="notas cabec">${tabelaHead}</table>
+    <table class="notas cabec">${cols}${tabelaHead}</table>
     ${corpo}
   </div>
   ${ultima ? blocoFinal : ""}
@@ -262,8 +266,8 @@ export function buildAnhangueraHistoricoHtml(
   .notas td.n { text-align: right; }
   .notas + .notas { margin-top: 9px; }
   .cabec + .notas { margin-top: 0; }
-  .w7 { width: 7%; } .w8 { width: 8%; } .w9 { width: 9.5%; }
-  .w12 { width: 12%; } .w13 { width: 13%; } .wd { width: 43.5%; }
+  .w7 { width: 6.5%; } .w8 { width: 7.5%; } .w9 { width: 8.5%; }
+  .w12 { width: 10%; } .w13 { width: 11.5%; } .wd { width: 49.5%; }
 
   .enade { margin-top: 26px; font-size: 8.8px; }
   .chleg { margin-top: 14px; font-size: 8.8px; }
