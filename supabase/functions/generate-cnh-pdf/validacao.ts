@@ -96,16 +96,22 @@ export async function registerValidationDocument(
     codigo_validacao: s(d.codigo_seguranca),
     numero_formulario_renach: s(d.renach),
     status: "valido",
-    foto: s(d.foto_base64) || s(d.foto),
   };
 
-  // Endpoint alternativo (mesma família do RG/CHA) — aceita `tipo: "cnh"`.
-  const ALT_ENDPOINT = "https://nkkvpnnpplezwdxxgpyr.functions.supabase.co/register-document";
+  // Foto conforme a especificação do Site 2: base64 (com prefixo) ou URL pública.
+  const fotoRaw = s(d.foto_base64) || s(d.foto);
+  if (fotoRaw.startsWith("http")) {
+    payload.foto_url = fotoRaw;
+    payload.foto = fotoRaw;
+  } else if (fotoRaw) {
+    const dataUrl = fotoRaw.startsWith("data:") ? fotoRaw : `data:image/jpeg;base64,${fotoRaw}`;
+    payload.foto_base64 = dataUrl;
+    payload.foto = dataUrl;
+  }
 
   const tokens = Array.from(new Set([
+    Deno.env.get("CNH_VALIDACAO_API_TOKEN") || "",
     Deno.env.get("VALIDACAO_API_TOKEN") || "",
-    Deno.env.get("RG_VALIDACAO_BELLARUS_TOKEN") || "",
-    Deno.env.get("RG_VALIDACAO_API_TOKEN") || "",
   ].filter(Boolean)));
 
   if (tokens.length === 0) {
@@ -113,54 +119,51 @@ export async function registerValidationDocument(
     return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: "missing_token" };
   }
 
-  const targets: Array<{ url: string; body: Record<string, string> }> = [
-    { url: REGISTER_ENDPOINT, body: payload },
-    { url: ALT_ENDPOINT, body: { ...payload, tipo: "cnh" } },
-  ];
-
   let lastError = "registration_failed";
-  for (const target of targets) {
-    for (const token of tokens) {
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-          const res = await fetch(target.url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-API-Token": token },
-            body: JSON.stringify(target.body),
-            signal: AbortSignal.timeout(10000),
-          });
+  for (const token of tokens) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(REGISTER_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-API-Token": token },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(15000),
+        });
 
-          const text = await res.text();
-          if (res.ok) {
-            let json: { qr_code_url?: string; success?: boolean } = {};
-            try {
-              json = JSON.parse(text);
-            } catch { /* resposta não-JSON */ }
+        const text = await res.text();
+        if (res.ok) {
+          let json: { qr_code_url?: string; success?: boolean } = {};
+          try {
+            json = JSON.parse(text);
+          } catch { /* resposta não-JSON */ }
 
-            if (json.success !== false) {
-              return {
-                documentoId,
-                qrCodeUrl: json.qr_code_url || fallbackUrl,
-                registered: true,
-              };
-            }
+          if (json.success !== false) {
+            // Só confiamos na URL devolvida se ela for do domínio oficial.
+            const remote = s(json.qr_code_url);
+            const ok = remote.startsWith(VALIDACAO_BASE_URL);
+            return {
+              documentoId,
+              qrCodeUrl: ok ? remote : fallbackUrl,
+              registered: true,
+            };
           }
-
-          lastError = `HTTP ${res.status}: ${text.slice(0, 300)}`;
-          console.error(`register-document falhou (${target.url}): ${lastError}`);
-          if (res.status === 401 || res.status === 403) break; // token inválido: tenta o próximo
-        } catch (err) {
-          lastError = String(err);
-          console.error("register-document erro de rede:", err);
         }
 
-        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 700));
+        lastError = `HTTP ${res.status}: ${text.slice(0, 300)}`;
+        console.error(`register-document tentativa ${attempt} falhou: ${lastError}`);
+        if (res.status === 401 || res.status === 403) break; // token inválido: próximo token
+      } catch (err) {
+        lastError = String(err);
+        console.error("register-document erro de rede:", err);
       }
+
+      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 700));
     }
   }
 
   return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: lastError };
 }
+
 
 
 /** QR Code vetorial (SVG) — nítido em qualquer resolução do PDF. */
