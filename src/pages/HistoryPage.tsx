@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const EDIT_COST_BASE = 0.3;
+/** Tipos que não podem ser editados (o registro no validador ficaria inconsistente). */
+const EDIT_DISABLED_TYPES: string[] = ["cnh"];
 const RENEW_COST_BASE = 1;
 const RENEW_DAYS = 30;
 
