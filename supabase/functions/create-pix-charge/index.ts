@@ -1,7 +1,7 @@
 // PIX charge (Elite Pay) — redeploy v2
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
-import { ELITEPAY_BASE_URL, applyPaidTransaction, confirmElitepayPayment } from "../_shared/elitepay.ts";
+import { applyPaidTransaction, confirmElitepayPayment, elitepayFetch } from "../_shared/elitepay.ts";
 
 const PLAN_BASE_PRICES: Record<string, number> = { Basic: 150, Pro: 450, Premium: 999.99 };
 
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
       ? `${credits_amount} creditos - Bellarus`
       : `Plano ${plan_name} - Bellarus`;
 
-    const elitepayResponse = await fetch(`${ELITEPAY_BASE_URL}/api/v1/deposit`, {
+    const elitepayResponse = await elitepayFetch(`/api/v1/deposit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
