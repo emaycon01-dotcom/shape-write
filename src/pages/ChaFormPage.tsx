@@ -16,6 +16,7 @@ import templateChaUrl from "@/assets/template-cha-bg-hq.webp";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { syncChaToExternal } from "@/lib/cha-external-sync";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { pick, rnd } from "@/lib/random";
 
@@ -206,7 +207,17 @@ export default function ChaFormPage() {
           additionalInfo: JSON.stringify(bodyData),
           pdfDataUrl: pdfResult.startsWith("data:") ? pdfResult : `data:application/pdf;base64,${pdfResult}`,
         });
-        toast({ title: "Documento atualizado com sucesso!" });
+        toast({ title: "Documento atualizado", description: "Atualizando o registro do QR Code..." });
+        const resync = await syncChaToExternal(pdfResult, bodyData as unknown as Record<string, string>);
+        toast(
+          resync.ok
+            ? { title: "QR Code atualizado", description: `Registro ${resync.documentoId} sincronizado.` }
+            : {
+                title: "Falha ao atualizar o QR Code",
+                description: "O PDF foi atualizado, mas o registro externo não foi sincronizado.",
+                variant: "destructive" as const,
+              }
+        );
         navigate("/dashboard/history");
       } else {
         const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
