@@ -3,7 +3,7 @@ select cron.schedule(
   '* * * * *',
   $cron$
   select net.http_post(
-    url := 'https://doycwownddyxfqntifca.supabase.co/functions/v1/reconcile-pix',
+    url := 'https://tfelypvzmdokfcgupmls.supabase.co/functions/v1/reconcile-pix',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'Lovable-Context', 'cron',
