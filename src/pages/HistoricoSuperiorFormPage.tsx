@@ -226,6 +226,7 @@ export default function HistoricoSuperiorFormPage() {
 
   const clearForm = () => {
     setForm(initial);
+    setManuais({});
     setGrupos(montarLinhas(gerarGrade(initial.curso, initial.semestres), Number(initial.anoInicial), true));
     toast({ title: "Formulário limpo!" });
   };
@@ -234,10 +235,12 @@ export default function HistoricoSuperiorFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
+    const form = derivar(formState);
     saveFormDraft("historico-superior", form as unknown as Record<string, unknown>);
 
     try {
       const logoBase64 = await loadTemplateBase64(logoAsset.url);
+
 
       const bodyData = {
         logo_base64: logoBase64,
