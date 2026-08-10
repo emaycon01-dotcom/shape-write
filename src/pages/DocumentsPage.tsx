@@ -16,7 +16,9 @@ type Modulo = {
   aplicativo?: boolean;
   emBreve?: boolean;
   manutencao?: boolean;
-  badges?: { label: string; tone: "hot" | "estado" | "exclusivo" }[];
+  emDestaque?: boolean;
+  badges?: { label: string; tone: "hot" | "estado" | "exclusivo" | "novo" }[];
+
 };
 
 type Categoria = {
@@ -140,10 +142,17 @@ const MODULOS: Categoria[] = [
         icon: BookOpen,
         rota: "/dashboard/documents/historico-superior",
         creditos: 1,
-        badges: [{ label: "TODOS OS CURSOS", tone: "exclusivo" }],
+        emDestaque: true,
+        badges: [
+          { label: "NOVO", tone: "novo" },
+          { label: "3 PÁGINAS", tone: "hot" },
+          { label: "TODOS OS CURSOS", tone: "exclusivo" },
+          { label: "NOTAS AUTOMÁTICAS", tone: "estado" },
+        ],
       },
     ],
   },
+
   {
     grupo: "ESCOLARES",
     destaque: "TODOS COM ESTADOS",
@@ -373,7 +382,7 @@ const MODULOS: Categoria[] = [
 ];
 
 
-function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance" | "hot" | "estado" | "exclusivo"; icon: React.ElementType; children: React.ReactNode }) {
+function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance" | "hot" | "estado" | "exclusivo" | "novo"; icon: React.ElementType; children: React.ReactNode }) {
   const tones = {
     qr: "border-success/40 bg-success/15 text-success",
     app: "border-warning/40 bg-warning/15 text-warning",
@@ -381,9 +390,11 @@ function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "
     maintenance: "border-destructive/40 bg-destructive/15 text-destructive",
     hot: "border-warning/60 bg-warning/25 text-warning shadow-[0_0_12px_-4px_hsl(var(--warning))]",
     estado: "border-success/60 bg-success/25 text-success shadow-[0_0_12px_-4px_hsl(var(--success))]",
+    novo: "border-primary/70 bg-primary/25 text-primary shadow-[0_0_16px_-3px_hsl(var(--primary))] animate-pulse",
     exclusivo:
       "border-accent/60 bg-gradient-to-r from-accent/30 via-primary/25 to-accent/30 text-accent shadow-[0_0_16px_-4px_hsl(var(--accent))] ring-1 ring-inset ring-accent/30",
   } as const;
+
   return (
     <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${tones[tone]}`}>
       <Icon className="h-2.5 w-2.5" />
@@ -503,13 +514,24 @@ export default function DocumentsPage() {
             className={`group relative w-full overflow-hidden rounded-xl border p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 ${
               m.emBreve || m.manutencao
                 ? "border-border/50 bg-card/40"
-                : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
+                : m.emDestaque
+                  ? "border-accent/70 bg-card/90 ring-1 ring-accent/40 shadow-[0_24px_60px_-30px_hsl(var(--accent)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.12)]"
+                  : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
             }`}
           >
-            {!m.emBreve && !m.manutencao && <div className="absolute inset-0 gradient-primary opacity-[0.08]" />}
+            {!m.emBreve && !m.manutencao && (
+              <div
+                className={`absolute inset-0 ${m.emDestaque ? "bg-gradient-to-br from-accent/25 via-primary/10 to-transparent opacity-90" : "gradient-primary opacity-[0.08]"}`}
+              />
+            )}
+            {m.emDestaque && (
+              <span className="absolute right-0 top-0 rounded-bl-lg bg-gradient-to-r from-accent to-primary px-2 py-[3px] text-[9px] font-bold uppercase tracking-wider text-accent-foreground shadow-lg">
+                Destaque
+              </span>
+            )}
             <div className="relative flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
-                <m.icon className={`h-5 w-5 ${m.emBreve || m.manutencao ? "text-muted-foreground" : "text-primary"}`} />
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 transition-colors ${m.emDestaque ? "bg-accent/20 ring-accent/50" : "bg-secondary/80 ring-border/60 group-hover:ring-primary/40"}`}>
+                <m.icon className={`h-5 w-5 ${m.emBreve || m.manutencao ? "text-muted-foreground" : m.emDestaque ? "text-accent" : "text-primary"}`} />
               </div>
               <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex items-center gap-1.5">
@@ -521,8 +543,9 @@ export default function DocumentsPage() {
                 <p className="text-[11px] leading-tight text-muted-foreground">{m.descricao}</p>
                 <div className="flex flex-wrap items-center gap-1">
                   {m.badges?.map((b) => (
-                    <Badge key={b.label} tone={b.tone} icon={b.tone === "hot" ? Flame : b.tone === "exclusivo" ? Sparkles : MapPin}>{b.label}</Badge>
+                    <Badge key={b.label} tone={b.tone} icon={b.tone === "hot" ? Flame : b.tone === "exclusivo" ? Sparkles : b.tone === "novo" ? Zap : MapPin}>{b.label}</Badge>
                   ))}
+
                   {atual.grupo === "ESCOLARES" && !m.manutencao && (
                     <Badge tone="estado" icon={MapPin}>ESTADOS</Badge>
                   )}
