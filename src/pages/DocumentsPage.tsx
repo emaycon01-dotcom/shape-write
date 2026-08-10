@@ -382,7 +382,7 @@ const MODULOS: Categoria[] = [
 ];
 
 
-function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance" | "hot" | "estado" | "exclusivo"; icon: React.ElementType; children: React.ReactNode }) {
+function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "maintenance" | "hot" | "estado" | "exclusivo" | "novo"; icon: React.ElementType; children: React.ReactNode }) {
   const tones = {
     qr: "border-success/40 bg-success/15 text-success",
     app: "border-warning/40 bg-warning/15 text-warning",
@@ -390,9 +390,11 @@ function Badge({ tone, icon: Icon, children }: { tone: "qr" | "app" | "soon" | "
     maintenance: "border-destructive/40 bg-destructive/15 text-destructive",
     hot: "border-warning/60 bg-warning/25 text-warning shadow-[0_0_12px_-4px_hsl(var(--warning))]",
     estado: "border-success/60 bg-success/25 text-success shadow-[0_0_12px_-4px_hsl(var(--success))]",
+    novo: "border-primary/70 bg-primary/25 text-primary shadow-[0_0_16px_-3px_hsl(var(--primary))] animate-pulse",
     exclusivo:
       "border-accent/60 bg-gradient-to-r from-accent/30 via-primary/25 to-accent/30 text-accent shadow-[0_0_16px_-4px_hsl(var(--accent))] ring-1 ring-inset ring-accent/30",
   } as const;
+
   return (
     <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-[1px] text-[9px] font-bold uppercase tracking-wide ${tones[tone]}`}>
       <Icon className="h-2.5 w-2.5" />
