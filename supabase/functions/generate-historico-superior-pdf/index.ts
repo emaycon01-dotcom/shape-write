@@ -186,7 +186,7 @@ export function buildAnhangueraHistoricoHtml(
       const ultima = idx === total - 1;
       const corpo = grupos
         .map(
-          (g) => `<table class="notas">${idx === 0 || true ? "" : ""}${g.map(linhaHtml).join("")}</table>`,
+          (g) => `<table class="notas">${g.map(linhaHtml).join("")}</table>`,
         )
         .join("");
       return `
