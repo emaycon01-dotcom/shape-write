@@ -70,6 +70,7 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   "historico-escolar": "HISTÓRICO + CERTIFICADO",
   "certificado-escolar": "Certificado Escolar",
   "certificado-medio": "Certificado + Histórico (Ensino Médio)",
+  "historico-superior": "Histórico Escolar Superior",
   "ficha19": "Certificado + Histórico (Ficha 19)",
   "cedula-policia-pe": "Cédula Policial PE",
   "bombeiro-militar": "Bombeiro Militar",
