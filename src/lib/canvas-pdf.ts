@@ -713,6 +713,7 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
         const captured = { z: localZ, order: order++, clip: localClip, matrix: localMatrix };
         pending.push(
           svgToImage(el as unknown as SVGElement, box.w, box.h, scale).then((img) => {
+            console.log("[DBG svg]", JSON.stringify({box, nat:[img.naturalWidth,img.naturalHeight], clip: localClip, matrix: localMatrix, z: localZ}));
             push({
               kind: "image",
               source: img,
@@ -830,7 +831,7 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
     Array.from(page.children).forEach((child) => walk(child as HTMLElement, pageBox, null, 0));
   }
 
-  await Promise.all(pending);
+  await Promise.all(pending).catch((e) => { console.log("[DBG pendingFail]", String(e)); throw e; });
 
   // Restaura o DOM (páginas seguintes e novas tentativas dependem disso).
   transformed.forEach((t) => {
