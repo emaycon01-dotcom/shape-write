@@ -4,9 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Search, Loader2, User, CreditCard, Calendar, MapPin, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const EXTERNAL_SUPABASE_URL = "https://mpiuedfqjtsrffdwwwfz.supabase.co";
-const EXTERNAL_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waXVlZGZxanRzcmZmZHd3d2Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5ODU4MDAsImV4cCI6MjA4OTU2MTgwMH0._9TVZIsc6phpZtqGPipXURsJDsMcMIBhpfjdY2QuMa8";
+import { supabase } from "@/integrations/supabase/client";
 
 function onlyDigits(value: string): string {
   return value.replace(/\D/g, "");
@@ -40,25 +38,18 @@ interface CnhRecord {
 }
 
 async function searchCnh(cpfInput: string): Promise<CnhRecord | null> {
-  const digits = onlyDigits(cpfInput);
-  const masked = formatCpf(cpfInput);
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) throw new Error("Não autenticado");
 
-  const fields = "nome_completo,cpf,rg,registro,categoria,data_nascimento,data_emissao,data_validade,renach,numero_espelho,cidade_estado,estado_extenso,parte1,parte2,parte3,parte4";
-  const headers: HeadersInit = {
-    apikey: EXTERNAL_SUPABASE_KEY,
-    Authorization: `Bearer ${EXTERNAL_SUPABASE_KEY}`,
-  };
+  const { data: functionData, error } = await supabase.functions.invoke("consulta-cnh", {
+    body: { cpf: cpfInput },
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
 
-  for (const cpf of [masked, digits]) {
-    const url = `${EXTERNAL_SUPABASE_URL}/rest/v1/cnh?select=${fields}&cpf=eq.${cpf}&limit=1`;
-    const res = await fetch(url, { headers });
-    if (res.ok) {
-      const rows = await res.json();
-      if (rows.length > 0) return rows[0] as CnhRecord;
-    }
-  }
-
-  return null;
+  if (error) throw error;
+  if (!functionData?.found) return null;
+  return functionData.data as CnhRecord;
 }
 
 export default function ConsultaCnhPage() {
