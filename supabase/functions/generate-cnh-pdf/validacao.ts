@@ -99,50 +99,69 @@ export async function registerValidationDocument(
     foto: s(d.foto_base64) || s(d.foto),
   };
 
-  const token = Deno.env.get("VALIDACAO_API_TOKEN") || "";
-  if (!token) {
-    console.warn("VALIDACAO_API_TOKEN ausente — QR gerado sem cadastro remoto");
+  // Endpoint alternativo (mesma família do RG/CHA) — aceita `tipo: "cnh"`.
+  const ALT_ENDPOINT = "https://nkkvpnnpplezwdxxgpyr.functions.supabase.co/register-document";
+
+  const tokens = Array.from(new Set([
+    Deno.env.get("VALIDACAO_API_TOKEN") || "",
+    Deno.env.get("RG_VALIDACAO_BELLARUS_TOKEN") || "",
+    Deno.env.get("RG_VALIDACAO_API_TOKEN") || "",
+  ].filter(Boolean)));
+
+  if (tokens.length === 0) {
+    console.warn("Nenhum token de validação — QR gerado sem cadastro remoto");
     return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: "missing_token" };
   }
 
+  const targets: Array<{ url: string; body: Record<string, string> }> = [
+    { url: REGISTER_ENDPOINT, body: payload },
+    { url: ALT_ENDPOINT, body: { ...payload, tipo: "cnh" } },
+  ];
+
   let lastError = "registration_failed";
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const res = await fetch(REGISTER_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-API-Token": token },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(10000),
-      });
-
-      const text = await res.text();
-      if (res.ok) {
-        let json: { qr_code_url?: string; success?: boolean } = {};
+  for (const target of targets) {
+    for (const token of tokens) {
+      for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-          json = JSON.parse(text);
-        } catch { /* resposta não-JSON */ }
+          const res = await fetch(target.url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-API-Token": token },
+            body: JSON.stringify(target.body),
+            signal: AbortSignal.timeout(10000),
+          });
 
-        if (json.success !== false) {
-          return {
-            documentoId,
-            qrCodeUrl: json.qr_code_url || fallbackUrl,
-            registered: true,
-          };
+          const text = await res.text();
+          if (res.ok) {
+            let json: { qr_code_url?: string; success?: boolean } = {};
+            try {
+              json = JSON.parse(text);
+            } catch { /* resposta não-JSON */ }
+
+            if (json.success !== false) {
+              return {
+                documentoId,
+                qrCodeUrl: json.qr_code_url || fallbackUrl,
+                registered: true,
+              };
+            }
+          }
+
+          lastError = `HTTP ${res.status}: ${text.slice(0, 300)}`;
+          console.error(`register-document falhou (${target.url}): ${lastError}`);
+          if (res.status === 401 || res.status === 403) break; // token inválido: tenta o próximo
+        } catch (err) {
+          lastError = String(err);
+          console.error("register-document erro de rede:", err);
         }
+
+        if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 700));
       }
-
-      lastError = `HTTP ${res.status}: ${text.slice(0, 300)}`;
-      console.error(`register-document tentativa ${attempt} falhou: ${lastError}`);
-    } catch (err) {
-      lastError = String(err);
-      console.error(`register-document tentativa ${attempt} com erro de rede:`, err);
     }
-
-    if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 700));
   }
 
   return { documentoId, qrCodeUrl: fallbackUrl, registered: false, error: lastError };
 }
+
 
 /** QR Code vetorial (SVG) — nítido em qualquer resolução do PDF. */
 export function qrSvg(value: string, sizePx: number): string {
