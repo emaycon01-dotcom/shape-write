@@ -18,6 +18,23 @@ export function elitepayHeaders(extra: Record<string, string> = {}, ua = UA_VARI
   };
 }
 
+// Quando o WAF (Square Cloud/Cloudflare) bloqueia o IP do nosso runtime,
+// podemos rotear as chamadas por um proxy próprio (Cloudflare Worker).
+// Basta definir o secret ELITEPAY_PROXY_URL (e opcionalmente ELITEPAY_PROXY_TOKEN).
+function proxyConfig() {
+  const url = (Deno.env.get("ELITEPAY_PROXY_URL") || "").trim().replace(/\/+$/, "");
+  const token = (Deno.env.get("ELITEPAY_PROXY_TOKEN") || "").trim();
+  return { url, token };
+}
+
+async function attemptFetch(path: string, init: RequestInit & { headers?: Record<string, string> }, ua: string) {
+  const { url: proxyUrl, token } = proxyConfig();
+  const target = proxyUrl ? `${proxyUrl}${path}` : `${ELITEPAY_BASE_URL}${path}`;
+  const extra: Record<string, string> = { ...(init.headers ?? {}) };
+  if (proxyUrl && token) extra["x-proxy-token"] = token;
+  return await fetch(target, { ...init, headers: elitepayHeaders(extra, ua) });
+}
+
 export async function elitepayFetch(
   path: string,
   init: RequestInit & { headers?: Record<string, string> } = {},
@@ -26,10 +43,7 @@ export async function elitepayFetch(
   let lastRes: Response | null = null;
   for (let attempt = 0; attempt < UA_VARIANTS.length; attempt++) {
     try {
-      const res = await fetch(`${ELITEPAY_BASE_URL}${path}`, {
-        ...init,
-        headers: elitepayHeaders(init.headers ?? {}, UA_VARIANTS[attempt]),
-      });
+      const res = await attemptFetch(path, init, UA_VARIANTS[attempt]);
       if (res.status === 403 && attempt < UA_VARIANTS.length - 1) {
         console.warn("ElitePay 403 (WAF) com UA", UA_VARIANTS[attempt], "— tentando outra variação");
         lastRes = res;
