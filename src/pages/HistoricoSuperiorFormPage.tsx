@@ -113,11 +113,6 @@ function codigoAleatorio() {
   return out;
 }
 
-/** Campos que o sistema preenche sozinho a partir dos dados principais. */
-const AUTO_FIELDS = [
-  "titulacao", "ingresso", "dataExpedicao", "localData", "codigoDocumento", "classificacao",
-] as const;
-
 export default function HistoricoSuperiorFormPage() {
   const [form, setForm] = useState<FormState>(initial);
   const [cursoOpen, setCursoOpen] = useState(false);
