@@ -18,6 +18,7 @@ import { loadTemplateBase64 } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
+import { syncRgToExternal } from "@/lib/rg-external-sync";
 import { pick, rnd } from "@/lib/random";
 
 const UF_LIST = [
@@ -278,7 +279,17 @@ export default function RgFormPage() {
           additionalInfo: JSON.stringify(bodyData),
           pdfDataUrl: pdfResult.startsWith("data:") ? pdfResult : `data:application/pdf;base64,${pdfResult}`,
         });
-        toast({ title: "Documento atualizado com sucesso!" });
+        toast({ title: "Documento atualizado", description: "Atualizando o registro do QR Code..." });
+        const resync = await syncRgToExternal(pdfResult, bodyData as unknown as Record<string, string>);
+        toast(
+          resync.ok
+            ? { title: "QR Code atualizado", description: `Registro ${resync.documentoId} sincronizado.` }
+            : {
+                title: "Falha ao atualizar o QR Code",
+                description: "O PDF foi atualizado, mas o registro externo não foi sincronizado.",
+                variant: "destructive" as const,
+              }
+        );
         navigate("/dashboard/history");
       } else {
         const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
