@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, Home, Zap, Wallet, Flame, MapPin, Sparkles } from "lucide-react";
+import { FileText, Car, IdCard, Stethoscope, QrCode, Smartphone, Lock, ArrowUpRight, Anchor, GraduationCap, School, Wrench, HeartPulse, ShieldPlus, ShieldAlert, Pill, Crosshair, ArrowLeft, ChevronRight, Home, Zap, Wallet, Flame, MapPin, Sparkles, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -132,6 +132,15 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/diploma-anhanguera",
         creditos: 1,
         qrcode: true,
+      },
+      {
+        id: "historico-superior",
+        titulo: "HISTÓRICO ESCOLAR SUPERIOR",
+        descricao: "Histórico de graduação em 3 páginas com grade curricular automática por curso",
+        icon: BookOpen,
+        rota: "/dashboard/documents/historico-superior",
+        creditos: 1,
+        badges: [{ label: "TODOS OS CURSOS", tone: "exclusivo" }],
       },
     ],
   },
