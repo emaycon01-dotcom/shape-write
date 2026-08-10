@@ -215,10 +215,9 @@ export default function HistoricoSuperiorFormPage() {
       docIdentidade: `${rnd(2)}.${rnd(3)}.${rnd(2)} GO`,
       anoInicial: String(ano),
       dataColacao: "12/02/2014",
-      dataExpedicao: "27/02/2014",
-      localData: "Anápolis, 27/2/2014",
       codigoDocumento: codigoAleatorio(),
     };
+    setManuais({});
     setForm(next);
     setGrupos(montarLinhas(gerarGrade(next.curso, next.semestres), ano, true));
     toast({ title: "Formulário preenchido com dados de teste!" });
