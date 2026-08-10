@@ -95,12 +95,11 @@ async function apiGet(path: string): Promise<{ ok: boolean; status: number; body
   const { clientId, clientSecret } = creds();
   if (!clientId || !clientSecret) return { ok: false, status: 0, body: null };
   try {
-    const res = await fetch(`${ELITEPAY_BASE_URL}${path}`, {
+    const res = await elitepayFetch(path, {
       method: "GET",
       headers: {
         "x-client-id": clientId,
         "x-client-secret": clientSecret,
-        Accept: "application/json",
       },
     });
     const body = await res.json().catch(() => null);
