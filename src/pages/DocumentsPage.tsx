@@ -514,13 +514,24 @@ export default function DocumentsPage() {
             className={`group relative w-full overflow-hidden rounded-xl border p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 ${
               m.emBreve || m.manutencao
                 ? "border-border/50 bg-card/40"
-                : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
+                : m.emDestaque
+                  ? "border-accent/70 bg-card/90 ring-1 ring-accent/40 shadow-[0_24px_60px_-30px_hsl(var(--accent)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.12)]"
+                  : "border-primary/40 bg-card/80 shadow-[0_18px_45px_-32px_hsl(var(--primary)/0.9),inset_0_1px_0_hsl(var(--foreground)/0.08)]"
             }`}
           >
-            {!m.emBreve && !m.manutencao && <div className="absolute inset-0 gradient-primary opacity-[0.08]" />}
+            {!m.emBreve && !m.manutencao && (
+              <div
+                className={`absolute inset-0 ${m.emDestaque ? "bg-gradient-to-br from-accent/25 via-primary/10 to-transparent opacity-90" : "gradient-primary opacity-[0.08]"}`}
+              />
+            )}
+            {m.emDestaque && (
+              <span className="absolute right-0 top-0 rounded-bl-lg bg-gradient-to-r from-accent to-primary px-2 py-[3px] text-[9px] font-bold uppercase tracking-wider text-accent-foreground shadow-lg">
+                Destaque
+              </span>
+            )}
             <div className="relative flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
-                <m.icon className={`h-5 w-5 ${m.emBreve || m.manutencao ? "text-muted-foreground" : "text-primary"}`} />
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 transition-colors ${m.emDestaque ? "bg-accent/20 ring-accent/50" : "bg-secondary/80 ring-border/60 group-hover:ring-primary/40"}`}>
+                <m.icon className={`h-5 w-5 ${m.emBreve || m.manutencao ? "text-muted-foreground" : m.emDestaque ? "text-accent" : "text-primary"}`} />
               </div>
               <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex items-center gap-1.5">
@@ -532,8 +543,9 @@ export default function DocumentsPage() {
                 <p className="text-[11px] leading-tight text-muted-foreground">{m.descricao}</p>
                 <div className="flex flex-wrap items-center gap-1">
                   {m.badges?.map((b) => (
-                    <Badge key={b.label} tone={b.tone} icon={b.tone === "hot" ? Flame : b.tone === "exclusivo" ? Sparkles : MapPin}>{b.label}</Badge>
+                    <Badge key={b.label} tone={b.tone} icon={b.tone === "hot" ? Flame : b.tone === "exclusivo" ? Sparkles : b.tone === "novo" ? Zap : MapPin}>{b.label}</Badge>
                   ))}
+
                   {atual.grupo === "ESCOLARES" && !m.manutencao && (
                     <Badge tone="estado" icon={MapPin}>ESTADOS</Badge>
                   )}
