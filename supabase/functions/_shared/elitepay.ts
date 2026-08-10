@@ -1,17 +1,19 @@
 export const ELITEPAY_BASE_URL = "https://api.elitepaybr.com";
 
-// O WAF do provedor (Square Cloud) bloqueia requisições sem cabeçalhos de
-// navegador. Mantemos um conjunto padrão para evitar 403 "Request Blocked".
-export const ELITEPAY_UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+// A API da Elite Pay fica atrás do Cloudflare/Square Cloud. Requisições com
+// User-Agent de navegador (sem fingerprint de navegador real) são tratadas
+// como bot e recebem 403 "Request Blocked". Usamos UAs "de servidor" e
+// tentamos algumas variações antes de desistir.
+const UA_VARIANTS = [
+  "curl/8.4.0",
+  "MonkeyLab-Server/1.0",
+  "PostmanRuntime/7.39.0",
+];
 
-export function elitepayHeaders(extra: Record<string, string> = {}): Record<string, string> {
+export function elitepayHeaders(extra: Record<string, string> = {}, ua = UA_VARIANTS[0]): Record<string, string> {
   return {
-    Accept: "application/json, text/plain, */*",
-    "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
-    "User-Agent": ELITEPAY_UA,
-    Origin: "https://app.elitepaybr.com",
-    Referer: "https://app.elitepaybr.com/",
+    Accept: "*/*",
+    "User-Agent": ua,
     ...extra,
   };
 }
@@ -21,22 +23,27 @@ export async function elitepayFetch(
   init: RequestInit & { headers?: Record<string, string> } = {},
 ): Promise<Response> {
   let lastErr: unknown = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  let lastRes: Response | null = null;
+  for (let attempt = 0; attempt < UA_VARIANTS.length; attempt++) {
     try {
       const res = await fetch(`${ELITEPAY_BASE_URL}${path}`, {
         ...init,
-        headers: elitepayHeaders(init.headers ?? {}),
+        headers: elitepayHeaders(init.headers ?? {}, UA_VARIANTS[attempt]),
       });
-      if (res.status === 403 && attempt < 2) {
-        await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+      if (res.status === 403 && attempt < UA_VARIANTS.length - 1) {
+        console.warn("ElitePay 403 (WAF) com UA", UA_VARIANTS[attempt], "— tentando outra variação");
+        lastRes = res;
+        await res.body?.cancel().catch(() => {});
+        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
         continue;
       }
       return res;
     } catch (e) {
       lastErr = e;
-      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+      await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
     }
   }
+  if (lastRes) return lastRes;
   throw lastErr ?? new Error("ElitePay unreachable");
 }
 
