@@ -610,8 +610,15 @@ async function buildItems(page: HTMLElement, scale: number): Promise<BuildItemsR
 
     let localClip = clip;
     if (cs.overflow === "hidden" || cs.overflow === "clip" || cs.contain === "strict") {
-      localClip = intersect(clip, box);
+      // O clip é aplicado ANTES da matriz na hora de pintar, ou seja, vive no
+      // espaço externo (página). Quando o elemento (ou um ancestral) está sob
+      // um transform, a caixa medida está em coordenadas naturais e precisa ser
+      // convertida — sem isso, tudo que fica além da área da página em
+      // coordenadas naturais (ex.: QR Code no canto inferior direito de um
+      // `.canvas` escalado) era recortado e sumia do PDF.
+      localClip = intersect(clip, transformedBounds(box, localMatrix));
     }
+
 
     let localZ = z;
     if (cs.position !== "static" && cs.zIndex !== "auto") {
