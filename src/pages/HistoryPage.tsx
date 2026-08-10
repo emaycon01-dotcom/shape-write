@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const EDIT_COST_BASE = 0.3;
+/** Tipos que não podem ser editados (o registro no validador ficaria inconsistente). */
+const EDIT_DISABLED_TYPES: string[] = ["cnh"];
 const RENEW_COST_BASE = 1;
 const RENEW_DAYS = 30;
 
@@ -198,6 +200,15 @@ export default function HistoryPage() {
 
   const confirmEdit = (doc: Document) => {
     if (!user) return;
+    if (EDIT_DISABLED_TYPES.includes(doc.type)) {
+      toast({
+        title: "Edição indisponível",
+        description:
+          "A CNH Digital não pode ser editada: o registro no validador e o QR Code ficariam inválidos. Gere uma nova CNH.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (user.credits < EDIT_COST) {
       toast({
         title: "Créditos insuficientes",
@@ -208,6 +219,7 @@ export default function HistoryPage() {
     }
     setEditDoc(doc);
   };
+
 
   const handleEdit = async () => {
     if (!editDoc || !user) return;
@@ -396,7 +408,7 @@ export default function HistoryPage() {
                     </>
                   )}
 
-                  {!expired && (
+                  {!expired && !EDIT_DISABLED_TYPES.includes(doc.type) && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -410,6 +422,7 @@ export default function HistoryPage() {
                       </span>
                     </Button>
                   )}
+
 
                   <Button variant="gradient" size="sm" onClick={() => confirmRenew(doc)} className="gap-1.5">
                     <RefreshCw className="w-4 h-4" /> Renovar
