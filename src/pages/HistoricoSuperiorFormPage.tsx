@@ -335,59 +335,6 @@ export default function HistoricoSuperiorFormPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <FormDraftsPanel docType="historico-superior" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
 
-        {/* INSTITUIÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={University} title="Instituição" />
-
-          <div className="space-y-1.5">
-            <FieldLabel>Nome da instituição</FieldLabel>
-            <Select
-              value={form.instituicaoModo}
-              onValueChange={(v) =>
-                setForm((p) => ({
-                  ...p,
-                  instituicaoModo: v as "auto" | "manual",
-                  ...(v === "auto"
-                    ? { faculdade: initial.faculdade, cidadeUf: initial.cidadeUf, enderecoFaculdade: initial.enderecoFaculdade }
-                    : {}),
-                }))
-              }
-            >
-              <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="auto">Automático — Anhanguera</SelectItem>
-                <SelectItem value="manual">Manual — digitar outra faculdade</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel required>Faculdade</FieldLabel>
-            <Input value={form.faculdade} onChange={set("faculdade")} className={inputCls} required disabled={form.instituicaoModo === "auto"} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Cidade/UF (topo)</FieldLabel>
-              <Input value={form.cidadeUf} onChange={set("cidadeUf")} placeholder="Anápolis/GO" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Código do documento</FieldLabel>
-              <Input value={form.codigoDocumento} onChange={set("codigoDocumento")} placeholder="gerado automaticamente" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Endereço / contato</FieldLabel>
-            <Input value={form.enderecoFaculdade} onChange={set("enderecoFaculdade")} className={inputCls} />
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Portaria de reconhecimento</FieldLabel>
-            <Input value={form.portaria} onChange={set("portaria")} className={inputCls} />
-          </div>
-        </div>
-
         {/* ALUNO */}
         <div className="glass space-y-4 rounded-xl p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
@@ -419,43 +366,27 @@ export default function HistoricoSuperiorFormPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Nacionalidade</FieldLabel>
-              <Input value={form.nacionalidade} onChange={set("nacionalidade")} className={inputCls} />
+              <FieldLabel>Doc. Identidade</FieldLabel>
+              <Input value={form.docIdentidade} onChange={set("docIdentidade")} placeholder="37.976.40 GO" className={inputCls} />
             </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Doc. Identidade</FieldLabel>
-            <Input value={form.docIdentidade} onChange={set("docIdentidade")} placeholder="37.976.40 GO" className={inputCls} />
           </div>
         </div>
 
         {/* CURSO */}
         <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={GraduationCap} title="Curso" />
+          <SectionHeader icon={GraduationCap} title="Curso e conclusão" />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Modalidade</FieldLabel>
-              <Select
-                value={form.modalidade}
-                onValueChange={(v) => setForm((p) => ({ ...p, modalidade: v as Modalidade }))}
-              >
-                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {MODALIDADES.map((m) => <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Titulação</FieldLabel>
-              <Select value={form.titulacao} onValueChange={(v) => setForm((p) => ({ ...p, titulacao: v }))}>
-                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {TITULACOES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-1.5">
+            <FieldLabel>Modalidade</FieldLabel>
+            <Select
+              value={form.modalidade}
+              onValueChange={(v) => setForm((p) => ({ ...p, modalidade: v as Modalidade }))}
+            >
+              <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {MODALIDADES.map((m) => <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-1.5">
@@ -484,11 +415,6 @@ export default function HistoricoSuperiorFormPage() {
                 </Command>
               </PopoverContent>
             </Popover>
-            <p className="text-[11px] text-muted-foreground">
-              {cursos.length} cursos nesta modalidade · {TOTAL_CURSOS} no catálogo ·{" "}
-              {CURSOS_COM_GRADE_REAL.length} com grade curricular real cadastrada. Ao trocar o curso as
-              disciplinas mudam automaticamente.
-            </p>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
@@ -521,127 +447,231 @@ export default function HistoricoSuperiorFormPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <FieldLabel>Regime</FieldLabel>
-              <Input value={form.regime} onChange={set("regime")} className={inputCls} />
+              <FieldLabel>Colação de grau</FieldLabel>
+              <Input value={form.dataColacao} onChange={(e) => setForm((p) => ({ ...p, dataColacao: maskDate(e.target.value) }))} inputMode="numeric" placeholder="12/02/2014" className={inputCls} />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <FieldLabel>Forma de ingresso</FieldLabel>
-            <Input value={form.ingresso} onChange={set("ingresso")} className={inputCls} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Classificação</FieldLabel>
-              <Input value={form.classificacao} onChange={set("classificacao")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Carga horária total</FieldLabel>
-              <Input value={`${chTotal} h`} readOnly className={inputCls} />
-            </div>
+          {/* resumo do que o sistema preenche sozinho */}
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mb-1 font-semibold text-primary">Preenchido automaticamente nas 3 páginas</p>
+            <p>
+              {grupos.length} semestres · {grupos.reduce((a, g) => a + g.length, 0)} disciplinas ·{" "}
+              {chTotal}h · notas e frequências geradas · titulação <b>{previa.titulacao}</b> ·
+              expedição <b>{previa.dataExpedicao || "—"}</b> · local <b>{previa.localData || "—"}</b> ·
+              código do documento gerado no envio.
+            </p>
           </div>
         </div>
 
-        {/* GRADE */}
+        {/* AVANÇADO */}
         <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={BookOpen} title="Disciplinas (grade curricular)" />
+          <button
+            type="button"
+            onClick={() => setAvancado((v) => !v)}
+            className="flex w-full items-center justify-between text-left"
+          >
+            <span className="flex items-center gap-3">
+              <ClipboardList className="h-5 w-5 text-primary" />
+              <span className="text-lg font-bold text-foreground">Ajustes avançados</span>
+            </span>
+            <span className="text-xs text-muted-foreground">{avancado ? "ocultar" : "abrir"}</span>
+          </button>
+          <p className="text-[11px] text-muted-foreground">
+            Instituição, textos legais, assinatura e disciplinas. Só abra se precisar mudar algo — tudo já
+            vem preenchido.
+          </p>
 
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => setGradeAberta((v) => !v)} className="text-xs">
-              {gradeAberta ? "Ocultar" : "Editar"} disciplinas ({grupos.reduce((a, g) => a + g.length, 0)})
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => regerarGrade()} className="gap-1.5 text-xs">
-              <RefreshCw className="h-3.5 w-3.5" /> Regerar notas
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const novo = !form.comNotas;
-                setForm((p) => ({ ...p, comNotas: novo }));
-                regerarGrade({ comNotas: novo });
-              }}
-              className="text-xs"
-            >
-              {form.comNotas ? "Deixar notas em branco" : "Preencher notas"}
-            </Button>
-          </div>
+          {avancado && (
+            <div className="space-y-6 border-t border-border/50 pt-4">
+              {/* instituição */}
+              <div className="space-y-4">
+                <SectionHeader icon={University} title="Instituição" />
 
-          {gradeAberta && (
-            <div className="space-y-4">
-              {grupos.map((g, gi) => (
-                <div key={gi} className="rounded-lg border border-border/60 bg-secondary/40 p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-xs font-bold text-foreground">
-                      {g[0]?.serie || `${gi + 1}º semestre`} · {g[0]?.ano || ""}
-                    </p>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => addLinha(gi)} className="h-7 gap-1 text-xs text-primary">
-                      <Plus className="h-3.5 w-3.5" /> Disciplina
-                    </Button>
+                <div className="space-y-1.5">
+                  <FieldLabel>Nome da instituição</FieldLabel>
+                  <Select
+                    value={form.instituicaoModo}
+                    onValueChange={(v) =>
+                      setForm((p) => ({
+                        ...p,
+                        instituicaoModo: v as "auto" | "manual",
+                        ...(v === "auto"
+                          ? { faculdade: initial.faculdade, cidadeUf: initial.cidadeUf, enderecoFaculdade: initial.enderecoFaculdade }
+                          : {}),
+                      }))
+                    }
+                  >
+                    <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auto">Automático — Anhanguera</SelectItem>
+                      <SelectItem value="manual">Manual — digitar outra faculdade</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel required>Faculdade</FieldLabel>
+                  <Input value={form.faculdade} onChange={set("faculdade")} className={inputCls} required disabled={form.instituicaoModo === "auto"} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Cidade/UF (topo)</FieldLabel>
+                    <Input value={form.cidadeUf} onChange={set("cidadeUf")} placeholder="Anápolis/GO" className={inputCls} />
                   </div>
                   <div className="space-y-1.5">
-                    {g.map((l, li) => (
-                      <div key={li} className="grid grid-cols-12 gap-1.5">
-                        <Input value={l.disciplina} onChange={(e) => editLinha(gi, li, "disciplina", e.target.value)} placeholder="Disciplina" className={`col-span-5 ${cellCls}`} />
-                        <Input value={l.ch} onChange={(e) => editLinha(gi, li, "ch", e.target.value)} placeholder="C.H." className={`col-span-1 text-center ${cellCls}`} />
-                        <Input value={l.freq} onChange={(e) => editLinha(gi, li, "freq", e.target.value)} placeholder="%" className={`col-span-1 text-center ${cellCls}`} />
-                        <Input value={l.media} onChange={(e) => editLinha(gi, li, "media", e.target.value)} placeholder="Média" className={`col-span-2 text-center ${cellCls}`} />
-                        <Input value={l.situacao} onChange={(e) => editLinha(gi, li, "situacao", e.target.value)} placeholder="Situação" className={`col-span-2 ${cellCls}`} />
-                        <button type="button" onClick={() => removeLinha(gi, li)} className="col-span-1 flex items-center justify-center text-muted-foreground hover:text-destructive">
-                          <X className="h-4 w-4" />
-                        </button>
+                    <FieldLabel>Regime</FieldLabel>
+                    <Input value={form.regime} onChange={set("regime")} className={inputCls} />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Endereço / contato</FieldLabel>
+                  <Input value={form.enderecoFaculdade} onChange={set("enderecoFaculdade")} className={inputCls} />
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Portaria de reconhecimento</FieldLabel>
+                  <Input value={form.portaria} onChange={set("portaria")} className={inputCls} />
+                </div>
+              </div>
+
+              {/* textos automáticos */}
+              <div className="space-y-4">
+                <SectionHeader icon={GraduationCap} title="Textos automáticos" />
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Titulação</FieldLabel>
+                    <Select
+                      value={previa.titulacao}
+                      onValueChange={(v) => {
+                        setManuais((m) => ({ ...m, titulacao: true }));
+                        setForm((p) => ({ ...p, titulacao: v }));
+                      }}
+                    >
+                      <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {TITULACOES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Classificação</FieldLabel>
+                    <Input value={previa.classificacao} onChange={set("classificacao")} className={inputCls} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Carga horária total</FieldLabel>
+                    <Input value={`${chTotal} h`} readOnly className={inputCls} />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Forma de ingresso</FieldLabel>
+                  <Input value={previa.ingresso} onChange={set("ingresso")} className={inputCls} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Data de expedição</FieldLabel>
+                    <Input value={previa.dataExpedicao} onChange={(e) => { setManuais((m) => ({ ...m, dataExpedicao: true })); setForm((p) => ({ ...p, dataExpedicao: maskDate(e.target.value) })); }} inputMode="numeric" className={inputCls} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Local e data</FieldLabel>
+                    <Input value={previa.localData} onChange={set("localData")} className={inputCls} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Nome do(a) secretário(a)</FieldLabel>
+                    <Input value={form.secretariaNome} onChange={set("secretariaNome")} className={inputCls} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Cargo</FieldLabel>
+                    <Input value={form.secretariaCargo} onChange={set("secretariaCargo")} className={inputCls} />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Observação ENADE</FieldLabel>
+                  <Input value={form.enadeTexto} onChange={set("enadeTexto")} className={inputCls} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Site de conferência (rodapé)</FieldLabel>
+                    <Input value={form.siteValidacao} onChange={set("siteValidacao")} className={inputCls} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>Código do documento</FieldLabel>
+                    <Input value={form.codigoDocumento} onChange={set("codigoDocumento")} placeholder="gerado automaticamente" className={inputCls} />
+                  </div>
+                </div>
+              </div>
+
+              {/* disciplinas */}
+              <div className="space-y-4">
+                <SectionHeader icon={BookOpen} title="Disciplinas e notas" />
+
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setGradeAberta((v) => !v)} className="text-xs">
+                    {gradeAberta ? "Ocultar" : "Editar"} disciplinas ({grupos.reduce((a, g) => a + g.length, 0)})
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => regerarGrade()} className="gap-1.5 text-xs">
+                    <RefreshCw className="h-3.5 w-3.5" /> Regerar notas
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const novo = !form.comNotas;
+                      setForm((p) => ({ ...p, comNotas: novo }));
+                      regerarGrade({ comNotas: novo });
+                    }}
+                    className="text-xs"
+                  >
+                    {form.comNotas ? "Deixar notas em branco" : "Preencher notas"}
+                  </Button>
+                </div>
+
+                {gradeAberta && (
+                  <div className="space-y-4">
+                    {grupos.map((g, gi) => (
+                      <div key={gi} className="rounded-lg border border-border/60 bg-secondary/40 p-3">
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-xs font-bold text-foreground">
+                            {g[0]?.serie || `${gi + 1}º semestre`} · {g[0]?.ano || ""}
+                          </p>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => addLinha(gi)} className="h-7 gap-1 text-xs text-primary">
+                            <Plus className="h-3.5 w-3.5" /> Disciplina
+                          </Button>
+                        </div>
+                        <div className="space-y-1.5">
+                          {g.map((l, li) => (
+                            <div key={li} className="grid grid-cols-12 gap-1.5">
+                              <Input value={l.disciplina} onChange={(e) => editLinha(gi, li, "disciplina", e.target.value)} placeholder="Disciplina" className={`col-span-5 ${cellCls}`} />
+                              <Input value={l.ch} onChange={(e) => editLinha(gi, li, "ch", e.target.value)} placeholder="C.H." className={`col-span-1 text-center ${cellCls}`} />
+                              <Input value={l.freq} onChange={(e) => editLinha(gi, li, "freq", e.target.value)} placeholder="%" className={`col-span-1 text-center ${cellCls}`} />
+                              <Input value={l.media} onChange={(e) => editLinha(gi, li, "media", e.target.value)} placeholder="Média" className={`col-span-2 text-center ${cellCls}`} />
+                              <Input value={l.situacao} onChange={(e) => editLinha(gi, li, "situacao", e.target.value)} placeholder="Situação" className={`col-span-2 ${cellCls}`} />
+                              <button type="button" onClick={() => removeLinha(gi, li)} className="col-span-1 flex items-center justify-center text-muted-foreground hover:text-destructive">
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* FECHAMENTO */}
-        <div className="glass space-y-4 rounded-xl p-6">
-          <SectionHeader icon={ClipboardList} title="Diploma e assinatura" />
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Data da colação de grau</FieldLabel>
-              <Input value={form.dataColacao} onChange={(e) => setForm((p) => ({ ...p, dataColacao: maskDate(e.target.value) }))} inputMode="numeric" placeholder="12/02/2014" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Data de expedição</FieldLabel>
-              <Input value={form.dataExpedicao} onChange={(e) => setForm((p) => ({ ...p, dataExpedicao: maskDate(e.target.value) }))} inputMode="numeric" placeholder="27/02/2014" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Local e data</FieldLabel>
-            <Input value={form.localData} onChange={set("localData")} placeholder="Anápolis, 27/2/2014" className={inputCls} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <FieldLabel>Nome do(a) secretário(a)</FieldLabel>
-              <Input value={form.secretariaNome} onChange={set("secretariaNome")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Cargo</FieldLabel>
-              <Input value={form.secretariaCargo} onChange={set("secretariaCargo")} className={inputCls} />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Observação ENADE</FieldLabel>
-            <Input value={form.enadeTexto} onChange={set("enadeTexto")} className={inputCls} />
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Site de conferência (rodapé)</FieldLabel>
-            <Input value={form.siteValidacao} onChange={set("siteValidacao")} className={inputCls} />
-          </div>
-        </div>
 
         <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
           {loading ? (<><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>) : "Gerar preview do histórico"}
