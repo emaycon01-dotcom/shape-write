@@ -113,11 +113,19 @@ function codigoAleatorio() {
   return out;
 }
 
+/** Campos que o sistema preenche sozinho a partir dos dados principais. */
+const AUTO_FIELDS = [
+  "titulacao", "ingresso", "dataExpedicao", "localData", "codigoDocumento", "classificacao",
+] as const;
+
 export default function HistoricoSuperiorFormPage() {
   const [form, setForm] = useState<FormState>(initial);
   const [cursoOpen, setCursoOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [gradeAberta, setGradeAberta] = useState(false);
+  const [avancado, setAvancado] = useState(false);
+  // campos que o usuário editou manualmente — deixam de ser recalculados
+  const [manuais, setManuais] = useState<Record<string, boolean>>({});
 
   const [grupos, setGrupos] = useState<LinhaHistorico[][]>(() =>
     montarLinhas(gerarGrade(initial.curso, initial.semestres), Number(initial.anoInicial), true),
@@ -135,13 +143,46 @@ export default function HistoricoSuperiorFormPage() {
   );
 
   const set = (field: keyof FormState) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => setForm((p) => ({ ...p, [field]: e.target.value }));
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setManuais((m) => ({ ...m, [field]: true }));
+      setForm((p) => ({ ...p, [field]: e.target.value }));
+    };
+
+  /** Deriva os campos repetidos nas 3 páginas a partir dos dados principais. */
+  const derivar = (f: FormState): FormState => {
+    const out = { ...f };
+    const cidade = (f.cidadeUf.split("/")[0] || "").trim();
+    const anoVest = (Number(f.anoInicial) || 2015) - 1;
+
+    if (!manuais.titulacao) {
+      out.titulacao =
+        f.modalidade === "licenciatura" ? "Licenciado"
+        : f.modalidade === "tecnologo" ? "Tecnólogo"
+        : "Bacharel";
+    }
+    if (!manuais.ingresso) {
+      out.ingresso = `Processo Seletivo/Vestibular Unificado - Conteúdo da Prova: ENEM-Historico do Ensino Médio-Prova Objetiva-Redação 11/${anoVest}`;
+    }
+    if (!manuais.dataExpedicao) out.dataExpedicao = f.dataColacao;
+    if (!manuais.localData) {
+      const d = out.dataExpedicao || f.dataColacao;
+      out.localData = cidade && d ? `${cidade}, ${d}` : "";
+    }
+    if (!manuais.codigoDocumento || !out.codigoDocumento) {
+      out.codigoDocumento = f.codigoDocumento || codigoAleatorio();
+    }
+    if (!manuais.classificacao) out.classificacao = f.classificacao || String(100 + Math.floor(Math.random() * 300));
+    return out;
+  };
+
+  const previa = useMemo(() => derivar(form), [form, manuais]);
 
   const regerarGrade = (over?: Partial<FormState>) => {
     const f = { ...form, ...over };
     const grade = gerarGrade(f.curso, f.semestres);
     setGrupos(montarLinhas(grade, Number(f.anoInicial) || 2015, f.comNotas));
   };
+
 
   const escolherCurso = (c: string) => {
     setForm((p) => ({ ...p, curso: c }));
