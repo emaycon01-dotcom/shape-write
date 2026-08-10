@@ -29,6 +29,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "historico-escolar": "/dashboard/documents/historico-escolar",
   "certificado-escolar": "/dashboard/documents/certificado-escolar",
   "certificado-medio": "/dashboard/documents/certificado-medio",
+  "historico-superior": "/dashboard/documents/historico-superior",
   "ficha19": "/dashboard/documents/ficha19/form",
   "cpf-fisico": "/dashboard/documentos-fisicos/carteirinhas/cpf-fisico",
   "operador-maquinas-digital": "/dashboard/documentos-fisicos/carteirinhas/operador-maquinas-digital",
