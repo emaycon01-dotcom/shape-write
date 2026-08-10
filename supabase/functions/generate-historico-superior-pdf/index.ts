@@ -29,44 +29,73 @@ export interface LinhaHistorico {
 const ROW_H = 17.4;        // altura de cada linha da tabela
 const HEAD_H = 20;         // cabeçalho da tabela
 const GAP_H = 9;           // respiro entre semestres
-const CAP_PAGE = 660;      // altura útil de tabela por página
+const CAP_PAGE = 572;      // altura útil de tabela por página
 const RESERVA_FIM = 250;   // espaço do bloco final (ENADE, diploma, assinatura)
+const MIN_SPLIT = 3;       // mínimo de linhas de um semestre para poder quebrar
 
-function alturaGrupo(g: LinhaHistorico[]) {
-  return g.length * ROW_H + GAP_H;
-}
-
-/** Distribui os grupos de semestre em páginas sem quebrar um semestre ao meio. */
+/**
+ * Distribui as linhas em páginas preenchendo o espaço útil (como no documento
+ * original da Anhanguera, onde um semestre pode continuar na página seguinte).
+ */
 export function paginar(grupos: LinhaHistorico[][]): LinhaHistorico[][][] {
   const paginas: LinhaHistorico[][][] = [];
   let atual: LinhaHistorico[][] = [];
   let altura = HEAD_H;
 
-  for (const g of grupos) {
-    const h = alturaGrupo(g);
-    if (atual.length && altura + h > CAP_PAGE) {
-      paginas.push(atual);
-      atual = [];
-      altura = HEAD_H;
+  const fecharPagina = () => {
+    paginas.push(atual);
+    atual = [];
+    altura = HEAD_H;
+  };
+
+  for (const grupo of grupos) {
+    let resto = grupo.slice();
+    let primeiraParte = true;
+
+    while (resto.length) {
+      const gap = primeiraParte ? GAP_H : 0;
+      const disponivel = CAP_PAGE - altura - gap;
+      const cabem = Math.floor(disponivel / ROW_H);
+
+      if (cabem >= resto.length) {
+        atual.push(resto);
+        altura += gap + resto.length * ROW_H;
+        resto = [];
+        break;
+      }
+
+      if (cabem >= MIN_SPLIT && resto.length - cabem >= MIN_SPLIT) {
+        atual.push(resto.slice(0, cabem));
+        resto = resto.slice(cabem);
+        altura += gap + cabem * ROW_H;
+      } else if (!atual.length) {
+        // grupo maior que a página inteira: força o corte
+        const n = Math.max(1, cabem);
+        atual.push(resto.slice(0, n));
+        resto = resto.slice(n);
+        altura += gap + n * ROW_H;
+      }
+
+      fecharPagina();
+      primeiraParte = false;
     }
-    atual.push(g);
-    altura += h;
   }
+
   if (atual.length) paginas.push(atual);
   if (!paginas.length) paginas.push([]);
 
   // O bloco final precisa de espaço: se não couber, abre mais uma página.
   const ultima = paginas[paginas.length - 1];
-  const hUltima = HEAD_H + ultima.reduce((a, g) => a + alturaGrupo(g), 0);
+  const hUltima =
+    HEAD_H + ultima.reduce((a, g, i) => a + g.length * ROW_H + (i ? GAP_H : 0), 0);
   if (hUltima > CAP_PAGE - RESERVA_FIM) {
     if (ultima.length > 1) {
-      // empurra os últimos semestres para uma nova página
       const nova: LinhaHistorico[][] = [];
       let h = hUltima;
       while (ultima.length > 1 && h > CAP_PAGE - RESERVA_FIM) {
         const g = ultima.pop()!;
         nova.unshift(g);
-        h -= alturaGrupo(g);
+        h -= g.length * ROW_H + GAP_H;
       }
       paginas.push(nova);
     } else {
