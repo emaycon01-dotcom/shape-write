@@ -235,8 +235,8 @@ export default function HistoricoSuperiorFormPage() {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
-    const form = derivar(formState);
-    saveFormDraft("historico-superior", form as unknown as Record<string, unknown>);
+    const d = derivar(form);
+    saveFormDraft("historico-superior", d as unknown as Record<string, unknown>);
 
     try {
       const logoBase64 = await loadTemplateBase64(logoAsset.url);
@@ -244,36 +244,36 @@ export default function HistoricoSuperiorFormPage() {
 
       const bodyData = {
         logo_base64: logoBase64,
-        faculdade: form.faculdade,
-        cidade_uf: form.cidadeUf,
-        endereco_faculdade: form.enderecoFaculdade,
+        faculdade: d.faculdade,
+        cidade_uf: d.cidadeUf,
+        endereco_faculdade: d.enderecoFaculdade,
 
-        nome: form.nome,
-        ra: form.ra,
-        natural_estado: form.naturalEstado,
-        nascimento: form.nascimento,
-        doc_identidade: form.docIdentidade,
-        nacionalidade: form.nacionalidade,
+        nome: d.nome,
+        ra: d.ra,
+        natural_estado: d.naturalEstado,
+        nascimento: d.nascimento,
+        doc_identidade: d.docIdentidade,
+        nacionalidade: d.nacionalidade,
 
-        titulacao: form.titulacao,
-        ingresso: form.ingresso,
-        classificacao: form.classificacao,
-        curso: form.curso,
-        regime: form.regime,
-        portaria: form.portaria,
+        titulacao: d.titulacao,
+        ingresso: d.ingresso,
+        classificacao: d.classificacao,
+        curso: d.curso,
+        regime: d.regime,
+        portaria: d.portaria,
 
         grupos,
 
-        enade_texto: form.enadeTexto,
-        diploma_curso: form.curso,
+        enade_texto: d.enadeTexto,
+        diploma_curso: d.curso,
         carga_horaria: String(chTotal),
-        data_colacao: form.dataColacao,
-        data_expedicao: form.dataExpedicao,
-        local_data: form.localData,
-        secretaria_nome: form.secretariaNome,
-        secretaria_cargo: form.secretariaCargo,
-        codigo_documento: form.codigoDocumento || codigoAleatorio(),
-        site_validacao: form.siteValidacao,
+        data_colacao: d.dataColacao,
+        data_expedicao: d.dataExpedicao,
+        local_data: d.localData,
+        secretaria_nome: d.secretariaNome,
+        secretaria_cargo: d.secretariaCargo,
+        codigo_documento: d.codigoDocumento || codigoAleatorio(),
+        site_validacao: d.siteValidacao,
       };
 
       const { data, error } = await invokeGeneratePdf("generate-historico-superior-pdf", {
