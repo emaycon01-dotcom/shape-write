@@ -82,7 +82,11 @@ export async function invokePdfFunction(
     body.preview !== true &&
     (!!primary.error || payload?.validacao_registrada !== true);
 
-  if (!validationMissing) {
+  // Qualquer função autorizada que falhe no backend principal (indisponível ou
+  // ainda não publicada lá) é reencaminhada uma única vez pela ponte.
+  const shouldBridge = validationMissing || (!!primary.error && FALLBACK_ALLOWED.has(functionName));
+
+  if (!shouldBridge) {
     return { data: primary.data, error: (primary.error as Error) || null };
   }
 
