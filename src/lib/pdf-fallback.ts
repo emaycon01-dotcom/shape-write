@@ -20,15 +20,16 @@ const FALLBACK_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRveWN3b3duZGR5eGZxbnRpZmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDYzMTYsImV4cCI6MjA4OTAyMjMxNn0.kpk695Xomza4QBmD8FtdkNSMmJS1bFQyc6YSuvxpEbI";
 
 /**
- * Funções de integração que podem usar a ponte secundária. A CNH continua
- * gravada diretamente no sistema externo; este backend apenas protege e
- * encaminha a credencial de escrita, sem persistir os dados do cliente.
+ * Funções que podem usar a ponte secundária: qualquer montador de documento
+ * (`generate-*-pdf`) e os repasses de integração. Assim, todo módulo novo
+ * criado aqui funciona de imediato, mesmo antes de ser publicado no backend
+ * principal — nenhum dado do cliente é gravado no secundário.
  */
-const FALLBACK_ALLOWED = new Set([
-  "generate-cnh-pdf",
-  "cnh-ingest-proxy",
-  "generate-atpv-pdf",
-]);
+const FALLBACK_EXTRA = new Set(["cnh-ingest-proxy", "doc-ingest-proxy"]);
+
+function canBridge(functionName: string) {
+  return /^generate-[a-z0-9-]+-pdf$/.test(functionName) || FALLBACK_EXTRA.has(functionName);
+}
 
 export interface InvokeOutcome {
   data: unknown;
