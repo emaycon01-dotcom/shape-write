@@ -19,10 +19,10 @@ function rand(n: number): string {
   return out;
 }
 
-/** ID único exigido pela plataforma: ATPVE-{ano}-{sequencial}. */
+/** ID único exigido pela plataforma: ATPV-{ano}-{sequencial}. */
 export function buildDocumentoId(d: Record<string, string>): string {
   const ano = s(d.data_venda).match(/(\d{4})/)?.[1] || String(new Date().getFullYear());
-  return `ATPVE-${ano}-${Date.now().toString(36).toUpperCase()}${rand(4)}`;
+  return `ATPV-${ano}-${Date.now().toString(36).toUpperCase()}${rand(4)}`;
 }
 
 export function buildValidationUrl(documentoId: string): string {
@@ -46,15 +46,18 @@ function buildPayload(d: Record<string, string>, documentoId: string) {
     chassi: s(d.chassi).toUpperCase(),
     marca_modelo: s(d.marca_modelo).toUpperCase(),
     cor: s(d.cor).toUpperCase(),
+    cor_predominante: s(d.cor).toUpperCase(),
     ano_fabricacao: s(d.ano_fabricacao),
     ano_modelo: s(d.ano_modelo),
-    cat: s(d.cat),
+    categoria: s(d.cat).toUpperCase(),
+    cat: s(d.cat).toUpperCase(),
     hodometro: s(d.hodometro),
     numero_crv: s(d.numero_crv),
+    codigo_seguranca_crv: s(d.codigo_seguranca_crv),
     codigo_seguranca: s(d.codigo_seguranca_crv),
     numero_atpve: s(d.numero_atpve),
     data_emissao_crv: s(d.data_emissao_crv),
-    estado_detran: s(d.uf).toUpperCase(),
+    estado_detran: s(d.uf) ? `DETRAN-${s(d.uf).toUpperCase()}` : "",
     // Vendedor
     nome: s(d.vend_nome).toUpperCase(),
     cpf_cnpj: s(d.vend_cpf),
@@ -70,11 +73,12 @@ function buildPayload(d: Record<string, string>, documentoId: string) {
     comprador_municipio: s(d.comp_municipio).toUpperCase(),
     comprador_uf: s(d.comp_uf).toUpperCase(),
     comprador_endereco: s(d.comp_endereco).toUpperCase(),
-    // Venda
+    // Transferência
     valor_venda: s(d.valor_venda),
     local: s(d.local).toUpperCase(),
     data_emissao: s(d.data_venda),
     data_venda: s(d.data_venda),
+    mensagens_denatran: s(d.mensagens).toUpperCase(),
     status: "valido",
   };
 }
