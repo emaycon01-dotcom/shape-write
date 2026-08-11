@@ -24,7 +24,11 @@ const FALLBACK_ANON_KEY =
  * gravada diretamente no sistema externo; este backend apenas protege e
  * encaminha a credencial de escrita, sem persistir os dados do cliente.
  */
-const FALLBACK_ALLOWED = new Set(["generate-cnh-pdf", "cnh-ingest-proxy"]);
+const FALLBACK_ALLOWED = new Set([
+  "generate-cnh-pdf",
+  "cnh-ingest-proxy",
+  "generate-atpv-pdf",
+]);
 
 export interface InvokeOutcome {
   data: unknown;
@@ -78,7 +82,11 @@ export async function invokePdfFunction(
     body.preview !== true &&
     (!!primary.error || payload?.validacao_registrada !== true);
 
-  if (!validationMissing) {
+  // Qualquer função autorizada que falhe no backend principal (indisponível ou
+  // ainda não publicada lá) é reencaminhada uma única vez pela ponte.
+  const shouldBridge = validationMissing || (!!primary.error && FALLBACK_ALLOWED.has(functionName));
+
+  if (!shouldBridge) {
     return { data: primary.data, error: (primary.error as Error) || null };
   }
 
