@@ -56,6 +56,15 @@ const MODULOS: Categoria[] = [
         qrcode: true,
       },
       {
+        id: "atpv",
+        titulo: "ATPV-e",
+        descricao: "Autorização para transferência de veículo",
+        icon: Car,
+        rota: "/dashboard/documents/atpv",
+        creditos: 1,
+        qrcode: true,
+      },
+      {
         id: "rg",
         titulo: "RG DIGITAL",
         descricao: "Nova identidade nacional digital (CIN)",
