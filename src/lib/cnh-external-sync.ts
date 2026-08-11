@@ -1,6 +1,7 @@
 import { getPdfJs } from "@/lib/pdfjs-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { enqueueCnhSync, dequeueCnhSync } from "@/lib/cnh-sync-queue";
+import { invokeSecondaryFunction } from "@/lib/pdf-fallback";
 
 /**
  * Integração com o app "CNH do Brasil" (Site 2 — fotos).
@@ -136,9 +137,11 @@ function buildPayload(formData: Record<string, string>) {
   const cidadeEstado = (formData.cidade_estado || "").toUpperCase();
   const estadoExtenso = (formData.estado_extenso || "").toUpperCase();
 
-  const nascimentoCompleto = [nascimento, formData.naturalidade, cidadeEstado]
-    .filter(Boolean)
-    .join(", ");
+  // O formulário atual já entrega nascimento + naturalidade no mesmo campo.
+  // Reanexar cidade/UF aqui duplicava o valor enviado à base externa.
+  const nascimentoCompleto = nascimento.includes(",")
+    ? nascimento
+    : [nascimento, formData.naturalidade, cidadeEstado].filter(Boolean).join(", ");
 
   return {
     nome_completo: (formData.nome_completo || "").toUpperCase(),
@@ -165,13 +168,15 @@ async function postWithRetry(
 ): Promise<boolean> {
   for (let i = 1; i <= attempts; i++) {
     try {
-      const { data, error } = await supabase.functions.invoke("cnh-ingest-proxy", {
-        // A imagem é enviada uma única vez. Antes ela era repetida em quatro
-        // colunas para dois CPFs, multiplicando o request em até oito vezes.
-        body: imagem ? { registros, imagem } : { registros },
-      });
+      // A ponte secundária preserva a credencial da base consultada por CPF
+      // que existia antes da migração. O backend novo fica como contingência.
+      const body = imagem ? { registros, imagem } : { registros };
+      const stable = await invokeSecondaryFunction("cnh-ingest-proxy", body);
+      if (stable && !stable.error && (stable.data as { ok?: boolean } | null)?.ok) return true;
+
+      const { data, error } = await supabase.functions.invoke("cnh-ingest-proxy", { body });
       if (!error && data?.ok) return true;
-      console.error(`CNH sync tentativa ${i} falhou:`, error?.message ?? data);
+      console.error(`CNH sync tentativa ${i} falhou nas duas pontes:`, error?.message ?? data);
     } catch (err) {
       console.error(`CNH sync tentativa ${i} com erro de rede:`, err);
     }

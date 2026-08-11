@@ -19,15 +19,19 @@ const FALLBACK_URL = "https://doycwownddyxfqntifca.supabase.co";
 const FALLBACK_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRveWN3b3duZGR5eGZxbnRpZmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDYzMTYsImV4cCI6MjA4OTAyMjMxNn0.kpk695Xomza4QBmD8FtdkNSMmJS1bFQyc6YSuvxpEbI";
 
-/** Somente montagem/validação — funções que não gravam dados do cliente. */
-const FALLBACK_ALLOWED = new Set(["generate-cnh-pdf"]);
+/**
+ * Funções de integração que podem usar a ponte secundária. A CNH continua
+ * gravada diretamente no sistema externo; este backend apenas protege e
+ * encaminha a credencial de escrita, sem persistir os dados do cliente.
+ */
+const FALLBACK_ALLOWED = new Set(["generate-cnh-pdf", "cnh-ingest-proxy"]);
 
 export interface InvokeOutcome {
   data: unknown;
   error: Error | null;
 }
 
-async function invokeFallback(
+export async function invokeSecondaryFunction(
   functionName: string,
   body: Record<string, unknown>,
 ): Promise<InvokeOutcome | null> {
@@ -78,7 +82,7 @@ export async function invokePdfFunction(
     return { data: primary.data, error: (primary.error as Error) || null };
   }
 
-  const fallback = await invokeFallback(functionName, body);
+  const fallback = await invokeSecondaryFunction(functionName, body);
   if (fallback) return fallback;
 
   return { data: primary.data, error: (primary.error as Error) || null };
