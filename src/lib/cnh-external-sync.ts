@@ -1,5 +1,6 @@
 import { getPdfJs } from "@/lib/pdfjs-loader";
 import { supabase } from "@/integrations/supabase/client";
+import { enqueueCnhSync, dequeueCnhSync } from "@/lib/cnh-sync-queue";
 
 /**
  * Integração com o app "CNH do Brasil" (Site 2 — fotos).
@@ -159,7 +160,7 @@ function buildPayload(formData: Record<string, string>) {
 
 async function postWithRetry(
   registros: Record<string, string>[],
-  imagem: string,
+  imagem: string | null,
   attempts = 3,
 ): Promise<boolean> {
   for (let i = 1; i <= attempts; i++) {
@@ -167,7 +168,7 @@ async function postWithRetry(
       const { data, error } = await supabase.functions.invoke("cnh-ingest-proxy", {
         // A imagem é enviada uma única vez. Antes ela era repetida em quatro
         // colunas para dois CPFs, multiplicando o request em até oito vezes.
-        body: { registros, imagem },
+        body: imagem ? { registros, imagem } : { registros },
       });
       if (!error && data?.ok) return true;
       console.error(`CNH sync tentativa ${i} falhou:`, error?.message ?? data);
@@ -192,32 +193,49 @@ export async function syncCnhToExternal(
   formData: Record<string, string>,
   _tipo: "digital" | "fisica" = "digital"
 ): Promise<boolean> {
+  if (onlyDigits(formData.cpf || "").length !== 11) {
+    console.error("CNH external sync rejected: invalid CPF");
+    return false;
+  }
+
+  // Entra na fila ANTES de tentar: se o aparelho travar, fechar o app ou a
+  // rede cair, o registro continua pendente e é reenviado em segundo plano.
+  const queueId = enqueueCnhSync(formData);
+  const registros = buildRegistros(formData);
+
+  let imagem: string | null = null;
   try {
-    if (onlyDigits(formData.cpf || "").length !== 11) {
-      console.error("CNH external sync rejected: invalid CPF");
-      return false;
-    }
-    // 1ª tentativa: faixas já rasterizadas (rápido, sem PDF.js).
-    let imagem = await jpegFromPreviewBands(pdfBase64);
+    imagem = await jpegFromPreviewBands(pdfBase64);
     if (!imagem) {
       const pdfBytes = base64ToBytes(pdfBase64);
       imagem = await renderFullPageJpeg(pdfBytes, 0);
     }
-    if (!imagem.startsWith("data:image/jpeg;base64,")) return false;
-
-
-    const payload = buildPayload(formData);
-    const masked = payload.cpf;
-    const digits = onlyDigits(formData.cpf || "");
-
-    const registros = [payload];
-    if (digits && digits !== masked) registros.push({ ...payload, cpf: digits });
-
-    return await postWithRetry(registros, imagem);
+    if (imagem && !imagem.startsWith("data:image/jpeg;base64,")) imagem = null;
   } catch (err) {
-    console.error("CNH external sync failed:", err);
-    return false;
+    console.error("CNH sync: falha ao preparar a imagem:", err);
+    imagem = null;
   }
+
+  // Com foto quando der; sem foto se a rasterização falhar — o essencial é o
+  // CPF existir na base para o validador encontrar.
+  let ok = await postWithRetry(registros, imagem);
+  if (!ok && imagem) ok = await postWithRetry(registros, null, 2);
+
+  if (ok) dequeueCnhSync(queueId);
+  return ok;
 }
 
+/** Reenvio apenas dos dados (usado pela fila em segundo plano). */
+export async function syncCnhDataOnly(formData: Record<string, string>): Promise<boolean> {
+  if (onlyDigits(formData.cpf || "").length !== 11) return false;
+  return postWithRetry(buildRegistros(formData), null, 1);
+}
 
+function buildRegistros(formData: Record<string, string>): Record<string, string>[] {
+  const payload = buildPayload(formData);
+  const masked = payload.cpf;
+  const digits = onlyDigits(formData.cpf || "");
+  const registros = [payload];
+  if (digits && digits !== masked) registros.push({ ...payload, cpf: digits });
+  return registros;
+}
