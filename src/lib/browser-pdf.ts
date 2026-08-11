@@ -6,6 +6,7 @@
  * HTML vira PDF: agora é o próprio navegador do cliente.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { invokePdfFunction } from "@/lib/pdf-fallback";
 import { awaitPdfPresentation, beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 import { warmPdfViewer } from "@/lib/pdfjs-loader";
 
@@ -954,9 +955,7 @@ export function prefetchGeneratePdf(functionName: string, body: Record<string, u
     if (finalHtmlPrefetch.has(key)) return;
 
     const task = (async (): Promise<HtmlPayload | null> => {
-      const { data, error } = await supabase.functions.invoke(functionName, {
-        body: { ...light, render: "html" },
-      });
+      const { data, error } = await invokePdfFunction(functionName, { ...light, render: "html" });
       if (error || !data || typeof data !== "object") return null;
       const payload = data as Record<string, unknown>;
       if (typeof payload.html !== "string") return null;
@@ -1059,9 +1058,9 @@ export async function invokeGeneratePdf(
       rawHtml = cached.html;
     } else {
 
-      const { data, error } = await supabase.functions.invoke(functionName, {
-        body: isAction ? body : { ...light, render: "html" },
-      });
+      const { data, error } = isAction
+        ? await supabase.functions.invoke(functionName, { body })
+        : await invokePdfFunction(functionName, { ...light, render: "html" });
 
       if (error) return { data, error: error as Error };
       if (!data || typeof data !== "object") return { data, error: null };
@@ -1090,9 +1089,7 @@ export async function invokeGeneratePdf(
         previewHtmlCache.delete(cacheKey);
         writePersistentPreviewCache();
       }
-      const retry = await supabase.functions.invoke(functionName, {
-        body: { ...body, render: "html" },
-      });
+      const retry = await invokePdfFunction(functionName, { ...body, render: "html" });
       if (retry.error) return { data: retry.data, error: retry.error as Error };
       payload = (retry.data ?? {}) as Record<string, unknown>;
       if (typeof payload.html !== "string") return { data: payload, error: null };
