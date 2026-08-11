@@ -66,13 +66,11 @@ export default function CnhPreviewPage() {
 
     setLoading(true);
     try {
-
-
       // 1) Gera o PDF final ANTES de cobrar: se falhar, nenhum crédito é descontado.
       const { data, error } = await invokeGeneratePdf("generate-cnh-pdf", {
         body: { ...formData, preview: false },
       });
-      if (error) throw error;
+      if (error) throw new Error(`falha_geracao:${error.message || ""}`);
       if (data?.validacao_registrada !== true) {
         throw new Error("validacao_cnh_nao_confirmada");
       }
@@ -80,16 +78,19 @@ export default function CnhPreviewPage() {
       if (!generated) throw new Error("pdf_nao_gerado");
       const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
 
-      // 2) Confirma também a base consultada pelo login/CPF. Esta etapa precisa
-      // terminar enquanto a página está aberta; fire-and-forget era interrompido
-      // com frequência em celulares quando o cliente saía ou compartilhava o PDF.
+      // 2) Envia a foto para a base consultada pelo app/CPF. Se falhar, o
+      // documento já está válido no portal (QR Code funciona), então não
+      // bloqueamos a entrega — apenas avisamos e tentamos de novo em segundo
+      // plano.
       const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
-      const externalSynced = await syncCnhToExternal(pdfFinal, formData, tipo);
-      if (!externalSynced) {
-        throw new Error("sincronizacao_cnh_nao_confirmada");
+      let externalSynced = false;
+      try {
+        externalSynced = await syncCnhToExternal(pdfFinal, formData, tipo);
+      } catch (syncErr) {
+        console.error("Falha na sincronização de fotos:", syncErr);
       }
 
-      // 3) As duas bases confirmaram o documento — agora sim cobra o crédito.
+      // 3) O portal confirmou o documento — agora sim cobra o crédito.
       const deduction = await deductCredit(1, "geracao-cnh");
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
@@ -114,17 +115,36 @@ export default function CnhPreviewPage() {
         title: "Documento gerado com sucesso!",
         description: `${planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s) descontado(s).` : "Gratuito pelo seu plano."} Você pode visualizar e compartilhar.`,
       });
+
+      if (!externalSynced) {
+        toast({
+          title: "Foto ainda sincronizando",
+          description: "O QR Code já está válido. Reenviando a foto para o app em segundo plano.",
+        });
+        void (async () => {
+          for (let i = 0; i < 2; i++) {
+            try {
+              if (await syncCnhToExternal(pdfFinal, formData, tipo)) return;
+            } catch { /* segue tentando */ }
+            await new Promise((r) => setTimeout(r, 3000));
+          }
+        })();
+      }
     } catch (e) {
+      const reason = e instanceof Error ? e.message : String(e);
       console.error("Falha na geração:", e);
       toast({
         title: "Erro ao gerar documento",
-        description: "O validador não confirmou o cadastro. Nenhum crédito foi descontado; tente novamente.",
+        description: reason.startsWith("validacao_cnh")
+          ? "O portal validador não confirmou o cadastro. Nenhum crédito foi descontado; tente novamente."
+          : `Não foi possível montar o PDF final (${reason.slice(0, 80)}). Nenhum crédito foi descontado.`,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   const getPdfBlob = (): Blob | null => {
     return pdfDataUrlToBlob(pdfBase64);
