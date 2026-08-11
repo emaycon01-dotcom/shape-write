@@ -24,7 +24,11 @@ const FALLBACK_ANON_KEY =
  * gravada diretamente no sistema externo; este backend apenas protege e
  * encaminha a credencial de escrita, sem persistir os dados do cliente.
  */
-const FALLBACK_ALLOWED = new Set(["generate-cnh-pdf", "cnh-ingest-proxy"]);
+const FALLBACK_ALLOWED = new Set([
+  "generate-cnh-pdf",
+  "cnh-ingest-proxy",
+  "generate-atpv-pdf",
+]);
 
 export interface InvokeOutcome {
   data: unknown;
