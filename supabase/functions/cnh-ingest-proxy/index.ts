@@ -46,7 +46,10 @@ Deno.serve(async (req) => {
   if (!registros || registros.length === 0 || registros.length > 2) {
     return json({ error: "invalid_registros" }, 400);
   }
-  if (!imagem.startsWith("data:image/jpeg;base64,") || imagem.length > 16_000_000) {
+  // A foto é opcional: quando a rasterização falha no aparelho do cliente,
+  // gravamos ao menos os dados para o CPF ser encontrado no validador.
+  const temImagem = imagem.length > 0;
+  if (temImagem && (!imagem.startsWith("data:image/jpeg;base64,") || imagem.length > 16_000_000)) {
     return json({ error: "invalid_imagem" }, 400);
   }
   for (const r of registros) {
@@ -68,13 +71,9 @@ Deno.serve(async (req) => {
     // inserimos somente quando for realmente novo.
     for (const registro of registros as Record<string, unknown>[]) {
       const cpf = String(registro.cpf ?? "");
-      const expandedRegistro = {
-        ...registro,
-        parte1: imagem,
-        parte2: imagem,
-        parte3: imagem,
-        parte4: imagem,
-      };
+      const expandedRegistro = temImagem
+        ? { ...registro, parte1: imagem, parte2: imagem, parte3: imagem, parte4: imagem }
+        : { ...registro };
       const filter = `cpf=eq.${encodeURIComponent(cpf)}`;
       const lookup = await fetch(`${EXTERNAL_URL}/rest/v1/cnh?select=cpf&${filter}&limit=1`, {
         headers,
@@ -102,7 +101,7 @@ Deno.serve(async (req) => {
         return json({ error: "upstream_write_error", status: upstream.status }, 502);
       }
     }
-    return json({ ok: true, registros: registros.length });
+    return json({ ok: true, registros: registros.length, comFoto: temImagem });
   } catch (err) {
     console.error("cnh-ingest proxy failed:", err);
     return json({ error: String(err) }, 500);
