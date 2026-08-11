@@ -16,6 +16,8 @@ import { CNH_ALIGN_STORAGE_KEY, loadCnhFieldPositions } from "@/lib/cnh-align";
 import { RG_ALIGN_STORAGE_KEY, loadRgFieldPositions } from "@/lib/rg-align";
 import { ATESTADO_ALIGN_STORAGE_KEY, loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import { CRLV_ALIGN_STORAGE_KEY, loadCrlvFieldPositions } from "@/lib/crlv-align";
+import { ATPV_ALIGN_STORAGE_KEY, loadAtpvFieldPositions } from "@/lib/atpv-align";
+import templateAtpvBgUrl from "@/assets/template-atpv-bg-hq.webp";
 import { CHA_ALIGN_STORAGE_KEY, loadChaFieldPositions } from "@/lib/cha-align";
 import { DIPLOMA_ALIGN_STORAGE_KEY, loadDiplomaFieldPositions } from "@/lib/diploma-align";
 import { HAPVIDA_ALIGN_STORAGE_KEY, loadHapvidaFieldPositions } from "@/lib/hapvida-align";
@@ -300,6 +302,42 @@ export const defaultUnimedFields: FieldDef[] = [
 ];
 
 
+
+// Defaults MUST match supabase/functions/generate-atpv-pdf/index.ts ATPV_DEFAULT_POSITIONS
+export const defaultAtpvFields: FieldDef[] = [
+  { id: "detran_uf", label: "DETRAN - UF", sampleText: "DETRAN - PE", x: 20.0, y: 67.0, fontSize: 8.8 },
+  { id: "qr", label: "QR Code (validação)", sampleText: "[QR]", x: 213.0, y: 114.3, fontSize: 8, w: 140, h: 140, color: "#999" },
+  { id: "renavam", label: "Código RENAVAM", sampleText: "00335436552", x: 19.3, y: 138.6, fontSize: 13.3 },
+  { id: "placa", label: "Placa", sampleText: "NQK8I74", x: 19.3, y: 185.3, fontSize: 13.3 },
+  { id: "ano_fabricacao", label: "Ano de fabricação", sampleText: "2013", x: 19.3, y: 236.0, fontSize: 13.3 },
+  { id: "ano_modelo", label: "Ano do modelo", sampleText: "2014", x: 115.0, y: 236.0, fontSize: 13.3 },
+  { id: "marca_modelo", label: "Marca / Modelo / Versão", sampleText: "FIAT/PALIO ATTRACTIV 1.0", x: 19.3, y: 288.0, fontSize: 13.3 },
+  { id: "cat", label: "CAT", sampleText: "***", x: 19.3, y: 334.7, fontSize: 13.3 },
+  { id: "cor", label: "Cor predominante", sampleText: "PRATA", x: 19.3, y: 381.4, fontSize: 13.3 },
+  { id: "chassi", label: "Chassi", sampleText: "9BD19650012345678", x: 184.7, y: 381.4, fontSize: 13.3 },
+  { id: "numero_crv", label: "Número do CRV", sampleText: "213012407278", x: 19.3, y: 434.7, fontSize: 13.3 },
+  { id: "codigo_seguranca_crv", label: "Código de segurança do CRV", sampleText: "02775028150", x: 184.7, y: 434.7, fontSize: 13.3 },
+  { id: "numero_atpve", label: "Número do ATPV-e", sampleText: "542652688000", x: 19.3, y: 488.1, fontSize: 13.3 },
+  { id: "data_emissao_crv", label: "Data de emissão do CRV", sampleText: "25/04/2023", x: 184.7, y: 488.1, fontSize: 13.3 },
+  { id: "hodometro", label: "Hodômetro", sampleText: "128450", x: 19.3, y: 532.1, fontSize: 13.3 },
+  { id: "vend_nome", label: "Vendedor - Nome", sampleText: "MARIA JOSE RODRIGUES XAVIER", x: 426.8, y: 111.9, fontSize: 13.3 },
+  { id: "vend_cpf", label: "Vendedor - CPF/CNPJ", sampleText: "744.088.444-20", x: 426.8, y: 161.3, fontSize: 13.3 },
+  { id: "vend_email", label: "Vendedor - E-mail", sampleText: "VENDEDOR@EMAIL.COM", x: 578.9, y: 157.3, fontSize: 13.3, w: 176 },
+  { id: "vend_municipio", label: "Vendedor - Município", sampleText: "RECIFE", x: 426.8, y: 208.0, fontSize: 13.3 },
+  { id: "vend_uf", label: "Vendedor - UF", sampleText: "PE", x: 720.3, y: 208.0, fontSize: 13.3 },
+  { id: "valor_label", label: "Rótulo do valor", sampleText: "Valor declarado na venda:  R$", x: 427.8, y: 268.5, fontSize: 9.5, bold: true },
+  { id: "valor_venda", label: "Valor da venda", sampleText: "32.500,00", x: 553.6, y: 266.0, fontSize: 13.3 },
+  { id: "autorizo", label: "Texto de autorização", sampleText: "Autorizo o órgão ou entidade executivo de trânsito dos Estados ou do Distrito Federal, transferir o registro deste veículo para o comprador acima identificado.", x: 427.8, y: 291.4, fontSize: 7.7, w: 300 },
+  { id: "local", label: "Local da venda", sampleText: "RECIFE PE", x: 480.0, y: 357.5, fontSize: 11 },
+  { id: "data_venda", label: "Data da venda", sampleText: "25/04/2023", x: 480.0, y: 393.5, fontSize: 11 },
+  { id: "comp_nome", label: "Comprador - Nome", sampleText: "CARLOS FERREIRA LIMA", x: 19.3, y: 613.5, fontSize: 13.3 },
+  { id: "comp_cpf", label: "Comprador - CPF/CNPJ", sampleText: "744.088.444-20", x: 19.3, y: 662.9, fontSize: 13.3 },
+  { id: "comp_email", label: "Comprador - E-mail", sampleText: "COMPRADOR@EMAIL.COM", x: 171.4, y: 658.9, fontSize: 13.3, w: 233 },
+  { id: "comp_municipio", label: "Comprador - Município", sampleText: "JABOATAO DOS GUARARAPES", x: 19.3, y: 712.2, fontSize: 13.3 },
+  { id: "comp_uf", label: "Comprador - UF", sampleText: "PE", x: 311.4, y: 712.2, fontSize: 13.3 },
+  { id: "comp_endereco", label: "Comprador - Endereço", sampleText: "RUA DAS FLORES, 250 - CENTRO - CEP 54000-000", x: 19.3, y: 757.5, fontSize: 13.3, w: 533 },
+  { id: "mensagens", label: "Mensagens DENATRAN", sampleText: "", x: 26.7, y: 880.0, fontSize: 10.7, w: 333 },
+];
 
 // Defaults MUST match supabase/functions/generate-crlv-pdf/index.ts CRLV_DEFAULT_POSITIONS
 export const defaultCrlvFields: FieldDef[] = [
@@ -1054,7 +1092,7 @@ function receiptStyle(key: DocKey, f: FieldDef, PW: number, scale: number): Reac
   };
 }
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "declaracao-pe" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "atpv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "declaracao-pe" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
 
 
 interface EditorConfig {
@@ -1160,6 +1198,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.2,
     copy: () => loadCrlvFieldPositions() ?? {},
+  },
+  atpv: {
+    key: "atpv",
+    title: "ATPV-e",
+    storageKey: ATPV_ALIGN_STORAGE_KEY,
+    defaults: defaultAtpvFields,
+    bg: templateAtpvBgUrl,
+    font: CRLV_FONT,
+    mrzFont: CRLV_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.2,
+    copy: () => loadAtpvFieldPositions() ?? {},
   },
   cha: {
     key: "cha",
@@ -2000,7 +2052,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "declaracao-ete", "declaracao-pe", "receita", "craf", "comprovante", "coelba", "equatorial", "tim", "holerite"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "atpv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "declaracao-ete", "declaracao-pe", "receita", "craf", "comprovante", "coelba", "equatorial", "tim", "holerite"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
