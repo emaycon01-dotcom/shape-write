@@ -137,9 +137,11 @@ function buildPayload(formData: Record<string, string>) {
   const cidadeEstado = (formData.cidade_estado || "").toUpperCase();
   const estadoExtenso = (formData.estado_extenso || "").toUpperCase();
 
-  const nascimentoCompleto = [nascimento, formData.naturalidade, cidadeEstado]
-    .filter(Boolean)
-    .join(", ");
+  // O formulário atual já entrega nascimento + naturalidade no mesmo campo.
+  // Reanexar cidade/UF aqui duplicava o valor enviado à base externa.
+  const nascimentoCompleto = nascimento.includes(",")
+    ? nascimento
+    : [nascimento, formData.naturalidade, cidadeEstado].filter(Boolean).join(", ");
 
   return {
     nome_completo: (formData.nome_completo || "").toUpperCase(),
