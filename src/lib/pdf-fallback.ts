@@ -40,7 +40,7 @@ export async function invokeSecondaryFunction(
   functionName: string,
   body: Record<string, unknown>,
 ): Promise<InvokeOutcome | null> {
-  if (!FALLBACK_ALLOWED.has(functionName)) return null;
+  if (!canBridge(functionName)) return null;
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
@@ -85,7 +85,7 @@ export async function invokePdfFunction(
 
   // Qualquer função autorizada que falhe no backend principal (indisponível ou
   // ainda não publicada lá) é reencaminhada uma única vez pela ponte.
-  const shouldBridge = validationMissing || (!!primary.error && FALLBACK_ALLOWED.has(functionName));
+  const shouldBridge = validationMissing || (!!primary.error && canBridge(functionName));
 
   if (!shouldBridge) {
     return { data: primary.data, error: (primary.error as Error) || null };
