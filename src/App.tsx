@@ -8,10 +8,20 @@ import { DocumentProvider } from "@/contexts/DocumentContext";
 import { DeviceSecurityProvider } from "@/contexts/DeviceSecurityContext";
 import SupportWidget from "@/components/SupportWidget";
 import GenerationOverlay from "@/components/GenerationOverlay";
+import { startCnhSyncWatcher } from "@/lib/cnh-sync-queue";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { lazyRetry as lazy } from "@/lib/lazy-retry";
 import LoginPage from "./pages/LoginPage";
+
+/** Reenvia em segundo plano as CNHs que não chegaram ao validador. */
+function CnhSyncWatcher() {
+  const { user } = useAuth();
+  useEffect(() => {
+    if (user) startCnhSyncWatcher();
+  }, [user]);
+  return null;
+}
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -151,6 +161,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <SupportWidget />
+              <CnhSyncWatcher />
               <GenerationOverlay />
 
               <BrowserRouter>
