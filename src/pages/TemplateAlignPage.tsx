@@ -1115,7 +1115,7 @@ function receiptStyle(key: DocKey, f: FieldDef, PW: number, scale: number): Reac
   };
 }
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "atpv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "declaracao-pe" | "receita" | "craf" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "atpv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "declaracao-pe" | "receita" | "craf" | "porte" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
 
 
 interface EditorConfig {
