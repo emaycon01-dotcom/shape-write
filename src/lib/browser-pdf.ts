@@ -1096,6 +1096,15 @@ export async function invokeGeneratePdf(
       html = payload.html;
     }
 
+    // O Porte Federal de Arma exige assinante/cargo/unidade em VERDE e com
+    // traço mais grosso. Aplicado aqui no cliente para não depender da versão
+    // publicada da Edge Function.
+    if (functionName === "generate-porte-pdf" && html) {
+      html = applyPorteSignatureStyle(html, body);
+    }
+
+
+
 
     try {
       // Todos os módulos agora usam o motor CANVAS (desenho direto + jsPDF),
