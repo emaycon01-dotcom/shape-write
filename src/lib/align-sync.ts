@@ -43,6 +43,8 @@ export const ALIGN_STORAGE_BY_DOC: Record<string, string> = {
   "declaracao-ete": DECLARACAO_ETE_ALIGN_STORAGE_KEY,
   receita: RECEITA_ALIGN_STORAGE_KEY,
   craf: CRAF_ALIGN_STORAGE_KEY,
+  porte: PORTE_ALIGN_STORAGE_KEY,
+  "declaracao-pe": DECLARACAO_PE_ALIGN_STORAGE_KEY,
   unip: UNIP_ALIGN_STORAGE_KEY,
   anhanguera: ANHANGUERA_ALIGN_STORAGE_KEY,
   comprovante: COMPROVANTE_ALIGN_STORAGE_KEY,
