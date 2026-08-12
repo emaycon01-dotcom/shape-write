@@ -45,7 +45,9 @@ export default function DashboardLayout() {
     <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
+        <SidebarBackdrop />
         <div className="flex-1 flex flex-col min-w-0">
+
           <header className="sticky top-0 z-30 h-14 flex items-center gap-3 border-b border-border/60 bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
             {!isHome && (
