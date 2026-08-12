@@ -179,6 +179,35 @@ export async function confirmElitepayPayment(
 }
 
 /**
+ * Confirma várias cobranças com uma única listagem do gateway. Usado pela
+ * reconciliação periódica para não multiplicar requisições e sofrer rate limit.
+ */
+export async function confirmElitepayPayments(chargeIds: string[]): Promise<Set<string>> {
+  const wanted = new Set(chargeIds.filter(Boolean));
+  const paid = new Set<string>();
+  if (wanted.size === 0) return paid;
+
+  const listPaths = [
+    `/api/v1/transactions?limit=100`,
+    `/api/v1/transactions?page=1&limit=100`,
+    `/api/v1/transactions`,
+  ];
+  for (const path of listPaths) {
+    const r = await apiGet(path);
+    if (!r.ok) continue;
+    for (const transaction of extractList(r.body)) {
+      if (!isPaidStatus(statusOf(transaction))) continue;
+      for (const chargeId of wanted) {
+        if (matchesCharge(transaction, chargeId)) paid.add(chargeId);
+      }
+    }
+    // A primeira listagem válida é suficiente; não repete a mesma consulta.
+    break;
+  }
+  return paid;
+}
+
+/**
  * Aplica os efeitos de um pagamento confirmado: créditos, plano,
  * limpeza de advertências e registro do depósito. Idempotente.
  */

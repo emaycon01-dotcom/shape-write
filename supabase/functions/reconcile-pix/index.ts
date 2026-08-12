@@ -3,7 +3,7 @@
 // fechar a página antes do polling detectar.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
-import { applyPaidTransaction, confirmElitepayPayment } from "../_shared/elitepay.ts";
+import { applyPaidTransaction, confirmElitepayPayments } from "../_shared/elitepay.ts";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -42,11 +42,14 @@ Deno.serve(async (req) => {
     let applied = 0;
     const results: Array<{ id: string; paid: boolean }> = [];
 
+    const chargeIds = (pending ?? []).map((tx) => tx.elitepay_charge_id || "").filter(Boolean);
+    const paidChargeIds = await confirmElitepayPayments(chargeIds);
+
     for (const tx of pending ?? []) {
       const chargeId = tx.elitepay_charge_id || "";
       if (!chargeId) continue;
       try {
-        const confirmed = await confirmElitepayPayment(chargeId);
+        const confirmed = paidChargeIds.has(chargeId);
         if (confirmed) {
           const ok = await applyPaidTransaction(supabaseAdmin, tx);
           if (ok) applied++;
