@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
@@ -51,7 +53,13 @@ const commonItems = [
 
 
 export function AppSidebar() {
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
+  const location = useLocation();
+  // Ao navegar, o menu sempre fecha: a página abre em tela cheia.
+  useEffect(() => {
+    setOpen(false);
+    setOpenMobile(false);
+  }, [location.pathname, setOpen, setOpenMobile]);
   // No celular o menu abre como painel (sheet): o estado "collapsed" do desktop
   // não deve esconder os textos, senão só aparecem os ícones.
   const collapsed = state === "collapsed" && !isMobile;
@@ -59,6 +67,7 @@ export function AppSidebar() {
   const { count: openTickets } = useOpenTickets();
   const { count: pendingApprovals } = usePendingApprovals();
   const { count: unverified } = useUnverifiedAccounts();
+
 
 
 
