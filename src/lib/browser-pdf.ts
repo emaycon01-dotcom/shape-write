@@ -984,6 +984,29 @@ const CANVAS_ENGINE_FUNCTIONS = new Set<string>(); // vazio = todos usam canvas
 
 
 
+const PORTE_GREEN =
+  "color:#0b5133 !important;-webkit-text-fill-color:#0b5133 !important;font-weight:800 !important;-webkit-text-stroke:0.22px #0b5133;";
+
+function escapeForHtml(value: string) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Pinta assinante/cargo/unidade do Porte em verde e com traço mais grosso. */
+function applyPorteSignatureStyle(html: string, body: Record<string, unknown>): string {
+  const values = ["assinante", "cargo", "unidade"]
+    .map((k) => (typeof body[k] === "string" ? (body[k] as string).trim() : ""))
+    .filter(Boolean)
+    .map(escapeForHtml);
+  if (!values.length) return html;
+
+  return html.replace(
+    /<div class="overlay" style="([^"]*)">([^<]*)<\/div>/g,
+    (full, style: string, text: string) =>
+      values.includes(text.trim())
+        ? `<div class="overlay" style="${style}${PORTE_GREEN}">${text}</div>`
+        : full,
+  );
+}
 
 
 /**
