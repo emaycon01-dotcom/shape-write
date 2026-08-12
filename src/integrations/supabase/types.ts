@@ -908,6 +908,10 @@ export type Database = {
         Args: { _target_user_id: string }
         Returns: undefined
       }
+      apply_paid_financial_transaction: {
+        Args: { _transaction_id: string }
+        Returns: boolean
+      }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       consume_credits: {
         Args: { _amount: number; _reason?: string }
