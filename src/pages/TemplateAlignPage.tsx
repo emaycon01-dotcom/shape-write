@@ -618,6 +618,27 @@ export const defaultCrafFields: FieldDef[] = [
   { id: "autenticidade", label: "Código de autenticidade", sampleText: "A Autenticidade no SisGCorp eb559a07035876bc154520d8e8b23e33", x: 258, y: 590.5, fontSize: 8.5, w: 260 },
 ];
 
+export const defaultPorteFields: FieldDef[] = [
+  { id: "certificado", label: "Certificado nº", sampleText: "0001234", x: 108, y: 151, fontSize: 10, w: 90 },
+  { id: "expedicao", label: "Expedição (órgão)", sampleText: "SR/PF/PE", x: 204, y: 151, fontSize: 10, w: 110 },
+  { id: "categoria", label: "Categoria", sampleText: "PARTICULAR", x: 310, y: 151, fontSize: 10, w: 132 },
+  { id: "via", label: "Via", sampleText: "1ª", x: 418, y: 151, fontSize: 10, w: 42 },
+  { id: "nome", label: "Nome completo", sampleText: "JOSE DA SILVA SOUZA", x: 130, y: 187, fontSize: 10, w: 300 },
+  { id: "abrangencia", label: "Abrangência", sampleText: "VALIDO EM TODO TERRITÓRIO NACIONAL", x: 130, y: 220, fontSize: 10, w: 300 },
+  { id: "arma_numero", label: "Arma nº", sampleText: "AB123456", x: 108, y: 257, fontSize: 10, w: 98 },
+  { id: "especie", label: "Espécie", sampleText: "PISTOLA", x: 210, y: 257, fontSize: 10, w: 98 },
+  { id: "marca", label: "Marca", sampleText: "TAURUS", x: 285, y: 257, fontSize: 10, w: 96 },
+  { id: "calibre", label: "Calibre", sampleText: "9MM", x: 342, y: 257, fontSize: 10, w: 96 },
+  { id: "fabricacao", label: "Fabricação", sampleText: "2021", x: 400, y: 257, fontSize: 10, w: 78 },
+  { id: "data_expedicao", label: "Data de expedição", sampleText: "12/03/2024", x: 92, y: 293, fontSize: 10, w: 92 },
+  { id: "validade", label: "Validade", sampleText: "12/03/2034", x: 205, y: 293, fontSize: 10, w: 92 },
+  { id: "identidade", label: "Identidade", sampleText: "1234567 SDS/PE", x: 330, y: 293, fontSize: 10, w: 120 },
+  { id: "assinante", label: "Assinante", sampleText: "CARLOS ALBERTO LIMA", x: 178, y: 314, fontSize: 5.2, w: 100 },
+  { id: "cargo", label: "Cargo", sampleText: "DELEGADO DE POLÍCIA FEDERAL", x: 165, y: 321, fontSize: 5.2, w: 126 },
+  { id: "unidade", label: "Unidade", sampleText: "SR/PF/PE", x: 228, y: 327, fontSize: 5.2, w: 100 },
+  { id: "numero_porte", label: "Nº do Porte", sampleText: "Nº do Porte: 0001234", x: 900, y: 305, fontSize: 6.3, w: 130 },
+];
+
 // Defaults MUST match supabase/functions/generate-unip-pdf/index.ts UNIP_DEFAULT_POSITIONS
 export const defaultUnipFields: FieldDef[] = [
   { id: "inst_titulo", label: "Instituição (título)", sampleText: "Universidade Paulista", x: 644, y: 168, fontSize: 62 },
