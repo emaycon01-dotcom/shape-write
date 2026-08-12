@@ -1,35 +1,29 @@
 import { useEffect, useState } from "react";
-import { Sparkles, X, FileText, Receipt, GraduationCap, Stethoscope, Wallet } from "lucide-react";
+import { Sparkles, X, FileText, Car, GraduationCap, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /** Atualize a versão sempre que mudar a lista — reabre o aviso para todos. */
-const NOVIDADES_VERSION = "2026-08-05";
+const NOVIDADES_VERSION = "2026-08-12";
 const STORAGE_KEY = "monkeylab_novidades";
 
 const NOVIDADES = [
   {
     tag: "NOVO SERVIÇO",
-    titulo: "SERVIÇOS FINANCEIROS",
-    desc: "Nova categoria financeira disponível no catálogo de serviços.",
-    icon: Wallet,
+    titulo: "ATPV-E",
+    desc: "Emissão com QR Code e validação integrada.",
+    icon: Car,
   },
   {
     tag: "NOVO SERVIÇO",
-    titulo: "SERVIÇOS DE COMPROVANTES",
-    desc: "Modelos atualizados com layout de alta resolução e dados automáticos.",
-    icon: Receipt,
-  },
-  {
-    tag: "NOVO SERVIÇO",
-    titulo: "SERVIÇOS ESCOLARES",
-    desc: "Catálogo ampliado com centenas de opções no formulário.",
+    titulo: "HISTÓRICO SUPERIOR",
+    desc: "Três páginas com notas e semestres automáticos.",
     icon: GraduationCap,
   },
   {
     tag: "NOVO SERVIÇO",
-    titulo: "SERVIÇOS MÉDICOS",
-    desc: "Pesquisa completa integrada e validação por QR Code.",
-    icon: Stethoscope,
+    titulo: "DECLARAÇÃO ESCOLAR",
+    desc: "Modelo exclusivo com layout de alta resolução.",
+    icon: ScrollText,
   },
   {
     tag: "MELHORIA",
@@ -38,6 +32,7 @@ const NOVIDADES = [
     icon: FileText,
   },
 ];
+
 
 export default function NovidadesDialog() {
   const [open, setOpen] = useState(false);
