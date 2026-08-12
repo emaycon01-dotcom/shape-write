@@ -53,6 +53,8 @@ import templateDeclaracaoEteAsset from "@/assets/template-declaracao-ete-bg.jpg.
 import templateDeclaracaoPeAsset from "@/assets/template-declaracao-pe-bg.jpg.asset.json";
 import templateReceitaBgUrl from "@/assets/template-receita-bg-hq.jpg";
 import templateCrafBgUrl from "@/assets/template-craf-bg-hq.webp";
+import { PORTE_ALIGN_STORAGE_KEY, loadPorteFieldPositions } from "@/lib/porte-align";
+import templatePorteBgUrl from "@/assets/template-porte-bg-hq.webp";
 import { UNIP_ALIGN_STORAGE_KEY, loadUnipFieldPositions } from "@/lib/unip-align";
 import { ANHANGUERA_ALIGN_STORAGE_KEY, loadAnhangueraFieldPositions } from "@/lib/anhanguera-align";
 import templateUnipP1Url from "@/assets/template-unip-p1-hq.webp";
