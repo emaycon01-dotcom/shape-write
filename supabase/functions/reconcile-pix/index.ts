@@ -3,7 +3,7 @@
 // fechar a página antes do polling detectar.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
-import { applyPaidTransaction, confirmElitepayPayment } from "../_shared/elitepay.ts";
+import { applyPaidTransaction, confirmElitepayPayments } from "../_shared/elitepay.ts";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -23,14 +23,16 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    const since = new Date(Date.now() - 48 * 60 * 60_000).toISOString();
+    // Pagamentos podem sofrer atraso no webhook; revisamos 30 dias para também
+    // recuperar cobranças antigas que ficaram pendentes durante indisponibilidades.
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60_000).toISOString();
     const { data: pending, error } = await supabaseAdmin
       .from("financial_transactions")
       .select("*")
       .in("status", ["gerado", "processando"])
       .gte("created_at", since)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(100);
 
     if (error) {
       console.error("reconcile-pix query error:", error);
@@ -40,15 +42,23 @@ Deno.serve(async (req) => {
     let applied = 0;
     const results: Array<{ id: string; paid: boolean }> = [];
 
+    const chargeIds = (pending ?? []).map((tx) => tx.elitepay_charge_id || "").filter(Boolean);
+    const paidChargeIds = await confirmElitepayPayments(chargeIds);
+
     for (const tx of pending ?? []) {
       const chargeId = tx.elitepay_charge_id || "";
       if (!chargeId) continue;
-      const confirmed = await confirmElitepayPayment(chargeId);
-      if (confirmed) {
-        const ok = await applyPaidTransaction(supabaseAdmin, tx);
-        if (ok) applied++;
+      try {
+        const confirmed = paidChargeIds.has(chargeId);
+        if (confirmed) {
+          const ok = await applyPaidTransaction(supabaseAdmin, tx);
+          if (ok) applied++;
+        }
+        results.push({ id: tx.id, paid: confirmed });
+      } catch (txError) {
+        console.error("reconcile-pix transaction failed:", tx.id, txError);
+        results.push({ id: tx.id, paid: false });
       }
-      results.push({ id: tx.id, paid: confirmed });
     }
 
     console.log(`reconcile-pix: ${pending?.length ?? 0} pendentes, ${applied} aplicados`);
