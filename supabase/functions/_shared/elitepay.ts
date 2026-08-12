@@ -184,79 +184,14 @@ export async function confirmElitepayPayment(
  */
 export async function applyPaidTransaction(supabaseAdmin: any, transaction: any): Promise<boolean> {
   if (!transaction || transaction.status === "pago") return false;
-
-  const { data: updatedTx } = await supabaseAdmin
-    .from("financial_transactions")
-    .update({ status: "pago", paid_at: new Date().toISOString() })
-    .eq("id", transaction.id)
-    .neq("status", "pago")
-    .select("id")
-    .maybeSingle();
-
-  if (!updatedTx) return false;
-
-  const userId = transaction.user_id;
-
-  if (transaction.type === "credito" && Number(transaction.credits_amount) > 0) {
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("credits")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (profile) {
-      const { error: creditError } = await supabaseAdmin
-        .from("profiles")
-        .update({ credits: Number(profile.credits || 0) + Number(transaction.credits_amount) })
-        .eq("user_id", userId);
-      if (creditError) console.error("Falha ao creditar usuário:", creditError);
-    }
-
-    await supabaseAdmin.from("credit_transactions").insert({
-      user_id: userId,
-      actor_id: "system",
-      kind: "credit",
-      amount: Number(transaction.credits_amount),
-      balance_after: 0,
-      reason: `pix_elitepay ${transaction.elitepay_charge_id || ""}`.trim(),
-    });
-  } else if (transaction.type === "plano" && transaction.plan_name) {
-    const planMap: Record<string, string> = { Basic: "dealer", Pro: "master", Premium: "diamond" };
-    const planValue = planMap[transaction.plan_name] || String(transaction.plan_name).toLowerCase();
-
-    const { error: planError } = await supabaseAdmin
-      .from("profiles")
-      .update({ plano: planValue })
-      .eq("user_id", userId);
-    if (planError) console.error("Falha ao aplicar plano:", planError);
-
-    await supabaseAdmin.from("user_roles").upsert(
-      { user_id: userId, cargo: planValue, assigned_by: "system" },
-      { onConflict: "user_id,cargo" },
-    );
-  }
-
-  // Depósito confirmado: zera todas as advertências de PIX do usuário
-  await supabaseAdmin
-    .from("pix_warnings")
-    .update({ status: "cleared", resolved_at: new Date().toISOString() })
-    .eq("user_id", userId)
-    .in("status", ["warning", "pending"]);
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("name, email")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  await supabaseAdmin.from("deposits").insert({
-    user_id: userId,
-    user_name: profile?.name || "",
-    user_email: profile?.email || "",
-    amount: transaction.amount,
-    method: "pix_elitepay",
-    status: "completed",
+  // Uma única transação no banco aplica saldo/plano, registra o depósito e só
+  // então marca a cobrança como paga. O bloqueio de linha evita crédito duplo.
+  const { data, error } = await supabaseAdmin.rpc("apply_paid_financial_transaction", {
+    _transaction_id: transaction.id,
   });
-
-  return true;
+  if (error) {
+    console.error("Falha atômica ao aplicar PIX:", transaction.id, error.message);
+    throw new Error(`pix_apply_failed: ${error.message}`);
+  }
+  return data === true;
 }
