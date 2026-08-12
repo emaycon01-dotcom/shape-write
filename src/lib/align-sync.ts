@@ -15,6 +15,8 @@ import { DECLARACAO_ALIGN_STORAGE_KEY } from "@/lib/declaracao-align";
 import { DECLARACAO_ETE_ALIGN_STORAGE_KEY } from "@/lib/declaracao-ete-align";
 import { RECEITA_ALIGN_STORAGE_KEY } from "@/lib/receita-align";
 import { CRAF_ALIGN_STORAGE_KEY } from "@/lib/craf-align";
+import { PORTE_ALIGN_STORAGE_KEY } from "@/lib/porte-align";
+import { DECLARACAO_PE_ALIGN_STORAGE_KEY } from "@/lib/declaracao-pe-align";
 import { UNIP_ALIGN_STORAGE_KEY } from "@/lib/unip-align";
 import { ANHANGUERA_ALIGN_STORAGE_KEY } from "@/lib/anhanguera-align";
 import { COMPROVANTE_ALIGN_STORAGE_KEY } from "@/lib/comprovante-align";
