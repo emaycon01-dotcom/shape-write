@@ -165,9 +165,9 @@ export function buildPorteHtml(d: Record<string, string>, fieldPositions: unknow
   ${block("validade", d.validade)}
   ${block("identidade", d.identidade)}
 
-  ${block("assinante", d.assinante)}
-  ${block("cargo", d.cargo)}
-  ${block("unidade", d.unidade || d.expedicao)}
+  ${block("assinante", d.assinante, "color:#0b5133;font-weight:700;")}
+  ${block("cargo", d.cargo, "color:#0b5133;font-weight:700;")}
+  ${block("unidade", d.unidade || d.expedicao, "color:#0b5133;font-weight:700;")}
 
   ${block("numero_porte", d.numero_porte ? `Nº do Porte: ${d.numero_porte}` : "")}
 </div>
