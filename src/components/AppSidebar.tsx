@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,11 +55,16 @@ const commonItems = [
 export function AppSidebar() {
   const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
   const location = useLocation();
-  // Ao navegar, o menu sempre fecha: a página abre em tela cheia.
+  const lastPathRef = useRef(location.pathname);
+  const closeRef = useRef({ setOpen, setOpenMobile });
+  closeRef.current = { setOpen, setOpenMobile };
+  // Ao navegar (mudança real de rota), o menu fecha: a página abre em tela cheia.
   useEffect(() => {
-    setOpen(false);
-    setOpenMobile(false);
-  }, [location.pathname, setOpen, setOpenMobile]);
+    if (lastPathRef.current === location.pathname) return;
+    lastPathRef.current = location.pathname;
+    closeRef.current.setOpen(false);
+    closeRef.current.setOpenMobile(false);
+  }, [location.pathname]);
   // No celular o menu abre como painel (sheet): o estado "collapsed" do desktop
   // não deve esconder os textos, senão só aparecem os ícones.
   const collapsed = state === "collapsed" && !isMobile;
