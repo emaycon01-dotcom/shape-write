@@ -1146,44 +1146,48 @@ async function renderOnce(
       canvas.width = Math.round(width * usableScale);
       const pagePreview: PreviewPage = { width, height, bands: [] };
 
-      let top = 0;
-      while (top < height) {
-        if (abortSignal?.aborted) throw new Error("Geração cancelada.");
-        const sliceH = Math.min(band, height - top);
-        canvas.height = Math.round(sliceH * usableScale);
-        const ctx = canvas.getContext("2d", { alpha: false });
-        if (!ctx) throw new Error("Canvas indisponível neste aparelho.");
+      try {
+        let top = 0;
+        while (top < height) {
+          if (abortSignal?.aborted) throw new Error("Geração cancelada.");
+          const sliceH = Math.min(band, height - top);
+          canvas.height = Math.round(sliceH * usableScale);
+          const ctx = canvas.getContext("2d", { alpha: false });
+          if (!ctx) throw new Error("Canvas indisponível neste aparelho.");
 
-        paintBand(ctx, items, usableScale, top, width, sliceH, coordScale, offsetX, offsetY);
-        if (isBlackCanvas(canvas)) {
-          throw new Error("O aparelho descartou a faixa de imagem durante a rasterização.");
+          paintBand(ctx, items, usableScale, top, width, sliceH, coordScale, offsetX, offsetY);
+          if (isBlackCanvas(canvas)) {
+            throw new Error("O aparelho descartou a faixa de imagem durante a rasterização.");
+          }
+          const bytes = await encodeJpeg(canvas, jpegQuality());
+          if (bytes.byteLength < 512) throw new Error("Falha ao rasterizar a página.");
+
+          const yPt = top * 0.75;
+          const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
+          pdf.addImage(bytes, "JPEG", 0, yPt, wPt, hSlicePt, undefined, "NONE");
+
+          if (collectPreview) {
+            // A mesma faixa já rasterizada vira a imagem do preview — o PDF.js
+            // não precisa desenhar tudo de novo.
+            // O Blob já captura os bytes; `slice()` criava outra cópia completa
+            // de cada faixa justamente no pico de memória do preview.
+            const url = URL.createObjectURL(
+              new Blob([bytes.buffer as ArrayBuffer], { type: "image/jpeg" }),
+            );
+            pagePreview.bands.push({ url, top, height: sliceH });
+          }
+
+          top += sliceH;
+          if (top < height) await new Promise((r) => setTimeout(r, 8));
         }
-        const bytes = await encodeJpeg(canvas, jpegQuality());
-        if (bytes.byteLength < 512) throw new Error("Falha ao rasterizar a página.");
 
-        const yPt = top * 0.75;
-        const hSlicePt = Math.min(sliceH * 0.75 + 0.05, hPt - yPt);
-        pdf.addImage(bytes, "JPEG", 0, yPt, wPt, hSlicePt, undefined, "NONE");
-
-        if (collectPreview) {
-          // A mesma faixa já rasterizada vira a imagem do preview — o PDF.js
-          // não precisa desenhar tudo de novo.
-          // O Blob já captura os bytes; `slice()` criava outra cópia completa
-          // de cada faixa justamente no pico de memória do preview.
-          const url = URL.createObjectURL(
-            new Blob([bytes.buffer as ArrayBuffer], { type: "image/jpeg" }),
-          );
-          pagePreview.bands.push({ url, top, height: sliceH });
-        }
-
-        top += sliceH;
-        if (top < height) await new Promise((r) => setTimeout(r, 8));
+        if (collectPreview) collected.push(pagePreview);
+      } finally {
+        // Essencial no Safari: se uma faixa falhar, zerar o backing store antes
+        // da próxima tentativa; aguardar apenas o GC mantém dezenas de MB vivos.
+        canvas.width = 0;
+        canvas.height = 0;
       }
-
-      if (collectPreview) collected.push(pagePreview);
-
-      canvas.width = 0;
-      canvas.height = 0;
     }
 
     if (!pdf) throw new Error("Documento vazio.");
@@ -1232,7 +1236,8 @@ export async function renderHtmlToPdfCanvas(
       lastError = error;
       if (abortSignal?.aborted) break;
       // Uma tentativa que falhou por memória deixa bitmaps presos no processo.
-      if (attempt.bandDivisor >= 4) releaseBitmapCache();
+      // Liberamos desde a primeira falha, antes de criar o próximo canvas.
+      releaseBitmapCache();
       await new Promise((r) => setTimeout(r, 120));
     }
   }
