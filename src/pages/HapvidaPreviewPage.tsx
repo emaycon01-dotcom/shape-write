@@ -111,22 +111,18 @@ export default function HapvidaPreviewPage() {
       }
 
       // O portal de validação do HapVida (api-hapvida.xyz) resolve o código no
-      // banco secundário. Espelhamos o mesmo código + PDF lá para o QR Code
-      // continuar encontrando o atestado após a migração do backend.
-      try {
-        await invokeSecondaryFunction("mirror-hapvida-code", {
-          code: verifyCode,
-          doc_id: created.id,
-          doc_type: "hapvida",
-          pdf_base64: pdfFinal,
-          name: formData.paciente || "",
-          identification: formData.cpf || "",
-          date: formData.data_atendimento || "",
-          description: `Atestado HapVida - ${formData.unidade_curta || formData.unidade || ""}`,
-        });
-      } catch (e) {
-        console.warn("Falha ao espelhar atestado no validador:", e);
-      }
+      // banco secundário. Espelhamos em SEGUNDO PLANO para não travar a entrega.
+      void invokeSecondaryFunction("mirror-hapvida-code", {
+        code: verifyCode,
+        doc_id: created.id,
+        doc_type: "hapvida",
+        pdf_base64: pdfFinal,
+        name: formData.paciente || "",
+        identification: formData.cpf || "",
+        date: formData.data_atendimento || "",
+        description: `Atestado HapVida - ${formData.unidade_curta || formData.unidade || ""}`,
+      }).catch((e) => console.warn("Falha ao espelhar atestado no validador:", e));
+
 
 
 
