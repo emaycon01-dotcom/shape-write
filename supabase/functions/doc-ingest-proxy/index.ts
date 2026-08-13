@@ -39,6 +39,17 @@ Deno.serve(async (req) => {
     return json({ error: "invalid_dados" }, 400);
   }
 
+  // O portal de RG consome data URLs PNG. Recusar imagens incompletas aqui
+  // evita confirmar um registro cujas fotos aparecerão quebradas depois.
+  if (tabela === "rg") {
+    const images = [dados.parte1, dados.parte2, dados.parte3, dados.parte4]
+      .filter((value): value is string => typeof value === "string" && value.length > 0);
+    if (!images.length) return json({ error: "missing_rg_images" }, 400);
+    if (images.some((value) => !value.startsWith("data:image/png;base64,") || value.length < 1_000)) {
+      return json({ error: "invalid_rg_image_format", detail: "As imagens do RG devem ser data URLs PNG completas." }, 400);
+    }
+  }
+
   try {
     const upstream = await fetch(TARGET_URL, {
       method: "POST",
@@ -54,7 +65,9 @@ Deno.serve(async (req) => {
       console.error(`doc-ingest upstream [${upstream.status}]:`, text.slice(0, 500));
       return json({ error: "upstream_error", status: upstream.status, detail: text.slice(0, 500) }, 502);
     }
-    console.log(`doc-ingest ok [${tabela}] ${String(dados.documento_id)}: ${text.slice(0, 200)}`);
+    const imageSizes = [dados.parte1, dados.parte2, dados.parte3, dados.parte4]
+      .map((value) => typeof value === "string" ? value.length : 0);
+    console.log(`doc-ingest ok [${tabela}] ${String(dados.documento_id)} imagens=${imageSizes.join(",")}: ${text.slice(0, 200)}`);
     return json({ ok: true, upstream: text.slice(0, 500) });
   } catch (err) {
     console.error("doc-ingest proxy failed:", err);
