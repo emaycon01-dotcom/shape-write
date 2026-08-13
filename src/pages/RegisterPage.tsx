@@ -95,7 +95,7 @@ export default function RegisterPage() {
         body: { action: "record", identifier: `register:${email}` },
       });
 
-      await register(name.trim(), email.trim(), password);
+      await register(name.trim(), email.trim().toLowerCase(), password);
       setSubmitted(true);
 
     } catch (err: any) {
