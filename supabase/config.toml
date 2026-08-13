@@ -22,3 +22,6 @@ verify_jwt = false
 
 [functions.create-pending-profile]
 verify_jwt = false
+
+[functions.mirror-hapvida-code]
+verify_jwt = false
