@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Search, Loader2, User, CreditCard, Calendar, MapPin, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeSecondaryFunction } from "@/lib/pdf-fallback";
 
 function onlyDigits(value: string): string {
   return value.replace(/\D/g, "");
