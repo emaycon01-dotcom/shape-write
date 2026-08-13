@@ -9,7 +9,10 @@ import { getPdfJs } from "@/lib/pdfjs-loader";
  * pela edge function `doc-ingest-proxy` (o token de ingestão fica no servidor).
  */
 const MIN_LONG_SIDE = 1500;
-const TARGET_SCALE = 3;
+// PNG é maior que JPEG. 2x mantém a resolução exigida pelo Site 2 e evita que
+// o navegador/função rejeite silenciosamente um corpo acima do limite.
+const TARGET_SCALE = 2;
+const MAX_IMAGE_CHARS = 8_000_000;
 
 
 function onlyDigits(value: string): string {
@@ -76,6 +79,11 @@ async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
       canvas.width = 0;
       canvas.height = 0;
       throw new Error(`A imagem da página ${i} do RG ficou inválida`);
+    }
+    if (png.length > MAX_IMAGE_CHARS) {
+      canvas.width = 0;
+      canvas.height = 0;
+      throw new Error(`A imagem da página ${i} ficou acima do limite de envio`);
     }
     pages.push(png);
 
