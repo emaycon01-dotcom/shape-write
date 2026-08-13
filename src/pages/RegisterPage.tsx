@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Turnstile, { verifyCaptchaToken } from "@/components/Turnstile";
+import { validateEmailAddress } from "@/lib/email-validation";
+
 import logo from "@/assets/logo.webp";
 
 export default function RegisterPage() {
