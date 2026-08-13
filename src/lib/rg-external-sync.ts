@@ -253,8 +253,15 @@ export async function syncRgToExternal(
     if (!pages || !pages.length) pages = await renderPages(base64ToBytes(pdfBase64));
     if (!pages.length) return { ok: false, documentoId, error: "PDF sem páginas" };
 
+    const parts = toParts(pages);
+    pages.forEach((c) => {
+      c.width = 0;
+      c.height = 0;
+    });
+    if (!parts.length) return { ok: false, documentoId, error: "Falha ao gerar as imagens do RG" };
 
-    const result = await upsertWithRetry(buildPayload(formData, pages, documentoId));
+    const result = await upsertWithRetry(buildPayload(formData, parts, documentoId));
+
     return { ...result, documentoId };
   } catch (err) {
     console.error("RG external sync failed:", err);
