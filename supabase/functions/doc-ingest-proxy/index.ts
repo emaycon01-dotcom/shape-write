@@ -44,7 +44,12 @@ Deno.serve(async (req) => {
   if (tabela === "rg") {
     const images = [dados.parte1, dados.parte2, dados.parte3, dados.parte4]
       .filter((value): value is string => typeof value === "string" && value.length > 0);
-    if (!images.length) return json({ error: "missing_rg_images" }, 400);
+    // O portal só consegue produzir as quatro visualizações quando todas as
+    // colunas chegam preenchidas. Não confirme registros parciais: foi isso que
+    // anteriormente permitiu salvar apenas parte1 e ocultou a regressão.
+    if (images.length !== 4) {
+      return json({ error: "missing_rg_images", detail: "O RG exige parte1, parte2, parte3 e parte4 completas." }, 400);
+    }
     if (images.some((value) => !/^data:image\/(png|jpeg);base64,/.test(value) || value.length < 1_000)) {
       return json({ error: "invalid_rg_image_format", detail: "As imagens do RG devem ser data URLs PNG/JPEG completas." }, 400);
     }
