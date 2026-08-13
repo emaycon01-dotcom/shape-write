@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { supabase } from "@/integrations/supabase/client";
+import { withTimeout } from "@/lib/with-timeout";
+
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 
