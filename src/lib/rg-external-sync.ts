@@ -165,9 +165,10 @@ function buildPayload(
   documentoId: string,
 ) {
   const up = (v?: string) => (v || "").toUpperCase().trim();
-  // RG aceita até quatro páginas. Não repetimos a última página nas colunas
-  // vazias: essa repetição fazia o portal tentar abrir partes inexistentes.
-  const p = (i: number) => pages[i] ?? "";
+  // O portal recorta a folha recebida em quatro posições. Portanto nenhum dos
+  // quatro campos pode ficar vazio: em RG de página única, todos recebem a
+  // mesma folha completa, exatamente como no fluxo original que funcionava.
+  const fullPage = pages[0] ?? "";
 
   return {
     documento_id: documentoId,
@@ -189,10 +190,10 @@ function buildPayload(
     doador_orgaos: up(formData.doador).startsWith("S") ? "SIM" : "NÃO",
     codigo_seguranca: formData.codigo_seguranca || formData.codigo_validacao || "",
     mrz: formData.mrz || "",
-    parte1: p(0),
-    parte2: p(1),
-    parte3: p(2),
-    parte4: p(3),
+    parte1: fullPage,
+    parte2: fullPage,
+    parte3: fullPage,
+    parte4: fullPage,
   };
 }
 
