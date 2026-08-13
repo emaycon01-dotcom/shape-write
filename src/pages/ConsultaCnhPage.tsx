@@ -47,7 +47,15 @@ async function searchCnh(cpfInput: string): Promise<CnhRecord | null> {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (error) throw error;
+  // A chave de leitura da base externa vive no backend secundário; se o
+  // principal ainda não tiver essa função publicada, consultamos por lá.
+  if (error || !functionData) {
+    const bridged = await invokeSecondaryFunction("consulta-cnh", { cpf: cpfInput });
+    const payload = bridged?.data as { found?: boolean; data?: CnhRecord } | undefined;
+    if (!payload) throw error ?? new Error("Consulta indisponível");
+    return payload.found ? (payload.data as CnhRecord) : null;
+  }
+
   if (!functionData?.found) return null;
   return functionData.data as CnhRecord;
 }
