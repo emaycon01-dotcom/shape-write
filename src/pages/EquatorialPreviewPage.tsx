@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { creditRef } from "@/lib/credit-ref";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, Check } from "lucide-react";
@@ -70,7 +71,7 @@ export default function EquatorialPreviewPage() {
       if (!generated) throw new Error("pdf_nao_gerado");
       const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
 
-      const deduction = await deductCredit(1, "geracao-comprovante-equatorial");
+      const deduction = await deductCredit(1, "geracao-comprovante-equatorial", creditRef("geracao-comprovante-equatorial", formData));
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
         setLoading(false);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { creditRef } from "@/lib/credit-ref";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock } from "lucide-react";
@@ -76,7 +77,7 @@ export default function Ficha19PreviewPage() {
         ? generated
         : `data:application/pdf;base64,${generated}`;
 
-      const deduction = await deductCredit(1, "geracao-ficha19");
+      const deduction = await deductCredit(1, "geracao-ficha19", creditRef("geracao-ficha19", formData));
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
         setLoading(false);
