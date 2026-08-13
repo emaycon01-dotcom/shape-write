@@ -115,7 +115,7 @@ export default function UnipPreviewPage() {
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
       });
-    } catch {
+    } catch (e) {
       toast({ title: "Erro ao gerar documento", description: `Nenhum crédito foi descontado. ${describeError(e)}`, variant: "destructive" });
     } finally {
       setLoading(false);
