@@ -51,24 +51,63 @@ function base64ToBytes(dataUrl: string): Uint8Array {
 }
 
 function canvasToImage(canvas: HTMLCanvasElement): string {
-  // Safari/iOS devolve "data:," quando o canvas é grande demais para PNG.
-  const png = canvas.toDataURL("image/png");
-  if (png.startsWith("data:image/png;base64,") && png.length > 1_000 && png.length <= MAX_IMAGE_CHARS) {
-    return png;
-  }
-  const jpeg = canvas.toDataURL("image/jpeg", 0.92);
+  const jpeg = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
   if (jpeg.startsWith("data:image/jpeg;base64,") && jpeg.length > 1_000 && jpeg.length <= MAX_IMAGE_CHARS) {
     return jpeg;
   }
   return "";
 }
 
-/** Renderiza TODAS as páginas do PDF como imagem, reduzindo a escala se preciso. */
-async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
-  // Reaproveita a instância única do app (worker local, já aquecido) em vez de
-  // baixar um segundo pdf.js da CDN a cada envio.
-  const pdfjsLib = await getPdfJs();
+/**
+ * Monta as imagens a partir das faixas já rasterizadas do PDF final (mesma
+ * rota usada pela CNH, que entrega alta qualidade sem estourar a memória do
+ * celular). Retorna null se o preview não estiver em cache.
+ */
+async function pagesFromPreviewBands(pdfDataUrl: string): Promise<string[] | null> {
+  try {
+    const { getPreviewPages } = await import("@/lib/canvas-pdf");
+    const pages = getPreviewPages(pdfDataUrl);
+    if (!pages || !pages.length) return null;
 
+    const out: string[] = [];
+    for (const page of pages) {
+      if (!page.bands.length) return null;
+      const scale = Math.max(1, TARGET_WIDTH / page.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(page.width * scale);
+      canvas.height = Math.round(page.height * scale);
+      const ctx = canvas.getContext("2d", { alpha: false });
+      if (!ctx) return null;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (const band of page.bands) {
+        const img = await new Promise<HTMLImageElement | null>((resolve) => {
+          const el = new Image();
+          el.onload = () => resolve(el);
+          el.onerror = () => resolve(null);
+          el.src = band.url;
+        });
+        if (!img) return null;
+        ctx.drawImage(img, 0, Math.round(band.top * scale), canvas.width, Math.round(band.height * scale));
+      }
+
+      const encoded = canvasToImage(canvas);
+      canvas.width = 0;
+      canvas.height = 0;
+      if (!encoded) return null;
+      out.push(encoded);
+    }
+    return out.length ? out : null;
+  } catch (err) {
+    console.error("RG sync: falha ao montar imagens das faixas:", err);
+    return null;
+  }
+}
+
+/** Fallback: rasteriza o PDF pelo pdf.js, uma página por vez, em alta largura. */
+async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
+  const pdfjsLib = await getPdfJs();
   const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
 
   const pages: string[] = [];
@@ -76,40 +115,37 @@ async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const base = page.getViewport({ scale: 1 });
-    const longSide = Math.max(base.width, base.height);
-    const startScale = Math.max(TARGET_SCALE, MIN_LONG_SIDE / longSide);
 
     let encoded = "";
-    for (const factor of [1, 0.75, 0.55, 0.4]) {
-      const scale = Math.max(startScale * factor, 900 / longSide);
-      const viewport = page.getViewport({ scale });
-
+    for (const width of [TARGET_WIDTH, 2000, MIN_WIDTH]) {
+      const viewport = page.getViewport({ scale: width / base.width });
       const canvas = document.createElement("canvas");
-      canvas.width = Math.round(viewport.width);
-      canvas.height = Math.round(viewport.height);
-      const ctx = canvas.getContext("2d", { alpha: false });
-      if (!ctx) throw new Error("Não foi possível preparar as imagens do RG");
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       try {
+        canvas.width = Math.round(viewport.width);
+        canvas.height = Math.round(viewport.height);
+        const ctx = canvas.getContext("2d", { alpha: false });
+        if (!ctx) throw new Error("sem contexto 2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
         encoded = canvasToImage(canvas);
-      } catch {
+      } catch (err) {
+        console.error(`RG sync: render ${width}px da página ${i} falhou`, err);
         encoded = "";
+      } finally {
+        canvas.width = 0;
+        canvas.height = 0;
       }
-
-      canvas.width = 0;
-      canvas.height = 0;
       if (encoded) break;
     }
 
-    if (!encoded) throw new Error(`A imagem da página ${i} do RG ficou inválida`);
-    pages.push(encoded);
+    // Uma página que falhou não pode cancelar o envio das outras.
+    if (encoded) pages.push(encoded);
   }
 
   return pages;
 }
+
 
 
 function buildPayload(
