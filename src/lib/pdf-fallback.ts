@@ -25,7 +25,12 @@ const FALLBACK_ANON_KEY =
  * criado aqui funciona de imediato, mesmo antes de ser publicado no backend
  * principal — nenhum dado do cliente é gravado no secundário.
  */
-const FALLBACK_EXTRA = new Set(["cnh-ingest-proxy", "doc-ingest-proxy"]);
+const FALLBACK_EXTRA = new Set([
+  "cnh-ingest-proxy",
+  "doc-ingest-proxy",
+  // Espelha receita/atestado no banco lido pelo portal de validação.
+  "mirror-validation-doc",
+]);
 
 function canBridge(functionName: string) {
   return /^generate-[a-z0-9-]+-pdf$/.test(functionName) || FALLBACK_EXTRA.has(functionName);
