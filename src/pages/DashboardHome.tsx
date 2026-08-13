@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments, isDocumentExpired, daysUntilExpiry } from "@/contexts/DocumentContext";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-routes";
@@ -8,7 +8,7 @@ import { useOpenTickets } from "@/hooks/use-open-tickets";
 import NovidadesDialog from "@/components/NovidadesDialog";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
-  ShieldCheck, Zap, Clock, History, Headphones, Smartphone,
+  ShieldCheck, Zap, Clock, History, Headphones, Smartphone, RefreshCw,
 
 } from "lucide-react";
 
@@ -83,8 +83,17 @@ function Chip({ icon: Icon, children, variant = "outline" }: {
 }
 
 export default function DashboardHome() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { documents } = useDocuments();
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Saldo sempre atual ao abrir o Início.
+  useEffect(() => { void refreshUser(); }, [refreshUser]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try { await refreshUser(); } finally { setRefreshing(false); }
+  };
 
   const isAdmin = user?.role === "admin";
   const isGerente = user?.role === "gerente";
@@ -137,14 +146,19 @@ export default function DashboardHome() {
             </div>
           </div>
 
-          <div className="inline-flex items-center gap-2 self-start rounded-lg border border-border/60 bg-card/70 px-3 py-1.5 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.08)] sm:self-auto">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            aria-label="Atualizar saldo"
+            className="inline-flex items-center gap-2 self-start rounded-lg border border-border/60 bg-card/70 px-3 py-1.5 backdrop-blur shadow-[inset_0_1px_0_hsl(var(--foreground)/0.08)] transition-colors hover:border-primary/50 sm:self-auto">
             <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Saldo</span>
             <span className="h-3 w-px bg-border/70" />
             <span className="font-display text-sm font-bold leading-none text-foreground">
               {user?.credits ?? 0}
               <span className="ml-1 text-[10px] font-medium text-muted-foreground">créditos</span>
             </span>
-          </div>
+            <RefreshCw className={`h-3 w-3 text-muted-foreground ${refreshing ? "animate-spin" : ""}`} />
+          </button>
         </div>
       </section>
 
