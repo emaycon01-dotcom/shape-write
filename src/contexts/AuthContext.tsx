@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     window.addEventListener("focus", revalidate);
     document.addEventListener("visibilitychange", onVisible);
-    const interval = window.setInterval(revalidate, 60_000);
+    const interval = window.setInterval(revalidate, 20_000);
 
     return () => {
       subscription.unsubscribe();
