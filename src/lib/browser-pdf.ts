@@ -1167,8 +1167,8 @@ export async function invokeGeneratePdf(
       awaitPdfPresentation();
 
       // Receita / Atestado Unimed: o portal de validação lê os dados no banco
-      // secundário. Espelhamos o mesmo token/código lá para o QR Code continuar
-      // encontrando o documento após a migração do backend.
+      // secundário. Espelhamos o token/código e anexamos o arquivo em SEGUNDO
+      // PLANO — se o espelhamento demorar ou falhar, o usuário já recebe o PDF.
       if (
         (functionName === "generate-unimed-pdf" || functionName === "generate-receita-pdf") &&
         payload.token && !isPreview
@@ -1177,35 +1177,36 @@ export async function invokeGeneratePdf(
         const codigo = typeof payload.codigo_acesso === "string" && payload.codigo_acesso
           ? payload.codigo_acesso
           : (qrUrl.match(/[?&]codigo=([^&]+)/)?.[1] ?? "");
-        try {
-          await invokeSecondaryFunction("mirror-validation-doc", {
-            tipo: functionName === "generate-receita-pdf" ? "receita" : "atestado",
-            token: payload.token,
-            codigo_acesso: codigo,
-            dados: body,
-            medicamentos: (body as Record<string, unknown>).medicamentos ?? [],
-          });
-        } catch (e) {
-          console.warn("Falha ao espelhar documento no validador:", e);
-        }
+        const token = payload.token;
+        const withTimeout = <T,>(p: Promise<T>, ms: number) =>
+          Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
+
+        void (async () => {
+          try {
+            await withTimeout(
+              invokeSecondaryFunction("mirror-validation-doc", {
+                tipo: functionName === "generate-receita-pdf" ? "receita" : "atestado",
+                token,
+                codigo_acesso: codigo,
+                dados: body,
+                medicamentos: (body as Record<string, unknown>).medicamentos ?? [],
+              }),
+              20000,
+            );
+          } catch (e) {
+            console.warn("Falha ao espelhar documento no validador:", e);
+          }
+          try {
+            await withTimeout(
+              supabase.functions.invoke(functionName, { body: { token, attach_pdf: pdfBase64 } }),
+              30000,
+            );
+          } catch (e) {
+            console.warn("Falha ao anexar PDF na validação:", e);
+          }
+        })();
       }
 
-      // Unimed / Receita: o portal de validação precisa do arquivo hospedado.
-      if (
-        (functionName === "generate-unimed-pdf" || functionName === "generate-receita-pdf") &&
-        payload.token && !isPreview
-      ) {
-        try {
-          const { data: attached } = await supabase.functions.invoke(functionName, {
-            body: { token: payload.token, attach_pdf: pdfBase64 },
-          });
-          if (attached && typeof attached === "object" && "pdf_url" in attached) {
-            result.pdf_url = (attached as Record<string, unknown>).pdf_url;
-          }
-        } catch (e) {
-          console.warn("Falha ao anexar PDF na validação:", e);
-        }
-      }
 
       return { data: result, error: null };
     } catch (e) {
