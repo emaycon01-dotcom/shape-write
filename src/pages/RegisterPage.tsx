@@ -62,6 +62,22 @@ export default function RegisterPage() {
       return;
     }
 
+    // Bloqueia endereços inválidos/temporários antes de disparar o e-mail de
+    // verificação — devoluções em massa restringem o envio do sistema.
+    try {
+      const { data: check } = await supabase.functions.invoke("validate-email", {
+        body: { email: email.trim().toLowerCase() },
+      });
+      if (check && check.valid === false) {
+        setError(check.reason || "E-mail inválido.");
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // Indisponibilidade da checagem não impede o cadastro.
+    }
+
+
     try {
       // Check rate limit server-side
       const { data: rateCheck } = await supabase.functions.invoke("rate-limit", {
