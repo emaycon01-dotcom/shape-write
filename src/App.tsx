@@ -9,6 +9,7 @@ import { DeviceSecurityProvider } from "@/contexts/DeviceSecurityContext";
 import SupportWidget from "@/components/SupportWidget";
 import GenerationOverlay from "@/components/GenerationOverlay";
 import { startCnhSyncWatcher } from "@/lib/cnh-sync-queue";
+import { startDocSyncWatcher } from "@/lib/doc-sync-queue";
 
 import { Suspense, useEffect } from "react";
 import { lazyRetry as lazy } from "@/lib/lazy-retry";
@@ -18,7 +19,7 @@ import LoginPage from "./pages/LoginPage";
 function CnhSyncWatcher() {
   const { user } = useAuth();
   useEffect(() => {
-    if (user) startCnhSyncWatcher();
+    if (user) { startCnhSyncWatcher(); startDocSyncWatcher(); }
   }, [user]);
   return null;
 }

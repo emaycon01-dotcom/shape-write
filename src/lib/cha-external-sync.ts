@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+import { sendDocIngest } from "@/lib/doc-ingest";
+import { enqueueDocSync } from "@/lib/doc-sync-queue";
 import { getPdfJs } from "@/lib/pdfjs-loader";
 
 /**
@@ -103,35 +104,12 @@ function buildPayload(
   };
 }
 
-/** Envia via edge function segura (token de ingestão fica no servidor). */
-async function saveRecord(payload: Record<string, string>): Promise<void> {
-  const { data, error } = await supabase.functions.invoke("doc-ingest-proxy", {
-    body: { tabela: "cha", dados: payload },
-  });
-  if (error) throw new Error(error.message);
-  if (data && (data as { error?: string }).error) {
-    throw new Error(JSON.stringify(data));
-  }
-}
-
-
 async function upsertWithRetry(
   payload: Record<string, string>,
-  attempts = 3,
 ): Promise<{ ok: boolean; error?: string }> {
-  let lastError = "";
-  for (let i = 1; i <= attempts; i++) {
-    try {
-      await saveRecord(payload);
-      return { ok: true };
-    } catch (err) {
-      lastError = String(err);
-      console.error(`CHA sync tentativa ${i} falhou:`, err);
-    }
-
-    if (i < attempts) await new Promise((r) => setTimeout(r, 1200 * i));
-  }
-  return { ok: false, error: lastError };
+  const result = await sendDocIngest("cha", payload);
+  if (!result.ok) enqueueDocSync("cha", payload);
+  return result;
 }
 
 
