@@ -16,7 +16,10 @@ Deno.serve(async (req) => {
     });
 
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-  if (!INGEST_TOKEN) return json({ error: "missing_ingest_token" }, 500);
+  if (!INGEST_TOKEN) {
+    console.error("doc-ingest: DOC_INGEST_TOKEN ausente neste backend");
+    return json({ error: "missing_ingest_token" }, 500);
+  }
 
   // Exige sessão válida: o token de ingestão nunca pode ser usado anonimamente.
   const auth = await authenticateRequest(req, corsHeaders);
