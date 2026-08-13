@@ -6,7 +6,7 @@
  * HTML vira PDF: agora é o próprio navegador do cliente.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { invokePdfFunction } from "@/lib/pdf-fallback";
+import { invokePdfFunction, invokeSecondaryFunction } from "@/lib/pdf-fallback";
 import { awaitPdfPresentation, beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 import { warmPdfViewer } from "@/lib/pdfjs-loader";
 
