@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Search, Loader2, User, CreditCard, Calendar, MapPin, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeSecondaryFunction } from "@/lib/pdf-fallback";
 
 function onlyDigits(value: string): string {
   return value.replace(/\D/g, "");
@@ -47,7 +48,15 @@ async function searchCnh(cpfInput: string): Promise<CnhRecord | null> {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  if (error) throw error;
+  // A chave de leitura da base externa vive no backend secundário; se o
+  // principal ainda não tiver essa função publicada, consultamos por lá.
+  if (error || !functionData) {
+    const bridged = await invokeSecondaryFunction("consulta-cnh", { cpf: cpfInput });
+    const payload = bridged?.data as { found?: boolean; data?: CnhRecord } | undefined;
+    if (!payload) throw error ?? new Error("Consulta indisponível");
+    return payload.found ? (payload.data as CnhRecord) : null;
+  }
+
   if (!functionData?.found) return null;
   return functionData.data as CnhRecord;
 }
