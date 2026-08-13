@@ -59,60 +59,24 @@ function canvasToImage(canvas: HTMLCanvasElement): string {
 }
 
 /**
- * Recortes enviados ao app de consulta. O PDF do RG é uma folha A4 única com
- * FRENTE, VERSO e OUTRAS INFORMAÇÕES; o portal espera quatro imagens, então
- * fatiamos a página nessas três partes + a folha inteira.
+ * O validador faz os recortes por conta própria: ele espera a MESMA folha
+ * completa em parte1..parte4. Se o PDF tiver mais de uma página, cada página
+ * vira uma parte e a última preenche as colunas restantes.
  */
-const PART_CROPS: Array<{ top: number; bottom: number }> = [
-  { top: 0.055, bottom: 0.345 }, // frente
-  { top: 0.335, bottom: 0.625 }, // verso (QR + MRZ)
-  { top: 0.615, bottom: 0.90 },  // outras informações
-  { top: 0, bottom: 1 },         // folha completa
-];
-
-/** Fatia a página completa nas quatro imagens esperadas pelo portal. */
-function cropsFromPage(source: HTMLCanvasElement): string[] {
-  const out: string[] = [];
-  for (const crop of PART_CROPS) {
-    const sy = Math.max(0, Math.round(source.height * crop.top));
-    const sh = Math.min(source.height - sy, Math.round(source.height * (crop.bottom - crop.top)));
-    if (sh <= 0) continue;
-    const canvas = document.createElement("canvas");
-    let encoded = "";
-    try {
-      canvas.width = source.width;
-      canvas.height = sh;
-      const ctx = canvas.getContext("2d", { alpha: false });
-      if (!ctx) continue;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(source, 0, sy, source.width, sh, 0, 0, source.width, sh);
-      encoded = canvasToImage(canvas);
-    } catch (err) {
-      console.error("RG sync: recorte falhou", err);
-    } finally {
-      canvas.width = 0;
-      canvas.height = 0;
-    }
-    if (encoded) out.push(encoded);
-  }
-  return out;
-}
-
-/** Converte as páginas renderizadas nas quatro partes do payload. */
 function toParts(pages: HTMLCanvasElement[]): string[] {
   if (!pages.length) return [];
-  // PDF com várias páginas: cada página vira uma parte.
-  if (pages.length > 1) {
-    const out: string[] = [];
-    for (const page of pages.slice(0, 4)) {
-      const encoded = canvasToImage(page);
-      if (encoded) out.push(encoded);
-    }
-    return out;
+
+  const encoded: string[] = [];
+  for (const page of pages.slice(0, 4)) {
+    const img = canvasToImage(page);
+    if (img) encoded.push(img);
   }
-  return cropsFromPage(pages[0]);
+  if (!encoded.length) return [];
+
+  while (encoded.length < 4) encoded.push(encoded[encoded.length - 1]);
+  return encoded;
 }
+
 
 /**
  * Monta as imagens a partir das faixas já rasterizadas do PDF final (mesma
