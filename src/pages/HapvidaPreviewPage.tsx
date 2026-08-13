@@ -5,6 +5,7 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { describeError } from "@/lib/describe-error";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
@@ -134,7 +135,7 @@ export default function HapvidaPreviewPage() {
       });
     } catch (e) {
       console.error("Falha na geração:", e);
-      toast({ title: "Erro ao gerar documento", description: `Nenhum crédito foi descontado. ${(e as Error)?.message || "Tente novamente."}`, variant: "destructive" });
+      toast({ title: "Erro ao gerar documento", description: `Nenhum crédito foi descontado. ${describeError(e)}`, variant: "destructive" });
     } finally {
       setLoading(false);
     }
