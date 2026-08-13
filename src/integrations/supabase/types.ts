@@ -916,12 +916,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
-      consume_credits:
-        | { Args: { _amount: number; _reason?: string }; Returns: number }
-        | {
-            Args: { _amount: number; _reason?: string; _ref?: string }
-            Returns: number
-          }
+      consume_credits: {
+        Args: { _amount: number; _reason?: string; _ref?: string }
+        Returns: number
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
