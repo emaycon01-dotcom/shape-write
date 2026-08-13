@@ -307,11 +307,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const deductCredit = useCallback(
-    async (amount: number = 1, reason: string = "geracao") => {
+    async (amount: number = 1, reason: string = "geracao", ref?: string) => {
       const { data, error } = await supabase.rpc("consume_credits", {
         _amount: amount,
         _reason: reason,
+        _ref: ref ?? null,
       });
+
+
 
       if (error) {
         const msg = error.message || "";
