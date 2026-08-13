@@ -143,6 +143,7 @@ export type Database = {
           id: string
           kind: string
           reason: string
+          ref: string | null
           user_id: string
         }
         Insert: {
@@ -153,6 +154,7 @@ export type Database = {
           id?: string
           kind?: string
           reason?: string
+          ref?: string | null
           user_id: string
         }
         Update: {
@@ -163,6 +165,7 @@ export type Database = {
           id?: string
           kind?: string
           reason?: string
+          ref?: string | null
           user_id?: string
         }
         Relationships: []
@@ -914,7 +917,7 @@ export type Database = {
       }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       consume_credits: {
-        Args: { _amount: number; _reason?: string }
+        Args: { _amount: number; _reason?: string; _ref?: string }
         Returns: number
       }
       delete_email: {

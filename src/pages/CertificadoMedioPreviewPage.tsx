@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { creditRef } from "@/lib/credit-ref";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, Copy, Check } from "lucide-react";
@@ -75,7 +76,7 @@ export default function CertificadoMedioPreviewPage() {
       if (!generated) throw new Error("pdf_nao_gerado");
       const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
 
-      const deduction = await deductCredit(1, "geracao-certificado-medio");
+      const deduction = await deductCredit(1, "geracao-certificado-medio", creditRef("geracao-certificado-medio", formData));
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
         setLoading(false);

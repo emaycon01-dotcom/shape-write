@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { creditRef } from "@/lib/credit-ref";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, Copy, Check } from "lucide-react";
@@ -59,7 +60,7 @@ export default function UnipPreviewPage() {
 
     setLoading(true);
     try {
-      const deduction = await deductCredit(1, "geracao-diploma-unip");
+      const deduction = await deductCredit(1, "geracao-diploma-unip", creditRef("geracao-diploma-unip", formData));
       if (!deduction.ok) {
         toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
         setLoading(false);
