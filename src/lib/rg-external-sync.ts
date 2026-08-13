@@ -10,7 +10,6 @@ import { getPdfJs } from "@/lib/pdfjs-loader";
  */
 const MIN_LONG_SIDE = 1500;
 const TARGET_SCALE = 3;
-const JPEG_QUALITY = 0.94;
 
 
 function onlyDigits(value: string): string {
@@ -46,7 +45,7 @@ function base64ToBytes(dataUrl: string): Uint8Array {
   return bytes;
 }
 
-/** Renderiza TODAS as páginas do PDF, sem recorte e sem rotação, em alta resolução. */
+/** Renderiza TODAS as páginas do PDF como PNG, formato exigido pelo validador. */
 async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
   // Reaproveita a instância única do app (worker local, já aquecido) em vez de
   // baixar um segundo pdf.js da CDN a cada envio.
@@ -66,12 +65,19 @@ async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(viewport.width);
     canvas.height = Math.round(viewport.height);
-    const ctx = canvas.getContext("2d", { alpha: false })!;
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) throw new Error("Não foi possível preparar as imagens do RG");
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     await page.render({ canvasContext: ctx, viewport }).promise;
-    pages.push(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+    const png = canvas.toDataURL("image/png");
+    if (!png.startsWith("data:image/png;base64,") || png.length < 1_000) {
+      canvas.width = 0;
+      canvas.height = 0;
+      throw new Error(`A imagem da página ${i} do RG ficou inválida`);
+    }
+    pages.push(png);
 
     canvas.width = 0;
     canvas.height = 0;
@@ -86,7 +92,9 @@ function buildPayload(
   documentoId: string,
 ) {
   const up = (v?: string) => (v || "").toUpperCase().trim();
-  const p = (i: number) => pages[i] ?? pages[pages.length - 1] ?? "";
+  // RG aceita até quatro páginas. Não repetimos a última página nas colunas
+  // vazias: essa repetição fazia o portal tentar abrir partes inexistentes.
+  const p = (i: number) => pages[i] ?? "";
 
   return {
     documento_id: documentoId,
