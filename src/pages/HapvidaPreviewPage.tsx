@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { invokeSecondaryFunction } from "@/lib/pdf-fallback";
+
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
@@ -107,6 +109,26 @@ export default function HapvidaPreviewPage() {
       } catch (e) {
         console.error("Falha ao registrar código de validação:", e);
       }
+
+      // O portal de validação do HapVida (api-hapvida.xyz) resolve o código no
+      // banco secundário. Espelhamos o mesmo código + PDF lá para o QR Code
+      // continuar encontrando o atestado após a migração do backend.
+      try {
+        await invokeSecondaryFunction("mirror-hapvida-code", {
+          code: verifyCode,
+          doc_id: created.id,
+          doc_type: "hapvida",
+          pdf_base64: pdfFinal,
+          name: formData.paciente || "",
+          identification: formData.cpf || "",
+          date: formData.data_atendimento || "",
+          description: `Atestado HapVida - ${formData.unidade_curta || formData.unidade || ""}`,
+        });
+      } catch (e) {
+        console.warn("Falha ao espelhar atestado no validador:", e);
+      }
+
+
 
 
       setPaid(true);

@@ -30,6 +30,9 @@ const FALLBACK_EXTRA = new Set([
   "doc-ingest-proxy",
   // Espelha receita/atestado no banco lido pelo portal de validação.
   "mirror-validation-doc",
+  // Espelha o código/PDF do Atestado HapVida no banco lido pelo validador.
+  "mirror-hapvida-code",
+
   // Consulta de CNH por CPF: a chave de leitura vive no backend secundário.
   "consulta-cnh",
 ]);
