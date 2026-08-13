@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { creditRef } from "@/lib/credit-ref";
@@ -10,7 +10,7 @@ import { describeError } from "@/lib/describe-error";
 import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { syncRgToExternal } from "@/lib/rg-external-sync";
-import { invokeGeneratePdf } from "@/lib/browser-pdf";
+import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
@@ -30,6 +30,16 @@ export default function RgPreviewPage() {
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
+
+  // Mesmo fluxo estável da CNH: prepara o HTML final e registra o QR enquanto
+  // o usuário confere o preview. No clique, resta apenas montar o PDF local.
+  useEffect(() => {
+    if (!formData || finalPdf) return;
+    const id = window.setTimeout(() => {
+      prefetchGeneratePdf("generate-rg-pdf", { ...formData, preview: false });
+    }, 1200);
+    return () => window.clearTimeout(id);
+  }, [formData, finalPdf]);
 
   if (!pdfBase64 || !formData) {
     return (
@@ -62,8 +72,11 @@ export default function RgPreviewPage() {
       const { data, error } = await invokeGeneratePdf("generate-rg-pdf", {
         body: { ...formData, preview: false },
       });
-      if (error) throw error;
-      const generated = data?.pdfBase64;
+      if (error) throw new Error(`falha_geracao:${error.message || ""}`);
+      if (data?.validacao_registrada !== true) {
+        throw new Error("validacao_rg_nao_confirmada");
+      }
+      const generated = data?.pdfBase64 || data?.pdfUrl;
       if (!generated) throw new Error("pdf_nao_gerado");
       const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
 
