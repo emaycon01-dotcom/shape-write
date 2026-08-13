@@ -64,7 +64,10 @@ export async function invokeSecondaryFunction(
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(body),
+      // Sem prazo, uma ponte pendurada deixava a tela "carregando" para sempre.
+      signal: AbortSignal.timeout(60000),
     });
+
 
     const json = await res.json().catch(() => null);
     if (!res.ok || !json || json.success === false) {
