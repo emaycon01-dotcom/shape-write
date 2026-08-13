@@ -64,18 +64,14 @@ export default function RegisterPage() {
 
     // Bloqueia endereços inválidos/temporários antes de disparar o e-mail de
     // verificação — devoluções em massa restringem o envio do sistema.
-    try {
-      const { data: check } = await supabase.functions.invoke("validate-email", {
-        body: { email: email.trim().toLowerCase() },
-      });
-      if (check && check.valid === false) {
-        setError(check.reason || "E-mail inválido.");
-        setLoading(false);
-        return;
-      }
-    } catch {
-      // Indisponibilidade da checagem não impede o cadastro.
+    const check = await validateEmailAddress(email);
+    if (!check.valid) {
+      setError(check.reason || "E-mail inválido.");
+      if (check.suggestion) setEmail(check.suggestion);
+      setLoading(false);
+      return;
     }
+
 
 
     try {
