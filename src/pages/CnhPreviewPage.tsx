@@ -85,7 +85,8 @@ export default function CnhPreviewPage() {
       const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
       let externalSynced = false;
       try {
-        externalSynced = await syncCnhToExternal(pdfFinal, formData, tipo);
+        externalSynced = await withTimeout(syncCnhToExternal(pdfFinal, formData, tipo), 45000, false);
+
       } catch (syncErr) {
         console.error("Falha na sincronização de fotos:", syncErr);
       }
