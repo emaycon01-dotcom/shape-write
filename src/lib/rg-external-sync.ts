@@ -202,8 +202,10 @@ export async function syncRgToExternal(
 ): Promise<{ ok: boolean; documentoId: string; error?: string }> {
   const documentoId = buildRgDocumentoId(formData.cpf || "");
   try {
-    const pages = await renderPages(base64ToBytes(pdfBase64));
+    let pages = await pagesFromPreviewBands(pdfBase64);
+    if (!pages || !pages.length) pages = await renderPages(base64ToBytes(pdfBase64));
     if (!pages.length) return { ok: false, documentoId, error: "PDF sem páginas" };
+
 
     const result = await upsertWithRetry(buildPayload(formData, pages, documentoId));
     return { ...result, documentoId };
