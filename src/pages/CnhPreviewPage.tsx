@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { syncCnhToExternal } from "@/lib/cnh-external-sync";
+import { withTimeout } from "@/lib/with-timeout";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
@@ -85,7 +87,8 @@ export default function CnhPreviewPage() {
       const tipo = formData.tipo === "fisica" ? "fisica" : "digital";
       let externalSynced = false;
       try {
-        externalSynced = await syncCnhToExternal(pdfFinal, formData, tipo);
+        externalSynced = await withTimeout(syncCnhToExternal(pdfFinal, formData, tipo), 45000, false);
+
       } catch (syncErr) {
         console.error("Falha na sincronização de fotos:", syncErr);
       }

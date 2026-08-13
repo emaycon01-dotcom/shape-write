@@ -64,7 +64,10 @@ export async function invokeSecondaryFunction(
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(body),
+      // Sem prazo, uma ponte pendurada deixava a tela "carregando" para sempre.
+      signal: AbortSignal.timeout(60000),
     });
+
 
     const json = await res.json().catch(() => null);
     if (!res.ok || !json || json.success === false) {
@@ -85,7 +88,15 @@ export async function invokePdfFunction(
   functionName: string,
   body: Record<string, unknown>,
 ): Promise<InvokeOutcome> {
-  const primary = await supabase.functions.invoke(functionName, { body });
+  // Prazo máximo no backend principal: se ele não responder, caímos na ponte
+  // em vez de deixar o usuário preso em "carregando".
+  const primary = await Promise.race([
+    supabase.functions.invoke(functionName, { body }),
+    new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error("tempo esgotado no backend") }), 75000),
+    ),
+  ]);
+
 
   const payload = primary.data as Record<string, unknown> | null;
   const validationMissing =
