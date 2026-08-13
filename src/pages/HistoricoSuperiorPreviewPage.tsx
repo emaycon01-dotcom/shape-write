@@ -99,7 +99,7 @@ export default function HistoricoSuperiorPreviewPage() {
       });
     } catch (e) {
       console.error("Falha na geração:", e);
-      toast({ title: "Erro ao gerar documento", description: "Nenhum crédito foi descontado. Tente novamente.", variant: "destructive" });
+      toast({ title: "Erro ao gerar documento", description: `Nenhum crédito foi descontado. ${(e as Error)?.message || "Tente novamente."}`, variant: "destructive" });
     } finally {
       setLoading(false);
     }
