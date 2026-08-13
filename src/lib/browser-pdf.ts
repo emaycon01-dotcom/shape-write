@@ -1137,15 +1137,6 @@ export async function invokeGeneratePdf(
       let pdfBase64: string;
       const canvasMod = await import("@/lib/canvas-pdf");
 
-      // O preview mantém os ImageBitmaps grandes do template em cache. Antes
-      // do documento definitivo, feche esses backing stores para que a
-      // rasterização final tenha toda a memória disponível. As faixas JPEG que
-      // o usuário está vendo continuam intactas, evitando o quadro preto.
-      if (!isPreview) {
-        canvasMod.releaseBitmapCache();
-        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-      }
-
       // O preview serve somente para conferência. O arquivo definitivo sempre
       // recebe uma montagem própria: reutilizar a Data URL do preview fazia o
       // visualizador continuar mostrando as faixas JPEG corretas em memória,
@@ -1157,9 +1148,6 @@ export async function invokeGeneratePdf(
       } catch (canvasError) {
         if (abortSignal?.aborted) throw canvasError;
         console.warn(`[PDF] Motor canvas falhou para ${functionName}, usando html2canvas fallback:`, canvasError);
-        // Não sobrepõe o fallback aos bitmaps deixados pela tentativa anterior.
-        canvasMod.releaseBitmapCache();
-        await new Promise((resolve) => setTimeout(resolve, 80));
         pdfBase64 = await renderHtmlToDocument(html, isPreview, abortSignal);
       }
 
