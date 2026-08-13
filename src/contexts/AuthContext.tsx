@@ -22,7 +22,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  deductCredit: (amount?: number, reason?: string) => Promise<{ ok: boolean; error?: string; credits?: number }>;
+  deductCredit: (amount?: number, reason?: string, ref?: string) => Promise<{ ok: boolean; error?: string; credits?: number }>;
   refreshUser: () => Promise<void>;
 }
 
