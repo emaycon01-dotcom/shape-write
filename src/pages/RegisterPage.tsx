@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Turnstile, { verifyCaptchaToken } from "@/components/Turnstile";
+import { validateEmailAddress } from "@/lib/email-validation";
+
 import logo from "@/assets/logo.webp";
 
 export default function RegisterPage() {
@@ -62,6 +64,18 @@ export default function RegisterPage() {
       return;
     }
 
+    // Bloqueia endereços inválidos/temporários antes de disparar o e-mail de
+    // verificação — devoluções em massa restringem o envio do sistema.
+    const check = await validateEmailAddress(email);
+    if (!check.valid) {
+      setError(check.reason || "E-mail inválido.");
+      if (check.suggestion) setEmail(check.suggestion);
+      setLoading(false);
+      return;
+    }
+
+
+
     try {
       // Check rate limit server-side
       const { data: rateCheck } = await supabase.functions.invoke("rate-limit", {
@@ -79,7 +93,7 @@ export default function RegisterPage() {
         body: { action: "record", identifier: `register:${email}` },
       });
 
-      await register(name.trim(), email.trim(), password);
+      await register(name.trim(), email.trim().toLowerCase(), password);
       setSubmitted(true);
 
     } catch (err: any) {

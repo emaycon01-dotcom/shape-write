@@ -25,3 +25,6 @@ verify_jwt = false
 
 [functions.mirror-hapvida-code]
 verify_jwt = false
+
+[functions.validate-email]
+verify_jwt = false
