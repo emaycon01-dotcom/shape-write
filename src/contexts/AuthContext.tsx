@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     window.addEventListener("focus", revalidate);
     document.addEventListener("visibilitychange", onVisible);
-    const interval = window.setInterval(revalidate, 60_000);
+    const interval = window.setInterval(revalidate, 20_000);
 
     return () => {
       subscription.unsubscribe();
@@ -202,6 +202,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.clearInterval(interval);
     };
   }, []);
+
+  // Saldo em tempo real: qualquer alteração de créditos/plano feita pelo painel
+  // (ou por uma recarga PIX) reflete na hora, sem esperar o próximo ciclo.
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(`profile-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${userId}` },
+        (payload) => {
+          const row = payload.new as { credits?: number; plano?: string; verified?: boolean; status?: string };
+          setUser((prev) => {
+            if (!prev) return prev;
+            const next = {
+              ...prev,
+              credits: Number(row?.credits ?? prev.credits) || 0,
+              plano: row?.plano || prev.plano,
+              verified: prev.role === "cliente" ? row?.verified === true : prev.verified,
+            };
+            writeCachedUser(next);
+            return next;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   const login = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
