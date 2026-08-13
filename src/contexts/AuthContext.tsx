@@ -31,6 +31,32 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const PENDING_MSG = "Sua conta está em análise. Aguarde a aprovação de um administrador.";
 export const REJECTED_MSG = "Seu acesso foi recusado pela administração.";
 
+/**
+ * Registra o perfil pendente via serviço quando o signUp não devolve sessão
+ * (confirmação de e-mail ativa) e o RLS impede a inserção pelo cliente.
+ */
+const PROFILE_BRIDGE_URL =
+  "https://doycwownddyxfqntifca.supabase.co/functions/v1/create-pending-profile";
+const PROFILE_BRIDGE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRveWN3b3duZGR5eGZxbnRpZmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDYzMTYsImV4cCI6MjA4OTAyMjMxNn0.kpk695Xomza4QBmD8FtdkNSMmJS1bFQyc6YSuvxpEbI";
+
+async function ensurePendingProfile(userId: string, email: string, name: string) {
+  try {
+    const res = await fetch(PROFILE_BRIDGE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: PROFILE_BRIDGE_KEY },
+      body: JSON.stringify({ user_id: userId, email, name }),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.ok) {
+      throw new Error("Não foi possível concluir o cadastro. Tente novamente.");
+    }
+  } catch (err) {
+    throw err instanceof Error ? err : new Error("Não foi possível concluir o cadastro.");
+  }
+}
+
+
 async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
   // Consultas em paralelo (antes eram 3 idas sequenciais ao banco)
   const [blockedRes, profileRes, rolesRes] = await Promise.all([
@@ -203,19 +229,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (error) throw new Error(error.message);
 
-    // Create profile for the new user (fica pendente até aprovação do admin)
+    // Cria o perfil do novo cadastro (fica pendente até aprovação do admin).
     if (data.user) {
-      await supabase.from("profiles").insert({
-        user_id: data.user.id,
-        email,
-        name,
-        credits: 0,
-        plano: "free",
-        status: "pendente",
-      });
+      let created = false;
+      if (data.session) {
+        const { error: insErr } = await supabase.from("profiles").insert({
+          user_id: data.user.id,
+          email,
+          name,
+          credits: 0,
+          plano: "free",
+          status: "pendente",
+        });
+        created = !insErr;
+      }
+
+      // Sem sessão (confirmação de e-mail ativa) o RLS bloqueia a inserção:
+      // o perfil é criado pelo serviço para a conta entrar na fila de aprovação.
+      if (!created) {
+        await ensurePendingProfile(data.user.id, email, name);
+      }
     }
     await supabase.auth.signOut();
   }, []);
+
 
 
   const logout = useCallback(async () => {
