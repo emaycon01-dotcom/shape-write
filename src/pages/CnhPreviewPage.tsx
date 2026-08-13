@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { syncCnhToExternal } from "@/lib/cnh-external-sync";
+import { withTimeout } from "@/lib/with-timeout";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
