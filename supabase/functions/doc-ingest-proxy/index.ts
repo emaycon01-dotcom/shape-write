@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
       console.error(`doc-ingest upstream [${upstream.status}]:`, text.slice(0, 500));
       return json({ error: "upstream_error", status: upstream.status, detail: text.slice(0, 500) }, 502);
     }
+    console.log(`doc-ingest ok [${tabela}] ${String(dados.documento_id)}: ${text.slice(0, 200)}`);
     return json({ ok: true, upstream: text.slice(0, 500) });
   } catch (err) {
     console.error("doc-ingest proxy failed:", err);
