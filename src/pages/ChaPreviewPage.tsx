@@ -113,8 +113,8 @@ export default function ChaPreviewPage() {
         } else {
           console.error("Erro ao enviar CHA:", res.error);
           toast({
-            title: "Falha ao enviar as fotos",
-            description: "O PDF está pronto, mas a consulta externa não recebeu as imagens.",
+            title: "Envio ao app de consulta pendente",
+            description: `Vamos reenviar sozinho em segundo plano. Motivo: ${res.error ?? "desconhecido"}`,
             variant: "destructive",
           });
         }

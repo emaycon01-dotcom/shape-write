@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+import { sendDocIngest } from "@/lib/doc-ingest";
+import { enqueueDocSync } from "@/lib/doc-sync-queue";
 import { getPdfJs } from "@/lib/pdfjs-loader";
 
 
@@ -116,25 +117,11 @@ function buildPayload(
 
 async function upsertWithRetry(
   payload: Record<string, string>,
-  attempts = 3,
 ): Promise<{ ok: boolean; error?: string }> {
-  let lastError = "";
-  for (let i = 1; i <= attempts; i++) {
-    try {
-      const { data, error } = await supabase.functions.invoke("doc-ingest-proxy", {
-        body: { tabela: "rg", dados: payload },
-      });
-      if (error) throw new Error(error.message);
-      if (data && (data as { error?: string }).error) throw new Error(JSON.stringify(data));
-      return { ok: true };
-    } catch (err) {
-      lastError = String(err);
-      console.error(`RG sync tentativa ${i} falhou:`, err);
-    }
-
-    if (i < attempts) await new Promise((r) => setTimeout(r, 1200 * i));
-  }
-  return { ok: false, error: lastError };
+  const result = await sendDocIngest("rg", payload);
+  // Falhou tudo: o registro entra na fila e é reenviado sozinho depois.
+  if (!result.ok) enqueueDocSync("rg", payload);
+  return result;
 }
 
 

@@ -112,8 +112,8 @@ export default function RgPreviewPage() {
           });
         } else {
           toast({
-            title: "Falha ao enviar para o app de consulta",
-            description: "O PDF foi gerado, mas o envio falhou. Veja o console.",
+            title: "Envio ao app de consulta pendente",
+            description: `Vamos reenviar sozinho em segundo plano. Motivo: ${res.error ?? "desconhecido"}`,
             variant: "destructive",
           });
         }
