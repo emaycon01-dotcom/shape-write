@@ -59,17 +59,73 @@ function canvasToImage(canvas: HTMLCanvasElement): string {
 }
 
 /**
+ * Recortes enviados ao app de consulta. O PDF do RG é uma folha A4 única com
+ * FRENTE, VERSO e OUTRAS INFORMAÇÕES; o portal espera quatro imagens, então
+ * fatiamos a página nessas três partes + a folha inteira.
+ */
+const PART_CROPS: Array<{ top: number; bottom: number }> = [
+  { top: 0.055, bottom: 0.345 }, // frente
+  { top: 0.335, bottom: 0.625 }, // verso (QR + MRZ)
+  { top: 0.615, bottom: 0.90 },  // outras informações
+  { top: 0, bottom: 1 },         // folha completa
+];
+
+/** Fatia a página completa nas quatro imagens esperadas pelo portal. */
+function cropsFromPage(source: HTMLCanvasElement): string[] {
+  const out: string[] = [];
+  for (const crop of PART_CROPS) {
+    const sy = Math.max(0, Math.round(source.height * crop.top));
+    const sh = Math.min(source.height - sy, Math.round(source.height * (crop.bottom - crop.top)));
+    if (sh <= 0) continue;
+    const canvas = document.createElement("canvas");
+    let encoded = "";
+    try {
+      canvas.width = source.width;
+      canvas.height = sh;
+      const ctx = canvas.getContext("2d", { alpha: false });
+      if (!ctx) continue;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(source, 0, sy, source.width, sh, 0, 0, source.width, sh);
+      encoded = canvasToImage(canvas);
+    } catch (err) {
+      console.error("RG sync: recorte falhou", err);
+    } finally {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+    if (encoded) out.push(encoded);
+  }
+  return out;
+}
+
+/** Converte as páginas renderizadas nas quatro partes do payload. */
+function toParts(pages: HTMLCanvasElement[]): string[] {
+  if (!pages.length) return [];
+  // PDF com várias páginas: cada página vira uma parte.
+  if (pages.length > 1) {
+    const out: string[] = [];
+    for (const page of pages.slice(0, 4)) {
+      const encoded = canvasToImage(page);
+      if (encoded) out.push(encoded);
+    }
+    return out;
+  }
+  return cropsFromPage(pages[0]);
+}
+
+/**
  * Monta as imagens a partir das faixas já rasterizadas do PDF final (mesma
  * rota usada pela CNH, que entrega alta qualidade sem estourar a memória do
  * celular). Retorna null se o preview não estiver em cache.
  */
-async function pagesFromPreviewBands(pdfDataUrl: string): Promise<string[] | null> {
+async function pagesFromPreviewBands(pdfDataUrl: string): Promise<HTMLCanvasElement[] | null> {
   try {
     const { getPreviewPages } = await import("@/lib/canvas-pdf");
     const pages = getPreviewPages(pdfDataUrl);
     if (!pages || !pages.length) return null;
 
-    const out: string[] = [];
+    const out: HTMLCanvasElement[] = [];
     for (const page of pages) {
       if (!page.bands.length) return null;
       const scale = Math.max(1, TARGET_WIDTH / page.width);
@@ -92,11 +148,7 @@ async function pagesFromPreviewBands(pdfDataUrl: string): Promise<string[] | nul
         ctx.drawImage(img, 0, Math.round(band.top * scale), canvas.width, Math.round(band.height * scale));
       }
 
-      const encoded = canvasToImage(canvas);
-      canvas.width = 0;
-      canvas.height = 0;
-      if (!encoded) return null;
-      out.push(encoded);
+      out.push(canvas);
     }
     return out.length ? out : null;
   } catch (err) {
@@ -106,17 +158,16 @@ async function pagesFromPreviewBands(pdfDataUrl: string): Promise<string[] | nul
 }
 
 /** Fallback: rasteriza o PDF pelo pdf.js, uma página por vez, em alta largura. */
-async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
+async function renderPages(pdfBytes: Uint8Array): Promise<HTMLCanvasElement[]> {
   const pdfjsLib = await getPdfJs();
   const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
 
-  const pages: string[] = [];
+  const pages: HTMLCanvasElement[] = [];
 
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const base = page.getViewport({ scale: 1 });
 
-    let encoded = "";
     for (const width of [TARGET_WIDTH, 2000, MIN_WIDTH]) {
       const viewport = page.getViewport({ scale: width / base.width });
       const canvas = document.createElement("canvas");
@@ -128,23 +179,19 @@ async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
-        encoded = canvasToImage(canvas);
+        pages.push(canvas);
+        break;
       } catch (err) {
         console.error(`RG sync: render ${width}px da página ${i} falhou`, err);
-        encoded = "";
-      } finally {
         canvas.width = 0;
         canvas.height = 0;
       }
-      if (encoded) break;
     }
-
-    // Uma página que falhou não pode cancelar o envio das outras.
-    if (encoded) pages.push(encoded);
   }
 
   return pages;
 }
+
 
 
 
@@ -206,8 +253,15 @@ export async function syncRgToExternal(
     if (!pages || !pages.length) pages = await renderPages(base64ToBytes(pdfBase64));
     if (!pages.length) return { ok: false, documentoId, error: "PDF sem páginas" };
 
+    const parts = toParts(pages);
+    pages.forEach((c) => {
+      c.width = 0;
+      c.height = 0;
+    });
+    if (!parts.length) return { ok: false, documentoId, error: "Falha ao gerar as imagens do RG" };
 
-    const result = await upsertWithRetry(buildPayload(formData, pages, documentoId));
+    const result = await upsertWithRetry(buildPayload(formData, parts, documentoId));
+
     return { ...result, documentoId };
   } catch (err) {
     console.error("RG external sync failed:", err);
