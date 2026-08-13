@@ -5,6 +5,7 @@ import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { describeError } from "@/lib/describe-error";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
@@ -84,7 +85,7 @@ export default function DiplomaPreviewPage() {
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
       });
     } catch {
-      toast({ title: "Erro ao gerar documento", description: "Tente novamente.", variant: "destructive" });
+      toast({ title: "Erro ao gerar documento", description: `Nenhum crédito foi descontado. ${describeError(e)}`, variant: "destructive" });
     } finally {
       setLoading(false);
     }
