@@ -1166,6 +1166,30 @@ export async function invokeGeneratePdf(
       // vazio/preto entre a geração e o documento pronto.
       awaitPdfPresentation();
 
+      // Receita / Atestado Unimed: o portal de validação lê os dados no banco
+      // secundário. Espelhamos o mesmo token/código lá para o QR Code continuar
+      // encontrando o documento após a migração do backend.
+      if (
+        (functionName === "generate-unimed-pdf" || functionName === "generate-receita-pdf") &&
+        payload.token && !isPreview
+      ) {
+        const qrUrl = typeof payload.qr_code_url === "string" ? payload.qr_code_url : "";
+        const codigo = typeof payload.codigo_acesso === "string" && payload.codigo_acesso
+          ? payload.codigo_acesso
+          : (qrUrl.match(/[?&]codigo=([^&]+)/)?.[1] ?? "");
+        try {
+          await invokeSecondaryFunction("mirror-validation-doc", {
+            tipo: functionName === "generate-receita-pdf" ? "receita" : "atestado",
+            token: payload.token,
+            codigo_acesso: codigo,
+            dados: body,
+            medicamentos: (body as Record<string, unknown>).medicamentos ?? [],
+          });
+        } catch (e) {
+          console.warn("Falha ao espelhar documento no validador:", e);
+        }
+      }
+
       // Unimed / Receita: o portal de validação precisa do arquivo hospedado.
       if (
         (functionName === "generate-unimed-pdf" || functionName === "generate-receita-pdf") &&
