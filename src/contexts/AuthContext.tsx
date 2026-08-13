@@ -203,19 +203,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (error) throw new Error(error.message);
 
-    // Create profile for the new user (fica pendente até aprovação do admin)
+    // Cria o perfil do novo cadastro (fica pendente até aprovação do admin).
     if (data.user) {
-      await supabase.from("profiles").insert({
-        user_id: data.user.id,
-        email,
-        name,
-        credits: 0,
-        plano: "free",
-        status: "pendente",
-      });
+      let created = false;
+      if (data.session) {
+        const { error: insErr } = await supabase.from("profiles").insert({
+          user_id: data.user.id,
+          email,
+          name,
+          credits: 0,
+          plano: "free",
+          status: "pendente",
+        });
+        created = !insErr;
+      }
+
+      // Sem sessão (confirmação de e-mail ativa) o RLS bloqueia a inserção:
+      // o perfil é criado pelo serviço para a conta entrar na fila de aprovação.
+      if (!created) {
+        await ensurePendingProfile(data.user.id, email, name);
+      }
     }
     await supabase.auth.signOut();
   }, []);
+
 
 
   const logout = useCallback(async () => {
