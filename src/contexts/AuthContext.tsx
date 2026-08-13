@@ -31,6 +31,32 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const PENDING_MSG = "Sua conta está em análise. Aguarde a aprovação de um administrador.";
 export const REJECTED_MSG = "Seu acesso foi recusado pela administração.";
 
+/**
+ * Registra o perfil pendente via serviço quando o signUp não devolve sessão
+ * (confirmação de e-mail ativa) e o RLS impede a inserção pelo cliente.
+ */
+const PROFILE_BRIDGE_URL =
+  "https://doycwownddyxfqntifca.supabase.co/functions/v1/create-pending-profile";
+const PROFILE_BRIDGE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRveWN3b3duZGR5eGZxbnRpZmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDYzMTYsImV4cCI6MjA4OTAyMjMxNn0.kpk695Xomza4QBmD8FtdkNSMmJS1bFQyc6YSuvxpEbI";
+
+async function ensurePendingProfile(userId: string, email: string, name: string) {
+  try {
+    const res = await fetch(PROFILE_BRIDGE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: PROFILE_BRIDGE_KEY },
+      body: JSON.stringify({ user_id: userId, email, name }),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.ok) {
+      throw new Error("Não foi possível concluir o cadastro. Tente novamente.");
+    }
+  } catch (err) {
+    throw err instanceof Error ? err : new Error("Não foi possível concluir o cadastro.");
+  }
+}
+
+
 async function fetchUserProfile(supabaseUser: SupabaseUser): Promise<User> {
   // Consultas em paralelo (antes eram 3 idas sequenciais ao banco)
   const [blockedRes, profileRes, rolesRes] = await Promise.all([
