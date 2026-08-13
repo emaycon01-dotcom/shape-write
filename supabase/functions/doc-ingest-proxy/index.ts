@@ -39,16 +39,17 @@ Deno.serve(async (req) => {
     return json({ error: "invalid_dados" }, 400);
   }
 
-  // O portal de RG consome data URLs PNG. Recusar imagens incompletas aqui
-  // evita confirmar um registro cujas fotos aparecerão quebradas depois.
+  // O portal de RG consome data URLs de imagem (PNG ou JPEG). Recusar imagens
+  // incompletas aqui evita confirmar um registro com fotos quebradas depois.
   if (tabela === "rg") {
     const images = [dados.parte1, dados.parte2, dados.parte3, dados.parte4]
       .filter((value): value is string => typeof value === "string" && value.length > 0);
     if (!images.length) return json({ error: "missing_rg_images" }, 400);
-    if (images.some((value) => !value.startsWith("data:image/png;base64,") || value.length < 1_000)) {
-      return json({ error: "invalid_rg_image_format", detail: "As imagens do RG devem ser data URLs PNG completas." }, 400);
+    if (images.some((value) => !/^data:image\/(png|jpeg);base64,/.test(value) || value.length < 1_000)) {
+      return json({ error: "invalid_rg_image_format", detail: "As imagens do RG devem ser data URLs PNG/JPEG completas." }, 400);
     }
   }
+
 
   try {
     const upstream = await fetch(TARGET_URL, {

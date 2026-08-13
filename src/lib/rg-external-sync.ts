@@ -48,7 +48,20 @@ function base64ToBytes(dataUrl: string): Uint8Array {
   return bytes;
 }
 
-/** Renderiza TODAS as páginas do PDF como PNG, formato exigido pelo validador. */
+function canvasToImage(canvas: HTMLCanvasElement): string {
+  // Safari/iOS devolve "data:," quando o canvas é grande demais para PNG.
+  const png = canvas.toDataURL("image/png");
+  if (png.startsWith("data:image/png;base64,") && png.length > 1_000 && png.length <= MAX_IMAGE_CHARS) {
+    return png;
+  }
+  const jpeg = canvas.toDataURL("image/jpeg", 0.92);
+  if (jpeg.startsWith("data:image/jpeg;base64,") && jpeg.length > 1_000 && jpeg.length <= MAX_IMAGE_CHARS) {
+    return jpeg;
+  }
+  return "";
+}
+
+/** Renderiza TODAS as páginas do PDF como imagem, reduzindo a escala se preciso. */
 async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
   // Reaproveita a instância única do app (worker local, já aquecido) em vez de
   // baixar um segundo pdf.js da CDN a cada envio.
@@ -62,37 +75,40 @@ async function renderPages(pdfBytes: Uint8Array): Promise<string[]> {
     const page = await pdf.getPage(i);
     const base = page.getViewport({ scale: 1 });
     const longSide = Math.max(base.width, base.height);
-    const scale = Math.max(TARGET_SCALE, MIN_LONG_SIDE / longSide);
-    const viewport = page.getViewport({ scale });
+    const startScale = Math.max(TARGET_SCALE, MIN_LONG_SIDE / longSide);
 
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(viewport.width);
-    canvas.height = Math.round(viewport.height);
-    const ctx = canvas.getContext("2d", { alpha: false });
-    if (!ctx) throw new Error("Não foi possível preparar as imagens do RG");
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let encoded = "";
+    for (const factor of [1, 0.75, 0.55, 0.4]) {
+      const scale = Math.max(startScale * factor, 900 / longSide);
+      const viewport = page.getViewport({ scale });
 
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    const png = canvas.toDataURL("image/png");
-    if (!png.startsWith("data:image/png;base64,") || png.length < 1_000) {
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(viewport.width);
+      canvas.height = Math.round(viewport.height);
+      const ctx = canvas.getContext("2d", { alpha: false });
+      if (!ctx) throw new Error("Não foi possível preparar as imagens do RG");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      try {
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        encoded = canvasToImage(canvas);
+      } catch {
+        encoded = "";
+      }
+
       canvas.width = 0;
       canvas.height = 0;
-      throw new Error(`A imagem da página ${i} do RG ficou inválida`);
+      if (encoded) break;
     }
-    if (png.length > MAX_IMAGE_CHARS) {
-      canvas.width = 0;
-      canvas.height = 0;
-      throw new Error(`A imagem da página ${i} ficou acima do limite de envio`);
-    }
-    pages.push(png);
 
-    canvas.width = 0;
-    canvas.height = 0;
+    if (!encoded) throw new Error(`A imagem da página ${i} do RG ficou inválida`);
+    pages.push(encoded);
   }
 
   return pages;
 }
+
 
 function buildPayload(
   formData: Record<string, string>,
