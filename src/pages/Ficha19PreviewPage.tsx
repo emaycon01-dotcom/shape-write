@@ -103,7 +103,7 @@ export default function Ficha19PreviewPage() {
       console.error("Falha na geração:", e);
       toast({
         title: "Erro ao gerar documento",
-        description: "Nenhum crédito foi descontado. Tente novamente.",
+        description: `Nenhum crédito foi descontado. ${(e as Error)?.message || "Tente novamente."}`,
         variant: "destructive",
       });
     } finally {
