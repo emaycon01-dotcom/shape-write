@@ -8,11 +8,13 @@ import { getPdfJs } from "@/lib/pdfjs-loader";
  * O render do PDF -> imagem base64 acontece NO NAVEGADOR e o envio é feito
  * pela edge function `doc-ingest-proxy` (o token de ingestão fica no servidor).
  */
-const MIN_LONG_SIDE = 1500;
-// PNG é maior que JPEG. 2x mantém a resolução exigida pelo Site 2 e evita que
-// o navegador/função rejeite silenciosamente um corpo acima do limite.
-const TARGET_SCALE = 2;
+// Mesma estratégia da CNH (que funciona bem): aproveitar as faixas já
+// rasterizadas do preview em alta resolução e exportar JPEG de qualidade.
+const TARGET_WIDTH = 2400;
+const MIN_WIDTH = 1600;
+const JPEG_QUALITY = 0.94;
 const MAX_IMAGE_CHARS = 8_000_000;
+
 
 
 function onlyDigits(value: string): string {
