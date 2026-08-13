@@ -1090,7 +1090,13 @@ function bandHeight(width: number, scale: number): number {
   const maxDim = maxCanvasDimension();
   const gb = deviceMemoryGb();
   const budget = gb <= 2 ? 6_000_000 : isWeakDevice() ? 12_000_000 : 24_000_000;
-  const byArea = Math.floor(budget / (width * scale));
+  // `width` e a altura da faixa são coordenadas CSS; ambos são multiplicados
+  // por `scale` ao criar o canvas. O cálculo anterior considerava a escala só
+  // na largura e, em 6x, permitia uma faixa de ~72 MP embora o orçamento fosse
+  // 12 MP. Em celulares o navegador encerrava a tarefa e a tela simplesmente
+  // voltava ao preview. Dividir por scale² mantém os mesmos 576 DPI, apenas
+  // reparte a página em faixas menores e seguras.
+  const byArea = Math.floor(budget / (width * scale * scale));
   const byDim = Math.floor(maxDim / scale);
   return Math.max(64, Math.min(byArea, byDim, 4000));
 }
