@@ -72,6 +72,17 @@ export default function PlanosPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [confirmPlano, setConfirmPlano] = useState<Plano | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const [pixCode, setPixCode] = useState("");
+  const [txId, setTxId] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+  const [qrAmount, setQrAmount] = useState(0);
+  const [qrPlano, setQrPlano] = useState("");
+  const [paid, setPaid] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const [useStaticPix, setUseStaticPix] = useState(false);
 
   // Abre direto o aviso quando vier do menu lateral (?plano=dealer)
   useEffect(() => {
@@ -118,19 +129,6 @@ export default function PlanosPage() {
 
     return () => clearInterval(interval);
   }, [showQr, paid, transactionId, useStaticPix, refreshUser, toast, qrPlano]);
-
-  const [generating, setGenerating] = useState(false);
-
-  const [showQr, setShowQr] = useState(false);
-  const [pixCode, setPixCode] = useState("");
-  const [txId, setTxId] = useState("");
-  const [transactionId, setTransactionId] = useState("");
-  const [qrAmount, setQrAmount] = useState(0);
-  const [qrPlano, setQrPlano] = useState("");
-  const [paid, setPaid] = useState(false);
-  const [checking, setChecking] = useState(false);
-  const [polling, setPolling] = useState(false);
-  const [useStaticPix, setUseStaticPix] = useState(false);
 
   const gerarPix = useCallback(async (plano: Plano) => {
     if (!user) return;
