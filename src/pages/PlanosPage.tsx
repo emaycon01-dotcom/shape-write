@@ -247,7 +247,7 @@ export default function PlanosPage() {
           )}
           <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
           <p className="text-center text-[11px] text-muted-foreground break-all">
-            Chave PIX (aleatória): <span className="text-foreground font-mono">{PIX_KEY}</span>
+            {transactionId ? "Pagamento automático via Mercado Pago" : `Chave PIX (aleatória): ${PIX_KEY}`}
           </p>
           {!paid && (
             <Button variant="outline" className="w-full h-11" onClick={handleCopy}>
