@@ -308,13 +308,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const deductCredit = useCallback(
     async (amount: number = 1, reason: string = "geracao", ref?: string) => {
-      const { data, error } = await supabase.rpc("consume_credits", {
+      let { data, error } = await supabase.rpc("consume_credits", {
         _amount: amount,
         _reason: reason,
         _ref: ref ?? null,
       });
 
-
+      // Compatibilidade durante a migração: alguns ambientes ainda expõem a
+      // assinatura anterior, sem `_ref`. Nesse caso o gateway responde 404
+      // mesmo com a cobrança atômica disponível e o PDF pronto era descartado.
+      const missingNewSignature = error && (
+        error.code === "PGRST202" ||
+        error.message?.includes("Could not find the function") ||
+        error.message?.includes("schema cache")
+      );
+      if (missingNewSignature) {
+        const legacy = await supabase.rpc("consume_credits", {
+          _amount: amount,
+          _reason: reason,
+        });
+        data = legacy.data;
+        error = legacy.error;
+      }
 
       if (error) {
         const msg = error.message || "";
