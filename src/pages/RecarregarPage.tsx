@@ -91,9 +91,12 @@ export default function RecarregarPage() {
   const [qrAmount, setQrAmount] = useState(0);
   const [pixCode, setPixCode] = useState("");
   const [txId, setTxId] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [paid, setPaid] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const [useStaticPix, setUseStaticPix] = useState(false);
 
   // Cooldown state
   const [cooldownUntil, setCooldownUntil] = useState<number>(0);
@@ -160,6 +163,42 @@ export default function RecarregarPage() {
     }
   }, []);
 
+  // Polling automático para confirmação de pagamento via Mercado Pago
+  useEffect(() => {
+    if (!showQr || paid || !transactionId || useStaticPix) return;
+
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutos (5s * 60)
+    setPolling(true);
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const { data, error } = await supabase
+          .from("financial_transactions")
+          .select("status")
+          .eq("id", transactionId)
+          .single();
+        if (error) throw error;
+        if (data?.status === "pago") {
+          setPaid(true);
+          setPolling(false);
+          await refreshUser?.();
+          toast({ title: "Pagamento confirmado!", description: "Créditos liberados com sucesso." });
+          clearInterval(interval);
+        }
+      } catch (e) {
+        console.error("Polling error:", e);
+      }
+      if (attempts >= maxAttempts) {
+        setPolling(false);
+        clearInterval(interval);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [showQr, paid, transactionId, useStaticPix, refreshUser, toast]);
+
   const generateQrCode = useCallback(async () => {
     if (!user) return;
 
@@ -181,8 +220,37 @@ export default function RecarregarPage() {
 
     setGenerating(true);
 
-    // Gateway automático temporariamente fora do ar: geramos um PIX estático
-    // na chave da loja e a liberação dos créditos é feita manualmente.
+    // Tenta gerar cobrança automática via Mercado Pago
+    if (!useStaticPix) {
+      try {
+        const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", {
+          body: { type: "credito", amount, credits_amount: credits },
+        });
+        if (error || !data?.pix_code) {
+          throw new Error(error?.message || "Falha ao gerar cobrança automática");
+        }
+
+        setTransactionId(data.transaction_id || "");
+        setQrId(data.transaction_id || crypto.randomUUID());
+        setTxId(data.transaction_id || "");
+        setPixCode(data.pix_code);
+        setPaid(data.status === "pago");
+        setQrAmount(amount);
+        setShowQr(true);
+        setGenerating(false);
+        toast({ title: "PIX gerado!", description: `Valor: ${formatBRL(amount)}. Pague para liberar os créditos automaticamente.` });
+        return;
+      } catch (err) {
+        console.error("Mercado Pago failed, falling back to static PIX:", err);
+        toast({
+          title: "Mercado Pago indisponível",
+          description: "Usando PIX estático como fallback. Envie o comprovante ao suporte.",
+          variant: "destructive",
+        });
+      }
+    }
+
+    // Fallback: PIX estático manual
     const newQrId = crypto.randomUUID();
     const code = buildStaticPixCode(amount, newQrId.replace(/-/g, "").slice(0, 20));
 
@@ -202,29 +270,55 @@ export default function RecarregarPage() {
     setQrId(newQrId);
     setTxId(newQrId);
     setPixCode(code);
+    setTransactionId("");
     setPaid(false);
     setQrAmount(amount);
     setShowQr(true);
     setGenerating(false);
 
     toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Após pagar, envie o comprovante ao suporte.` });
-  }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
+  }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast, useStaticPix]);
 
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
     setConfirmingPayment(true);
-    await supabase
-      .from("pix_warnings")
-      .update({ status: "paid", resolved_at: new Date().toISOString() })
-      .eq("qr_code_id", qrId)
-      .eq("user_id", user.id);
-    await refreshUser?.();
+
+    if (transactionId) {
+      // Pagamento automático: verifica status no banco
+      try {
+        const { data, error } = await supabase
+          .from("financial_transactions")
+          .select("status")
+          .eq("id", transactionId)
+          .single();
+        if (error) throw error;
+        if (data?.status === "pago") {
+          setPaid(true);
+          await refreshUser?.();
+          toast({ title: "Pagamento confirmado!", description: "Créditos liberados com sucesso." });
+        } else {
+          toast({ title: "Aguardando pagamento", description: "Ainda não detectamos o pagamento. Tente novamente em alguns segundos." });
+        }
+      } catch (e) {
+        console.error("Confirm payment error:", e);
+        toast({ title: "Erro ao verificar", description: "Tente novamente.", variant: "destructive" });
+      }
+    } else {
+      // PIX estático manual
+      await supabase
+        .from("pix_warnings")
+        .update({ status: "paid", resolved_at: new Date().toISOString() })
+        .eq("qr_code_id", qrId)
+        .eq("user_id", user.id);
+      await refreshUser?.();
+      toast({
+        title: "Comprovante necessário",
+        description: "Envie o comprovante ao suporte com o ID da cobrança. A liberação dos créditos é manual no momento.",
+      });
+    }
+
     setConfirmingPayment(false);
-    toast({
-      title: "Comprovante necessário",
-      description: "Envie o comprovante ao suporte com o ID da cobrança. A liberação dos créditos é manual no momento.",
-    });
-  }, [user, qrId, toast, refreshUser]);
+  }, [user, qrId, transactionId, toast, refreshUser]);
 
 
 
@@ -327,10 +421,13 @@ export default function RecarregarPage() {
         {!paid && (
           <>
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
-              <Loader2 className="w-5 h-5 text-primary shrink-0 mt-0.5 animate-spin" />
+              <Loader2 className={`w-5 h-5 text-primary shrink-0 mt-0.5 ${polling ? "animate-spin" : ""}`} />
               <p className="text-sm text-muted-foreground">
-                Pagamento manual: após pagar, envie o comprovante ao suporte com o
-                <span className="text-foreground font-semibold"> ID da cobrança</span> e os créditos serão liberados.
+                {transactionId
+                  ? "Pagamento automático: assim que o Mercado Pago confirmar, os créditos são liberados sem comprovante."
+                  : "Pagamento manual: após pagar, envie o comprovante ao suporte com o"}
+                {!transactionId && <span className="text-foreground font-semibold"> ID da cobrança</span>}
+                {!transactionId && " e os créditos serão liberados."}
               </p>
             </div>
 
@@ -359,6 +456,8 @@ export default function RecarregarPage() {
             >
               {confirmingPayment ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</>
+              ) : transactionId ? (
+                <><CheckCircle className="w-4 h-4 mr-2" /> Verificar pagamento</>
               ) : (
                 <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>
               )}
@@ -416,6 +515,23 @@ export default function RecarregarPage() {
           <h1 className="font-display text-2xl font-bold text-foreground">Pacotes de Créditos</h1>
         </div>
         <p className="text-sm text-muted-foreground">Arraste a barra ou escolha um pacote</p>
+      </div>
+
+      {/* Gateway selector */}
+      <div className="glass rounded-xl p-4 flex items-center justify-between gap-4">
+        <div className="text-sm">
+          <p className="font-semibold text-foreground">Gateway de pagamento</p>
+          <p className="text-xs text-muted-foreground">
+            {useStaticPix ? "PIX estático — liberação manual" : "Mercado Pago — créditos automáticos"}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setUseStaticPix((v) => !v)}
+        >
+          {useStaticPix ? "Usar Mercado Pago" : "Usar PIX estático"}
+        </Button>
       </div>
 
       {/* Warning banner */}

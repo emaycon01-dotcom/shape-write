@@ -371,6 +371,8 @@ export type Database = {
           created_at: string
           credits_amount: number
           elitepay_charge_id: string | null
+          gateway: string | null
+          gateway_charge_id: string | null
           id: string
           paid_at: string | null
           pix_code: string | null
@@ -386,6 +388,8 @@ export type Database = {
           created_at?: string
           credits_amount?: number
           elitepay_charge_id?: string | null
+          gateway?: string | null
+          gateway_charge_id?: string | null
           id?: string
           paid_at?: string | null
           pix_code?: string | null
@@ -401,6 +405,8 @@ export type Database = {
           created_at?: string
           credits_amount?: number
           elitepay_charge_id?: string | null
+          gateway?: string | null
+          gateway_charge_id?: string | null
           id?: string
           paid_at?: string | null
           pix_code?: string | null

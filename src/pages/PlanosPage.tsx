@@ -72,6 +72,17 @@ export default function PlanosPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [confirmPlano, setConfirmPlano] = useState<Plano | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const [pixCode, setPixCode] = useState("");
+  const [txId, setTxId] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+  const [qrAmount, setQrAmount] = useState(0);
+  const [qrPlano, setQrPlano] = useState("");
+  const [paid, setPaid] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const [useStaticPix, setUseStaticPix] = useState(false);
 
   // Abre direto o aviso quando vier do menu lateral (?plano=dealer)
   useEffect(() => {
@@ -83,25 +94,81 @@ export default function PlanosPage() {
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  const [generating, setGenerating] = useState(false);
+  // Polling automático para confirmação de pagamento via Mercado Pago
+  useEffect(() => {
+    if (!showQr || paid || !transactionId || useStaticPix) return;
 
-  const [showQr, setShowQr] = useState(false);
-  const [pixCode, setPixCode] = useState("");
-  const [txId, setTxId] = useState("");
-  const [qrAmount, setQrAmount] = useState(0);
-  const [qrPlano, setQrPlano] = useState("");
-  const [paid, setPaid] = useState(false);
-  const [checking, setChecking] = useState(false);
+    let attempts = 0;
+    const maxAttempts = 60;
+    setPolling(true);
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const { data, error } = await supabase
+          .from("financial_transactions")
+          .select("status")
+          .eq("id", transactionId)
+          .single();
+        if (error) throw error;
+        if (data?.status === "pago") {
+          setPaid(true);
+          setPolling(false);
+          await refreshUser?.();
+          toast({ title: "Pagamento confirmado!", description: `Plano ${qrPlano} ativado com sucesso.` });
+          clearInterval(interval);
+        }
+      } catch (e) {
+        console.error("Polling error:", e);
+      }
+      if (attempts >= maxAttempts) {
+        setPolling(false);
+        clearInterval(interval);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [showQr, paid, transactionId, useStaticPix, refreshUser, toast, qrPlano]);
 
   const gerarPix = useCallback(async (plano: Plano) => {
     if (!user) return;
     setGenerating(true);
 
-    // Gateway automático fora do ar: PIX estático na chave da loja, liberação manual.
+    if (!useStaticPix) {
+      try {
+        const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", {
+          body: { type: "plano", amount: plano.preco, plan_name: plano.nome },
+        });
+        if (error || !data?.pix_code) {
+          throw new Error(error?.message || "Falha ao gerar cobrança automática");
+        }
+
+        setTransactionId(data.transaction_id || "");
+        setTxId(data.transaction_id || "");
+        setPixCode(data.pix_code);
+        setQrAmount(plano.preco);
+        setQrPlano(plano.nome);
+        setPaid(data.status === "pago");
+        setShowQr(true);
+        setGenerating(false);
+        toast({ title: "PIX gerado!", description: `Plano ${plano.nome} — ${formatBRL(plano.preco)}. Pague para ativar automaticamente.` });
+        return;
+      } catch (err) {
+        console.error("Mercado Pago failed, falling back to static PIX:", err);
+        toast({
+          title: "Mercado Pago indisponível",
+          description: "Usando PIX estático como fallback. Envie o comprovante ao suporte.",
+          variant: "destructive",
+        });
+      }
+    }
+
+    // Fallback: PIX estático manual
     const id = crypto.randomUUID();
     const code = buildStaticPixCode(plano.preco, id.replace(/-/g, "").slice(0, 20));
 
     setGenerating(false);
+    setTransactionId("");
     setTxId(id);
     setPixCode(code);
     setQrAmount(plano.preco);
@@ -110,17 +177,42 @@ export default function PlanosPage() {
     setShowQr(true);
 
     toast({ title: "PIX gerado!", description: `Plano ${plano.nome} — ${formatBRL(plano.preco)}. Envie o comprovante ao suporte.` });
-  }, [user, toast]);
+  }, [user, toast, useStaticPix]);
 
   const handleCheck = useCallback(async () => {
+    if (!transactionId) {
+      setChecking(true);
+      await refreshUser?.();
+      setChecking(false);
+      toast({
+        title: "Comprovante necessário",
+        description: "Envie o comprovante ao suporte para ativarmos o plano manualmente.",
+      });
+      return;
+    }
+
+    // Pagamento automático: verifica status no banco
     setChecking(true);
-    await refreshUser?.();
+    try {
+      const { data, error } = await supabase
+        .from("financial_transactions")
+        .select("status")
+        .eq("id", transactionId)
+        .single();
+      if (error) throw error;
+      if (data?.status === "pago") {
+        setPaid(true);
+        await refreshUser?.();
+        toast({ title: "Pagamento confirmado!", description: `Plano ${qrPlano} ativado com sucesso.` });
+      } else {
+        toast({ title: "Aguardando pagamento", description: "Ainda não detectamos o pagamento. Tente novamente em alguns segundos." });
+      }
+    } catch (e) {
+      console.error("Check payment error:", e);
+      toast({ title: "Erro ao verificar", description: "Tente novamente.", variant: "destructive" });
+    }
     setChecking(false);
-    toast({
-      title: "Comprovante necessário",
-      description: "Envie o comprovante ao suporte para ativarmos o plano manualmente.",
-    });
-  }, [refreshUser, toast]);
+  }, [refreshUser, toast, transactionId, qrPlano]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -155,7 +247,7 @@ export default function PlanosPage() {
           )}
           <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
           <p className="text-center text-[11px] text-muted-foreground break-all">
-            Chave PIX (aleatória): <span className="text-foreground font-mono">{PIX_KEY}</span>
+            {transactionId ? "Pagamento automático via Mercado Pago" : `Chave PIX (aleatória): ${PIX_KEY}`}
           </p>
           {!paid && (
             <Button variant="outline" className="w-full h-11" onClick={handleCopy}>
@@ -167,7 +259,7 @@ export default function PlanosPage() {
         <div className="flex gap-3">
           {!paid && (
             <Button variant="gradient" className="flex-1 h-12 font-semibold" onClick={handleCheck} disabled={checking}>
-              {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</> : <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>}
+              {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</> : transactionId ? <><CheckCircle className="w-4 h-4 mr-2" /> Verificar pagamento</> : <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>}
             </Button>
           )}
           <Button variant="outline" className="flex-1 h-12 font-semibold" onClick={() => setShowQr(false)}>
@@ -189,6 +281,23 @@ export default function PlanosPage() {
           Escolha um plano e pague via PIX. Plano atual:{" "}
           <span className="text-foreground font-semibold uppercase">{user?.plano || "free"}</span>
         </p>
+      </div>
+
+      {/* Gateway selector */}
+      <div className="glass rounded-xl p-4 flex items-center justify-between gap-4">
+        <div className="text-sm">
+          <p className="font-semibold text-foreground">Gateway de pagamento</p>
+          <p className="text-xs text-muted-foreground">
+            {useStaticPix ? "PIX estático — liberação manual" : "Mercado Pago — ativação automática"}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setUseStaticPix((v) => !v)}
+        >
+          {useStaticPix ? "Usar Mercado Pago" : "Usar PIX estático"}
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

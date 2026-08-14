@@ -25,3 +25,9 @@ verify_jwt = false
 
 [functions.mirror-hapvida-code]
 verify_jwt = false
+
+[functions.create-mercado-pago-pix]
+verify_jwt = true
+
+[functions.mercado-pago-webhook]
+verify_jwt = false
