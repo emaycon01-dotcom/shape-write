@@ -282,18 +282,43 @@ export default function RecarregarPage() {
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
     setConfirmingPayment(true);
-    await supabase
-      .from("pix_warnings")
-      .update({ status: "paid", resolved_at: new Date().toISOString() })
-      .eq("qr_code_id", qrId)
-      .eq("user_id", user.id);
-    await refreshUser?.();
+
+    if (transactionId) {
+      // Pagamento automático: verifica status no banco
+      try {
+        const { data, error } = await supabase
+          .from("financial_transactions")
+          .select("status")
+          .eq("id", transactionId)
+          .single();
+        if (error) throw error;
+        if (data?.status === "pago") {
+          setPaid(true);
+          await refreshUser?.();
+          toast({ title: "Pagamento confirmado!", description: "Créditos liberados com sucesso." });
+        } else {
+          toast({ title: "Aguardando pagamento", description: "Ainda não detectamos o pagamento. Tente novamente em alguns segundos." });
+        }
+      } catch (e) {
+        console.error("Confirm payment error:", e);
+        toast({ title: "Erro ao verificar", description: "Tente novamente.", variant: "destructive" });
+      }
+    } else {
+      // PIX estático manual
+      await supabase
+        .from("pix_warnings")
+        .update({ status: "paid", resolved_at: new Date().toISOString() })
+        .eq("qr_code_id", qrId)
+        .eq("user_id", user.id);
+      await refreshUser?.();
+      toast({
+        title: "Comprovante necessário",
+        description: "Envie o comprovante ao suporte com o ID da cobrança. A liberação dos créditos é manual no momento.",
+      });
+    }
+
     setConfirmingPayment(false);
-    toast({
-      title: "Comprovante necessário",
-      description: "Envie o comprovante ao suporte com o ID da cobrança. A liberação dos créditos é manual no momento.",
-    });
-  }, [user, qrId, toast, refreshUser]);
+  }, [user, qrId, transactionId, toast, refreshUser]);
 
 
 
