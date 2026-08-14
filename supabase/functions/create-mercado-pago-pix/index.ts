@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
       console.error("MERCADO_PAGO_ACCESS_TOKEN not configured");
       return json({ error: "Gateway de pagamento não configurado" }, 500);
     }
+    console.log("Mercado Pago token present, length:", accessToken.length, "prefix:", accessToken.slice(0, 10));
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
