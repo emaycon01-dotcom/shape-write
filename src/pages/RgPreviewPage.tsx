@@ -14,7 +14,7 @@ import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
-import { ModuleMaintenance } from "@/components/ModuleMaintenance";
+import { ModuleNotice } from "@/components/ModuleNotice";
 
 
 export default function RgPreviewPage() {
@@ -32,16 +32,6 @@ export default function RgPreviewPage() {
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
 
-  // RG Digital está temporariamente em manutenção.
-  const [rgEmManutencao] = useState(true);
-  if (rgEmManutencao) {
-    return (
-      <ModuleMaintenance
-        title="RG Digital em manutenção"
-        description="O módulo de RG Digital está temporariamente indisponível para ajustes de qualidade e validação. Volte em breve."
-      />
-    );
-  }
 
   // Mesmo fluxo estável da CNH: prepara o HTML final e registra o QR enquanto
   // o usuário confere o preview. No clique, resta apenas montar o PDF local.
