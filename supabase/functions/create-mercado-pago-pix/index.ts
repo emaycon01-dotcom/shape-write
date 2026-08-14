@@ -2,6 +2,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "../_shared/cors.ts";
 import { applyPaidTransaction } from "../_shared/elitepay.ts";
+import { authenticateRequest } from "../_shared/auth.ts";
 
 const PLAN_BASE_PRICES: Record<string, number> = { Basic: 150, Pro: 450, Premium: 999.99 };
 const MP_API = "https://api.mercadopago.com/v1";
@@ -46,16 +47,13 @@ Deno.serve(async (req) => {
       return json({ error: "Não autorizado" }, 401);
     }
 
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: `Bearer ${token}` } } },
-    );
-
-    const { data: { user: authUser }, error: authError } = await supabaseUser.auth.getUser(token);
-    if (authError || !authUser) {
-      return json({ error: "Não autorizado" }, 401);
-    }
+    // O token é emitido pelo backend principal de São Paulo. Recria a
+    // requisição com Authorization também para o fallback text/plain.
+    const authRequest = new Request(req.url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const auth = await authenticateRequest(authRequest, corsHeaders);
+    if (auth instanceof Response) return auth;
 
     const { type, amount, credits_amount, plan_name } = (body ?? {}) as {
       type?: string; amount?: number; credits_amount?: number; plan_name?: string;
@@ -79,17 +77,21 @@ Deno.serve(async (req) => {
     }
     console.log("Mercado Pago token present, length:", accessToken.length, "prefix:", accessToken.slice(0, 10));
 
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const targetUrl = Deno.env.get("MIGRATION_TARGET_URL");
+    const targetKey = Deno.env.get("MIGRATION_TARGET_KEY");
+    if (!targetUrl || !targetKey) {
+      return json({ error: "Backend financeiro não configurado" }, 500);
+    }
+    const supabaseAdmin = createClient(targetUrl, targetKey, {
+      auth: { persistSession: false },
+    });
 
     // Reutiliza cobrança recente (< 10 min) para evitar duplicados
     const tenMinAgo = new Date(Date.now() - 10 * 60_000).toISOString();
     const { data: existingCharge } = await supabaseAdmin
       .from("financial_transactions")
       .select("*")
-      .eq("user_id", authUser.id)
+      .eq("user_id", auth.userId)
       .eq("type", type)
       .eq("amount", amount)
       .eq("status", "gerado")
@@ -119,7 +121,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("name, email")
-      .eq("user_id", authUser.id)
+      .eq("user_id", auth.userId)
       .maybeSingle();
 
     const description = type === "credito"
@@ -173,7 +175,7 @@ Deno.serve(async (req) => {
     const { data: transaction, error: insertError } = await supabaseAdmin
       .from("financial_transactions")
       .insert({
-        user_id: authUser.id,
+        user_id: auth.userId,
         type,
         amount,
         credits_amount: credits_amount || 0,
