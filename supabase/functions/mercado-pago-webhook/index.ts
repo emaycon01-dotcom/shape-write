@@ -51,8 +51,7 @@ Deno.serve(async (req) => {
     const { data: transaction, error: findError } = await supabaseAdmin
       .from("financial_transactions")
       .select("*")
-      .eq("gateway", "mercado_pago")
-      .eq("gateway_charge_id", String(paymentId))
+      .eq("elitepay_charge_id", String(paymentId))
       .maybeSingle();
 
     if (findError) {

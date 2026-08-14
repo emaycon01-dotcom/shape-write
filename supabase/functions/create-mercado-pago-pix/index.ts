@@ -95,15 +95,14 @@ Deno.serve(async (req) => {
       .eq("type", type)
       .eq("amount", amount)
       .eq("status", "gerado")
-      .eq("gateway", "mercado_pago")
       .gte("created_at", tenMinAgo)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (existingCharge?.pix_code) {
-      if (existingCharge.gateway_charge_id) {
-        const paid = await checkMercadoPagoPayment(existingCharge.gateway_charge_id, accessToken);
+      if (existingCharge.elitepay_charge_id) {
+        const paid = await checkMercadoPagoPayment(existingCharge.elitepay_charge_id, accessToken);
         if (paid) {
           await applyPaidTransaction(supabaseAdmin, existingCharge);
           existingCharge.status = "pago";
@@ -182,8 +181,9 @@ Deno.serve(async (req) => {
         plan_name: plan_name || null,
         status: "gerado",
         txid: paymentId,
-        gateway: "mercado_pago",
-        gateway_charge_id: paymentId,
+        // O banco principal ainda usa este nome legado. O valor é o ID da
+        // cobrança do Mercado Pago; não há chamada à ElitePay neste fluxo.
+        elitepay_charge_id: paymentId,
         pix_code: pixCode,
         qr_code_base64: qrCodeBase64,
       })
