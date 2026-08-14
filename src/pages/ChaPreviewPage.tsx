@@ -5,6 +5,7 @@ import { creditRef } from "@/lib/credit-ref";
 import { useDocuments } from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, ArrowLeft, Loader2, CreditCard, Lock, AlertTriangle, RefreshCw, Copy, Check } from "lucide-react";
+import { ModuleNotice } from "@/components/ModuleNotice";
 import { useToast } from "@/hooks/use-toast";
 import { describeError } from "@/lib/describe-error";
 import { supabase } from "@/integrations/supabase/client";
@@ -165,6 +166,7 @@ export default function ChaPreviewPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      <ModuleNotice />
       <button
         onClick={() => navigate("/dashboard/documents/cha")}
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
