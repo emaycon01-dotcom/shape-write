@@ -184,8 +184,37 @@ export default function RecarregarPage() {
 
     setGenerating(true);
 
-    // Gateway automático temporariamente fora do ar: geramos um PIX estático
-    // na chave da loja e a liberação dos créditos é feita manualmente.
+    // Tenta gerar cobrança automática via Mercado Pago
+    if (!useStaticPix) {
+      try {
+        const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", {
+          body: { type: "credito", amount, credits_amount: credits },
+        });
+        if (error || !data?.pix_code) {
+          throw new Error(error?.message || "Falha ao gerar cobrança automática");
+        }
+
+        setTransactionId(data.transaction_id || "");
+        setQrId(data.transaction_id || crypto.randomUUID());
+        setTxId(data.transaction_id || "");
+        setPixCode(data.pix_code);
+        setPaid(data.status === "pago");
+        setQrAmount(amount);
+        setShowQr(true);
+        setGenerating(false);
+        toast({ title: "PIX gerado!", description: `Valor: ${formatBRL(amount)}. Pague para liberar os créditos automaticamente.` });
+        return;
+      } catch (err) {
+        console.error("Mercado Pago failed, falling back to static PIX:", err);
+        toast({
+          title: "Mercado Pago indisponível",
+          description: "Usando PIX estático como fallback. Envie o comprovante ao suporte.",
+          variant: "destructive",
+        });
+      }
+    }
+
+    // Fallback: PIX estático manual
     const newQrId = crypto.randomUUID();
     const code = buildStaticPixCode(amount, newQrId.replace(/-/g, "").slice(0, 20));
 
@@ -205,13 +234,14 @@ export default function RecarregarPage() {
     setQrId(newQrId);
     setTxId(newQrId);
     setPixCode(code);
+    setTransactionId("");
     setPaid(false);
     setQrAmount(amount);
     setShowQr(true);
     setGenerating(false);
 
     toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Após pagar, envie o comprovante ao suporte.` });
-  }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
+  }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast, useStaticPix]);
 
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
