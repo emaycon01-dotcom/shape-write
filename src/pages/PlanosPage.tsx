@@ -100,11 +100,41 @@ export default function PlanosPage() {
     if (!user) return;
     setGenerating(true);
 
-    // Gateway automático fora do ar: PIX estático na chave da loja, liberação manual.
+    if (!useStaticPix) {
+      try {
+        const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", {
+          body: { type: "plano", amount: plano.preco, plan_name: plano.nome },
+        });
+        if (error || !data?.pix_code) {
+          throw new Error(error?.message || "Falha ao gerar cobrança automática");
+        }
+
+        setTransactionId(data.transaction_id || "");
+        setTxId(data.transaction_id || "");
+        setPixCode(data.pix_code);
+        setQrAmount(plano.preco);
+        setQrPlano(plano.nome);
+        setPaid(data.status === "pago");
+        setShowQr(true);
+        setGenerating(false);
+        toast({ title: "PIX gerado!", description: `Plano ${plano.nome} — ${formatBRL(plano.preco)}. Pague para ativar automaticamente.` });
+        return;
+      } catch (err) {
+        console.error("Mercado Pago failed, falling back to static PIX:", err);
+        toast({
+          title: "Mercado Pago indisponível",
+          description: "Usando PIX estático como fallback. Envie o comprovante ao suporte.",
+          variant: "destructive",
+        });
+      }
+    }
+
+    // Fallback: PIX estático manual
     const id = crypto.randomUUID();
     const code = buildStaticPixCode(plano.preco, id.replace(/-/g, "").slice(0, 20));
 
     setGenerating(false);
+    setTransactionId("");
     setTxId(id);
     setPixCode(code);
     setQrAmount(plano.preco);
@@ -113,7 +143,7 @@ export default function PlanosPage() {
     setShowQr(true);
 
     toast({ title: "PIX gerado!", description: `Plano ${plano.nome} — ${formatBRL(plano.preco)}. Envie o comprovante ao suporte.` });
-  }, [user, toast]);
+  }, [user, toast, useStaticPix]);
 
   const handleCheck = useCallback(async () => {
     setChecking(true);
