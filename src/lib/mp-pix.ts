@@ -39,6 +39,7 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
   }
 
   const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-mercado-pago-pix`;
+
   const callGateway = (accessToken: string) => fetch(functionUrl, {
     method: "POST",
     headers: {
@@ -49,11 +50,28 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     body: JSON.stringify(payload),
   });
 
-  // Alguns navegadores (Safari/iPad) falham no preflight do fetch manual.
-  // Nesse caso usamos o cliente oficial, que já é usado por todo o app.
-  async function callViaSdk(): Promise<MpPixResult> {
-    const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", { body: payload });
-    if (error) throw new Error(error.message || "Falha no servidor de pagamentos.");
+  // Requisição "simples" (sem cabeçalhos customizados) — não dispara preflight
+  // CORS, então funciona mesmo em navegadores/redes que bloqueiam o OPTIONS.
+  const callGatewayNoPreflight = (accessToken: string) => fetch(functionUrl, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+    body: JSON.stringify({ ...payload, access_token: accessToken }),
+  });
+
+  async function callViaSdk(accessToken: string): Promise<MpPixResult> {
+    try {
+      const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", { body: payload });
+      if (error) throw new Error(error.message || "Falha no servidor de pagamentos.");
+      return parse(data);
+    } catch {
+      const res = await callGatewayNoPreflight(accessToken);
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error((data as { error?: string })?.error || `Falha no servidor de pagamentos (${res.status}).`);
+      return parse(data);
+    }
+  }
+
+  function parse(data: unknown): MpPixResult {
     const res = data as (MpPixResult & { error?: string }) | null;
     if (res?.error) throw new Error(String(res.error));
     if (!res?.pix_code) throw new Error("O gateway não retornou o código PIX.");
@@ -64,7 +82,7 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
   try {
     response = await callGateway(session.access_token);
   } catch {
-    return await callViaSdk();
+    return await callViaSdk(session.access_token);
   }
 
   if (response.status === 401) {
@@ -76,7 +94,7 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     try {
       response = await callGateway(session.access_token);
     } catch {
-      return await callViaSdk();
+      return await callViaSdk(session.access_token);
     }
   }
 
@@ -86,8 +104,5 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     throw new Error(data?.error || `Falha no servidor de pagamentos (${response.status}).`);
   }
 
-  if (data?.error) throw new Error(String(data.error));
-  if (!data?.pix_code) throw new Error("O gateway não retornou o código PIX.");
-
-  return data as MpPixResult;
+  return parse(data);
 }
