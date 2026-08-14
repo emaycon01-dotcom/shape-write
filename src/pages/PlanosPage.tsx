@@ -88,10 +88,13 @@ export default function PlanosPage() {
   const [showQr, setShowQr] = useState(false);
   const [pixCode, setPixCode] = useState("");
   const [txId, setTxId] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [qrAmount, setQrAmount] = useState(0);
   const [qrPlano, setQrPlano] = useState("");
   const [paid, setPaid] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const [useStaticPix, setUseStaticPix] = useState(false);
 
   const gerarPix = useCallback(async (plano: Plano) => {
     if (!user) return;
