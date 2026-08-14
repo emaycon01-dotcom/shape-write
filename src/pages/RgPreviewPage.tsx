@@ -32,6 +32,17 @@ export default function RgPreviewPage() {
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
 
+  // RG Digital está temporariamente em manutenção.
+  const [rgEmManutencao] = useState(true);
+  if (rgEmManutencao) {
+    return (
+      <ModuleMaintenance
+        title="RG Digital em manutenção"
+        description="O módulo de RG Digital está temporariamente indisponível para ajustes de qualidade e validação. Volte em breve."
+      />
+    );
+  }
+
   // Mesmo fluxo estável da CNH: prepara o HTML final e registra o QR enquanto
   // o usuário confere o preview. No clique, resta apenas montar o PDF local.
   useEffect(() => {
