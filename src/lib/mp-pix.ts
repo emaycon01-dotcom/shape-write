@@ -38,7 +38,10 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     throw new Error("Sessão expirada. Entre novamente para gerar o PIX automático.");
   }
 
-  const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-mercado-pago-pix`;
+  // A aplicação/autenticação está no backend de São Paulo, mas as funções
+  // gerenciadas são publicadas neste host estável. Não derive esta URL do
+  // cliente: isso fazia builds antigos chamarem um host sem a função (404).
+  const functionUrl = "https://doycwownddyxfqntifca.supabase.co/functions/v1/create-mercado-pago-pix";
 
   const callGateway = (accessToken: string) => fetch(functionUrl, {
     method: "POST",
@@ -58,17 +61,11 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     body: JSON.stringify({ ...payload, access_token: accessToken }),
   });
 
-  async function callViaSdk(accessToken: string): Promise<MpPixResult> {
-    try {
-      const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", { body: payload });
-      if (error) throw new Error(error.message || "Falha no servidor de pagamentos.");
-      return parse(data);
-    } catch {
-      const res = await callGatewayNoPreflight(accessToken);
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error((data as { error?: string })?.error || `Falha no servidor de pagamentos (${res.status}).`);
-      return parse(data);
-    }
+  async function callWithoutPreflight(accessToken: string): Promise<MpPixResult> {
+    const res = await callGatewayNoPreflight(accessToken);
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data as { error?: string })?.error || `Falha no servidor de pagamentos (${res.status}).`);
+    return parse(data);
   }
 
   function parse(data: unknown): MpPixResult {
@@ -82,7 +79,7 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
   try {
     response = await callGateway(session.access_token);
   } catch {
-    return await callViaSdk(session.access_token);
+    return await callWithoutPreflight(session.access_token);
   }
 
   if (response.status === 401) {
@@ -94,7 +91,7 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     try {
       response = await callGateway(session.access_token);
     } catch {
-      return await callViaSdk(session.access_token);
+      return await callWithoutPreflight(session.access_token);
     }
   }
 

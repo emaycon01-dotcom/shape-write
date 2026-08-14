@@ -38,17 +38,20 @@ Deno.serve(async (req) => {
       return json({ ok: true, message: "Ignored topic" });
     }
 
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const targetUrl = Deno.env.get("MIGRATION_TARGET_URL");
+    const targetKey = Deno.env.get("MIGRATION_TARGET_KEY");
+    if (!targetUrl || !targetKey) {
+      return json({ error: "Backend financeiro não configurado" }, 500);
+    }
+    const supabaseAdmin = createClient(targetUrl, targetKey, {
+      auth: { persistSession: false },
+    });
 
     // Busca transação pelo ID do Mercado Pago
     const { data: transaction, error: findError } = await supabaseAdmin
       .from("financial_transactions")
       .select("*")
-      .eq("gateway", "mercado_pago")
-      .eq("gateway_charge_id", String(paymentId))
+      .eq("elitepay_charge_id", String(paymentId))
       .maybeSingle();
 
     if (findError) {
