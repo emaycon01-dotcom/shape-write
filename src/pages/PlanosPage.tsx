@@ -259,7 +259,7 @@ export default function PlanosPage() {
         <div className="flex gap-3">
           {!paid && (
             <Button variant="gradient" className="flex-1 h-12 font-semibold" onClick={handleCheck} disabled={checking}>
-              {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</> : <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>}
+              {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</> : transactionId ? <><CheckCircle className="w-4 h-4 mr-2" /> Verificar pagamento</> : <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>}
             </Button>
           )}
           <Button variant="outline" className="flex-1 h-12 font-semibold" onClick={() => setShowQr(false)}>
