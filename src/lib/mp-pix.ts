@@ -49,11 +49,22 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     body: JSON.stringify(payload),
   });
 
+  // Alguns navegadores (Safari/iPad) falham no preflight do fetch manual.
+  // Nesse caso usamos o cliente oficial, que já é usado por todo o app.
+  async function callViaSdk(): Promise<MpPixResult> {
+    const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", { body: payload });
+    if (error) throw new Error(error.message || "Falha no servidor de pagamentos.");
+    const res = data as (MpPixResult & { error?: string }) | null;
+    if (res?.error) throw new Error(String(res.error));
+    if (!res?.pix_code) throw new Error("O gateway não retornou o código PIX.");
+    return res;
+  }
+
   let response: Response;
   try {
     response = await callGateway(session.access_token);
   } catch {
-    throw new Error("Não foi possível conectar ao servidor de pagamentos. Verifique sua internet e tente novamente.");
+    return await callViaSdk();
   }
 
   if (response.status === 401) {
@@ -65,7 +76,7 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     try {
       response = await callGateway(session.access_token);
     } catch {
-      throw new Error("Não foi possível conectar ao servidor de pagamentos. Verifique sua internet e tente novamente.");
+      return await callViaSdk();
     }
   }
 
