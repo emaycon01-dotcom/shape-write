@@ -258,16 +258,28 @@ export async function applyPaidTransaction(supabaseAdmin: any, transaction: any)
         .eq("user_id", claimed.user_id);
       if (creditError) throw creditError;
 
+      const reason = `pix_${claimed.gateway || "mercadopago"} ${claimed.elitepay_charge_id || ""}`.trim();
+      const { data: existingLog } = await supabaseAdmin.from("credit_transactions")
+        .select("id")
+        .eq("user_id", claimed.user_id)
+        .eq("reason", reason)
+        .limit(1)
+        .maybeSingle();
+      if (existingLog) {
+        await supabaseAdmin.from("financial_transactions")
+          .update({ status: "pago", paid_at: new Date().toISOString() }).eq("id", claimed.id);
+        return false;
+      }
+
       const { error: logError } = await supabaseAdmin.from("credit_transactions").insert({
         user_id: claimed.user_id,
         actor_id: "system",
         kind: "credit",
         amount: claimed.credits_amount,
         balance_after: newBalance,
-        reason: `pix_${claimed.gateway || "mercadopago"} ${claimed.elitepay_charge_id || ""}`.trim(),
-        ref: `pix:${claimed.id}`,
+        reason,
       });
-      if (logError && logError.code !== "23505") throw logError;
+      if (logError) throw logError;
     } else if (claimed.type === "plano" && claimed.plan_name) {
       const plan = claimed.plan_name === "Basic" ? "dealer" :
         claimed.plan_name === "Pro" ? "master" :
@@ -297,8 +309,15 @@ export async function applyPaidTransaction(supabaseAdmin: any, transaction: any)
     if (paidError) throw paidError;
     return true;
   } catch (fallbackError) {
-    await supabaseAdmin.from("financial_transactions").update({ status: "gerado" })
-      .eq("id", transaction.id).eq("status", "processando");
+    // Só devolve para pendente se nenhum efeito financeiro foi registrado.
+    // Se o log existe, uma nova tentativa apenas finaliza a cobrança.
+    const reason = `pix_${transaction.gateway || "mercadopago"} ${transaction.elitepay_charge_id || ""}`.trim();
+    const { data: appliedLog } = await supabaseAdmin.from("credit_transactions")
+      .select("id").eq("user_id", transaction.user_id).eq("reason", reason).limit(1).maybeSingle();
+    if (!appliedLog) {
+      await supabaseAdmin.from("financial_transactions").update({ status: "gerado" })
+        .eq("id", transaction.id).eq("status", "processando");
+    }
     throw fallbackError;
   }
 }
