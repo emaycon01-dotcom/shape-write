@@ -359,6 +359,7 @@ export default function RgFormPage() {
 
   return (
     <div className="max-w-2xl">
+      <ModuleNotice />
       <div className="mb-4 flex items-center justify-between">
         <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground">
           ← Voltar

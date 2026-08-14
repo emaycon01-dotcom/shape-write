@@ -168,6 +168,7 @@ export default function RgPreviewPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      <ModuleNotice />
       <button
         onClick={() => navigate("/dashboard/documents/rg")}
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
