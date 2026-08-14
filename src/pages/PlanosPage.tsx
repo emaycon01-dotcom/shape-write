@@ -136,12 +136,7 @@ export default function PlanosPage() {
 
     if (!useStaticPix) {
       try {
-        const { data, error } = await supabase.functions.invoke("create-mercado-pago-pix", {
-          body: { type: "plano", amount: plano.preco, plan_name: plano.nome },
-        });
-        if (error || !data?.pix_code) {
-          throw new Error(error?.message || "Falha ao gerar cobrança automática");
-        }
+        const data = await createMercadoPagoPix({ type: "plano", amount: plano.preco, plan_name: plano.nome });
 
         setTransactionId(data.transaction_id || "");
         setTxId(data.transaction_id || "");
@@ -154,14 +149,17 @@ export default function PlanosPage() {
         toast({ title: "PIX gerado!", description: `Plano ${plano.nome} — ${formatBRL(plano.preco)}. Pague para ativar automaticamente.` });
         return;
       } catch (err) {
-        console.error("Mercado Pago failed, falling back to static PIX:", err);
+        console.error("Mercado Pago failed:", err);
+        setGenerating(false);
         toast({
-          title: "Mercado Pago indisponível",
-          description: "Usando PIX estático como fallback. Envie o comprovante ao suporte.",
+          title: "Não foi possível gerar o PIX automático",
+          description: `${err instanceof Error ? err.message : "Erro desconhecido"} Se preferir, troque para "PIX estático" e envie o comprovante ao suporte.`,
           variant: "destructive",
         });
+        return;
       }
     }
+
 
     // Fallback: PIX estático manual
     const id = crypto.randomUUID();
