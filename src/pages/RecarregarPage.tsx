@@ -456,6 +456,8 @@ export default function RecarregarPage() {
             >
               {confirmingPayment ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</>
+              ) : transactionId ? (
+                <><CheckCircle className="w-4 h-4 mr-2" /> Verificar pagamento</>
               ) : (
                 <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>
               )}
