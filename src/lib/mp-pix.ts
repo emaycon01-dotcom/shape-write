@@ -20,40 +20,59 @@ export interface MpPixPayload {
  * A causa mais comum de "cair no PIX estático" era o token expirado: a função
  * respondia 401 e o cliente assumia que o gateway estava fora do ar.
  */
-async function ensureFreshSession(): Promise<boolean> {
+async function ensureFreshSession() {
   const { data } = await supabase.auth.getSession();
-  const session = data.session;
+  let session = data.session;
   if (!session) return false;
   const expiresAt = (session.expires_at ?? 0) * 1000;
   if (expiresAt - Date.now() < 120_000) {
     const { data: refreshed } = await supabase.auth.refreshSession();
-    return !!refreshed.session;
+    session = refreshed.session;
   }
-  return true;
+  return session || false;
 }
 
 export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPixResult> {
-  const hasSession = await ensureFreshSession();
-  if (!hasSession) {
+  let session = await ensureFreshSession();
+  if (!session) {
     throw new Error("Sessão expirada. Entre novamente para gerar o PIX automático.");
   }
 
-  const invoke = () => supabase.functions.invoke("create-mercado-pago-pix", { body: payload });
+  const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-mercado-pago-pix`;
+  const callGateway = (accessToken: string) => fetch(functionUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 
-  let { data, error } = await invoke();
-
-  // Uma segunda tentativa após renovar o token cobre 401 por token vencido em trânsito.
-  if (error) {
-    await supabase.auth.refreshSession();
-    ({ data, error } = await invoke());
+  let response: Response;
+  try {
+    response = await callGateway(session.access_token);
+  } catch {
+    throw new Error("Não foi possível conectar ao servidor de pagamentos. Verifique sua internet e tente novamente.");
   }
 
-  if (error) {
-    const ctx = (error as { context?: { status?: number } }).context;
-    if (ctx?.status === 401) {
+  if (response.status === 401) {
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    session = refreshed.session || false;
+    if (!session) {
       throw new Error("Sessão expirada. Entre novamente para gerar o PIX automático.");
     }
-    throw new Error(error.message || "Falha ao gerar cobrança no Mercado Pago.");
+    try {
+      response = await callGateway(session.access_token);
+    } catch {
+      throw new Error("Não foi possível conectar ao servidor de pagamentos. Verifique sua internet e tente novamente.");
+    }
+  }
+
+  const data = await response.json().catch(() => null) as (MpPixResult & { error?: string }) | null;
+  if (!response.ok) {
+    if (response.status === 401) throw new Error("Sessão expirada. Entre novamente para gerar o PIX automático.");
+    throw new Error(data?.error || `Falha no servidor de pagamentos (${response.status}).`);
   }
 
   if (data?.error) throw new Error(String(data.error));
