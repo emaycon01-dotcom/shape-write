@@ -180,24 +180,11 @@ export default function RecarregarPage() {
 
     setGenerating(true);
 
-    // Cria a cobrança real na Elite Pay
-    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
-      body: { type: "credito", amount, credits_amount: credits },
-    });
+    // Gateway automático temporariamente fora do ar: geramos um PIX estático
+    // na chave da loja e a liberação dos créditos é feita manualmente.
+    const newQrId = crypto.randomUUID();
+    const code = buildStaticPixCode(amount, newQrId.replace(/-/g, "").slice(0, 20));
 
-    if (error || !data?.pix_code) {
-      setGenerating(false);
-      toast({
-        title: "Erro ao gerar PIX",
-        description: (data as any)?.error || error?.message || "Tente novamente em instantes.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newQrId = data.transaction_id as string;
-
-    // Insert pending warning record
     await supabase.from("pix_warnings").insert({
       user_id: user.id,
       qr_code_id: newQrId,
@@ -213,62 +200,31 @@ export default function RecarregarPage() {
 
     setQrId(newQrId);
     setTxId(newQrId);
-    setPixCode(data.pix_code as string);
+    setPixCode(code);
     setPaid(false);
     setQrAmount(amount);
     setShowQr(true);
     setGenerating(false);
 
-    toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Pague em até 15 minutos.` });
+    toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Após pagar, envie o comprovante ao suporte.` });
   }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
-
-  // Polling do status do pagamento (consulta o gateway, não só o banco)
-  useEffect(() => {
-    if (!showQr || !txId || paid) return;
-    const interval = setInterval(async () => {
-      const { data } = await supabase.functions.invoke("check-pix-payment", {
-        body: { transaction_id: txId },
-      });
-      if (data?.status === "pago") {
-        setPaid(true);
-        clearInterval(interval);
-        await clearAllWarnings();
-        await refreshUser?.();
-        toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [showQr, txId, paid, toast, clearAllWarnings, refreshUser]);
 
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
     setConfirmingPayment(true);
-
-    const { data } = await supabase.functions.invoke("check-pix-payment", {
-      body: { transaction_id: txId },
-    });
-
+    await supabase
+      .from("pix_warnings")
+      .update({ status: "paid", resolved_at: new Date().toISOString() })
+      .eq("qr_code_id", qrId)
+      .eq("user_id", user.id);
+    await refreshUser?.();
     setConfirmingPayment(false);
-
-    if (data?.status === "pago") {
-      setPaid(true);
-      await supabase
-        .from("pix_warnings")
-        .update({ status: "paid", resolved_at: new Date().toISOString() })
-        .eq("qr_code_id", qrId)
-        .eq("user_id", user.id);
-      await clearAllWarnings();
-      await refreshUser?.();
-      toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
-      return;
-    }
-
     toast({
-      title: "Pagamento ainda não identificado",
-      description: "Assim que o PIX for compensado os créditos entram automaticamente.",
-      variant: "destructive",
+      title: "Comprovante necessário",
+      description: "Envie o comprovante ao suporte com o ID da cobrança. A liberação dos créditos é manual no momento.",
     });
-  }, [user, qrId, txId, toast, clearAllWarnings, refreshUser]);
+  }, [user, qrId, toast, refreshUser]);
+
 
 
   const handleCopyPix = useCallback(async () => {
