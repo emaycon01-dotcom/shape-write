@@ -91,9 +91,12 @@ export default function RecarregarPage() {
   const [qrAmount, setQrAmount] = useState(0);
   const [pixCode, setPixCode] = useState("");
   const [txId, setTxId] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [paid, setPaid] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const [useStaticPix, setUseStaticPix] = useState(false);
 
   // Cooldown state
   const [cooldownUntil, setCooldownUntil] = useState<number>(0);
