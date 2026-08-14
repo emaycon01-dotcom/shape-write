@@ -180,14 +180,39 @@ export default function PlanosPage() {
   }, [user, toast, useStaticPix]);
 
   const handleCheck = useCallback(async () => {
+    if (!transactionId) {
+      setChecking(true);
+      await refreshUser?.();
+      setChecking(false);
+      toast({
+        title: "Comprovante necessário",
+        description: "Envie o comprovante ao suporte para ativarmos o plano manualmente.",
+      });
+      return;
+    }
+
+    // Pagamento automático: verifica status no banco
     setChecking(true);
-    await refreshUser?.();
+    try {
+      const { data, error } = await supabase
+        .from("financial_transactions")
+        .select("status")
+        .eq("id", transactionId)
+        .single();
+      if (error) throw error;
+      if (data?.status === "pago") {
+        setPaid(true);
+        await refreshUser?.();
+        toast({ title: "Pagamento confirmado!", description: `Plano ${qrPlano} ativado com sucesso.` });
+      } else {
+        toast({ title: "Aguardando pagamento", description: "Ainda não detectamos o pagamento. Tente novamente em alguns segundos." });
+      }
+    } catch (e) {
+      console.error("Check payment error:", e);
+      toast({ title: "Erro ao verificar", description: "Tente novamente.", variant: "destructive" });
+    }
     setChecking(false);
-    toast({
-      title: "Comprovante necessário",
-      description: "Envie o comprovante ao suporte para ativarmos o plano manualmente.",
-    });
-  }, [refreshUser, toast]);
+  }, [refreshUser, toast, transactionId, qrPlano]);
 
   const handleCopy = useCallback(async () => {
     try {
