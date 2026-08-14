@@ -396,10 +396,13 @@ export default function RecarregarPage() {
         {!paid && (
           <>
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
-              <Loader2 className="w-5 h-5 text-primary shrink-0 mt-0.5 animate-spin" />
+              <Loader2 className={`w-5 h-5 text-primary shrink-0 mt-0.5 ${polling ? "animate-spin" : ""}`} />
               <p className="text-sm text-muted-foreground">
-                Pagamento manual: após pagar, envie o comprovante ao suporte com o
-                <span className="text-foreground font-semibold"> ID da cobrança</span> e os créditos serão liberados.
+                {transactionId
+                  ? "Pagamento automático: assim que o Mercado Pago confirmar, os créditos são liberados sem comprovante."
+                  : "Pagamento manual: após pagar, envie o comprovante ao suporte com o"}
+                {!transactionId && <span className="text-foreground font-semibold"> ID da cobrança</span>}
+                {!transactionId && " e os créditos serão liberados."}
               </p>
             </div>
 
