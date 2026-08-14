@@ -20,6 +20,7 @@ import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { syncRgToExternal } from "@/lib/rg-external-sync";
 import { pick, rnd } from "@/lib/random";
+import { ModuleMaintenance } from "@/components/ModuleMaintenance";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -113,8 +114,9 @@ export default function RgFormPage() {
 
   const isEditMode = Boolean(editState?.editDocId);
 
-  // RG Digital está temporariamente em manutenção.
-  if (!isEditMode) {
+  // RG Digital está temporariamente em manutenção (novos acessos bloqueados; edições de histórico também suspensas).
+  const [rgEmManutencao] = useState(true);
+  if (rgEmManutencao) {
     return (
       <ModuleMaintenance
         title="RG Digital em manutenção"
