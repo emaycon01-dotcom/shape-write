@@ -517,6 +517,23 @@ export default function RecarregarPage() {
         <p className="text-sm text-muted-foreground">Arraste a barra ou escolha um pacote</p>
       </div>
 
+      {/* Gateway selector */}
+      <div className="glass rounded-xl p-4 flex items-center justify-between gap-4">
+        <div className="text-sm">
+          <p className="font-semibold text-foreground">Gateway de pagamento</p>
+          <p className="text-xs text-muted-foreground">
+            {useStaticPix ? "PIX estático — liberação manual" : "Mercado Pago — créditos automáticos"}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setUseStaticPix((v) => !v)}
+        >
+          {useStaticPix ? "Usar Mercado Pago" : "Usar PIX estático"}
+        </Button>
+      </div>
+
       {/* Warning banner */}
       {warningCount > 0 && (
         <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 flex items-center gap-3">
