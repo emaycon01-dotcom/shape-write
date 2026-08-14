@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
+import { buildStaticPixCode, PIX_KEY } from "@/lib/pix-static";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -180,24 +181,11 @@ export default function RecarregarPage() {
 
     setGenerating(true);
 
-    // Cria a cobrança real na Elite Pay
-    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
-      body: { type: "credito", amount, credits_amount: credits },
-    });
+    // Gateway automático temporariamente fora do ar: geramos um PIX estático
+    // na chave da loja e a liberação dos créditos é feita manualmente.
+    const newQrId = crypto.randomUUID();
+    const code = buildStaticPixCode(amount, newQrId.replace(/-/g, "").slice(0, 20));
 
-    if (error || !data?.pix_code) {
-      setGenerating(false);
-      toast({
-        title: "Erro ao gerar PIX",
-        description: (data as any)?.error || error?.message || "Tente novamente em instantes.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newQrId = data.transaction_id as string;
-
-    // Insert pending warning record
     await supabase.from("pix_warnings").insert({
       user_id: user.id,
       qr_code_id: newQrId,
@@ -213,62 +201,31 @@ export default function RecarregarPage() {
 
     setQrId(newQrId);
     setTxId(newQrId);
-    setPixCode(data.pix_code as string);
+    setPixCode(code);
     setPaid(false);
     setQrAmount(amount);
     setShowQr(true);
     setGenerating(false);
 
-    toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Pague em até 15 minutos.` });
+    toast({ title: "QR Code gerado!", description: `Valor: ${formatBRL(amount)}. Após pagar, envie o comprovante ao suporte.` });
   }, [user, selectedPacote, sliderValue, sliderPrice, cooldownUntil, cooldownLeft, warningCount, reportViolation, toast]);
-
-  // Polling do status do pagamento (consulta o gateway, não só o banco)
-  useEffect(() => {
-    if (!showQr || !txId || paid) return;
-    const interval = setInterval(async () => {
-      const { data } = await supabase.functions.invoke("check-pix-payment", {
-        body: { transaction_id: txId },
-      });
-      if (data?.status === "pago") {
-        setPaid(true);
-        clearInterval(interval);
-        await clearAllWarnings();
-        await refreshUser?.();
-        toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [showQr, txId, paid, toast, clearAllWarnings, refreshUser]);
 
   const handleConfirmPayment = useCallback(async () => {
     if (!user || !qrId) return;
     setConfirmingPayment(true);
-
-    const { data } = await supabase.functions.invoke("check-pix-payment", {
-      body: { transaction_id: txId },
-    });
-
+    await supabase
+      .from("pix_warnings")
+      .update({ status: "paid", resolved_at: new Date().toISOString() })
+      .eq("qr_code_id", qrId)
+      .eq("user_id", user.id);
+    await refreshUser?.();
     setConfirmingPayment(false);
-
-    if (data?.status === "pago") {
-      setPaid(true);
-      await supabase
-        .from("pix_warnings")
-        .update({ status: "paid", resolved_at: new Date().toISOString() })
-        .eq("qr_code_id", qrId)
-        .eq("user_id", user.id);
-      await clearAllWarnings();
-      await refreshUser?.();
-      toast({ title: "Pagamento confirmado!", description: "Seus créditos já foram adicionados e suas advertências foram zeradas." });
-      return;
-    }
-
     toast({
-      title: "Pagamento ainda não identificado",
-      description: "Assim que o PIX for compensado os créditos entram automaticamente.",
-      variant: "destructive",
+      title: "Comprovante necessário",
+      description: "Envie o comprovante ao suporte com o ID da cobrança. A liberação dos créditos é manual no momento.",
     });
-  }, [user, qrId, txId, toast, clearAllWarnings, refreshUser]);
+  }, [user, qrId, toast, refreshUser]);
+
 
 
   const handleCopyPix = useCallback(async () => {
@@ -357,6 +314,9 @@ export default function RecarregarPage() {
           )}
           <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
           <p className="text-xs text-muted-foreground">ID: {qrId.slice(0, 8).toUpperCase()}</p>
+          <p className="text-center text-[11px] text-muted-foreground break-all">
+            Chave PIX (aleatória): <span className="text-foreground font-mono">{PIX_KEY}</span>
+          </p>
           {!paid && (
             <Button variant="outline" className="w-full h-11" onClick={handleCopyPix}>
               <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
@@ -369,8 +329,8 @@ export default function RecarregarPage() {
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
               <Loader2 className="w-5 h-5 text-primary shrink-0 mt-0.5 animate-spin" />
               <p className="text-sm text-muted-foreground">
-                Aguardando confirmação do PIX. Assim que o pagamento cair, seus créditos entram
-                <span className="text-foreground font-semibold"> automaticamente</span>.
+                Pagamento manual: após pagar, envie o comprovante ao suporte com o
+                <span className="text-foreground font-semibold"> ID da cobrança</span> e os créditos serão liberados.
               </p>
             </div>
 
@@ -400,7 +360,7 @@ export default function RecarregarPage() {
               {confirmingPayment ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</>
               ) : (
-                <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>
+                <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>
               )}
             </Button>
           )}
