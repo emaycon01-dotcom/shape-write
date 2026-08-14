@@ -25,7 +25,9 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const paymentId = body.data?.id || body.id;
+    // O Mercado Pago envia dois formatos válidos:
+    // { data: { id }, type: "payment" } e { resource, topic: "payment" }.
+    const paymentId = body.data?.id || body.id || body.resource;
     const topic = (body.type || body.topic || "").toLowerCase();
 
     if (!paymentId) {

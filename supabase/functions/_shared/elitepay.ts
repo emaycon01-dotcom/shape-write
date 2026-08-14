@@ -218,9 +218,87 @@ export async function applyPaidTransaction(supabaseAdmin: any, transaction: any)
   const { data, error } = await supabaseAdmin.rpc("apply_paid_financial_transaction", {
     _transaction_id: transaction.id,
   });
-  if (error) {
+  if (!error) return data === true;
+
+  // Compatibilidade temporária com bancos migrados cujo PostgREST ainda não
+  // recarregou a RPC. Primeiro reivindica a cobrança com uma troca condicional
+  // de estado; assim webhook, polling e reconciliação não creditam em duplicidade.
+  const rpcMissing = error.code === "PGRST202" ||
+    error.message?.includes("Could not find the function public.apply_paid_financial_transaction");
+  if (!rpcMissing) {
     console.error("Falha atômica ao aplicar PIX:", transaction.id, error.message);
     throw new Error(`pix_apply_failed: ${error.message}`);
   }
-  return data === true;
+
+  console.warn("RPC financeira fora do cache; usando aplicação idempotente:", transaction.id);
+  const { data: claimed, error: claimError } = await supabaseAdmin
+    .from("financial_transactions")
+    .update({ status: "processando" })
+    .eq("id", transaction.id)
+    .in("status", ["gerado", "pending", "approved"])
+    .select("*")
+    .maybeSingle();
+
+  if (claimError) throw new Error(`pix_claim_failed: ${claimError.message}`);
+  if (!claimed) return false;
+
+  try {
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("credits, name, email")
+      .eq("user_id", claimed.user_id)
+      .single();
+    if (profileError || !profile) throw new Error(profileError?.message || "profile_not_found");
+
+    if (claimed.type === "credito" && Number(claimed.credits_amount) > 0) {
+      const newBalance = Number(profile.credits || 0) + Number(claimed.credits_amount);
+      const { error: creditError } = await supabaseAdmin
+        .from("profiles")
+        .update({ credits: newBalance })
+        .eq("user_id", claimed.user_id);
+      if (creditError) throw creditError;
+
+      const { error: logError } = await supabaseAdmin.from("credit_transactions").insert({
+        user_id: claimed.user_id,
+        actor_id: "system",
+        kind: "credit",
+        amount: claimed.credits_amount,
+        balance_after: newBalance,
+        reason: `pix_${claimed.gateway || "mercadopago"} ${claimed.elitepay_charge_id || ""}`.trim(),
+        ref: `pix:${claimed.id}`,
+      });
+      if (logError && logError.code !== "23505") throw logError;
+    } else if (claimed.type === "plano" && claimed.plan_name) {
+      const plan = claimed.plan_name === "Basic" ? "dealer" :
+        claimed.plan_name === "Pro" ? "master" :
+        claimed.plan_name === "Premium" ? "diamond" : String(claimed.plan_name).toLowerCase();
+      const { error: planError } = await supabaseAdmin
+        .from("profiles")
+        .update({ plano: plan })
+        .eq("user_id", claimed.user_id);
+      if (planError) throw planError;
+    } else {
+      throw new Error("invalid_transaction");
+    }
+
+    await supabaseAdmin.from("pix_warnings").update({ status: "cleared", resolved_at: new Date().toISOString() })
+      .eq("user_id", claimed.user_id).in("status", ["warning", "pending"]);
+    await supabaseAdmin.from("deposits").insert({
+      user_id: claimed.user_id,
+      user_name: profile.name || "",
+      user_email: profile.email || "",
+      amount: claimed.amount,
+      method: `pix_${claimed.gateway || "mercadopago"}`,
+      status: "completed",
+    });
+
+    const { error: paidError } = await supabaseAdmin.from("financial_transactions")
+      .update({ status: "pago", paid_at: new Date().toISOString() }).eq("id", claimed.id);
+    if (paidError) throw paidError;
+    return true;
+  } catch (fallbackError) {
+    await supabaseAdmin.from("financial_transactions").update({ status: "gerado" })
+      .eq("id", transaction.id).eq("status", "processando");
+    throw fallbackError;
+  }
 }
