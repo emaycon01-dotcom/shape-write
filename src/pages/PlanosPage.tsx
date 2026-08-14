@@ -83,6 +83,42 @@ export default function PlanosPage() {
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
+  // Polling automático para confirmação de pagamento via Mercado Pago
+  useEffect(() => {
+    if (!showQr || paid || !transactionId || useStaticPix) return;
+
+    let attempts = 0;
+    const maxAttempts = 60;
+    setPolling(true);
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const { data, error } = await supabase
+          .from("financial_transactions")
+          .select("status")
+          .eq("id", transactionId)
+          .single();
+        if (error) throw error;
+        if (data?.status === "pago") {
+          setPaid(true);
+          setPolling(false);
+          await refreshUser?.();
+          toast({ title: "Pagamento confirmado!", description: `Plano ${qrPlano} ativado com sucesso.` });
+          clearInterval(interval);
+        }
+      } catch (e) {
+        console.error("Polling error:", e);
+      }
+      if (attempts >= maxAttempts) {
+        setPolling(false);
+        clearInterval(interval);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [showQr, paid, transactionId, useStaticPix, refreshUser, toast, qrPlano]);
+
   const [generating, setGenerating] = useState(false);
 
   const [showQr, setShowQr] = useState(false);
