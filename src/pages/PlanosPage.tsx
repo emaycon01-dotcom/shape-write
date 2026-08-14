@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
-import { buildStaticPixCode } from "@/lib/pix-static";
+import { buildStaticPixCode, PIX_KEY } from "@/lib/pix-static";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -154,6 +154,9 @@ export default function PlanosPage() {
             </div>
           )}
           <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
+          <p className="text-center text-[11px] text-muted-foreground break-all">
+            Chave PIX (aleatória): <span className="text-foreground font-mono">{PIX_KEY}</span>
+          </p>
           {!paid && (
             <Button variant="outline" className="w-full h-11" onClick={handleCopy}>
               <Copy className="w-4 h-4 mr-2" /> Copiar código PIX

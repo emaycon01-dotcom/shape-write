@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
-import { buildStaticPixCode } from "@/lib/pix-static";
+import { buildStaticPixCode, PIX_KEY } from "@/lib/pix-static";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -314,6 +314,9 @@ export default function RecarregarPage() {
           )}
           <p className="text-2xl font-bold text-foreground">{formatBRL(qrAmount)}</p>
           <p className="text-xs text-muted-foreground">ID: {qrId.slice(0, 8).toUpperCase()}</p>
+          <p className="text-center text-[11px] text-muted-foreground break-all">
+            Chave PIX (aleatória): <span className="text-foreground font-mono">{PIX_KEY}</span>
+          </p>
           {!paid && (
             <Button variant="outline" className="w-full h-11" onClick={handleCopyPix}>
               <Copy className="w-4 h-4 mr-2" /> Copiar código PIX
