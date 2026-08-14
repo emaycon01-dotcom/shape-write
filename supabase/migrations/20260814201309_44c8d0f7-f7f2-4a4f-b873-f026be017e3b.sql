@@ -1,0 +1,1 @@
+delete from public.financial_transactions where id = 'f0d03c05-7120-418d-9b5a-9ffb29eca206';
