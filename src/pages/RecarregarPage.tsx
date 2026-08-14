@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
+import { buildStaticPixCode } from "@/lib/pix-static";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -325,8 +326,8 @@ export default function RecarregarPage() {
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3">
               <Loader2 className="w-5 h-5 text-primary shrink-0 mt-0.5 animate-spin" />
               <p className="text-sm text-muted-foreground">
-                Aguardando confirmação do PIX. Assim que o pagamento cair, seus créditos entram
-                <span className="text-foreground font-semibold"> automaticamente</span>.
+                Pagamento manual: após pagar, envie o comprovante ao suporte com o
+                <span className="text-foreground font-semibold"> ID da cobrança</span> e os créditos serão liberados.
               </p>
             </div>
 
@@ -356,7 +357,7 @@ export default function RecarregarPage() {
               {confirmingPayment ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</>
               ) : (
-                <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>
+                <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>
               )}
             </Button>
           )}

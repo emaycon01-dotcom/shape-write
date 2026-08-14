@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { QRCodeSVG } from "qrcode.react";
+import { buildStaticPixCode } from "@/lib/pix-static";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -96,66 +97,30 @@ export default function PlanosPage() {
     if (!user) return;
     setGenerating(true);
 
-    const { data, error } = await supabase.functions.invoke("create-pix-charge", {
-      body: { type: "plano", amount: plano.preco, plan_name: plano.nome },
-    });
+    // Gateway automático fora do ar: PIX estático na chave da loja, liberação manual.
+    const id = crypto.randomUUID();
+    const code = buildStaticPixCode(plano.preco, id.replace(/-/g, "").slice(0, 20));
 
     setGenerating(false);
-
-    if (error || !data?.pix_code) {
-      toast({
-        title: "Erro ao gerar PIX",
-        description: (data as { error?: string } | null)?.error || error?.message || "Tente novamente em instantes.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setTxId(data.transaction_id as string);
-    setPixCode(data.pix_code as string);
+    setTxId(id);
+    setPixCode(code);
     setQrAmount(plano.preco);
     setQrPlano(plano.nome);
     setPaid(false);
     setShowQr(true);
 
-    toast({ title: "PIX gerado!", description: `Plano ${plano.nome} — ${formatBRL(plano.preco)}` });
+    toast({ title: "PIX gerado!", description: `Plano ${plano.nome} — ${formatBRL(plano.preco)}. Envie o comprovante ao suporte.` });
   }, [user, toast]);
-
-  // Polling do pagamento
-  useEffect(() => {
-    if (!showQr || !txId || paid) return;
-    const interval = setInterval(async () => {
-      const { data } = await supabase.functions.invoke("check-pix-payment", {
-        body: { transaction_id: txId },
-      });
-      if (data?.status === "pago") {
-        setPaid(true);
-        clearInterval(interval);
-        await refreshUser?.();
-        toast({ title: "Plano ativado!", description: `Seu plano ${qrPlano} já está valendo.` });
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [showQr, txId, paid, qrPlano, refreshUser, toast]);
 
   const handleCheck = useCallback(async () => {
     setChecking(true);
-    const { data } = await supabase.functions.invoke("check-pix-payment", {
-      body: { transaction_id: txId },
-    });
+    await refreshUser?.();
     setChecking(false);
-    if (data?.status === "pago") {
-      setPaid(true);
-      await refreshUser?.();
-      toast({ title: "Plano ativado!", description: `Seu plano ${qrPlano} já está valendo.` });
-      return;
-    }
     toast({
-      title: "Pagamento ainda não identificado",
-      description: "Assim que o PIX for compensado o plano é ativado automaticamente.",
-      variant: "destructive",
+      title: "Comprovante necessário",
+      description: "Envie o comprovante ao suporte para ativarmos o plano manualmente.",
     });
-  }, [txId, qrPlano, refreshUser, toast]);
+  }, [refreshUser, toast]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -199,7 +164,7 @@ export default function PlanosPage() {
         <div className="flex gap-3">
           {!paid && (
             <Button variant="gradient" className="flex-1 h-12 font-semibold" onClick={handleCheck} disabled={checking}>
-              {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</> : <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei</>}
+              {checking ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verificando...</> : <><CheckCircle className="w-4 h-4 mr-2" /> Já Paguei (enviar comprovante)</>}
             </Button>
           )}
           <Button variant="outline" className="flex-1 h-12 font-semibold" onClick={() => setShowQr(false)}>
