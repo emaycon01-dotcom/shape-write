@@ -14,6 +14,7 @@ import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
+import { ModuleMaintenance } from "@/components/ModuleMaintenance";
 
 
 export default function RgPreviewPage() {

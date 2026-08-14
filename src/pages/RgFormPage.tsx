@@ -113,6 +113,16 @@ export default function RgFormPage() {
 
   const isEditMode = Boolean(editState?.editDocId);
 
+  // RG Digital está temporariamente em manutenção.
+  if (!isEditMode) {
+    return (
+      <ModuleMaintenance
+        title="RG Digital em manutenção"
+        description="O módulo de RG Digital está temporariamente indisponível para ajustes de qualidade e validação. Volte em breve."
+      />
+    );
+  }
+
   // Hidrata o formulário quando vem do histórico (edição)
   useEffect(() => {
     if (hydrated || !editState?.editDocId) return;
