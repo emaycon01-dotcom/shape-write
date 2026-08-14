@@ -33,28 +33,38 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    // Aceita token no header (padrão) ou no corpo (fallback sem preflight,
+    // usado por navegadores que bloqueiam o OPTIONS — Safari/iPad).
+    const raw = await req.text();
+    let body: Record<string, unknown> = {};
+    try { body = raw ? JSON.parse(raw) : {}; } catch { body = {}; }
+
+    const headerToken = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+    const bodyToken = typeof body.access_token === "string" ? body.access_token : "";
+    const token = headerToken || bodyToken;
+    if (!token) {
       return json({ error: "Não autorizado" }, 401);
     }
 
     const supabaseUser = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
+      { global: { headers: { Authorization: `Bearer ${token}` } } },
     );
 
-    const { data: { user: authUser }, error: authError } = await supabaseUser.auth.getUser();
+    const { data: { user: authUser }, error: authError } = await supabaseUser.auth.getUser(token);
     if (authError || !authUser) {
       return json({ error: "Não autorizado" }, 401);
     }
 
-    const body = await req.json().catch(() => ({}));
-    const { type, amount, credits_amount, plan_name } = body ?? {};
+    const { type, amount, credits_amount, plan_name } = (body ?? {}) as {
+      type?: string; amount?: number; credits_amount?: number; plan_name?: string;
+    };
 
     if (!type || typeof amount !== "number" || amount <= 0) {
       return json({ error: "Dados inválidos" }, 400);
     }
+
     if (type !== "credito" && type !== "plano") {
       return json({ error: "Tipo inválido" }, 400);
     }
