@@ -283,6 +283,23 @@ export default function PlanosPage() {
         </p>
       </div>
 
+      {/* Gateway selector */}
+      <div className="glass rounded-xl p-4 flex items-center justify-between gap-4">
+        <div className="text-sm">
+          <p className="font-semibold text-foreground">Gateway de pagamento</p>
+          <p className="text-xs text-muted-foreground">
+            {useStaticPix ? "PIX estático — liberação manual" : "Mercado Pago — ativação automática"}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setUseStaticPix((v) => !v)}
+        >
+          {useStaticPix ? "Usar Mercado Pago" : "Usar PIX estático"}
+        </Button>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-3">
         {PLANOS.map((p) => (
           <div
