@@ -73,7 +73,7 @@ const MODULOS: Categoria[] = [
         aplicativo: true,
         rota: "/dashboard/documents/rg",
         creditos: 1,
-        
+        manutencao: true,
       },
       {
         id: "cha",
@@ -84,6 +84,7 @@ const MODULOS: Categoria[] = [
         creditos: 1,
         qrcode: true,
         aplicativo: true,
+        manutencao: true,
       },
     ],
   },
