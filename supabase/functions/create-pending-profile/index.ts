@@ -80,6 +80,16 @@ Deno.serve(async (req) => {
       return json({ error: "email_mismatch" }, 400);
     }
 
+    // O acesso é controlado pela aprovação manual do perfil, não por links de
+    // confirmação. Confirma o e-mail no mesmo backend em que a conta nasceu
+    // para impedir que usuários já aprovados fiquem presos no login.
+    if (!found.user.email_confirmed_at) {
+      const { error: confirmErr } = await admin.auth.admin.updateUserById(userId, {
+        email_confirm: true,
+      });
+      if (confirmErr) return json({ error: "email_confirmation_failed" }, 500);
+    }
+
     const { data: existing } = await admin
       .from("profiles")
       .select("user_id")
