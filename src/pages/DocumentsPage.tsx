@@ -74,7 +74,6 @@ const MODULOS: Categoria[] = [
         rota: "/dashboard/documents/rg",
         creditos: 1,
       },
-      },
       {
         id: "cha",
         titulo: "CNH MARÍTIMA (CHA)",
@@ -84,7 +83,6 @@ const MODULOS: Categoria[] = [
         creditos: 1,
         qrcode: true,
         aplicativo: true,
-        manutencao: true,
       },
     ],
   },
