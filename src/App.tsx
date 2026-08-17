@@ -200,8 +200,8 @@ const App = () => {
                         <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
                         <Route path="documents/atpv" element={<AtpvFormPage />} />
                         <Route path="documents/atpv/preview" element={<AtpvPreviewPage />} />
-                        <Route path="documents/cha" element={<ModuleMaintenance title="CNH Marítima (CHA) em manutenção" />} />
-                        <Route path="documents/cha/preview" element={<ModuleMaintenance title="CNH Marítima (CHA) em manutenção" />} />
+                        <Route path="documents/cha" element={<ChaFormPage />} />
+                        <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
                         <Route path="documents/diploma" element={<DiplomaFormPage />} />
                         <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
                         <Route path="documents/diploma-unip" element={<UnipFormPage />} />
