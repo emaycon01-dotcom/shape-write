@@ -3,7 +3,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { authenticateRequest } from "../_shared/auth.ts";
 
-const TARGET_URL = "https://hfkckowhrjbpjgniaakl.supabase.co/functions/v1/doc-ingest";
+const TARGET_URL = "https://zxkbzmmctfznfxddnzlc.supabase.co/functions/v1/doc-ingest";
 const INGEST_TOKEN = Deno.env.get("DOC_INGEST_TOKEN") ?? "";
 
 Deno.serve(async (req) => {
