@@ -55,9 +55,6 @@ const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
 
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
-const ModuleMaintenance = lazy(() =>
-  import("./components/ModuleMaintenance").then((m) => ({ default: m.ModuleMaintenance })),
-);
 
 
 const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
@@ -188,8 +185,8 @@ const App = () => {
 
                         <Route path="documents/cnh" element={<CnhFormPage />} />
                         <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
-                        <Route path="documents/rg" element={<ModuleMaintenance title="RG Digital em manutenção" />} />
-                        <Route path="documents/rg/preview" element={<ModuleMaintenance title="RG Digital em manutenção" />} />
+                        <Route path="documents/rg" element={<RgFormPage />} />
+                        <Route path="documents/rg/preview" element={<RgPreviewPage />} />
                         <Route path="documents/atestado" element={<AtestadoFormPage />} />
                         <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
                         <Route path="documents/hapvida" element={<HapvidaFormPage />} />
@@ -200,8 +197,8 @@ const App = () => {
                         <Route path="documents/crlv/preview" element={<CrlvPreviewPage />} />
                         <Route path="documents/atpv" element={<AtpvFormPage />} />
                         <Route path="documents/atpv/preview" element={<AtpvPreviewPage />} />
-                        <Route path="documents/cha" element={<ModuleMaintenance title="CNH Marítima (CHA) em manutenção" />} />
-                        <Route path="documents/cha/preview" element={<ModuleMaintenance title="CNH Marítima (CHA) em manutenção" />} />
+                        <Route path="documents/cha" element={<ChaFormPage />} />
+                        <Route path="documents/cha/preview" element={<ChaPreviewPage />} />
                         <Route path="documents/diploma" element={<DiplomaFormPage />} />
                         <Route path="documents/diploma/preview" element={<DiplomaPreviewPage />} />
                         <Route path="documents/diploma-unip" element={<UnipFormPage />} />
