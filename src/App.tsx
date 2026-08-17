@@ -55,9 +55,6 @@ const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
 
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
-const ModuleMaintenance = lazy(() =>
-  import("./components/ModuleMaintenance").then((m) => ({ default: m.ModuleMaintenance })),
-);
 
 
 const CnhFormPage = lazy(() => import("./pages/CnhFormPage"));
