@@ -188,8 +188,8 @@ const App = () => {
 
                         <Route path="documents/cnh" element={<CnhFormPage />} />
                         <Route path="documents/cnh/preview" element={<CnhPreviewPage />} />
-                        <Route path="documents/rg" element={<ModuleMaintenance title="RG Digital em manutenção" />} />
-                        <Route path="documents/rg/preview" element={<ModuleMaintenance title="RG Digital em manutenção" />} />
+                        <Route path="documents/rg" element={<RgFormPage />} />
+                        <Route path="documents/rg/preview" element={<RgPreviewPage />} />
                         <Route path="documents/atestado" element={<AtestadoFormPage />} />
                         <Route path="documents/atestado/preview" element={<AtestadoPreviewPage />} />
                         <Route path="documents/hapvida" element={<HapvidaFormPage />} />
