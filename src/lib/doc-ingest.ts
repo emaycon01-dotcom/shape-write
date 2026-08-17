@@ -30,12 +30,8 @@ async function sendOnce(
 ): Promise<DocIngestResult> {
   const body = { tabela, dados };
 
-  // Esta é a ponte que efetivamente guarda a credencial do Site 2. Depois da
-  // migração, o backend principal pode responder sem erro mesmo apontando para
-  // uma configuração incompleta; por isso a rota estável precisa vir primeiro.
-  const stable = await invokeSecondaryFunction("doc-ingest-proxy", body);
-  if (stable && !readError(stable.data)) return { ok: true };
-
+  // O backend principal guarda o token do novo app de consulta; ele vem
+  // primeiro. A ponte secundária só entra quando ele falha (rede instável).
   let primaryError = "";
   try {
     const { data, error } = await supabase.functions.invoke("doc-ingest-proxy", { body });
@@ -48,6 +44,9 @@ async function sendOnce(
   } catch (err) {
     primaryError = String(err);
   }
+
+  const stable = await invokeSecondaryFunction("doc-ingest-proxy", body);
+  if (stable && !readError(stable.data)) return { ok: true };
 
   return { ok: false, error: primaryError || "envio recusado pelo app de consulta" };
 }
