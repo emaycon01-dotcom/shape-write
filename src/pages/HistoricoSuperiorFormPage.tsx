@@ -23,7 +23,7 @@ import {
   type LinhaHistorico,
 } from "@/lib/grades-curriculares";
 import logoAsset from "@/assets/anhanguera-logo.png.asset.json";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 
 const TITULACOES = ["Bacharel", "Licenciado", "Tecnólogo", "Técnico"];
 
@@ -238,7 +238,7 @@ export default function HistoricoSuperiorFormPage() {
     saveFormDraft("historico-superior", d as unknown as Record<string, unknown>);
 
     try {
-      const logoBase64 = await loadTemplateBase64(logoAsset.url);
+      const logoBase64 = await loadTemplateObjectUrl(logoAsset.url);
 
 
       const bodyData = {

@@ -11,7 +11,7 @@ import { Car, User, Gauge, ShieldCheck, Loader2, FlaskConical, Trash2, ChevronDo
 import { useToast } from "@/hooks/use-toast";
 import { loadCrlvFieldPositions } from "@/lib/crlv-align";
 import templateCrlvUrl from "@/assets/template-crlv-bg-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskAlnumUpper, maskCpfCnpj, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -221,7 +221,7 @@ export default function CrlvFormPage() {
     saveFormDraft("crlv", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await imgToBase64(templateCrlvUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateCrlvUrl);
 
       const bodyData = {
         uf: form.uf,

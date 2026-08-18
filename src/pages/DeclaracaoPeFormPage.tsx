@@ -10,7 +10,7 @@ import { GraduationCap, Loader2, FlaskConical, Trash2, FileText, User, School } 
 import { useToast } from "@/hooks/use-toast";
 import { loadDeclaracaoPeFieldPositions } from "@/lib/declaracao-pe-align";
 import templatePeAsset from "@/assets/template-declaracao-pe-bg.jpg.asset.json";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -134,7 +134,7 @@ export default function DeclaracaoPeFormPage() {
     saveFormDraft("declaracao-pe", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templatePeAsset.url);
+      const templateBase64 = await loadTemplateObjectUrl(templatePeAsset.url);
 
       const bodyData = {
         nome_aluno: form.nomeAluno,

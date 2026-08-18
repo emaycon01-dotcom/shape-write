@@ -11,7 +11,7 @@ import { Loader2, FlaskConical, Trash2, FileText, User, Building2, Scroll } from
 import { useToast } from "@/hooks/use-toast";
 import { loadObitoFieldPositions } from "@/lib/obito-align";
 import templateObitoUrl from "@/assets/template-obito-bg-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF, maskPhone, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -187,7 +187,7 @@ export default function ObitoFormPage() {
     saveFormDraft("obito", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateObitoUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateObitoUrl);
 
       const bodyData = {
         nome: form.nome,

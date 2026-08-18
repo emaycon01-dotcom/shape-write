@@ -11,7 +11,7 @@ import { User, Building2, Loader2, FlaskConical, Trash2, History, FileText, Stet
 import { useToast } from "@/hooks/use-toast";
 import { loadUnimedFieldPositions } from "@/lib/unimed-align";
 import templateUnimedUrl from "@/assets/template-unimed-bg-hq.jpg";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -283,7 +283,7 @@ export default function UnimedFormPage() {
     saveFormDraft("unimed", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateUnimedUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateUnimedUrl);
       const horaCurta = form.horaAtendimento.slice(0, 5);
       const prontuario = form.prontuario || `00${rnd(7)}`;
       const numeroAtendimento = form.numeroAtendimento || rnd(7);

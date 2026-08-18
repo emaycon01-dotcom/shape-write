@@ -11,7 +11,7 @@ import MedicamentoSearch from "@/components/MedicamentoSearch";
 import { useToast } from "@/hooks/use-toast";
 import { loadReceitaFieldPositions } from "@/lib/receita-align";
 import templateReceitaUrl from "@/assets/template-receita-bg-hq.jpg";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -157,7 +157,7 @@ export default function ReceitaFormPage() {
     saveFormDraft("receita", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateReceitaUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateReceitaUrl);
 
       const bodyData = {
         cidade_unidade: form.cidadeUnidade,

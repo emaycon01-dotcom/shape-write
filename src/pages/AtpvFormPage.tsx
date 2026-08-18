@@ -10,7 +10,7 @@ import { Car, User, UserCheck, FileText, Loader2, FlaskConical, Trash2 } from "l
 import { useToast } from "@/hooks/use-toast";
 import { loadAtpvFieldPositions } from "@/lib/atpv-align";
 import templateAtpvUrl from "@/assets/template-atpv-bg-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskAlnumUpper, maskCpfCnpj, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -217,7 +217,7 @@ export default function AtpvFormPage() {
     saveFormDraft("atpv", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateAtpvUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateAtpvUrl);
 
       const bodyData = {
         uf: form.uf,

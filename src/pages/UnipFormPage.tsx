@@ -15,7 +15,7 @@ import { loadUnipFieldPositions } from "@/lib/unip-align";
 import { MODALIDADES, type Modalidade, cursosPorModalidade, TOTAL_CURSOS } from "@/lib/diploma-cursos";
 import templateP1Url from "@/assets/template-unip-p1-hq.webp";
 import templateP2Url from "@/assets/template-unip-p2-hq.jpg";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -155,8 +155,8 @@ export default function UnipFormPage() {
 
   const buildBody = async () => {
     const [template_p1_base64, template_p2_base64] = await Promise.all([
-      loadTemplateBase64(templateP1Url),
-      loadTemplateBase64(templateP2Url),
+      loadTemplateObjectUrl(templateP1Url),
+      loadTemplateObjectUrl(templateP2Url),
     ]);
 
     const curso = titleCase(form.curso);

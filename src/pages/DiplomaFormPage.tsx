@@ -24,7 +24,7 @@ import {
 } from "@/lib/diploma-cursos";
 import templateP1Url from "@/assets/template-diploma-p1-hq.jpg";
 import templateP2Url from "@/assets/template-diploma-p2-hq.jpg";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskDigits, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -306,8 +306,8 @@ export default function DiplomaFormPage() {
 
   const buildBody = async () => {
     const [template_p1_base64, template_p2_base64] = await Promise.all([
-      imgToBase64(templateP1Url),
-      imgToBase64(templateP2Url),
+      loadTemplateObjectUrl(templateP1Url),
+      loadTemplateObjectUrl(templateP2Url),
     ]);
 
     return {

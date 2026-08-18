@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadChaFieldPositions } from "@/lib/cha-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import templateChaUrl from "@/assets/template-cha-bg-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskCPF, maskDate } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { syncChaToExternal } from "@/lib/cha-external-sync";
@@ -173,7 +173,7 @@ export default function ChaFormPage() {
     saveFormDraft("cha", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await imgToBase64(templateChaUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateChaUrl);
 
       const bodyData = {
         nome: form.nome,

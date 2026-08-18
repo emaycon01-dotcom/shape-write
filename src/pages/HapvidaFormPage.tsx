@@ -11,7 +11,7 @@ import { HeartPulse, User, Building2, Loader2, FlaskConical, Trash2, History, Fi
 import { useToast } from "@/hooks/use-toast";
 import { loadHapvidaFieldPositions } from "@/lib/hapvida-align";
 import templateHapvidaUrl from "@/assets/template-hapvida-bg-hq.jpg";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits, maskPhone, maskTime } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -200,7 +200,7 @@ export default function HapvidaFormPage() {
     saveFormDraft("hapvida", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateHapvidaUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateHapvidaUrl);
       const horaCurta = form.horaAtendimento.slice(0, 5);
       const unidade = form.unidade.trim();
 

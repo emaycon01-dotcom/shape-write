@@ -12,7 +12,7 @@ import { loadCrafFieldPositions } from "@/lib/craf-align";
 import templateCrafUrl from "@/assets/template-craf-bg-hq.webp";
 import testFotoUrl from "@/assets/test-foto.png";
 
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -202,7 +202,7 @@ export default function CrafFormPage() {
     saveFormDraft("craf", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateCrafUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateCrafUrl);
 
       const bodyData = {
         validade: form.validade,

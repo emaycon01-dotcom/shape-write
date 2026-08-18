@@ -12,7 +12,7 @@ import { Stethoscope, User, Building2, Loader2, FlaskConical, Trash2, History, F
 import { useToast } from "@/hooks/use-toast";
 import { loadAtestadoFieldPositions } from "@/lib/atestado-align";
 import templateAtestadoUrl from "@/assets/template-atestado-bg-hq.jpg";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { splitEndereco } from "@/lib/atestado-endereco";
 import { maskCPF, maskDate, maskDigits, maskTimeSec } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
@@ -154,7 +154,7 @@ export default function AtestadoFormPage() {
     saveFormDraft("atestado", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await imgToBase64(templateAtestadoUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateAtestadoUrl);
 
       const [end1, end2, end3] = splitEndereco(form.endereco);
       const horaCurta = form.horaAtendimento.slice(0, 5);
