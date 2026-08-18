@@ -1246,8 +1246,10 @@ export async function invokeGeneratePdf(
     if (!isAction) {
       generationInProgress = false;
       setGenerationBusy(false);
+      flushPendingTemplateRevokes();
       currentGenerationAbort = null;
     }
+
     endPdfLoading();
   }
 }
