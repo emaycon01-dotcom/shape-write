@@ -817,6 +817,14 @@ function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) 
     if (depth > 12) return value;
 
     if (typeof value === "string") {
+      // Template já carregado como `blob:` (caminho leve): também vira
+      // marcador. Assim o HTML guardado em cache nunca fica com uma URL de
+      // objeto morta depois que o cliente recarrega a página.
+      if (value.startsWith("blob:") && isTemplateKey(key)) {
+        const token = `__LVASSET_${i++}__`;
+        map.set(token, value);
+        return token;
+      }
       // Rejeição rápida: strings curtas ou que não começam com data URI nunca
       // serão tokenizadas. Evita varrer megabytes de texto desnecessariamente.
       if (
@@ -826,6 +834,7 @@ function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) 
       ) {
         return value;
       }
+
       // O marcador de mídia mantém o prefixo `data:` para que funções que
       // testam `startsWith("data:")` não acabem prefixando duas vezes.
       const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
