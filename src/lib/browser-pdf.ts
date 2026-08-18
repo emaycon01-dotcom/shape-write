@@ -9,6 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { invokePdfFunction, invokeSecondaryFunction } from "@/lib/pdf-fallback";
 import { awaitPdfPresentation, beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 import { warmPdfViewer } from "@/lib/pdfjs-loader";
+import { setGenerationBusy } from "@/lib/generation-busy";
+import { recordGeneration } from "@/lib/generation-telemetry";
+
 
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
