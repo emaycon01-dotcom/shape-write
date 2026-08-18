@@ -1223,7 +1223,14 @@ export async function invokeGeneratePdf(
       }
 
 
+      recordGeneration({
+        fn: functionName,
+        preview: isPreview,
+        ms: Math.round(performance.now() - startedAt),
+        ok: true,
+      });
       return { data: result, error: null };
+
     } catch (e) {
       const err = e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.");
       recordGeneration({
