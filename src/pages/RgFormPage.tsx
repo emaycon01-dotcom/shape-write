@@ -20,7 +20,6 @@ import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { syncRgToExternal } from "@/lib/rg-external-sync";
 import { pick, rnd } from "@/lib/random";
-import { ModuleNotice } from "@/components/ModuleNotice";
 
 const UF_LIST = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
@@ -359,7 +358,6 @@ export default function RgFormPage() {
 
   return (
     <div className="max-w-2xl">
-      <ModuleNotice />
       <div className="mb-4 flex items-center justify-between">
         <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground">
           ← Voltar

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, X, User, Anchor, Ship, Loader2, FlaskConical, Trash2 } from "lucide-react";
-import { ModuleNotice } from "@/components/ModuleNotice";
 import { useToast } from "@/hooks/use-toast";
 import { loadChaFieldPositions } from "@/lib/cha-align";
 import testFotoUrl from "@/assets/test-foto.png";
@@ -253,7 +252,6 @@ export default function ChaFormPage() {
 
   return (
     <div className="max-w-2xl">
-      <ModuleNotice />
       <div className="mb-4 flex items-center justify-between">
         <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground">
           ← Voltar
