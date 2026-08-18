@@ -1033,6 +1033,7 @@ export async function invokeGeneratePdf(
   const body = options?.body ?? {};
   const isAction = typeof (body as { action?: unknown }).action === "string";
   const isPreview = body.preview === true;
+  const startedAt = performance.now();
 
 
   // Um toque duplo antes do React desabilitar o botão iniciava dois iframes,
@@ -1043,8 +1044,10 @@ export async function invokeGeneratePdf(
   }
   if (!isAction) {
     generationInProgress = true;
+    setGenerationBusy(true);
     currentGenerationAbort = new AbortController();
   }
+
   const abortSignal = !isAction ? currentGenerationAbort?.signal : null;
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
