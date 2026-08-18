@@ -10,6 +10,7 @@ import { invokePdfFunction, invokeSecondaryFunction } from "@/lib/pdf-fallback";
 import { awaitPdfPresentation, beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 import { warmPdfViewer } from "@/lib/pdfjs-loader";
 import { setGenerationBusy } from "@/lib/generation-busy";
+import { flushPendingTemplateRevokes } from "@/lib/template-cache";
 import { recordGeneration } from "@/lib/generation-telemetry";
 
 
@@ -1246,8 +1247,10 @@ export async function invokeGeneratePdf(
     if (!isAction) {
       generationInProgress = false;
       setGenerationBusy(false);
+      flushPendingTemplateRevokes();
       currentGenerationAbort = null;
     }
+
     endPdfLoading();
   }
 }
