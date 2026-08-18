@@ -30,6 +30,29 @@ function trimBase64(activeUrl: string) {
   }
 }
 
+/**
+ * URLs que saíram do cache mas NÃO podem ser revogadas agora: durante uma
+ * geração o HTML do documento ainda aponta para elas. Revogar no meio do
+ * caminho faria a imagem sumir do PDF final. Ficam na fila e são liberadas
+ * quando a geração termina.
+ */
+const pendingRevoke = new Set<string>();
+
+function revokeNow(url: string) {
+  try {
+    URL.revokeObjectURL(url);
+  } catch {
+    /* ignora */
+  }
+}
+
+/** Libera os `blob:` adiados (chamado ao final de cada geração). */
+export function flushPendingTemplateRevokes() {
+  if (isGenerationBusy()) return;
+  for (const u of pendingRevoke) revokeNow(u);
+  pendingRevoke.clear();
+}
+
 function trimObjectUrls(activeUrl: string) {
   while (objectUrlCache.size > MAX_CACHED_OBJECT_URLS) {
     const oldest = objectUrlCache.keys().next().value as string | undefined;
@@ -38,15 +61,13 @@ function trimObjectUrls(activeUrl: string) {
     objectUrlCache.delete(oldest);
     void stale
       ?.then((u) => {
-        try {
-          URL.revokeObjectURL(u);
-        } catch {
-          /* ignora */
-        }
+        if (isGenerationBusy()) pendingRevoke.add(u);
+        else revokeNow(u);
       })
       .catch(() => undefined);
   }
 }
+
 
 /**
  * Caminho LEVE (padrão): devolve um `blob:` reaproveitável para o template.
