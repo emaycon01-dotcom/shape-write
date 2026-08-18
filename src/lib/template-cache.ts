@@ -14,6 +14,8 @@
  * (envio ao validador / ingestão externa).
  */
 
+import { isGenerationBusy } from "@/lib/generation-busy";
+
 const base64Cache = new Map<string, Promise<string>>();
 const objectUrlCache = new Map<string, Promise<string>>();
 
