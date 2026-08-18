@@ -1219,14 +1219,24 @@ export async function invokeGeneratePdf(
 
       return { data: result, error: null };
     } catch (e) {
-      return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
+      const err = e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.");
+      recordGeneration({
+        fn: functionName,
+        preview: isPreview,
+        ms: Math.round(performance.now() - startedAt),
+        ok: false,
+        reason: err.message,
+      });
+      return { data: null, error: err };
     }
   } finally {
     if (!isAction) {
       generationInProgress = false;
+      setGenerationBusy(false);
       currentGenerationAbort = null;
     }
     endPdfLoading();
   }
 }
+
 
