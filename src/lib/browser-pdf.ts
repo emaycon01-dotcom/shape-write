@@ -9,6 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { invokePdfFunction, invokeSecondaryFunction } from "@/lib/pdf-fallback";
 import { awaitPdfPresentation, beginPdfLoading, endPdfLoading } from "@/lib/pdf-loading";
 import { warmPdfViewer } from "@/lib/pdfjs-loader";
+import { setGenerationBusy } from "@/lib/generation-busy";
+import { recordGeneration } from "@/lib/generation-telemetry";
+
 
 
 /** Escala de renderização: 794px (A4 @96dpi) * 3.75 ≈ 2978px ≈ 360 DPI. */
@@ -817,6 +820,14 @@ function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) 
     if (depth > 12) return value;
 
     if (typeof value === "string") {
+      // Template já carregado como `blob:` (caminho leve): também vira
+      // marcador. Assim o HTML guardado em cache nunca fica com uma URL de
+      // objeto morta depois que o cliente recarrega a página.
+      if (value.startsWith("blob:") && isTemplateKey(key)) {
+        const token = `__LVASSET_${i++}__`;
+        map.set(token, value);
+        return token;
+      }
       // Rejeição rápida: strings curtas ou que não começam com data URI nunca
       // serão tokenizadas. Evita varrer megabytes de texto desnecessariamente.
       if (
@@ -826,6 +837,7 @@ function tokenizeHeavyAssets(body: Record<string, unknown>, allowMedia = false) 
       ) {
         return value;
       }
+
       // O marcador de mídia mantém o prefixo `data:` para que funções que
       // testam `startsWith("data:")` não acabem prefixando duas vezes.
       const media = allowMedia && isMediaKey(key) && !isTemplateKey(key);
@@ -1021,6 +1033,7 @@ export async function invokeGeneratePdf(
   const body = options?.body ?? {};
   const isAction = typeof (body as { action?: unknown }).action === "string";
   const isPreview = body.preview === true;
+  const startedAt = performance.now();
 
 
   // Um toque duplo antes do React desabilitar o botão iniciava dois iframes,
@@ -1031,8 +1044,10 @@ export async function invokeGeneratePdf(
   }
   if (!isAction) {
     generationInProgress = true;
+    setGenerationBusy(true);
     currentGenerationAbort = new AbortController();
   }
+
   const abortSignal = !isAction ? currentGenerationAbort?.signal : null;
 
   beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
@@ -1208,16 +1223,33 @@ export async function invokeGeneratePdf(
       }
 
 
+      recordGeneration({
+        fn: functionName,
+        preview: isPreview,
+        ms: Math.round(performance.now() - startedAt),
+        ok: true,
+      });
       return { data: result, error: null };
+
     } catch (e) {
-      return { data: null, error: e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.") };
+      const err = e instanceof Error ? e : new Error("Falha ao gerar o PDF no navegador.");
+      recordGeneration({
+        fn: functionName,
+        preview: isPreview,
+        ms: Math.round(performance.now() - startedAt),
+        ok: false,
+        reason: err.message,
+      });
+      return { data: null, error: err };
     }
   } finally {
     if (!isAction) {
       generationInProgress = false;
+      setGenerationBusy(false);
       currentGenerationAbort = null;
     }
     endPdfLoading();
   }
 }
+
 

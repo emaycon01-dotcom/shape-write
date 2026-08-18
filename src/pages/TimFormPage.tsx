@@ -10,7 +10,7 @@ import { Loader2, FlaskConical, Trash2, User, Receipt } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { loadTimFieldPositions } from "@/lib/tim-align";
 import templateTimP1Url from "@/assets/template-tim-p1-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -214,7 +214,7 @@ export default function TimFormPage() {
     setForm(f);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateTimP1Url);
+      const templateBase64 = await loadTemplateObjectUrl(templateTimP1Url);
 
       const bodyData: Record<string, string | undefined | unknown> = {
         nome: f.nome,

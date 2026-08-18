@@ -10,7 +10,7 @@ import { GraduationCap, Loader2, FlaskConical, Trash2, FileText, User, School } 
 import { useToast } from "@/hooks/use-toast";
 import { loadDeclaracaoEteFieldPositions } from "@/lib/declaracao-ete-align";
 import templateEteAsset from "@/assets/template-declaracao-ete-bg.jpg.asset.json";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -150,7 +150,7 @@ export default function DeclaracaoEteFormPage() {
     saveFormDraft("declaracao-ete", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateEteAsset.url);
+      const templateBase64 = await loadTemplateObjectUrl(templateEteAsset.url);
 
       const bodyData = {
         nome_aluno: form.nomeAluno,

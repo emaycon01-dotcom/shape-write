@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadCoelbaFieldPositions } from "@/lib/coelba-align";
 import templateCoelbaP1Url from "@/assets/template-coelba-p1-hq.webp";
 import templateCoelbaP2Url from "@/assets/template-coelba-p2-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -229,8 +229,8 @@ export default function CoelbaFormPage() {
 
     try {
       const [templateBase64, templateP2Base64] = await Promise.all([
-        loadTemplateBase64(templateCoelbaP1Url),
-        loadTemplateBase64(templateCoelbaP2Url),
+        loadTemplateObjectUrl(templateCoelbaP1Url),
+        loadTemplateObjectUrl(templateCoelbaP2Url),
       ]);
 
       const bodyData = {

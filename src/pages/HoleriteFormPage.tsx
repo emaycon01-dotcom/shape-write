@@ -10,7 +10,7 @@ import { Loader2, FlaskConical, Trash2, Building2, User, Calculator, Wallet } fr
 import { useToast } from "@/hooks/use-toast";
 import { loadHoleriteFieldPositions } from "@/lib/holerite-align";
 import templateHoleriteUrl from "@/assets/template-holerite-p1-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 
@@ -172,7 +172,7 @@ export default function HoleriteFormPage() {
     saveFormDraft("holerite", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await loadTemplateBase64(templateHoleriteUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateHoleriteUrl);
 
       const bodyData: Record<string, string | undefined | unknown> = {
         ...form,

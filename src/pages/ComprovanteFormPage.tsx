@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { loadComprovanteFieldPositions } from "@/lib/comprovante-align";
 import templateEnelP1Url from "@/assets/template-enel-p1-hq.webp";
 import templateEnelP2Url from "@/assets/template-enel-p2-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -278,8 +278,8 @@ export default function ComprovanteFormPage() {
 
     try {
       const [templateBase64, templateP2Base64] = await Promise.all([
-        loadTemplateBase64(templateEnelP1Url),
-        loadTemplateBase64(templateEnelP2Url),
+        loadTemplateObjectUrl(templateEnelP1Url),
+        loadTemplateObjectUrl(templateEnelP2Url),
       ]);
 
       const bodyData = {

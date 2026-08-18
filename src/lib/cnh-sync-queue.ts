@@ -1,3 +1,4 @@
+import { isGenerationBusy } from "@/lib/generation-busy";
 /**
  * Fila persistente de sincronização da CNH com a base consultada por CPF.
  *
@@ -61,6 +62,8 @@ let flushing = false;
  */
 export async function flushCnhSyncQueue(): Promise<void> {
   if (flushing) return;
+  // Nunca disputa memória/rede com uma geração em andamento.
+  if (isGenerationBusy()) return;
   const items = read();
   if (!items.length) return;
   flushing = true;

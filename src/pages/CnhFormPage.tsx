@@ -16,7 +16,7 @@ import { loadCnhFieldPositions } from "@/lib/cnh-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateCnhUrl from "@/assets/template-cnh-bg-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -314,7 +314,7 @@ export default function CnhFormPage() {
 
     try {
       // Convert template to base64
-      const templateBase64 = await imgToBase64(templateCnhUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateCnhUrl);
       const assinaturaNormalizada = assPreview
         ? await normalizeSignatureImage(assPreview)
         : "";

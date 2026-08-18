@@ -11,8 +11,10 @@ import GenerationOverlay from "@/components/GenerationOverlay";
 import { startCnhSyncWatcher } from "@/lib/cnh-sync-queue";
 import { startDocSyncWatcher } from "@/lib/doc-sync-queue";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { lazyRetry as lazy } from "@/lib/lazy-retry";
+import { releaseTemplateBase64Cache } from "@/lib/template-cache";
 import LoginPage from "./pages/LoginPage";
 
 /** Reenvia em segundo plano as CNHs que não chegaram ao validador. */
@@ -23,6 +25,28 @@ function CnhSyncWatcher() {
   }, [user]);
   return null;
 }
+
+/**
+ * Libera a memória pesada (faixas do preview e texto base64 de template)
+ * quando o cliente SAI de um fluxo de documento. Antes, tudo continuava vivo
+ * enquanto ele navegava entre módulos e o consumo só crescia até a aba
+ * recarregar sozinha no celular.
+ */
+function MemoryJanitor() {
+  const { pathname } = useLocation();
+  const wasInDocFlow = useRef(false);
+  useEffect(() => {
+    const inDocFlow = /^\/dashboard\/documents\/.+/.test(pathname);
+    if (wasInDocFlow.current && !inDocFlow) {
+      releaseTemplateBase64Cache();
+      // Import sob demanda: não traz o motor de PDF para o pacote inicial.
+      void import("@/lib/canvas-pdf").then((m) => m.releasePreviewPages()).catch(() => undefined);
+    }
+    wasInDocFlow.current = inDocFlow;
+  }, [pathname]);
+  return null;
+}
+
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -169,6 +193,7 @@ const App = () => {
               <GenerationOverlay />
 
               <BrowserRouter>
+                <MemoryJanitor />
                 <Suspense fallback={<Loading />}>
                   <Routes>
                     <Route path="/" element={<Navigate to="/login" replace />} />

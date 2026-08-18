@@ -14,7 +14,7 @@ import { loadRgFieldPositions } from "@/lib/rg-align";
 import testFotoUrl from "@/assets/test-foto.png";
 import testAssUrl from "@/assets/test-assinatura.png";
 import templateRgUrl from "@/assets/template-rg-bg-hq.webp";
-import { loadTemplateBase64 } from "@/lib/template-cache";
+import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
@@ -228,7 +228,7 @@ export default function RgFormPage() {
     saveFormDraft("rg", form as unknown as Record<string, unknown>);
 
     try {
-      const templateBase64 = await imgToBase64(templateRgUrl);
+      const templateBase64 = await loadTemplateObjectUrl(templateRgUrl);
 
       const bodyData = {
         nome_completo: form.nomeCompleto,
