@@ -8,6 +8,7 @@
  * encontrado no validador.
  */
 import { sendDocIngest, stripImages, type DocIngestTable } from "@/lib/doc-ingest";
+import { isGenerationBusy } from "@/lib/generation-busy";
 
 const STORAGE_KEY = "doc_sync_queue_v1";
 const MAX_ITEMS = 20;
@@ -61,6 +62,8 @@ let flushing = false;
 
 export async function flushDocSyncQueue(): Promise<void> {
   if (flushing) return;
+  // Nunca disputa memória/rede com uma geração em andamento.
+  if (isGenerationBusy()) return;
   const items = read();
   if (!items.length) return;
   flushing = true;
