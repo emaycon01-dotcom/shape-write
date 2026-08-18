@@ -15,7 +15,6 @@ import { Suspense, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { lazyRetry as lazy } from "@/lib/lazy-retry";
 import { releaseTemplateBase64Cache } from "@/lib/template-cache";
-import { releasePreviewPages } from "@/lib/canvas-pdf";
 import LoginPage from "./pages/LoginPage";
 
 /** Reenvia em segundo plano as CNHs que não chegaram ao validador. */
@@ -40,7 +39,8 @@ function MemoryJanitor() {
     const inDocFlow = /^\/dashboard\/documents\/.+/.test(pathname);
     if (wasInDocFlow.current && !inDocFlow) {
       releaseTemplateBase64Cache();
-      releasePreviewPages();
+      // Import sob demanda: não traz o motor de PDF para o pacote inicial.
+      void import("@/lib/canvas-pdf").then((m) => m.releasePreviewPages()).catch(() => undefined);
     }
     wasInDocFlow.current = inDocFlow;
   }, [pathname]);
@@ -193,6 +193,7 @@ const App = () => {
               <GenerationOverlay />
 
               <BrowserRouter>
+                <MemoryJanitor />
                 <Suspense fallback={<Loading />}>
                   <Routes>
                     <Route path="/" element={<Navigate to="/login" replace />} />
