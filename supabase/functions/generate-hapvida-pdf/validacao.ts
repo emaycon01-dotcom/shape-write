@@ -112,7 +112,6 @@ function buildPayload(d: Record<string, string>) {
 
 const REQUIRED: Array<[string, string]> = [
   ["patient_name", "Nome do paciente"],
-  ["patient_cpf", "CPF"],
   ["patient_birth_date", "Data de nascimento"],
   ["professional_name", "Nome do profissional"],
   ["professional_crm", "CRM"],
@@ -132,6 +131,12 @@ export async function registerValidationDocument(
   const faltando = REQUIRED
     .filter(([k]) => !s(payload[k]))
     .map(([, label]) => label);
+
+  // CPF e CNS são alternativas no formulário. O bloqueio anterior exigia
+  // CPF mesmo com um CNS válido e devolvia 502 durante a geração final.
+  if (!s(payload.patient_cpf) && !s(payload.patient_cns)) {
+    faltando.push("CPF ou CNS");
+  }
 
   if (faltando.length) {
     return {
