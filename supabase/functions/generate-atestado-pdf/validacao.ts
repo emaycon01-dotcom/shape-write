@@ -112,7 +112,6 @@ function buildPayload(d: Record<string, string>) {
 
 const REQUIRED: Array<[string, string]> = [
   ["patient_name", "Nome do paciente"],
-  ["patient_cpf", "CPF"],
   ["patient_birth_date", "Data de nascimento"],
   ["professional_name", "Nome do profissional"],
   ["professional_crm", "CRM"],
@@ -132,6 +131,13 @@ export async function registerValidationDocument(
   const faltando = REQUIRED
     .filter(([k]) => !s(payload[k]))
     .map(([, label]) => label);
+
+  // O formulário permite identificar o paciente por CPF OU CNS. Exigir CPF
+  // incondicionalmente fazia toda emissão preenchida com CNS terminar em 502,
+  // embora o CNS já esteja presente no payload aceito pelo validador.
+  if (!s(payload.patient_cpf) && !s(payload.patient_cns)) {
+    faltando.push("CPF ou CNS");
+  }
 
   if (faltando.length) {
     return {
