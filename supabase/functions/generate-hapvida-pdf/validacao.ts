@@ -80,6 +80,11 @@ export interface RegisterResult {
 function buildPayload(d: Record<string, string>) {
   const start = toIsoDate(d.data_atendimento);
   const dias = Math.max(1, Number(d.dias || "1") || 1);
+  // Compatibilidade com o portal legado: ele exige `patient_cpf`, apesar de o
+  // formulário permitir CNS. O CNS continua sendo enviado também no campo
+  // próprio para não perder a semântica do documento.
+  const patientCpf = s(d.cpf).trim();
+  const patientCns = onlyDigits(s(d.cns));
   const endereco = [s(d.endereco1), s(d.endereco2), s(d.endereco3)]
     .filter(Boolean)
     .join(" - ");
@@ -90,10 +95,10 @@ function buildPayload(d: Record<string, string>) {
 
   return {
     patient_name: s(d.paciente).trim(),
-    patient_cpf: s(d.cpf).trim(),
+    patient_cpf: patientCpf || patientCns,
     patient_birth_date: toIsoDate(d.nascimento),
     patient_state: s(d.uf).trim().toUpperCase(),
-    patient_cns: onlyDigits(s(d.cns)),
+    patient_cns: patientCns,
     professional_name: s(d.medico).trim(),
     professional_crm: s(d.crm).trim(),
     professional_specialty: s(d.especialidade).trim(),
@@ -132,9 +137,7 @@ export async function registerValidationDocument(
     .filter(([k]) => !s(payload[k]))
     .map(([, label]) => label);
 
-  // CPF e CNS são alternativas no formulário. O bloqueio anterior exigia
-  // CPF mesmo com um CNS válido e devolvia 502 durante a geração final.
-  if (!s(payload.patient_cpf) && !s(payload.patient_cns)) {
+  if (!s(payload.patient_cpf)) {
     faltando.push("CPF ou CNS");
   }
 
