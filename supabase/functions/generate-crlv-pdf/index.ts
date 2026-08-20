@@ -190,7 +190,7 @@ const FIT_WIDTHS: Record<string, number> = {
   chassi: 215,
   cor: 90,
   combustivel: 240,
-  observacoes: 480,
+  observacoes: 330,
   categoria: 250,
   capacidade: 105,
   potencia: 250,

@@ -89,7 +89,11 @@ export function buildCorpoHtml(d: Record<string, string>): string {
     `${b(d.escola)}, no ano letivo de ${b(d.ano_letivo)}. Cujo término do ano letivo aconteceu no dia ` +
     `${b(diaTermino)} de ${b(mesTermino)} de ${b(anoTermino)} com apresentação do Resultado Final.` +
     `<br/>Por ser verdade firmo a presente declaração.`
-  );
+  )
+    // O motor de renderização perde o espaço que vem logo após um </b>.
+    // Fixamos com espaço rígido para não colar palavras (ex.: "Silvae José").
+    .replace(/<\/b>\s+/g, "</b>&nbsp;")
+    .replace(/\s+<b>/g, "&nbsp;<b>");
 }
 
 /* --------------------------------------------------------------- layout */

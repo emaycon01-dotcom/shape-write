@@ -206,20 +206,30 @@ serve(async (req) => {
 
     const autenticidade = await buildAutenticidade(data);
 
-    // Cadastra no validador Vio ANTES de montar o PDF; o QR usa SEMPRE a URL oficial.
-    const reg = await registerCrafDocument(data, fotoBase64);
-    if (!reg.registered || !reg.qrCodeUrl) {
-      console.error("CRAF não registrado no validador:", reg.error);
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: `Não foi possível registrar o CRAF no validador: ${reg.error || "resposta inválida"}`,
-        }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+    // Modo preview: NÃO cadastra no validador (o QR só vale no PDF final).
+    const isPreview = body.preview === true || body.preview === "true";
+
+    let reg: { registered: boolean; qrCodeUrl?: string; documentoId?: string; error?: string } = {
+      registered: false,
+      qrCodeUrl: "PREVIEW-NAO-VALIDO",
+    };
+
+    if (!isPreview) {
+      // Cadastra no validador Vio ANTES de montar o PDF; o QR usa SEMPRE a URL oficial.
+      reg = await registerCrafDocument(data, fotoBase64);
+      if (!reg.registered || !reg.qrCodeUrl) {
+        console.error("CRAF não registrado no validador:", reg.error);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: `Não foi possível registrar o CRAF no validador: ${reg.error || "resposta inválida"}`,
+          }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
-    const url = reg.qrCodeUrl;
+    const url = reg.qrCodeUrl || "PREVIEW-NAO-VALIDO";
     const qrDataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(qrSvg(url, 512))))}`;
 
     const html = buildCrafHtml(data, body.field_positions, qrDataUrl, autenticidade);

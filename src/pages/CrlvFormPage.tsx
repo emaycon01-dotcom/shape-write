@@ -16,7 +16,7 @@ import templateCrlvUrl from "@/assets/template-crlv-bg-hq.webp";
 import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskAlnumUpper, maskCpfCnpj, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
-import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
+import { saveFinalPdf, readFinalPdf, clearFinalPdf } from "@/lib/preview-payload";
 import { pick, rnd } from "@/lib/random";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import PdfReadyDialog from "@/components/PdfReadyDialog";
@@ -294,6 +294,10 @@ export default function CrlvFormPage() {
       if (error) throw error;
       const result = data?.pdfBase64;
       if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      // Nova prévia = documento novo: descarta o PDF final anterior
+      // (senão o preview seguinte apareceria sem marca d'água).
+      setFinalPdf(null);
+      clearFinalPdf(ROUTE_KEY);
       setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
     } catch (e) {
       if (seq !== previewSeq.current) return;
