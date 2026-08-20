@@ -157,6 +157,9 @@ export default function CnhPreviewPage() {
     return pdfDataUrlToBlob(pdfBase64);
   };
 
+  const cpfDigitos = (formData.cpf || "").replace(/\D/g, "");
+  const mensagemEntrega = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui estão seus dados de acesso para o App CNH:\n\nLogin: ${formData.cpf || cpfDigitos}\nSenha: ${cpfDigitos.slice(-6)}\n\nAcesse o site para visualizar sua CNH digital:\nhttps://condutor-cnhdigital-vio-webs.info`;
+
   const handleShare = async () => {
     try {
       const blob = getPdfBlob();
@@ -324,7 +327,7 @@ export default function CnhPreviewPage() {
         pdfDataUrl={pdfBase64}
         fileName="documento-cnh.pdf"
         title="Documento CNH"
-        message={mensagem}
+        message={mensagemEntrega}
       />
 
     </div>
