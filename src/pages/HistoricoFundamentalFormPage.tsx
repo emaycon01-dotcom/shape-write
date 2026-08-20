@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import FormDraftsPanel from "@/components/FormDraftsPanel";
 import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,14 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   School, Loader2, FlaskConical, Trash2, FileText, User, PenLine,
-  ChevronDown, ChevronRight, ListChecks, CalendarClock, BookOpenCheck,
+  ChevronDown, ChevronRight, ListChecks, CalendarClock, BookOpenCheck, History,
+  Eye, CreditCard, ShieldCheck, ArrowLeft, RefreshCw, Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { maskDate } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
-import { storePreviewPayload } from "@/lib/preview-payload";
 import { normalizeSignatureImage } from "@/lib/signature-image";
 import { ESTADOS_UF, ESTADO_NOMES, loadBrasaoDataUrl } from "@/lib/brasoes-estados";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
+import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { creditRef } from "@/lib/credit-ref";
+import { describeError } from "@/lib/describe-error";
+import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
 
 type Nota = { componente: string; base: string; n: string[] };
 type Etapa = { etapa: string; ano: string; unidade: string; cidade: string; uf: string };
@@ -101,10 +107,14 @@ const initial: FormState = {
 const etapaVazia = (etapa = ""): Etapa => ({ etapa, ano: "", unidade: "", cidade: "", uf: "PE" });
 const dependenciaVazia = (): Dependencia => ({ serie: "", componente: "", ch: "", nota: "", freq: "", escola: "", cidade: "", ano: "" });
 
+const ROUTE_KEY = "/dashboard/documents/historico-fundamental";
+
 export default function HistoricoFundamentalFormPage() {
   const location = useLocation();
   const editState = location.state as { editDocId?: string } | null;
-  const { getDocument, loadDocumentInfo, updateDocument } = useDocuments();
+  const { getDocument, loadDocumentInfo, updateDocument, documents, addDocument } = useDocuments();
+
+  const previewHistory = documents.filter((d) => d.type === "historico-fundamental").slice(0, 6);
 
   const [form, setForm] = useState<FormState>(initial);
   const [notas, setNotas] = useState<Nota[]>(NOTAS_PADRAO);
@@ -121,14 +131,27 @@ export default function HistoricoFundamentalFormPage() {
   const [assinatura, setAssinatura] = useState("");
   const [showNotas, setShowNotas] = useState(false);
   const [showDependencias, setShowDependencias] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
-  const { user } = useAuth();
+  const { user, deductCredit } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const isEditMode = Boolean(editState?.editDocId);
+  const cost = planCost(1, user?.plano);
+
+  /* ---------------- estado do preview ao vivo ---------------- */
+  const [previewPdf, setPreviewPdf] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [autoLive, setAutoLive] = useState(true);
+  const previewSeq = useRef(0);
+  const generatedSignature = useRef<string | null>(null);
+
+  /* ---------------- estado do documento final ---------------- */
+  const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(ROUTE_KEY));
+  const [showReady, setShowReady] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     if (hydrated || !editState?.editDocId) return;
@@ -278,445 +301,750 @@ export default function HistoricoFundamentalFormPage() {
     setEtapas(ETAPAS_PADRAO.map((e) => etapaVazia(e)));
     setDependencias([dependenciaVazia()]);
     setAssinatura("");
+    setPreviewPdf(null);
     toast({ title: "Formulário limpo!" });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setLoading(true);
-    saveFormDraft("historico-fundamental", form as unknown as Record<string, unknown>);
+  /* ---------------- montagem do payload ---------------- */
+  const buildBody = useCallback(async () => {
+    const brasao = await loadBrasaoDataUrl(form.estado);
+    return {
+      estado: form.estado,
+      estado_nome: ESTADO_NOMES[form.estado] || form.estado,
+      gerencia: form.gerencia,
+      escola: form.escola,
+      endereco: form.endereco,
+      cep: form.cep,
+      telefone: form.telefone,
+      inep: form.inep,
+      modalidade: form.modalidade,
+      turno: form.turno,
+      nome_aluno: form.nomeAluno,
+      rg: form.rg,
+      filiacao: form.filiacao,
+      municipio_nascimento: form.municipioNascimento,
+      uf_nascimento: form.ufNascimento,
+      pais: form.pais,
+      data_nascimento: form.dataNascimento,
+      observacoes: form.observacoes,
+      observacao_pagina2: form.observacaoPagina2,
+      secretario_nome: form.secretarioNome,
+      secretario_portaria: form.secretarioPortaria,
+      diretor_nome: form.diretorNome,
+      diretor_portaria: form.diretorPortaria,
+      diretor_registro: form.diretorRegistro,
+      notas_json: JSON.stringify(notas),
+      etapas_json: JSON.stringify(etapas.filter((t) => t.etapa || t.ano || t.unidade)),
+      dependencias_json: JSON.stringify(dependencias.filter((t) => t.serie || t.componente)),
+      frequencia_json: JSON.stringify(frequencia),
+      carga_horaria_json: JSON.stringify(cargaHoraria),
+      resultado_json: JSON.stringify(resultado),
+      template_brasao_base64: brasao,
+      assinatura_base64: assinatura,
+    } as Record<string, unknown>;
+  }, [form, notas, etapas, dependencias, frequencia, cargaHoraria, resultado, assinatura]);
 
+  const signature = useMemo(
+    () => JSON.stringify({ form, notas, etapas, dependencias, frequencia, cargaHoraria, resultado, assinatura }),
+    [form, notas, etapas, dependencias, frequencia, cargaHoraria, resultado, assinatura],
+  );
+
+  const canPreview =
+    form.nomeAluno.trim().length > 2 &&
+    form.rg.trim().length > 3 &&
+    form.escola.trim().length > 2;
+
+  const runPreview = useCallback(async () => {
+    const seq = ++previewSeq.current;
+    setPreviewing(true);
+    setPreviewError(null);
     try {
-      const brasao = await loadBrasaoDataUrl(form.estado);
-
-      const bodyData = {
-        estado: form.estado,
-        estado_nome: ESTADO_NOMES[form.estado] || form.estado,
-        gerencia: form.gerencia,
-        escola: form.escola,
-        endereco: form.endereco,
-        cep: form.cep,
-        telefone: form.telefone,
-        inep: form.inep,
-        modalidade: form.modalidade,
-        turno: form.turno,
-        nome_aluno: form.nomeAluno,
-        rg: form.rg,
-        filiacao: form.filiacao,
-        municipio_nascimento: form.municipioNascimento,
-        uf_nascimento: form.ufNascimento,
-        pais: form.pais,
-        data_nascimento: form.dataNascimento,
-        observacoes: form.observacoes,
-        observacao_pagina2: form.observacaoPagina2,
-        secretario_nome: form.secretarioNome,
-        secretario_portaria: form.secretarioPortaria,
-        diretor_nome: form.diretorNome,
-        diretor_portaria: form.diretorPortaria,
-        diretor_registro: form.diretorRegistro,
-        notas_json: JSON.stringify(notas),
-        etapas_json: JSON.stringify(etapas.filter((t) => t.etapa || t.ano || t.unidade)),
-        dependencias_json: JSON.stringify(dependencias.filter((t) => t.serie || t.componente)),
-        frequencia_json: JSON.stringify(frequencia),
-        carga_horaria_json: JSON.stringify(cargaHoraria),
-        resultado_json: JSON.stringify(resultado),
-        template_brasao_base64: brasao,
-        assinatura_base64: assinatura,
-      };
-
+      const body = await buildBody();
       const { data, error } = await invokeGeneratePdf("generate-historico-fundamental-pdf", {
-        body: { ...bodyData, preview: !isEditMode },
+        body: { ...body, preview: true },
       });
-
+      if (seq !== previewSeq.current) return;
       if (error) throw error;
+      const result = data?.pdfBase64;
+      if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
+    } catch (e) {
+      if (seq !== previewSeq.current) return;
+      setPreviewError(describeError(e));
+    } finally {
+      if (seq === previewSeq.current) setPreviewing(false);
+    }
+  }, [buildBody]);
 
-      const pdfResult = data?.pdfBase64;
-      if (!pdfResult) throw new Error(data?.error || "Nenhum PDF retornado");
+  useEffect(() => {
+    if (!autoLive || !canPreview || generating || showReady) return;
+    if (generatedSignature.current === signature) return;
+    const id = window.setTimeout(() => { void runPreview(); }, 900);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature, autoLive, canPreview, generating, showReady]);
 
-      if (isEditMode && editState?.editDocId) {
+  /* ---------------- documento final ---------------- */
+  const handleGenerate = async () => {
+    if (!user) return;
+
+    if (isEditMode && editState?.editDocId) {
+      setGenerating(true);
+      try {
+        const body = await buildBody();
+        const { data, error } = await invokeGeneratePdf("generate-historico-fundamental-pdf", { body: { ...body, preview: false } });
+        if (error) throw error;
+        const generated = data?.pdfBase64;
+        if (!generated) throw new Error("pdf_nao_gerado");
         await updateDocument(editState.editDocId, {
-          additionalInfo: JSON.stringify(bodyData),
-          pdfDataUrl: pdfResult.startsWith("data:") ? pdfResult : `data:application/pdf;base64,${pdfResult}`,
+          additionalInfo: JSON.stringify(body),
+          pdfDataUrl: generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`,
         });
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
-      } else {
-        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
-        navigate("/dashboard/documents/historico-fundamental/preview", { state: { previewId } });
+      } catch (e) {
+        toast({ title: "Erro ao atualizar documento", description: describeError(e), variant: "destructive" });
+      } finally {
+        setGenerating(false);
       }
-    } catch (err) {
-      console.error("Erro ao gerar Histórico Ensino Fundamental:", err);
+      return;
+    }
+
+    if ((user.credits ?? 0) < cost) {
       toast({
-        title: isEditMode ? "Erro ao atualizar documento" : "Erro ao gerar PDF",
-        description: err instanceof Error ? err.message : "Tente novamente.",
+        title: "Créditos insuficientes",
+        description: `Você precisa de ${formatCredits(cost)} crédito(s) para gerar o documento.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGenerating(true);
+    saveFormDraft("historico-fundamental", form as unknown as Record<string, unknown>);
+    try {
+      const body = await buildBody();
+
+      const { data, error } = await invokeGeneratePdf("generate-historico-fundamental-pdf", {
+        body: { ...body, preview: false },
+      });
+      if (error) throw error;
+      const generated = data?.pdfBase64;
+      if (!generated) throw new Error("pdf_nao_gerado");
+      const pdfFinal: string = generated.startsWith("data:")
+        ? generated
+        : `data:application/pdf;base64,${generated}`;
+
+      const deduction = await deductCredit(1, "geracao-historico-fundamental", creditRef("geracao-historico-fundamental", body));
+      if (!deduction.ok) {
+        toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
+        return;
+      }
+
+      setFinalPdf(pdfFinal);
+      saveFinalPdf(ROUTE_KEY, pdfFinal);
+
+      await addDocument({
+        name: form.nomeAluno || "",
+        identification: form.rg || "",
+        date: form.dataNascimento || "",
+        description: `HISTÓRICO ENSINO FUNDAMENTAL - ${form.escola || ""}`,
+        additionalInfo: JSON.stringify(body),
+        type: "historico-fundamental",
+        userId: user.id,
+        pdfDataUrl: pdfFinal,
+      });
+
+      generatedSignature.current = signature;
+      setShowReady(true);
+
+      toast({
+        title: "Documento gerado com sucesso!",
+        description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
+      });
+    } catch (e) {
+      console.error("Falha na geração:", e);
+      toast({
+        title: "Erro ao gerar documento",
+        description: `Nenhum crédito foi descontado. ${describeError(e)}`,
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
   };
 
-  const inputCls = "bg-secondary border-border text-foreground placeholder:text-muted-foreground";
-  const selectCls = `h-10 w-full rounded-md border px-3 text-sm ${inputCls}`;
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu HISTÓRICO ENSINO FUNDAMENTAL está pronto.\n\nAluno: ${form.nomeAluno}\nEscola: ${form.escola}`;
+
+  const inputCls = "h-11 rounded-xl bg-secondary/70 border-border/70 text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-primary/40";
+  const selectCls = `h-11 w-full rounded-xl border px-3 text-sm ${inputCls}`;
 
   const FieldLabel = ({ children, required = false }: { children: React.ReactNode; required?: boolean }) => (
-    <label className="text-sm font-semibold text-primary">
-      {children}{required && <span className="ml-0.5 text-destructive">*</span>}
+    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+      {children}{required && <span className="text-destructive ml-0.5">*</span>}
     </label>
   );
 
-  const SectionHeader = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
-    <div className="mb-2 flex items-center gap-3 border-b border-border/50 pb-2">
-      <Icon className="h-5 w-5 text-primary" />
-      <h2 className="text-lg font-bold text-foreground">{title}</h2>
+  const SectionHeader = ({ icon: Icon, title, hint }: { icon: React.ElementType; title: string; hint?: string }) => (
+    <div className="mb-4 flex items-center gap-3">
+      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/12 ring-1 ring-inset ring-primary/25">
+        <Icon className="h-4 w-4 text-primary" />
+      </span>
+      <div className="min-w-0">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-foreground">{title}</h2>
+        {hint && <p className="truncate text-[11px] text-muted-foreground">{hint}</p>}
+      </div>
+    </div>
+  );
+
+  const card = "relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-5 shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_18px_40px_-28px_hsl(var(--foreground)/0.4)] backdrop-blur-xl";
+
+  /* ---------------- painel de preview (reutilizado em 2 posições) ---------------- */
+  const previewPanel = (
+    <div className={`${card} flex h-full flex-col p-0`}>
+      <div className="flex items-center justify-between gap-3 border-b border-border/50 px-5 py-3">
+        <div className="flex items-center gap-2">
+          <Eye className="h-4 w-4 text-primary" />
+          <span className="text-sm font-bold text-foreground">Prévia do documento</span>
+          {previewing && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAutoLive((v) => !v)}
+            className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+              autoLive
+                ? "border-primary/40 bg-primary/12 text-primary"
+                : "border-border bg-secondary text-muted-foreground"
+            }`}
+          >
+            {autoLive ? "Ao vivo" : "Manual"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void runPreview()}
+            disabled={!canPreview || previewing}
+            className="rounded-full border border-border bg-secondary p-1.5 text-muted-foreground transition hover:text-foreground disabled:opacity-40"
+            aria-label="Atualizar prévia"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${previewing ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+      </div>
+
+      <div className="relative min-h-[420px] flex-1 overflow-hidden rounded-b-2xl bg-secondary/30">
+        {previewPdf ? (
+          <>
+            <PdfCanvasPreview pdfDataUrl={finalPdf || previewPdf} title="Prévia do HISTÓRICO ENSINO FUNDAMENTAL" />
+            {!finalPdf && (
+              <div className="pointer-events-none absolute inset-0 select-none overflow-hidden">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.05) 80px, hsl(var(--destructive) / 0.05) 82px)",
+                  }}
+                />
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="absolute whitespace-nowrap text-[17px] font-bold text-destructive/20"
+                    style={{
+                      transform: "rotate(-35deg)",
+                      top: `${10 + (i % 4) * 25}%`,
+                      left: `${-10 + Math.floor(i / 4) * 40}%`,
+                      letterSpacing: "2px",
+                    }}
+                  >
+                    MonkeyLab MonkeyLab
+                  </span>
+                ))}
+              </div>
+            )}
+            {previewing && (
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 overflow-hidden">
+                <div className="h-full w-full animate-pulse bg-primary/70" />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-inset ring-primary/20">
+              {previewing ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <FileText className="h-6 w-6 text-primary" />}
+            </span>
+            <p className="text-sm font-semibold text-foreground">
+              {previewing ? "Montando a prévia..." : "A prévia aparece aqui"}
+            </p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              {previewError
+                ? previewError
+                : "Preencha nome do aluno, RG e escola — a prévia atualiza sozinha enquanto você digita."}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <p className="border-t border-border/50 px-5 py-2.5 text-center text-[11px] text-muted-foreground">
+        A marca d'água sai apenas no PDF final gerado.
+      </p>
     </div>
   );
 
   return (
-    <div className="max-w-3xl">
-      <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground">
-          ← Voltar
-        </button>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={fillTest} className="gap-1.5 border-primary/30 text-xs text-primary hover:bg-primary/10">
-            <FlaskConical className="h-3.5 w-3.5" /> Teste
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={clearForm} className="gap-1.5 border-destructive/30 text-xs text-destructive hover:bg-destructive/10">
-            <Trash2 className="h-3.5 w-3.5" /> Limpar
-          </Button>
+    <div className="mx-auto w-full max-w-[1500px] pb-28 xl:pb-8">
+      {/* HERO */}
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card/50 p-6 backdrop-blur-xl">
+        <div
+          className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full opacity-70 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.35), transparent 70%)" }}
+        />
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <button
+              onClick={() => navigate("/dashboard/documents")}
+              className="mb-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Serviços
+            </button>
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-inset ring-primary/30">
+                <School className="h-5 w-5 text-primary" />
+              </span>
+              <div>
+                <h1 className="font-display text-2xl font-bold leading-tight text-foreground">HISTÓRICO ENSINO FUNDAMENTAL</h1>
+                <p className="text-xs text-muted-foreground">Editor com prévia ao vivo · sem trocar de tela</p>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+                <Sparkles className="h-3 w-3" /> Prévia em tempo real
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                <ShieldCheck className="h-3 w-3" /> Crédito só na geração final
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={fillTest} className="gap-1.5 rounded-xl border-primary/30 text-xs text-primary hover:bg-primary/10">
+              <FlaskConical className="h-3.5 w-3.5" /> Teste
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={clearForm} className="gap-1.5 rounded-xl border-destructive/30 text-xs text-destructive hover:bg-destructive/10">
+              <Trash2 className="h-3.5 w-3.5" /> Limpar
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
-        <span aria-hidden className="studio-hero-glow" />
-        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">HISTÓRICO ENSINO FUNDAMENTAL</h1>
-      </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] xl:items-start">
+        {/* COLUNA — FORMULÁRIO */}
+        <form
+          onSubmit={(e) => { e.preventDefault(); void handleGenerate(); }}
+          className="space-y-5"
+        >
+          <FormDraftsPanel docType="historico-fundamental" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+          {/* ESCOLA */}
+          <div className={card}>
+            <SectionHeader icon={School} title="Unidade de ensino" />
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <FieldLabel required>Estado (brasão)</FieldLabel>
+                <select value={form.estado} onChange={(e) => setForm((p) => ({ ...p, estado: e.target.value }))} className={selectCls}>
+                  {ESTADOS_UF.map((uf) => (
+                    <option key={uf} value={uf}>{uf} — {ESTADO_NOMES[uf]}</option>
+                  ))}
+                </select>
+              </div>
 
-        <FormDraftsPanel docType="historico-fundamental" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
-        {/* ESCOLA */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={School} title="Unidade de ensino" />
+              <div className="space-y-1.5">
+                <FieldLabel>Gerência / diretoria regional</FieldLabel>
+                <Input value={form.gerencia} onChange={set("gerencia")} className={inputCls} />
+              </div>
 
-          <div className="space-y-1.5">
-            <FieldLabel required>Estado (brasão)</FieldLabel>
-            <select value={form.estado} onChange={(e) => setForm((p) => ({ ...p, estado: e.target.value }))} className={selectCls}>
-              {ESTADOS_UF.map((uf) => (
-                <option key={uf} value={uf}>{uf} — {ESTADO_NOMES[uf]}</option>
-              ))}
-            </select>
-          </div>
+              <div className="space-y-1.5">
+                <FieldLabel required>Nome da unidade de ensino</FieldLabel>
+                <Input value={form.escola} onChange={set("escola")} className={inputCls} required />
+              </div>
 
-          <div className="space-y-1.5">
-            <FieldLabel>Gerência / diretoria regional</FieldLabel>
-            <Input value={form.gerencia} onChange={set("gerencia")} className={inputCls} />
-          </div>
+              <div className="space-y-1.5">
+                <FieldLabel required>Endereço</FieldLabel>
+                <Input value={form.endereco} onChange={set("endereco")} className={inputCls} required />
+              </div>
 
-          <div className="space-y-1.5">
-            <FieldLabel required>Nome da unidade de ensino</FieldLabel>
-            <Input value={form.escola} onChange={set("escola")} className={inputCls} required />
-          </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <FieldLabel>CEP</FieldLabel>
+                  <Input value={form.cep} onChange={set("cep")} className={inputCls} />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Telefone</FieldLabel>
+                  <Input value={form.telefone} onChange={set("telefone")} className={inputCls} />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Código INEP</FieldLabel>
+                  <Input value={form.inep} onChange={set("inep")} className={inputCls} />
+                </div>
+              </div>
 
-          <div className="space-y-1.5">
-            <FieldLabel required>Endereço</FieldLabel>
-            <Input value={form.endereco} onChange={set("endereco")} className={inputCls} required />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <FieldLabel>CEP</FieldLabel>
-              <Input value={form.cep} onChange={set("cep")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Telefone</FieldLabel>
-              <Input value={form.telefone} onChange={set("telefone")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Código INEP</FieldLabel>
-              <Input value={form.inep} onChange={set("inep")} className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <FieldLabel>Modalidade</FieldLabel>
-              <select value={form.modalidade} onChange={(e) => setForm((p) => ({ ...p, modalidade: e.target.value }))} className={selectCls}>
-                {MODALIDADES.map((m) => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Turno</FieldLabel>
-              <select value={form.turno} onChange={(e) => setForm((p) => ({ ...p, turno: e.target.value }))} className={selectCls}>
-                {TURNOS.map((m) => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* ALUNO */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={User} title="Dados do aluno" />
-
-          <div className="space-y-1.5">
-            <FieldLabel required>Nome do aluno (a)</FieldLabel>
-            <Input value={form.nomeAluno} onChange={set("nomeAluno")} className={inputCls} required />
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Filiação</FieldLabel>
-            <Input value={form.filiacao} onChange={set("filiacao")} placeholder="Nome da mãe e do pai" className={inputCls} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <FieldLabel required>R.G.</FieldLabel>
-              <Input value={form.rg} onChange={set("rg")} className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>Data de nascimento</FieldLabel>
-              <Input value={form.dataNascimento} onChange={setMask("dataNascimento", maskDate)} inputMode="numeric" placeholder="12/03/2005" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel required>Município de nascimento</FieldLabel>
-              <Input value={form.municipioNascimento} onChange={set("municipioNascimento")} className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Estado (nascimento)</FieldLabel>
-              <select value={form.ufNascimento} onChange={(e) => setForm((p) => ({ ...p, ufNascimento: e.target.value }))} className={selectCls}>
-                {ESTADOS_UF.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>País</FieldLabel>
-              <Input value={form.pais} onChange={set("pais")} className={inputCls} />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <FieldLabel>Modalidade</FieldLabel>
+                  <select value={form.modalidade} onChange={(e) => setForm((p) => ({ ...p, modalidade: e.target.value }))} className={selectCls}>
+                    {MODALIDADES.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Turno</FieldLabel>
+                  <select value={form.turno} onChange={(e) => setForm((p) => ({ ...p, turno: e.target.value }))} className={selectCls}>
+                    {TURNOS.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* NOTAS (OPCIONAL) */}
-        <div className="glass p-6">
-          <button
-            type="button"
-            onClick={() => setShowNotas((v) => !v)}
-            className="flex w-full items-center justify-between gap-3 text-left"
-          >
-            <span className="flex items-center gap-3">
-              <ListChecks className="h-5 w-5 text-primary" />
-              <span>
-                <span className="block text-lg font-bold text-foreground">Notas por ano/série (opcional)</span>
-                <span className="block text-xs text-muted-foreground">
-                  Deixe em branco para sair com asterisco (*), como no modelo oficial.
+          {/* ALUNO */}
+          <div className={card}>
+            <SectionHeader icon={User} title="Dados do aluno" />
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <FieldLabel required>Nome do aluno (a)</FieldLabel>
+                <Input value={form.nomeAluno} onChange={set("nomeAluno")} className={inputCls} required />
+              </div>
+
+              <div className="space-y-1.5">
+                <FieldLabel>Filiação</FieldLabel>
+                <Input value={form.filiacao} onChange={set("filiacao")} placeholder="Nome da mãe e do pai" className={inputCls} />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <FieldLabel required>R.G.</FieldLabel>
+                  <Input value={form.rg} onChange={set("rg")} className={inputCls} required />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel required>Data de nascimento</FieldLabel>
+                  <Input value={form.dataNascimento} onChange={setMask("dataNascimento", maskDate)} inputMode="numeric" placeholder="12/03/2005" className={inputCls} required />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel required>Município de nascimento</FieldLabel>
+                  <Input value={form.municipioNascimento} onChange={set("municipioNascimento")} className={inputCls} required />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Estado (nascimento)</FieldLabel>
+                  <select value={form.ufNascimento} onChange={(e) => setForm((p) => ({ ...p, ufNascimento: e.target.value }))} className={selectCls}>
+                    {ESTADOS_UF.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>País</FieldLabel>
+                  <Input value={form.pais} onChange={set("pais")} className={inputCls} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* NOTAS (OPCIONAL) */}
+          <div className={card}>
+            <button
+              type="button"
+              onClick={() => setShowNotas((v) => !v)}
+              className="flex w-full items-center justify-between gap-3 text-left"
+            >
+              <span className="flex items-center gap-3">
+                <ListChecks className="h-5 w-5 text-primary" />
+                <span>
+                  <span className="block text-sm font-bold uppercase tracking-wide text-foreground">Notas por ano/série (opcional)</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Deixe em branco para sair com asterisco (*), como no modelo oficial.
+                  </span>
                 </span>
               </span>
-            </span>
-            {showNotas ? <ChevronDown className="h-5 w-5 text-primary" /> : <ChevronRight className="h-5 w-5 text-primary" />}
-          </button>
+              {showNotas ? <ChevronDown className="h-5 w-5 text-primary" /> : <ChevronRight className="h-5 w-5 text-primary" />}
+            </button>
 
-          {showNotas && (
-            <div className="mt-5 space-y-4 overflow-x-auto">
-              <div className="min-w-[720px] space-y-2">
-                <div className="grid grid-cols-[1fr_96px_repeat(9,46px)] gap-1 text-[10px] font-semibold uppercase text-muted-foreground">
-                  <span>Disciplina</span>
-                  <span className="text-center">Base</span>
-                  {COLUNAS.map((c) => <span key={c} className="text-center">{c}</span>)}
-                </div>
-
-                {notas.map((nota, i) => (
-                  <div key={i} className="grid grid-cols-[1fr_96px_repeat(9,46px)] items-center gap-1">
-                    <Input value={nota.componente} onChange={(e) => setNotaCampo(i, "componente", e.target.value)} className={`${inputCls} h-9 text-xs`} />
-                    <Input value={nota.base} onChange={(e) => setNotaCampo(i, "base", e.target.value)} className={`${inputCls} h-9 text-center text-[10px]`} />
-                    {nota.n.map((v, c) => (
-                      <Input key={c} value={v} onChange={(e) => setNotaValor(i, c, e.target.value)} className={`${inputCls} h-9 px-1 text-center text-xs`} />
-                    ))}
+            {showNotas && (
+              <div className="mt-5 space-y-4 overflow-x-auto">
+                <div className="min-w-[720px] space-y-2">
+                  <div className="grid grid-cols-[1fr_96px_repeat(9,46px)] gap-1 text-[10px] font-semibold uppercase text-muted-foreground">
+                    <span>Disciplina</span>
+                    <span className="text-center">Base</span>
+                    {COLUNAS.map((c) => <span key={c} className="text-center">{c}</span>)}
                   </div>
-                ))}
 
-                <div className="space-y-2 border-t border-border/50 pt-3">
-                  {([
-                    ["Frequência anual %", frequencia, setFrequencia],
-                    ["Carga horária anual", cargaHoraria, setCargaHoraria],
-                    ["Resultado final", resultado, setResultado],
-                  ] as const).map(([rotulo, valores, setter]) => (
-                    <div key={rotulo} className="grid grid-cols-[1fr_96px_repeat(9,46px)] items-center gap-1">
-                      <span className="text-xs font-semibold text-primary">{rotulo}</span>
-                      <span />
-                      {valores.map((v, c) => (
-                        <Input
-                          key={c}
-                          value={v}
-                          onChange={(e) => setLinha(setter as React.Dispatch<React.SetStateAction<string[]>>, c, e.target.value)}
-                          className={`${inputCls} h-9 px-1 text-center text-xs`}
-                        />
+                  {notas.map((nota, i) => (
+                    <div key={i} className="grid grid-cols-[1fr_96px_repeat(9,46px)] items-center gap-1">
+                      <Input value={nota.componente} onChange={(e) => setNotaCampo(i, "componente", e.target.value)} className={`${inputCls} h-9 text-xs`} />
+                      <Input value={nota.base} onChange={(e) => setNotaCampo(i, "base", e.target.value)} className={`${inputCls} h-9 text-center text-[10px]`} />
+                      {nota.n.map((v, c) => (
+                        <Input key={c} value={v} onChange={(e) => setNotaValor(i, c, e.target.value)} className={`${inputCls} h-9 px-1 text-center text-xs`} />
                       ))}
                     </div>
                   ))}
+
+                  <div className="space-y-2 border-t border-border/50 pt-3">
+                    {([
+                      ["Frequência anual %", frequencia, setFrequencia],
+                      ["Carga horária anual", cargaHoraria, setCargaHoraria],
+                      ["Resultado final", resultado, setResultado],
+                    ] as const).map(([rotulo, valores, setter]) => (
+                      <div key={rotulo} className="grid grid-cols-[1fr_96px_repeat(9,46px)] items-center gap-1">
+                        <span className="text-xs font-semibold text-primary">{rotulo}</span>
+                        <span />
+                        {valores.map((v, c) => (
+                          <Input
+                            key={c}
+                            value={v}
+                            onChange={(e) => setLinha(setter as React.Dispatch<React.SetStateAction<string[]>>, c, e.target.value)}
+                            className={`${inputCls} h-9 px-1 text-center text-xs`}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setNotas((p) => [...p, { componente: "", base: "COMUM", n: vazio9() }])}>
+                    + Adicionar disciplina
+                  </Button>
+                  {notas.length > 1 && (
+                    <Button type="button" variant="outline" size="sm" className="text-xs text-destructive" onClick={() => setNotas((p) => p.slice(0, -1))}>
+                      Remover última
+                    </Button>
+                  )}
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setNotas((p) => [...p, { componente: "", base: "COMUM", n: vazio9() }])}>
-                  + Adicionar disciplina
-                </Button>
-                {notas.length > 1 && (
-                  <Button type="button" variant="outline" size="sm" className="text-xs text-destructive" onClick={() => setNotas((p) => p.slice(0, -1))}>
-                    Remover última
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ETAPAS */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={CalendarClock} title="Etapas cursadas" />
-
-          {etapas.map((etapa, i) => (
-            <div key={i} className="space-y-2 rounded-lg border border-border/50 p-3">
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_80px]">
-                <Input value={etapa.etapa} onChange={(e) => setEtapa(i, "etapa", e.target.value)} placeholder="Etapa" className={`${inputCls} h-9 text-xs`} />
-                <Input value={etapa.ano} onChange={(e) => setEtapa(i, "ano", e.target.value)} placeholder="Ano" className={`${inputCls} h-9 text-xs`} />
-              </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_60px]">
-                <Input value={etapa.unidade} onChange={(e) => setEtapa(i, "unidade", e.target.value)} placeholder="Estabelecimento de ensino" className={`${inputCls} h-9 text-xs`} />
-                <Input value={etapa.cidade} onChange={(e) => setEtapa(i, "cidade", e.target.value)} placeholder="Cidade" className={`${inputCls} h-9 text-xs`} />
-                <select value={etapa.uf} onChange={(e) => setEtapa(i, "uf", e.target.value)} className={`${selectCls} h-9 text-xs`}>
-                  {ESTADOS_UF.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
-                </select>
-              </div>
-            </div>
-          ))}
-
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setEtapas((p) => [...p, etapaVazia()])}>
-              + Adicionar etapa
-            </Button>
-            {etapas.length > 1 && (
-              <Button type="button" variant="outline" size="sm" className="text-xs text-destructive" onClick={() => setEtapas((p) => p.slice(0, -1))}>
-                Remover última
-              </Button>
             )}
           </div>
 
-          <div className="space-y-1.5">
-            <FieldLabel>Observações (página 1)</FieldLabel>
-            <Input value={form.observacoes} onChange={set("observacoes")} className={inputCls} />
-          </div>
-        </div>
-
-        {/* DEPENDÊNCIA (OPCIONAL) */}
-        <div className="glass p-6">
-          <button
-            type="button"
-            onClick={() => setShowDependencias((v) => !v)}
-            className="flex w-full items-center justify-between gap-3 text-left"
-          >
-            <span className="flex items-center gap-3">
-              <BookOpenCheck className="h-5 w-5 text-primary" />
-              <span>
-                <span className="block text-lg font-bold text-foreground">Dependência de estudos (opcional)</span>
-                <span className="block text-xs text-muted-foreground">Página 2 do documento. Deixe vazio para sair com traços.</span>
-              </span>
-            </span>
-            {showDependencias ? <ChevronDown className="h-5 w-5 text-primary" /> : <ChevronRight className="h-5 w-5 text-primary" />}
-          </button>
-
-          {showDependencias && (
-            <div className="mt-5 space-y-3">
-              {dependencias.map((dep, i) => (
-                <div key={i} className="space-y-2 rounded-lg border border-border/50 p-3">
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <Input value={dep.serie} onChange={(e) => setDependencia(i, "serie", e.target.value)} placeholder="Série" className={`${inputCls} h-9 text-xs`} />
-                    <Input value={dep.ch} onChange={(e) => setDependencia(i, "ch", e.target.value)} placeholder="CH" className={`${inputCls} h-9 text-xs`} />
-                    <Input value={dep.nota} onChange={(e) => setDependencia(i, "nota", e.target.value)} placeholder="Nota" className={`${inputCls} h-9 text-xs`} />
-                    <Input value={dep.freq} onChange={(e) => setDependencia(i, "freq", e.target.value)} placeholder="Freq %" className={`${inputCls} h-9 text-xs`} />
+          {/* ETAPAS */}
+          <div className={card}>
+            <SectionHeader icon={CalendarClock} title="Etapas cursadas" />
+            <div className="space-y-3">
+              {etapas.map((etapa, i) => (
+                <div key={i} className="space-y-2 rounded-xl border border-border/60 bg-secondary/40 p-3">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_80px]">
+                    <Input value={etapa.etapa} onChange={(e) => setEtapa(i, "etapa", e.target.value)} placeholder="Etapa" className={`${inputCls} h-9 text-xs`} />
+                    <Input value={etapa.ano} onChange={(e) => setEtapa(i, "ano", e.target.value)} placeholder="Ano" className={`${inputCls} h-9 text-xs`} />
                   </div>
-                  <Input value={dep.componente} onChange={(e) => setDependencia(i, "componente", e.target.value)} placeholder="Componente curricular" className={`${inputCls} h-9 text-xs`} />
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_80px]">
-                    <Input value={dep.escola} onChange={(e) => setDependencia(i, "escola", e.target.value)} placeholder="Escola" className={`${inputCls} h-9 text-xs`} />
-                    <Input value={dep.cidade} onChange={(e) => setDependencia(i, "cidade", e.target.value)} placeholder="Cidade/UF" className={`${inputCls} h-9 text-xs`} />
-                    <Input value={dep.ano} onChange={(e) => setDependencia(i, "ano", e.target.value)} placeholder="Ano" className={`${inputCls} h-9 text-xs`} />
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_60px]">
+                    <Input value={etapa.unidade} onChange={(e) => setEtapa(i, "unidade", e.target.value)} placeholder="Estabelecimento de ensino" className={`${inputCls} h-9 text-xs`} />
+                    <Input value={etapa.cidade} onChange={(e) => setEtapa(i, "cidade", e.target.value)} placeholder="Cidade" className={`${inputCls} h-9 text-xs`} />
+                    <select value={etapa.uf} onChange={(e) => setEtapa(i, "uf", e.target.value)} className={`${selectCls} h-9 text-xs`}>
+                      {ESTADOS_UF.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+                    </select>
                   </div>
                 </div>
               ))}
 
               <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setDependencias((p) => [...p, dependenciaVazia()])}>
-                  + Adicionar linha
+                <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setEtapas((p) => [...p, etapaVazia()])}>
+                  + Adicionar etapa
                 </Button>
-                {dependencias.length > 1 && (
-                  <Button type="button" variant="outline" size="sm" className="text-xs text-destructive" onClick={() => setDependencias((p) => p.slice(0, -1))}>
+                {etapas.length > 1 && (
+                  <Button type="button" variant="outline" size="sm" className="text-xs text-destructive" onClick={() => setEtapas((p) => p.slice(0, -1))}>
                     Remover última
                   </Button>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <FieldLabel>Observação (página 2)</FieldLabel>
-                <Input value={form.observacaoPagina2} onChange={set("observacaoPagina2")} className={inputCls} />
+                <FieldLabel>Observações (página 1)</FieldLabel>
+                <Input value={form.observacoes} onChange={set("observacoes")} className={inputCls} />
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* ASSINATURAS */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={PenLine} title="Assinaturas do rodapé" />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <FieldLabel>Nome do secretário (a)</FieldLabel>
-              <Input value={form.secretarioNome} onChange={set("secretarioNome")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Portaria do secretário</FieldLabel>
-              <Input value={form.secretarioPortaria} onChange={set("secretarioPortaria")} placeholder="Portaria nº 035/13" className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Nome do diretor (a)</FieldLabel>
-              <Input value={form.diretorNome} onChange={set("diretorNome")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Portaria do diretor</FieldLabel>
-              <Input value={form.diretorPortaria} onChange={set("diretorPortaria")} placeholder="Portaria nº 3.010/2015" className={inputCls} />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <FieldLabel>Registro MEC</FieldLabel>
-              <Input value={form.diretorRegistro} onChange={set("diretorRegistro")} placeholder="Reg. MEC. 35.456" className={inputCls} />
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Envie a imagem com as assinaturas/carimbo. Ela é aplicada sobre a faixa do rodapé da primeira página.
-          </p>
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={uploadAssinatura}
-            className="block w-full text-xs text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
-          />
-          {assinatura && (
-            <div className="rounded-md border border-border/60 bg-white p-2">
-              <img src={assinatura} alt="Assinaturas" className="mx-auto h-24 object-contain" />
-            </div>
-          )}
-        </div>
+          {/* DEPENDÊNCIA (OPCIONAL) */}
+          <div className={card}>
+            <button
+              type="button"
+              onClick={() => setShowDependencias((v) => !v)}
+              className="flex w-full items-center justify-between gap-3 text-left"
+            >
+              <span className="flex items-center gap-3">
+                <BookOpenCheck className="h-5 w-5 text-primary" />
+                <span>
+                  <span className="block text-sm font-bold uppercase tracking-wide text-foreground">Dependência de estudos (opcional)</span>
+                  <span className="block text-xs text-muted-foreground">Página 2 do documento. Deixe vazio para sair com traços.</span>
+                </span>
+              </span>
+              {showDependencias ? <ChevronDown className="h-5 w-5 text-primary" /> : <ChevronRight className="h-5 w-5 text-primary" />}
+            </button>
 
-        <div className="flex justify-center pt-1">
-          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
-            {loading ? (
-              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
-            ) : isEditMode ? (
-              <><FileText className="mr-2 h-5 w-5" /> Salvar alterações</>
-            ) : (
-              <><School className="mr-2 h-5 w-5" /> Gerar preview</>
+            {showDependencias && (
+              <div className="mt-5 space-y-3">
+                {dependencias.map((dep, i) => (
+                  <div key={i} className="space-y-2 rounded-xl border border-border/60 bg-secondary/40 p-3">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <Input value={dep.serie} onChange={(e) => setDependencia(i, "serie", e.target.value)} placeholder="Série" className={`${inputCls} h-9 text-xs`} />
+                      <Input value={dep.ch} onChange={(e) => setDependencia(i, "ch", e.target.value)} placeholder="CH" className={`${inputCls} h-9 text-xs`} />
+                      <Input value={dep.nota} onChange={(e) => setDependencia(i, "nota", e.target.value)} placeholder="Nota" className={`${inputCls} h-9 text-xs`} />
+                      <Input value={dep.freq} onChange={(e) => setDependencia(i, "freq", e.target.value)} placeholder="Freq %" className={`${inputCls} h-9 text-xs`} />
+                    </div>
+                    <Input value={dep.componente} onChange={(e) => setDependencia(i, "componente", e.target.value)} placeholder="Componente curricular" className={`${inputCls} h-9 text-xs`} />
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_80px]">
+                      <Input value={dep.escola} onChange={(e) => setDependencia(i, "escola", e.target.value)} placeholder="Escola" className={`${inputCls} h-9 text-xs`} />
+                      <Input value={dep.cidade} onChange={(e) => setDependencia(i, "cidade", e.target.value)} placeholder="Cidade/UF" className={`${inputCls} h-9 text-xs`} />
+                      <Input value={dep.ano} onChange={(e) => setDependencia(i, "ano", e.target.value)} placeholder="Ano" className={`${inputCls} h-9 text-xs`} />
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setDependencias((p) => [...p, dependenciaVazia()])}>
+                    + Adicionar linha
+                  </Button>
+                  {dependencias.length > 1 && (
+                    <Button type="button" variant="outline" size="sm" className="text-xs text-destructive" onClick={() => setDependencias((p) => p.slice(0, -1))}>
+                      Remover última
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <FieldLabel>Observação (página 2)</FieldLabel>
+                  <Input value={form.observacaoPagina2} onChange={set("observacaoPagina2")} className={inputCls} />
+                </div>
+              </div>
             )}
+          </div>
+
+          {/* ASSINATURAS */}
+          <div className={card}>
+            <SectionHeader icon={PenLine} title="Assinaturas do rodapé" />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <FieldLabel>Nome do secretário (a)</FieldLabel>
+                  <Input value={form.secretarioNome} onChange={set("secretarioNome")} className={inputCls} />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Portaria do secretário</FieldLabel>
+                  <Input value={form.secretarioPortaria} onChange={set("secretarioPortaria")} placeholder="Portaria nº 035/13" className={inputCls} />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Nome do diretor (a)</FieldLabel>
+                  <Input value={form.diretorNome} onChange={set("diretorNome")} className={inputCls} />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Portaria do diretor</FieldLabel>
+                  <Input value={form.diretorPortaria} onChange={set("diretorPortaria")} placeholder="Portaria nº 3.010/2015" className={inputCls} />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <FieldLabel>Registro MEC</FieldLabel>
+                  <Input value={form.diretorRegistro} onChange={set("diretorRegistro")} placeholder="Reg. MEC. 35.456" className={inputCls} />
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Envie a imagem com as assinaturas/carimbo. Ela é aplicada sobre a faixa do rodapé da primeira página.
+              </p>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={uploadAssinatura}
+                className="block w-full text-xs text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
+              />
+              {assinatura && (
+                <div className="rounded-md border border-border/60 bg-white p-2">
+                  <img src={assinatura} alt="Assinaturas" className="mx-auto h-24 object-contain" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* PRÉVIA — só no mobile/tablet, entre o formulário e o botão */}
+          <div className="xl:hidden">{previewPanel}</div>
+
+          {/* AÇÃO */}
+          <div className={`${card} hidden xl:block`}>
+            <div className="mb-3 flex items-center gap-3">
+              <CreditCard className="h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground">
+                  Custo: {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "grátis pelo seu plano"}
+                </p>
+                <p className="text-xs text-muted-foreground">Saldo atual: {user?.credits ?? 0} crédito(s)</p>
+              </div>
+            </div>
+            <Button type="submit" variant="gradient" className="h-14 w-full rounded-2xl text-base font-semibold" disabled={generating}>
+              {generating ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando documento...</>
+              ) : isEditMode ? (
+                "Salvar alterações"
+              ) : (
+                <>Gerar PDF ({cost > 0 ? `${formatCredits(cost)} crédito` : "grátis"})</>
+              )}
+            </Button>
+          </div>
+
+          {/* HISTÓRICO */}
+          <div className={card}>
+            <SectionHeader icon={History} title="Histórico de gerações" />
+            {previewHistory.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum documento gerado ainda.</p>
+            ) : (
+              <ul className="space-y-2">
+                {previewHistory.map((d) => (
+                  <li key={d.id} className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-foreground">{d.name || "Sem nome"}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {d.identification} · {new Date(d.createdAt).toLocaleDateString("pt-BR")}
+                      </p>
+                    </div>
+                    <Button
+                      type="button" size="sm" variant="outline"
+                      className="shrink-0 gap-1.5 rounded-lg text-xs"
+                      onClick={() => navigate("/dashboard/history", { state: { focusDocId: d.id } })}
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Abrir
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </form>
+
+        {/* COLUNA — PRÉVIA STICKY (desktop) */}
+        <div className="hidden xl:block xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)]">
+          {previewPanel}
+        </div>
+      </div>
+
+      {/* BARRA DE AÇÃO FIXA (mobile/tablet) */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/85 px-4 py-3 backdrop-blur-xl xl:hidden">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-2">
+          <p className="flex items-center gap-1.5 truncate rounded-full border border-border/60 bg-secondary/50 px-2.5 py-0.5 text-[10px] text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "Grátis pelo seu plano"}
+            </span>
+            <span aria-hidden>·</span>
+            <span>Saldo: {user?.credits ?? 0}</span>
+          </p>
+          <Button
+            type="button"
+            variant="gradient"
+            className="h-12 w-full max-w-md rounded-2xl text-sm font-semibold"
+            disabled={generating}
+            onClick={() => void handleGenerate()}
+          >
+            {generating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando...</> : isEditMode ? "Salvar" : "Gerar PDF"}
           </Button>
         </div>
-      </form>
+      </div>
+
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={finalPdf || ""}
+        fileName="historico-ensino-fundamental.pdf"
+        title="Historico Ensino Fundamental"
+        message={mensagem}
+      />
     </div>
   );
 }
