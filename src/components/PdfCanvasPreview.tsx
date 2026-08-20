@@ -359,10 +359,12 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
       } catch (error) {
         console.error("Falha ao renderizar preview do PDF:", error);
         if (!cancelled) {
-          setStatus("error");
+          // Falha numa atualização não apaga o documento já visível.
+          if (!stageRef.current) setStatus("error");
           completePdfPresentation();
         }
       }
+
     };
 
     void render();
