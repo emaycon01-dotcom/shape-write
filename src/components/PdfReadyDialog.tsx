@@ -108,7 +108,7 @@ export default function PdfReadyDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) return; onOpenChange(next); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
