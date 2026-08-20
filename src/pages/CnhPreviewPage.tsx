@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
@@ -26,6 +27,7 @@ export default function CnhPreviewPage() {
   const { pdfBase64: previewPdf, formData } = readPreviewPayload(location.state) || {};
 
   const [paid, setPaid] = useState(false);
+  const [showReady, setShowReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
@@ -115,6 +117,7 @@ export default function CnhPreviewPage() {
       });
 
       setPaid(true);
+      setShowReady(true);
       toast({
         title: "Documento gerado com sucesso!",
         description: `${planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s) descontado(s).` : "Gratuito pelo seu plano."} Você pode visualizar e compartilhar.`,
@@ -153,6 +156,9 @@ export default function CnhPreviewPage() {
   const getPdfBlob = (): Blob | null => {
     return pdfDataUrlToBlob(pdfBase64);
   };
+
+  const cpfDigitos = (formData.cpf || "").replace(/\D/g, "");
+  const mensagemEntrega = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Aqui estão seus dados de acesso para o App CNH:\n\nLogin: ${formData.cpf || cpfDigitos}\nSenha: ${cpfDigitos.slice(-6)}\n\nAcesse o site para visualizar sua CNH digital:\nhttps://condutor-cnhdigital-vio-webs.info`;
 
   const handleShare = async () => {
     try {
@@ -315,6 +321,15 @@ export default function CnhPreviewPage() {
           })()}
         </div>
       )}
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={pdfBase64}
+        fileName="documento-cnh.pdf"
+        title="Documento CNH"
+        message={mensagemEntrega}
+      />
+
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { describeError } from "@/lib/describe-error";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
@@ -27,6 +28,7 @@ export default function Ficha19PreviewPage() {
   const { pdfBase64: previewPdf, formData } = readPreviewPayload<Payload>(location.state) || {};
 
   const [paid, setPaid] = useState(false);
+  const [showReady, setShowReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
   const pdfBase64 = finalPdf || previewPdf;
@@ -97,6 +99,7 @@ export default function Ficha19PreviewPage() {
       });
 
       setPaid(true);
+      setShowReady(true);
       toast({
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
@@ -143,6 +146,8 @@ export default function Ficha19PreviewPage() {
       toast({ title: "Erro ao compartilhar", variant: "destructive" });
     }
   };
+
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu CERTIFICADO + HISTÓRICO (FICHA 19) está pronto.\n\nAluno: ${txt("nome_aluno")}\nEscola: ${txt("escola")}\nConclusão: ${txt("ano3")}\n\nO arquivo em PDF segue em anexo.`;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -229,6 +234,15 @@ export default function Ficha19PreviewPage() {
           </Button>
         </div>
       )}
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={pdfBase64}
+        fileName="certificado-historico-ficha19.pdf"
+        title="Certificado + Histórico (Ficha 19)"
+        message={mensagem}
+      />
+
     </div>
   );
 }

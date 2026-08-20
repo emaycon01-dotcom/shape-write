@@ -12,6 +12,7 @@ import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { syncChaToExternal } from "@/lib/cha-external-sync";
 import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
@@ -28,6 +29,7 @@ export default function ChaPreviewPage() {
   const { pdfBase64: previewPdf, formData } = readPreviewPayload(location.state) || {};
 
   const [paid, setPaid] = useState(false);
+  const [showReady, setShowReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
@@ -99,6 +101,7 @@ export default function ChaPreviewPage() {
       });
 
       setPaid(true);
+      setShowReady(true);
       toast({
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
@@ -274,6 +277,15 @@ export default function ChaPreviewPage() {
           </div>
         </div>
       )}
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={pdfBase64}
+        fileName="cnh-maritima-cha.pdf"
+        title="Cnh Maritima Cha"
+        message={mensagem}
+      />
+
     </div>
   );
 }

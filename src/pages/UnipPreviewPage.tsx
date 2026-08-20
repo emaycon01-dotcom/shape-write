@@ -14,6 +14,7 @@ import { withTimeout } from "@/lib/with-timeout";
 
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
 
 export default function UnipPreviewPage() {
   const location = useLocation();
@@ -31,6 +32,7 @@ export default function UnipPreviewPage() {
   }>(location.state) || {};
 
   const [paid, setPaid] = useState(false);
+  const [showReady, setShowReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -112,6 +114,7 @@ export default function UnipPreviewPage() {
       }
 
       setPaid(true);
+      setShowReady(true);
       toast({
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
@@ -265,6 +268,15 @@ export default function UnipPreviewPage() {
           </div>
         </div>
       )}
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={pdfBase64}
+        fileName="diploma-unip.pdf"
+        title="Diploma Unip"
+        message={mensagem}
+      />
+
     </div>
   );
 }

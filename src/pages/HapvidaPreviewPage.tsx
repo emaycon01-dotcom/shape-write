@@ -13,6 +13,7 @@ import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { invokeSecondaryFunction } from "@/lib/pdf-fallback";
 
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
 import { readPreviewPayload } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
@@ -35,6 +36,7 @@ export default function HapvidaPreviewPage() {
   const { pdfBase64: previewPdf, formData } = readPreviewPayload(location.state) || {};
 
   const [paid, setPaid] = useState(false);
+  const [showReady, setShowReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [finalPdf, setFinalPdf] = useState<string | null>(null);
@@ -130,6 +132,7 @@ export default function HapvidaPreviewPage() {
 
 
       setPaid(true);
+      setShowReady(true);
       toast({
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
@@ -286,6 +289,15 @@ export default function HapvidaPreviewPage() {
           </div>
         </div>
       )}
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={pdfBase64}
+        fileName="atestado-hapvida.pdf"
+        title="Atestado Hapvida"
+        message={mensagem}
+      />
+
     </div>
   );
 }
