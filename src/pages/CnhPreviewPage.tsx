@@ -215,7 +215,7 @@ export default function CnhPreviewPage() {
       </p>
 
       {/* PDF Preview area */}
-      <div className="relative glass rounded-xl overflow-hidden mb-6" style={{ height: "70vh" }}>
+      <div className="relative glass overflow-hidden mb-6" style={{ height: "70vh" }}>
         <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview da CNH Digital" />
 
         {/* Watermark overlay - only when not paid */}
@@ -246,7 +246,7 @@ export default function CnhPreviewPage() {
       {/* Action buttons */}
       {!paid ? (
         <div className="space-y-3">
-          <div className="glass rounded-xl p-4 flex items-center gap-3">
+          <div className="glass p-4 flex items-center gap-3">
             <CreditCard className="w-5 h-5 text-primary shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground">Custo: {planCost(1, user?.plano) > 0 ? `${formatCredits(planCost(1, user?.plano))} crédito(s)` : "grátis (plano Premium)"}</p>
@@ -301,7 +301,7 @@ export default function CnhPreviewPage() {
             };
 
             return (
-              <div className="glass rounded-xl p-5 space-y-3">
+              <div className="glass p-5 space-y-3">
                 <p className="text-xs font-semibold text-primary uppercase tracking-wider">Mensagem de entrega</p>
                 <div className="bg-secondary/50 rounded-lg p-4 text-sm text-foreground leading-relaxed whitespace-pre-line">
                   {mensagem}

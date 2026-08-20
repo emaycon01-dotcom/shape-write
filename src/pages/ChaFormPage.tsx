@@ -275,7 +275,7 @@ export default function ChaFormPage() {
 
         <FormDraftsPanel docType="cha" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* AMADOR */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do Amador" />
 
           <div className="space-y-1.5">
@@ -330,7 +330,7 @@ export default function ChaFormPage() {
         </div>
 
         {/* HABILITAÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Anchor} title="Habilitação" />
 
           <div className="space-y-1.5">
@@ -369,7 +369,7 @@ export default function ChaFormPage() {
         </div>
 
         {/* NAVEGAÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Ship} title="Navegação e Emissão" />
 
           <div className="space-y-1.5">

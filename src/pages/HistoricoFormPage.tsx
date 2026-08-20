@@ -417,7 +417,7 @@ export default function HistoricoFormPage() {
 
         <FormDraftsPanel docType="historico" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Escola (cabeçalho)" />
 
           <div className="space-y-1.5">
@@ -497,7 +497,7 @@ export default function HistoricoFormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Aluno" />
 
           <div className="space-y-1.5">
@@ -544,7 +544,7 @@ export default function HistoricoFormPage() {
         </div>
 
         {/* ANOS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={CalendarRange} title="Anos letivos" />
 
           <div className="grid grid-cols-3 gap-4">
@@ -573,7 +573,7 @@ export default function HistoricoFormPage() {
         </div>
 
         {/* ESTUDOS REALIZADOS */}
-        <div className="glass space-y-3 rounded-xl p-6">
+        <div className="glass space-y-3 p-6">
           <SectionHeader icon={GraduationCap} title="Estudos realizados" />
 
           <div className="space-y-2 rounded-lg border border-border/60 bg-secondary/40 p-3">
@@ -621,7 +621,7 @@ export default function HistoricoFormPage() {
         </div>
 
         {/* HISTÓRICO */}
-        <div className="glass space-y-3 rounded-xl p-6">
+        <div className="glass space-y-3 p-6">
           <SectionHeader icon={History} title="Histórico de Previews" />
           {previewHistory.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum histórico escolar gerado ainda.</p>

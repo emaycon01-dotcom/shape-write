@@ -329,7 +329,7 @@ export default function CrlvFormPage() {
 
         <FormDraftsPanel docType="crlv" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* IDENTIFICAÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Car} title="Identificação do veículo" />
 
           <div className="grid grid-cols-3 gap-4">
@@ -425,7 +425,7 @@ export default function CrlvFormPage() {
         </div>
 
         {/* CARACTERÍSTICAS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Gauge} title="Características técnicas" />
 
           <div className="grid grid-cols-2 gap-4">
@@ -472,7 +472,7 @@ export default function CrlvFormPage() {
         </div>
 
         {/* PROPRIETÁRIO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Proprietário e emissão" />
 
           <div className="space-y-1.5">
@@ -497,7 +497,7 @@ export default function CrlvFormPage() {
         </div>
 
         {/* DPVAT (opcional) */}
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <button
             type="button"
             onClick={() => setDpvatOpen((v) => !v)}

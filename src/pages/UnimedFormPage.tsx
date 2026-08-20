@@ -393,7 +393,7 @@ export default function UnimedFormPage() {
 
         <FormDraftsPanel docType="unimed" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* PACIENTE */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Paciente" />
 
           <div className="space-y-1.5">
@@ -468,7 +468,7 @@ export default function UnimedFormPage() {
         </div>
 
         {/* ATENDIMENTO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Stethoscope} title="Atendimento" />
 
           <div className="grid grid-cols-2 gap-4">
@@ -509,7 +509,7 @@ export default function UnimedFormPage() {
         </div>
 
         {/* UNIDADE */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Building2} title="Unidade" />
 
           <div className="space-y-1.5">
@@ -555,7 +555,7 @@ export default function UnimedFormPage() {
         </div>
 
         {/* PROFISSIONAL */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Stethoscope} title="Profissional" />
 
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-secondary/40 px-3 py-2">
@@ -649,7 +649,7 @@ export default function UnimedFormPage() {
 
 
         {/* HISTÓRICO */}
-        <div className="glass space-y-3 rounded-xl p-6">
+        <div className="glass space-y-3 p-6">
           <SectionHeader icon={History} title="Histórico de Previews" />
           {previewHistory.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum atestado Unimed gerado ainda.</p>

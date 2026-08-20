@@ -430,7 +430,7 @@ export default function CnhFormPage() {
 
         <FormDraftsPanel docType="cnh" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* DADOS PESSOAIS */}
-        <div className="glass rounded-xl p-6 space-y-4">
+        <div className="glass p-6 space-y-4">
           <SectionHeader icon={User} title="Dados Pessoais" />
 
           <div className="space-y-1.5">
@@ -519,7 +519,7 @@ export default function CnhFormPage() {
         </div>
 
         {/* DADOS DO DOCUMENTO */}
-        <div className="glass rounded-xl p-6 space-y-4">
+        <div className="glass p-6 space-y-4">
           <SectionHeader icon={FileText} title="Dados do Documento" />
 
           <div className="space-y-1.5">
@@ -700,7 +700,7 @@ export default function CnhFormPage() {
         </div>
 
         {/* INFORMAÇÕES ADICIONAIS */}
-        <div className="glass rounded-xl p-6 space-y-4">
+        <div className="glass p-6 space-y-4">
           <SectionHeader icon={Info} title="Informações Adicionais" />
 
           <div className="space-y-1.5">

@@ -326,7 +326,7 @@ export default function AtpvFormPage() {
         <FormDraftsPanel docType="atpv" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
 
         {/* VEÍCULO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Car} title="Identificação do veículo" />
 
           <div className="grid grid-cols-3 gap-4">
@@ -403,7 +403,7 @@ export default function AtpvFormPage() {
         </div>
 
         {/* VENDEDOR */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Vendedor" />
 
           <div className="space-y-1.5">
@@ -435,7 +435,7 @@ export default function AtpvFormPage() {
         </div>
 
         {/* VENDA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={FileText} title="Dados da venda" />
 
           <div className="grid grid-cols-3 gap-4">
@@ -455,7 +455,7 @@ export default function AtpvFormPage() {
         </div>
 
         {/* COMPRADOR */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={UserCheck} title="Comprador" />
 
           <div className="space-y-1.5">

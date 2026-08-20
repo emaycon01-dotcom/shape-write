@@ -412,7 +412,7 @@ export default function ComprovanteFormPage() {
 
         <FormDraftsPanel docType="comprovante" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* TITULAR */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Titular da conta" />
 
           <div className="space-y-1.5">
@@ -427,7 +427,7 @@ export default function ComprovanteFormPage() {
         </div>
 
         {/* ENDEREÇO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Home} title="Endereço de fornecimento" />
 
           <div className="space-y-1.5">
@@ -467,7 +467,7 @@ export default function ComprovanteFormPage() {
         </div>
 
         {/* FATURA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Receipt} title="Fatura" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

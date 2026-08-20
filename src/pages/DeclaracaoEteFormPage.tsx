@@ -245,7 +245,7 @@ export default function DeclaracaoEteFormPage() {
 
         <FormDraftsPanel docType="declaracao-ete" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
 
           <div className="space-y-1.5">
@@ -281,7 +281,7 @@ export default function DeclaracaoEteFormPage() {
         </div>
 
         {/* MATRÍCULA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Matrícula" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

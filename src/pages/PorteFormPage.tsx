@@ -257,7 +257,7 @@ export default function PorteFormPage() {
 
         <FormDraftsPanel docType="porte" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* CERTIFICADO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={FileText} title="Dados do certificado" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -286,7 +286,7 @@ export default function PorteFormPage() {
         </div>
 
         {/* TITULAR */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do portador" />
 
           <div className="space-y-1.5">
@@ -306,7 +306,7 @@ export default function PorteFormPage() {
         </div>
 
         {/* ARMA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Crosshair} title="Dados da arma" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -339,7 +339,7 @@ export default function PorteFormPage() {
         </div>
 
         {/* EXPEDIÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Shield} title="Expedição e assinatura" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

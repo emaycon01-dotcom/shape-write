@@ -231,7 +231,7 @@ export default function DeclaracaoPeFormPage() {
         <FormDraftsPanel docType="declaracao-pe" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
 
           <div className="space-y-1.5">
@@ -267,7 +267,7 @@ export default function DeclaracaoPeFormPage() {
         </div>
 
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Dados escolares" />
 
           <div className="space-y-1.5">

@@ -396,7 +396,7 @@ export default function CertificadoMedioFormPage() {
 
         <FormDraftsPanel docType="certificado-medio" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Escola (cabeçalho)" />
 
           <div className="space-y-1.5">
@@ -445,7 +445,7 @@ export default function CertificadoMedioFormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Aluno" />
 
           <div className="space-y-1.5">
@@ -547,7 +547,7 @@ export default function CertificadoMedioFormPage() {
         </div>
 
         {/* NOTAS (opcional) */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <button
             type="button"
             onClick={() => setNotasAbertas((v) => !v)}
@@ -570,7 +570,7 @@ export default function CertificadoMedioFormPage() {
 
 
         {/* ESTABELECIMENTOS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={ClipboardList} title="Estabelecimentos de ensino" />
           {estabs.map((e, i) => (
             <div key={e.serie} className="space-y-2 rounded-lg border border-border/60 bg-secondary/40 p-3">

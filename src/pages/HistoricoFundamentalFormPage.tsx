@@ -398,7 +398,7 @@ export default function HistoricoFundamentalFormPage() {
 
         <FormDraftsPanel docType="historico-fundamental" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Unidade de ensino" />
 
           <div className="space-y-1.5">
@@ -457,7 +457,7 @@ export default function HistoricoFundamentalFormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
 
           <div className="space-y-1.5">
@@ -497,7 +497,7 @@ export default function HistoricoFundamentalFormPage() {
         </div>
 
         {/* NOTAS (OPCIONAL) */}
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <button
             type="button"
             onClick={() => setShowNotas((v) => !v)}
@@ -571,7 +571,7 @@ export default function HistoricoFundamentalFormPage() {
         </div>
 
         {/* ETAPAS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={CalendarClock} title="Etapas cursadas" />
 
           {etapas.map((etapa, i) => (
@@ -608,7 +608,7 @@ export default function HistoricoFundamentalFormPage() {
         </div>
 
         {/* DEPENDÊNCIA (OPCIONAL) */}
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <button
             type="button"
             onClick={() => setShowDependencias((v) => !v)}
@@ -663,7 +663,7 @@ export default function HistoricoFundamentalFormPage() {
         </div>
 
         {/* ASSINATURAS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={PenLine} title="Assinaturas do rodapé" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

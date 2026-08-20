@@ -474,7 +474,7 @@ export default function Ficha19FormPage() {
 
         <FormDraftsPanel docType="ficha19" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Escola (cabeçalho)" />
 
           <div className="space-y-1.5">
@@ -534,7 +534,7 @@ export default function Ficha19FormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
 
           <div className="space-y-1.5">
@@ -609,7 +609,7 @@ export default function Ficha19FormPage() {
         </div>
 
         {/* INFORMAÇÕES COMPLEMENTARES */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={ClipboardList} title="Informações complementares" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -654,7 +654,7 @@ export default function Ficha19FormPage() {
         </div>
 
         {/* HISTÓRICO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={BookOpen} title="Histórico escolar" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -735,7 +735,7 @@ export default function Ficha19FormPage() {
         </div>
 
         {/* ASSINATURAS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={PenLine} title="Assinaturas" />
 
           {modo === "auto" ? (
@@ -776,7 +776,7 @@ export default function Ficha19FormPage() {
         </div>
 
         <div className="flex justify-center pt-1">
-          <Button type="submit" disabled={loading} className="h-12 w-full max-w-md rounded-2xl text-base font-semibold">
+          <Button type="submit" variant="gradient" disabled={loading} className="h-12 w-full max-w-md rounded-2xl text-base font-semibold">
             {loading ? (<><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>) : "Gerar documento"}
           </Button>
         </div>

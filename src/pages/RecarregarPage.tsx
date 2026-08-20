@@ -394,7 +394,7 @@ export default function RecarregarPage() {
           </p>
         </div>
 
-        <div className="glass rounded-xl p-6 flex flex-col items-center gap-4">
+        <div className="glass p-6 flex flex-col items-center gap-4">
           {paid ? (
             <div className="flex flex-col items-center gap-3 py-6">
               <CheckCircle className="w-14 h-14 text-accent" />
@@ -517,7 +517,7 @@ export default function RecarregarPage() {
       </div>
 
       {/* Gateway selector */}
-      <div className="glass rounded-xl p-4 flex items-center justify-between gap-4">
+      <div className="glass p-4 flex items-center justify-between gap-4">
         <div className="text-sm">
           <p className="font-semibold text-foreground">Gateway de pagamento</p>
           <p className="text-xs text-muted-foreground">
@@ -546,7 +546,7 @@ export default function RecarregarPage() {
 
       {/* Barra deslizante — sempre no topo */}
       <div>
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <p className="text-sm text-muted-foreground mb-4">Arraste para selecionar a quantidade:</p>
           <Slider
             value={sliderValue}

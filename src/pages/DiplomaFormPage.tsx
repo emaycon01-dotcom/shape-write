@@ -443,7 +443,7 @@ export default function DiplomaFormPage() {
 
         <FormDraftsPanel docType="diploma" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* CURSO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={GraduationCap} title="Curso e Titulação" />
 
           <div className="grid grid-cols-2 gap-4">
@@ -518,7 +518,7 @@ export default function DiplomaFormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do Diplomado" />
 
           <div className="space-y-1.5">
@@ -572,7 +572,7 @@ export default function DiplomaFormPage() {
         </div>
 
         {/* INSTITUIÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={University} title="Instituição" />
 
           <div className="space-y-1.5">
@@ -638,7 +638,7 @@ export default function DiplomaFormPage() {
         </div>
 
         {/* EXPEDIÇÃO E REGISTRO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={FileSignature} title="Expedição e Registro" />
 
           <CidadeUfPicker

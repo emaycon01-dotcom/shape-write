@@ -300,7 +300,7 @@ export default function CrafFormPage() {
 
         <FormDraftsPanel docType="craf" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* TITULAR */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do titular" />
 
           <div className="space-y-1.5">
@@ -364,7 +364,7 @@ export default function CrafFormPage() {
         </div>
 
         {/* ARMA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Crosshair} title="Dados da arma" />
 
           <div className="space-y-1.5">
@@ -404,7 +404,7 @@ export default function CrafFormPage() {
         </div>
 
         {/* EXPEDIÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Shield} title="Expedição e assinatura" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

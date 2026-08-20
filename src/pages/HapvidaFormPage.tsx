@@ -304,7 +304,7 @@ export default function HapvidaFormPage() {
 
         <FormDraftsPanel docType="hapvida" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* PACIENTE */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Paciente" />
 
           <div className="space-y-1.5">
@@ -352,7 +352,7 @@ export default function HapvidaFormPage() {
         </div>
 
         {/* ATENDIMENTO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Stethoscope} title="Atendimento" />
 
           <div className="space-y-1.5">
@@ -402,7 +402,7 @@ export default function HapvidaFormPage() {
         </div>
 
         {/* UNIDADE E PROFISSIONAL */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Building2} title="Unidade e profissional" />
 
           <div className="space-y-1.5">
@@ -460,7 +460,7 @@ export default function HapvidaFormPage() {
         </div>
 
         {/* HISTÓRICO */}
-        <div className="glass space-y-3 rounded-xl p-6">
+        <div className="glass space-y-3 p-6">
           <SectionHeader icon={History} title="Histórico de Previews" />
           {previewHistory.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum atestado HapVida gerado ainda.</p>

@@ -33,7 +33,7 @@ export default function FormDraftsPanel({ docType, onRestore }: Props) {
   if (drafts.length === 0) return null;
 
   return (
-    <div className="glass space-y-3 rounded-xl p-5">
+    <div className="glass space-y-3 p-5">
       <div className="flex items-center gap-2">
         <History className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold tracking-wide text-foreground">

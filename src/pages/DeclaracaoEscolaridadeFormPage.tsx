@@ -230,7 +230,7 @@ export default function DeclaracaoEscolaridadeFormPage() {
 
         <FormDraftsPanel docType="declaracao-escolaridade" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
 
           <div className="space-y-1.5">
@@ -265,7 +265,7 @@ export default function DeclaracaoEscolaridadeFormPage() {
         </div>
 
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Instituição de ensino" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -305,7 +305,7 @@ export default function DeclaracaoEscolaridadeFormPage() {
         </div>
 
         {/* CARIMBO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={PenLine} title="Carimbo / assinatura" />
           <p className="text-xs text-muted-foreground">
             Envie a imagem do carimbo com a assinatura. Ela é aplicada no rodapé do documento, no mesmo lugar do modelo oficial.

@@ -381,7 +381,7 @@ export default function RgFormPage() {
 
         <FormDraftsPanel docType="rg" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* DADOS PESSOAIS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados Pessoais" />
 
           <div className="space-y-1.5">
@@ -457,7 +457,7 @@ export default function RgFormPage() {
         </div>
 
         {/* EMISSÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={FileText} title="Emissão" />
 
           <div className="grid grid-cols-2 gap-4">
@@ -514,7 +514,7 @@ export default function RgFormPage() {
         </div>
 
         {/* OUTRAS INFORMAÇÕES (opcional) */}
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <button
             type="button"
             onClick={() => setOutrasOpen((v) => !v)}

@@ -277,7 +277,7 @@ export default function AnhangueraFormPage() {
 
         <FormDraftsPanel docType="anhanguera" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* CURSO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={GraduationCap} title="Curso" />
 
           <div className="space-y-1.5">
@@ -344,7 +344,7 @@ export default function AnhangueraFormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Aluno" />
 
           <div className="space-y-1.5">
@@ -391,7 +391,7 @@ export default function AnhangueraFormPage() {
         </div>
 
         {/* DIPLOMA E REGISTRO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={FileSignature} title="Diploma e registro" />
 
           <CidadeUfPicker
@@ -442,7 +442,7 @@ export default function AnhangueraFormPage() {
         </div>
 
         {/* INSTITUIÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={University} title="Instituição" />
           <p className="text-xs text-muted-foreground">
             Mantenedora (Anhanguera Educacional Participações S.A.), CNPJ, assinaturas e os textos legais de

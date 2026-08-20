@@ -256,7 +256,7 @@ export default function HoleriteFormPage() {
           </div>
         </Section>
 
-        <div className="glass space-y-4 rounded-xl p-5">
+        <div className="glass space-y-4 p-5">
           <div className="flex items-center gap-2">
             <Wallet className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Vencimentos e descontos</h2>

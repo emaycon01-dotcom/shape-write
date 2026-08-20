@@ -314,7 +314,7 @@ export default function HistoryPage() {
       <p className="text-muted-foreground mb-8">{userDocs.length} documento(s) gerado(s)</p>
 
       {userDocs.length === 0 ? (
-        <div className="glass rounded-xl p-12 text-center">
+        <div className="glass p-12 text-center">
           <QrCode className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">Nenhum documento gerado ainda.</p>
           <Button variant="gradient" className="mt-4" asChild>

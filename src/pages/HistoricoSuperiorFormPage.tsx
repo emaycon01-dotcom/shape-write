@@ -338,7 +338,7 @@ export default function HistoricoSuperiorFormPage() {
         <FormDraftsPanel docType="historico-superior" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
 
           <div className="space-y-1.5">
@@ -375,7 +375,7 @@ export default function HistoricoSuperiorFormPage() {
         </div>
 
         {/* CURSO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={GraduationCap} title="Curso e conclusão" />
 
           <div className="space-y-1.5">
@@ -467,7 +467,7 @@ export default function HistoricoSuperiorFormPage() {
         </div>
 
         {/* AVANÇADO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <button
             type="button"
             onClick={() => setAvancado((v) => !v)}

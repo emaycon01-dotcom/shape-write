@@ -272,7 +272,7 @@ export default function CertidaoFormPage() {
 
         <FormDraftsPanel docType="certidao" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* REGISTRADO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do registrado" />
 
           <div className="space-y-1.5">
@@ -363,7 +363,7 @@ export default function CertidaoFormPage() {
         </div>
 
         {/* CARTÓRIO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Building2} title="Cartório" />
 
           <div className="grid grid-cols-3 gap-4">
