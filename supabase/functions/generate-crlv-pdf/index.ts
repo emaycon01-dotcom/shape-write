@@ -307,7 +307,7 @@ function buildCrlvHtml(d: Record<string, string>, fieldPositions?: unknown, qrVa
   ${mono("chassi", (d.chassi || "").toUpperCase())}
   ${mono("cor", (d.cor || "").toUpperCase())}
   ${mono("combustivel", (d.combustivel || "").toUpperCase())}
-  ${mono("observacoes", (d.observacoes || "").toUpperCase())}
+  ${monoWrap("observacoes", (d.observacoes || "").toUpperCase())}
 
   ${mono("categoria", (d.categoria || "").toUpperCase())}
   ${mono("capacidade", d.capacidade || "")}
