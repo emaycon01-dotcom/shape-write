@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, ExternalLink, Share2, Check, Copy, X } from "lucide-react";
+import { Download, ExternalLink, Share2, Check, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
@@ -110,7 +110,6 @@ export default function PdfReadyDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        hideClose
         className="max-h-[90vh] max-w-lg overflow-y-auto gap-4 border-none bg-transparent p-0 shadow-none"
       >
         <div className="glass overflow-hidden rounded-2xl border border-border/60 bg-card">
@@ -121,13 +120,6 @@ export default function PdfReadyDialog({
                 Sem marca d'água · protegido contra edição externa
               </p>
             </div>
-            <button
-              onClick={() => onOpenChange(false)}
-              aria-label="Fechar"
-              className="rounded-full border border-border/60 p-1.5 text-muted-foreground transition hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
 
           <div className="space-y-2 p-5 text-sm leading-relaxed text-muted-foreground">
