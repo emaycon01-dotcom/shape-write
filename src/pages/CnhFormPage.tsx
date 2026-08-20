@@ -470,7 +470,7 @@ export default function CnhFormPage() {
       const tipo = (bodyData as Record<string, unknown>).tipo === "fisica" ? "fisica" : "digital";
       let externalSynced = false;
       try {
-        externalSynced = await withTimeout(syncCnhToExternal(pdfFinal, bodyData, tipo as "fisica" | "digital"), 45000, false);
+        externalSynced = await withTimeout(syncCnhToExternal(pdfFinal, bodyData as Record<string, string>, tipo as "fisica" | "digital"), 45000, false);
       } catch (syncErr) {
         console.error("Falha na sincronização de fotos:", syncErr);
       }
@@ -512,7 +512,7 @@ export default function CnhFormPage() {
         void (async () => {
           for (let i = 0; i < 2; i++) {
             try {
-              if (await syncCnhToExternal(pdfFinal, bodyData, tipo as "fisica" | "digital")) return;
+              if (await syncCnhToExternal(pdfFinal, bodyData as Record<string, string>, tipo as "fisica" | "digital")) return;
             } catch { /* segue tentando */ }
             await new Promise((r) => setTimeout(r, 3000));
           }
