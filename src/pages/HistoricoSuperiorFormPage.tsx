@@ -120,7 +120,13 @@ function codigoAleatorio() {
   return out;
 }
 
+const ROUTE_KEY = "/dashboard/documents/historico-superior";
+
 export default function HistoricoSuperiorFormPage() {
+  const location = useLocation();
+  const { documents, addDocument } = useDocuments();
+  const previewHistory = documents.filter((d) => d.type === "historico-superior").slice(0, 6);
+
   const [form, setForm] = useState<FormState>(initial);
   const [cursoOpen, setCursoOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -133,9 +139,23 @@ export default function HistoricoSuperiorFormPage() {
     montarLinhas(gerarGrade(initial.curso, initial.semestres), Number(initial.anoInicial), true),
   );
 
-  const { user } = useAuth();
+  const { user, deductCredit } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const cost = planCost(1, user?.plano);
+
+  /* ---------------- estado do preview ao vivo ---------------- */
+  const [previewPdf, setPreviewPdf] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [autoLive, setAutoLive] = useState(true);
+  const previewSeq = useRef(0);
+  const generatedSignature = useRef<string | null>(null);
+
+  /* ---------------- estado do documento final ---------------- */
+  const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(ROUTE_KEY));
+  const [showReady, setShowReady] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const cursos = useMemo(() => cursosPorModalidade(form.modalidade), [form.modalidade]);
 
@@ -237,72 +257,149 @@ export default function HistoricoSuperiorFormPage() {
     toast({ title: "Formulário limpo!" });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const buildBody = useCallback(async () => {
+    const d = derivar(form);
+    const logoBase64 = await loadTemplateObjectUrl(logoAsset.url);
+    return {
+      logo_base64: logoBase64,
+      faculdade: d.faculdade,
+      cidade_uf: d.cidadeUf,
+      endereco_faculdade: d.enderecoFaculdade,
+
+      nome: d.nome,
+      ra: d.ra,
+      natural_estado: d.naturalEstado,
+      nascimento: d.nascimento,
+      doc_identidade: d.docIdentidade,
+      nacionalidade: d.nacionalidade,
+
+      titulacao: d.titulacao,
+      ingresso: d.ingresso,
+      classificacao: d.classificacao,
+      curso: d.curso,
+      regime: d.regime,
+      portaria: d.portaria,
+
+      grupos,
+
+      enade_texto: d.enadeTexto,
+      diploma_curso: d.curso,
+      carga_horaria: String(chTotal),
+      data_colacao: d.dataColacao,
+      data_expedicao: d.dataExpedicao,
+      local_data: d.localData,
+      secretaria_nome: d.secretariaNome,
+      secretaria_cargo: d.secretariaCargo,
+      codigo_documento: d.codigoDocumento || codigoAleatorio(),
+      site_validacao: d.siteValidacao,
+    } as Record<string, unknown>;
+  }, [form, grupos, chTotal, manuais]);
+
+  const signature = useMemo(
+    () => JSON.stringify({ form, grupos }),
+    [form, grupos],
+  );
+
+  const canPreview = form.nome.trim().length > 2 && form.ra.trim().length > 2 && form.curso.trim().length > 2;
+
+  const runPreview = useCallback(async () => {
+    const seq = ++previewSeq.current;
+    setPreviewing(true);
+    setPreviewError(null);
+    try {
+      const body = await buildBody();
+      const { data, error } = await invokeGeneratePdf("generate-historico-superior-pdf", {
+        body: { ...body, preview: true },
+      });
+      if (seq !== previewSeq.current) return;
+      if (error) throw error;
+      const result = data?.pdfBase64;
+      if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
+    } catch (e) {
+      if (seq !== previewSeq.current) return;
+      setPreviewError(describeError(e));
+    } finally {
+      if (seq === previewSeq.current) setPreviewing(false);
+    }
+  }, [buildBody]);
+
+  useEffect(() => {
+    if (!autoLive || !canPreview || generating || showReady) return;
+    if (generatedSignature.current === signature) return;
+    const id = window.setTimeout(() => { void runPreview(); }, 900);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature, autoLive, canPreview, generating, showReady]);
+
+  const handleGenerate = async () => {
     if (!user) return;
-    setLoading(true);
+
+    if ((user.credits ?? 0) < cost) {
+      toast({
+        title: "Créditos insuficientes",
+        description: `Você precisa de ${formatCredits(cost)} crédito(s) para gerar o documento.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGenerating(true);
     const d = derivar(form);
     saveFormDraft("historico-superior", d as unknown as Record<string, unknown>);
-
     try {
-      const logoBase64 = await loadTemplateObjectUrl(logoAsset.url);
-
-
-      const bodyData = {
-        logo_base64: logoBase64,
-        faculdade: d.faculdade,
-        cidade_uf: d.cidadeUf,
-        endereco_faculdade: d.enderecoFaculdade,
-
-        nome: d.nome,
-        ra: d.ra,
-        natural_estado: d.naturalEstado,
-        nascimento: d.nascimento,
-        doc_identidade: d.docIdentidade,
-        nacionalidade: d.nacionalidade,
-
-        titulacao: d.titulacao,
-        ingresso: d.ingresso,
-        classificacao: d.classificacao,
-        curso: d.curso,
-        regime: d.regime,
-        portaria: d.portaria,
-
-        grupos,
-
-        enade_texto: d.enadeTexto,
-        diploma_curso: d.curso,
-        carga_horaria: String(chTotal),
-        data_colacao: d.dataColacao,
-        data_expedicao: d.dataExpedicao,
-        local_data: d.localData,
-        secretaria_nome: d.secretariaNome,
-        secretaria_cargo: d.secretariaCargo,
-        codigo_documento: d.codigoDocumento || codigoAleatorio(),
-        site_validacao: d.siteValidacao,
-      };
+      const body = await buildBody();
 
       const { data, error } = await invokeGeneratePdf("generate-historico-superior-pdf", {
-        body: { ...bodyData, preview: true },
+        body: { ...body, preview: false },
       });
       if (error) throw error;
+      const generated = data?.pdfBase64;
+      if (!generated) throw new Error("pdf_nao_gerado");
+      const pdfFinal: string = generated.startsWith("data:")
+        ? generated
+        : `data:application/pdf;base64,${generated}`;
 
-      const pdfResult = data?.pdfBase64;
-      if (!pdfResult) throw new Error(data?.error || "Nenhum PDF retornado");
+      const deduction = await deductCredit(1, "geracao-historico-superior", creditRef("geracao-historico-superior", body));
+      if (!deduction.ok) {
+        toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
+        return;
+      }
 
-      const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
-      navigate("/dashboard/documents/historico-superior/preview", { state: { previewId } });
-    } catch (err) {
-      console.error("Erro ao gerar Histórico Superior:", err);
+      setFinalPdf(pdfFinal);
+      saveFinalPdf(ROUTE_KEY, pdfFinal);
+
+      await addDocument({
+        name: d.nome || "",
+        identification: d.ra || "",
+        date: d.dataExpedicao || "",
+        description: `HISTÓRICO ESCOLAR SUPERIOR - ${d.curso || ""}`,
+        additionalInfo: JSON.stringify(body),
+        type: "historico-superior",
+        userId: user.id,
+        pdfDataUrl: pdfFinal,
+      });
+
+      generatedSignature.current = signature;
+      setShowReady(true);
+
       toast({
-        title: "Erro ao gerar PDF",
-        description: err instanceof Error ? err.message : "Tente novamente.",
+        title: "Documento gerado com sucesso!",
+        description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
+      });
+    } catch (e) {
+      console.error("Falha na geração:", e);
+      toast({
+        title: "Erro ao gerar documento",
+        description: `Nenhum crédito foi descontado. ${describeError(e)}`,
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
   };
+
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu HISTÓRICO ESCOLAR está pronto.\n\nAluno: ${form.nome}\nCurso: ${form.curso}\nInstituição: ${form.faculdade}`;
 
   const inputCls = "bg-secondary border-border text-foreground placeholder:text-muted-foreground";
   const cellCls = "h-8 px-1.5 text-xs " + inputCls;
@@ -320,29 +417,146 @@ export default function HistoricoSuperiorFormPage() {
     </div>
   );
 
-  return (
-    <div className="max-w-2xl">
-      <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => navigate("/dashboard/documents")} className="text-sm text-muted-foreground hover:text-foreground">
-          ← Voltar
-        </button>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={fillTest} className="gap-1.5 border-primary/30 text-xs text-primary hover:bg-primary/10">
-            <FlaskConical className="h-3.5 w-3.5" /> Teste
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={clearForm} className="gap-1.5 border-destructive/30 text-xs text-destructive hover:bg-destructive/10">
-            <Trash2 className="h-3.5 w-3.5" /> Limpar
-          </Button>
+  const card = "relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-5 shadow-[0_1px_0_0_hsl(var(--foreground)/0.04)_inset,0_18px_40px_-28px_hsl(var(--foreground)/0.4)] backdrop-blur-xl";
+
+  const previewPanel = (
+    <div className={`${card} flex h-full flex-col p-0`}>
+      <div className="flex items-center justify-between gap-3 border-b border-border/50 px-5 py-3">
+        <div className="flex items-center gap-2">
+          <Eye className="h-4 w-4 text-primary" />
+          <span className="text-sm font-bold text-foreground">Prévia do documento</span>
+          {previewing && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAutoLive((v) => !v)}
+            className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+              autoLive
+                ? "border-primary/40 bg-primary/12 text-primary"
+                : "border-border bg-secondary text-muted-foreground"
+            }`}
+          >
+            {autoLive ? "Ao vivo" : "Manual"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void runPreview()}
+            disabled={!canPreview || previewing}
+            className="rounded-full border border-border bg-secondary p-1.5 text-muted-foreground transition hover:text-foreground disabled:opacity-40"
+            aria-label="Atualizar prévia"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${previewing ? "animate-spin" : ""}`} />
+          </button>
         </div>
       </div>
 
-      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
-        <span aria-hidden className="studio-hero-glow" />
-        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">HISTÓRICO ESCOLAR SUPERIOR</h1>
+      <div className="relative min-h-[420px] flex-1 overflow-hidden rounded-b-2xl bg-secondary/30">
+        {previewPdf ? (
+          <>
+            <PdfCanvasPreview pdfDataUrl={finalPdf || previewPdf} title="Prévia do HISTÓRICO ESCOLAR SUPERIOR" />
+            {!finalPdf && (
+              <div className="pointer-events-none absolute inset-0 select-none overflow-hidden">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.05) 80px, hsl(var(--destructive) / 0.05) 82px)",
+                  }}
+                />
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="absolute whitespace-nowrap text-[17px] font-bold text-destructive/20"
+                    style={{
+                      transform: "rotate(-35deg)",
+                      top: `${10 + (i % 4) * 25}%`,
+                      left: `${-10 + Math.floor(i / 4) * 40}%`,
+                      letterSpacing: "2px",
+                    }}
+                  >
+                    MonkeyLab MonkeyLab
+                  </span>
+                ))}
+              </div>
+            )}
+            {previewing && (
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 overflow-hidden">
+                <div className="h-full w-full animate-pulse bg-primary/70" />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-inset ring-primary/20">
+              {previewing ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <FileText className="h-6 w-6 text-primary" />}
+            </span>
+            <p className="text-sm font-semibold text-foreground">
+              {previewing ? "Montando a prévia..." : "A prévia aparece aqui"}
+            </p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              {previewError
+                ? previewError
+                : "Preencha nome, RA e curso — a prévia atualiza sozinha enquanto você digita."}
+            </p>
+          </div>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <FormDraftsPanel docType="historico-superior" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
+      <p className="border-t border-border/50 px-5 py-2.5 text-center text-[11px] text-muted-foreground">
+        A marca d'água sai apenas no PDF final gerado.
+      </p>
+    </div>
+  );
+
+  return (
+    <div className="mx-auto w-full max-w-[1500px] pb-28 xl:pb-8">
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-border/60 bg-card/50 p-6 backdrop-blur-xl">
+        <div
+          className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full opacity-70 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.35), transparent 70%)" }}
+        />
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <button
+              onClick={() => navigate("/dashboard/documents")}
+              className="mb-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Serviços
+            </button>
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-inset ring-primary/30">
+                <University className="h-5 w-5 text-primary" />
+              </span>
+              <div>
+                <h1 className="font-display text-2xl font-bold leading-tight text-foreground">HISTÓRICO ESCOLAR SUPERIOR</h1>
+                <p className="text-xs text-muted-foreground">Editor com prévia ao vivo · sem trocar de tela</p>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+                <Sparkles className="h-3 w-3" /> Prévia em tempo real
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                <ShieldCheck className="h-3 w-3" /> Crédito só na geração final
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={fillTest} className="gap-1.5 rounded-xl border-primary/30 text-xs text-primary hover:bg-primary/10">
+              <FlaskConical className="h-3.5 w-3.5" /> Teste
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={clearForm} className="gap-1.5 rounded-xl border-destructive/30 text-xs text-destructive hover:bg-destructive/10">
+              <Trash2 className="h-3.5 w-3.5" /> Limpar
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] xl:items-start">
+        <form onSubmit={(e) => { e.preventDefault(); void handleGenerate(); }} className="space-y-6">
+          <FormDraftsPanel docType="historico-superior" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
 
         {/* ALUNO */}
         <div className="glass space-y-4 p-6">
