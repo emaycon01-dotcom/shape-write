@@ -259,7 +259,7 @@ export default function UnimedPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="atestado-unimed.pdf"
-        title="PDF baixado com sucesso!"
+        title="Atestado Unimed"
         message={mensagem}
       />
 

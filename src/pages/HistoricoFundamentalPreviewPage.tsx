@@ -260,7 +260,7 @@ export default function HistoricoFundamentalPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="historico-ensino-fundamental.pdf"
-        title="PDF baixado com sucesso!"
+        title="Historico Ensino Fundamental"
         message={mensagem}
       />
 

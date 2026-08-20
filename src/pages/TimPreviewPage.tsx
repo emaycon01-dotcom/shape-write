@@ -251,7 +251,7 @@ export default function TimPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="comprovante-residencia-tim.pdf"
-        title="PDF baixado com sucesso!"
+        title="Comprovante Residencia Tim"
         message={mensagem}
       />
 

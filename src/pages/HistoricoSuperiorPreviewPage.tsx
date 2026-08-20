@@ -259,7 +259,7 @@ export default function HistoricoSuperiorPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="historico-escolar-superior.pdf"
-        title="PDF baixado com sucesso!"
+        title="Historico Escolar Superior"
         message={mensagem}
       />
 

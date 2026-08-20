@@ -282,7 +282,7 @@ export default function ChaPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="cnh-maritima-cha.pdf"
-        title="PDF baixado com sucesso!"
+        title="Cnh Maritima Cha"
         message={mensagem}
       />
 

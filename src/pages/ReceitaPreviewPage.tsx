@@ -258,7 +258,7 @@ export default function ReceitaPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="receita-medica.pdf"
-        title="PDF baixado com sucesso!"
+        title="Receita Medica"
         message={mensagem}
       />
 

@@ -260,7 +260,7 @@ export default function CertificadoMedioPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="certificado-historico.pdf"
-        title="PDF baixado com sucesso!"
+        title="Certificado Historico"
         message={mensagem}
       />
 

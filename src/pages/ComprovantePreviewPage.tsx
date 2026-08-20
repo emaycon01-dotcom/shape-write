@@ -251,7 +251,7 @@ export default function ComprovantePreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="comprovante-residencia.pdf"
-        title="PDF baixado com sucesso!"
+        title="Comprovante Residencia"
         message={mensagem}
       />
 

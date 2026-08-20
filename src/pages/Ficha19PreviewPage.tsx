@@ -239,7 +239,8 @@ export default function Ficha19PreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="certificado-historico-ficha19.pdf"
-        title="PDF baixado com sucesso!"
+        title="Certificado + Histórico (Ficha 19)"
+        message={mensagem}
       />
 
     </div>

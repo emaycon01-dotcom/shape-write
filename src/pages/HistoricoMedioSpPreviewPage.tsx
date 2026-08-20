@@ -260,7 +260,7 @@ export default function HistoricoMedioSpPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="historico-escolar-ensino-medio.pdf"
-        title="PDF baixado com sucesso!"
+        title="Historico Escolar Ensino Medio"
         message={mensagem}
       />
 

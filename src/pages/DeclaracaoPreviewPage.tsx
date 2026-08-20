@@ -258,7 +258,7 @@ export default function DeclaracaoPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="declaracao-escolar.pdf"
-        title="PDF baixado com sucesso!"
+        title="Declaracao Escolar"
         message={mensagem}
       />
 

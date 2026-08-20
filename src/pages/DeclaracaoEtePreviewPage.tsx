@@ -258,7 +258,7 @@ export default function DeclaracaoEtePreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="declaracao-matricula.pdf"
-        title="PDF baixado com sucesso!"
+        title="Declaracao Matricula"
         message={mensagem}
       />
 

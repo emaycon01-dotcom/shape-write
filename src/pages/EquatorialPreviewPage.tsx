@@ -251,7 +251,7 @@ export default function EquatorialPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="comprovante-residencia-equatorial.pdf"
-        title="PDF baixado com sucesso!"
+        title="Comprovante Residencia Equatorial"
         message={mensagem}
       />
 

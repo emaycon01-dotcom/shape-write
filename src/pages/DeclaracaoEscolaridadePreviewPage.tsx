@@ -260,7 +260,7 @@ export default function DeclaracaoEscolaridadePreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="declaracao-escolaridade.pdf"
-        title="PDF baixado com sucesso!"
+        title="Declaracao Escolaridade"
         message={mensagem}
       />
 

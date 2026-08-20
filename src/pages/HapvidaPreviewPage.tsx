@@ -294,7 +294,7 @@ export default function HapvidaPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="atestado-hapvida.pdf"
-        title="PDF baixado com sucesso!"
+        title="Atestado Hapvida"
         message={mensagem}
       />
 

@@ -237,7 +237,7 @@ export default function AnhangueraPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="diploma-anhanguera.pdf"
-        title="PDF baixado com sucesso!"
+        title="Diploma Anhanguera"
         message={mensagem}
       />
 

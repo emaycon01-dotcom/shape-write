@@ -257,7 +257,7 @@ export default function ObitoPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="certidao-obito.pdf"
-        title="PDF baixado com sucesso!"
+        title="Certidao Obito"
         message={mensagem}
       />
 

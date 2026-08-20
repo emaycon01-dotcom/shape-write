@@ -257,7 +257,7 @@ export default function CrafPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="craf.pdf"
-        title="PDF baixado com sucesso!"
+        title="Craf"
         message={mensagem}
       />
 

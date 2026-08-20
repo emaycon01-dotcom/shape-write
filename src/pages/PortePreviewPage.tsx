@@ -255,7 +255,7 @@ export default function PortePreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="porte-federal-arma.pdf"
-        title="PDF baixado com sucesso!"
+        title="Porte Federal Arma"
         message={mensagem}
       />
 

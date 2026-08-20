@@ -258,7 +258,7 @@ export default function CertidaoPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="certidao-nascimento.pdf"
-        title="PDF baixado com sucesso!"
+        title="Certidao Nascimento"
         message={mensagem}
       />
 

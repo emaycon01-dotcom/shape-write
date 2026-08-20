@@ -284,7 +284,7 @@ export default function RgPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="documento-rg.pdf"
-        title="PDF baixado com sucesso!"
+        title="Documento Rg"
         message={mensagem}
       />
 

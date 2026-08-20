@@ -251,7 +251,7 @@ export default function HoleritePreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="holerite.pdf"
-        title="PDF baixado com sucesso!"
+        title="Holerite"
         message={mensagem}
       />
 

@@ -251,7 +251,7 @@ export default function CoelbaPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="comprovante-residencia-coelba.pdf"
-        title="PDF baixado com sucesso!"
+        title="Comprovante Residencia Coelba"
         message={mensagem}
       />
 

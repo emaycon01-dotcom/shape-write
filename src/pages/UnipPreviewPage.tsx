@@ -273,7 +273,7 @@ export default function UnipPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="diploma-unip.pdf"
-        title="PDF baixado com sucesso!"
+        title="Diploma Unip"
         message={mensagem}
       />
 

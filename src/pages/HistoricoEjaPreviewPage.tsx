@@ -260,7 +260,7 @@ export default function HistoricoEjaPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="historico-certificado-eja.pdf"
-        title="PDF baixado com sucesso!"
+        title="Historico Certificado Eja"
         message={mensagem}
       />
 

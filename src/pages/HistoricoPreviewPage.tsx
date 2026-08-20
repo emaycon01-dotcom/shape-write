@@ -258,7 +258,7 @@ export default function HistoricoPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="historico-escolar.pdf"
-        title="PDF baixado com sucesso!"
+        title="Historico Escolar"
         message={mensagem}
       />
 

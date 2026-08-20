@@ -270,7 +270,7 @@ export default function DiplomaPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="diploma.pdf"
-        title="PDF baixado com sucesso!"
+        title="Diploma"
         message={mensagem}
       />
 

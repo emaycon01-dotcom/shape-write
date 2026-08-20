@@ -259,7 +259,7 @@ export default function AtestadoPreviewPage() {
         onOpenChange={setShowReady}
         pdfDataUrl={pdfBase64}
         fileName="atestado-medico.pdf"
-        title="PDF baixado com sucesso!"
+        title="Atestado Medico"
         message={mensagem}
       />
 
