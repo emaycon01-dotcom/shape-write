@@ -228,9 +228,9 @@ export default function AtestadoFormPage() {
      Após a geração final não roda de novo (evitava a tela de carregando
      reaparecer por cima do diálogo de PDF pronto). */
   useEffect(() => {
-    if (!autoLive || !canPreview || generating || showReady) return;
+    if (!autoLive || generating || showReady) return;
     if (generatedSignature.current === signature) return;
-    const id = window.setTimeout(() => { void runPreview(); }, 900);
+    const id = window.setTimeout(() => { void runPreview(); }, 400);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature, autoLive, canPreview, generating, showReady]);

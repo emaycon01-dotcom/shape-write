@@ -429,9 +429,9 @@ export default function Ficha19FormPage() {
   }, [buildBody]);
 
   useEffect(() => {
-    if (!autoLive || !canPreview || loading || showReady) return;
+    if (!autoLive || loading || showReady) return;
     if (generatedSignature.current === signature) return;
-    const id = window.setTimeout(() => { void runPreview(); }, 900);
+    const id = window.setTimeout(() => { void runPreview(); }, 400);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature, autoLive, canPreview, loading, showReady]);

@@ -377,9 +377,9 @@ export default function HistoricoFundamentalFormPage() {
   }, [buildBody]);
 
   useEffect(() => {
-    if (!autoLive || !canPreview || generating || showReady) return;
+    if (!autoLive || generating || showReady) return;
     if (generatedSignature.current === signature) return;
-    const id = window.setTimeout(() => { void runPreview(); }, 900);
+    const id = window.setTimeout(() => { void runPreview(); }, 400);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature, autoLive, canPreview, generating, showReady]);
