@@ -10,7 +10,7 @@ import { describeError } from "@/lib/describe-error";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
-import { readPreviewPayload } from "@/lib/preview-payload";
+import { readPreviewPayload, readFinalPdf, saveFinalPdf } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import PdfReadyDialog from "@/components/PdfReadyDialog";
@@ -30,8 +30,8 @@ export default function DiplomaPreviewPage() {
     validationUrl?: string;
   }>(location.state) || {};
 
-  const [paid, setPaid] = useState(false);
-  const [showReady, setShowReady] = useState(false);
+  const [paid, setPaid] = useState(() => !!readFinalPdf(location.pathname));
+  const [showReady, setShowReady] = useState(() => !!readFinalPdf(location.pathname));
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 

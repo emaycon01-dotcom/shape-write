@@ -11,7 +11,7 @@ import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import PdfReadyDialog from "@/components/PdfReadyDialog";
-import { readPreviewPayload } from "@/lib/preview-payload";
+import { readPreviewPayload, readFinalPdf, saveFinalPdf } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
 const FORM_ROUTE = "/dashboard/documents/historico-superior";
@@ -27,11 +27,11 @@ export default function HistoricoSuperiorPreviewPage() {
 
   const { pdfBase64: previewPdf, formData } = readPreviewPayload<Payload>(location.state) || {};
 
-  const [paid, setPaid] = useState(false);
-  const [showReady, setShowReady] = useState(false);
+  const [paid, setPaid] = useState(() => !!readFinalPdf(location.pathname));
+  const [showReady, setShowReady] = useState(() => !!readFinalPdf(location.pathname));
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [finalPdf, setFinalPdf] = useState<string | null>(null);
+  const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(location.pathname));
   const pdfBase64 = finalPdf || previewPdf;
 
   useEffect(() => {
@@ -84,6 +84,7 @@ export default function HistoricoSuperiorPreviewPage() {
         return;
       }
       setFinalPdf(pdfFinal);
+      saveFinalPdf(location.pathname, pdfFinal);
 
       await addDocument({
         name: txt("nome"),

@@ -14,7 +14,7 @@ import { invokeSecondaryFunction } from "@/lib/pdf-fallback";
 
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import PdfReadyDialog from "@/components/PdfReadyDialog";
-import { readPreviewPayload } from "@/lib/preview-payload";
+import { readPreviewPayload, readFinalPdf, saveFinalPdf } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
 /** Código opaco, não sequencial e URL-safe (32 chars) para o QR de validação. */
@@ -35,11 +35,11 @@ export default function HapvidaPreviewPage() {
 
   const { pdfBase64: previewPdf, formData } = readPreviewPayload(location.state) || {};
 
-  const [paid, setPaid] = useState(false);
-  const [showReady, setShowReady] = useState(false);
+  const [paid, setPaid] = useState(() => !!readFinalPdf(location.pathname));
+  const [showReady, setShowReady] = useState(() => !!readFinalPdf(location.pathname));
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [finalPdf, setFinalPdf] = useState<string | null>(null);
+  const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(location.pathname));
   const pdfBase64 = finalPdf || previewPdf;
 
   if (!pdfBase64 || !formData) {
@@ -89,6 +89,7 @@ export default function HapvidaPreviewPage() {
         return;
       }
       setFinalPdf(pdfFinal);
+      saveFinalPdf(location.pathname, pdfFinal);
 
       const created = await addDocument({
         name: formData.paciente || "",
