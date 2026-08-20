@@ -781,13 +781,26 @@ async function renderOnce(
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type InvokeResult = { data: any; error: Error | null };
 
-let generationInProgress = false;
-let currentGenerationAbort: AbortController | null = null;
+type ActiveGeneration = {
+  kind: "preview" | "final";
+  abort: AbortController;
+  done: Promise<void>;
+  finish: () => void;
+};
+
+let activeGeneration: ActiveGeneration | null = null;
+
+function createActiveGeneration(kind: ActiveGeneration["kind"]): ActiveGeneration {
+  let finish = () => undefined;
+  const done = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  return { kind, abort: new AbortController(), done, finish };
+}
 
 /** Cancela uma geração em andamento (útil ao navegar para outra tela). */
 export function cancelCurrentGeneration() {
-  currentGenerationAbort?.abort();
-  currentGenerationAbort = null;
+  activeGeneration?.abort.abort();
 }
 
 /**
@@ -1037,19 +1050,27 @@ export async function invokeGeneratePdf(
   const startedAt = performance.now();
 
 
-  // Um toque duplo antes do React desabilitar o botão iniciava dois iframes,
-  // dois conjuntos de canvases e duas cópias do template ao mesmo tempo. Em
-  // celulares isso era suficiente para derrubar o processo do navegador.
-  if (!isAction && generationInProgress) {
-    return { data: null, error: new Error("Já existe um documento sendo gerado. Aguarde a conclusão.") };
-  }
+  // O Studio pode estar atualizando o preview exatamente quando o usuário toca
+  // em "Gerar". Isso não é uma segunda geração final: cancelamos o preview e
+  // esperamos sua limpeza antes de iniciar o arquivo definitivo. Assim não há
+  // erro falso nem dois conjuntos de canvases concorrendo por memória.
+  let ownedGeneration: ActiveGeneration | null = null;
   if (!isAction) {
-    generationInProgress = true;
+    while (activeGeneration) {
+      if (activeGeneration.kind === "final") {
+        return { data: null, error: new Error("Já existe um documento sendo gerado. Aguarde a conclusão.") };
+      }
+      const previousPreview = activeGeneration;
+      previousPreview.abort.abort();
+      await previousPreview.done;
+    }
+
+    ownedGeneration = createActiveGeneration(isPreview ? "preview" : "final");
+    activeGeneration = ownedGeneration;
     setGenerationBusy(true);
-    currentGenerationAbort = new AbortController();
   }
 
-  const abortSignal = !isAction ? currentGenerationAbort?.signal : null;
+  const abortSignal = ownedGeneration?.abort.signal ?? null;
 
   // A tela cheia de carregamento pertence somente à geração FINAL. O Studio
   // atualiza a prévia automaticamente enquanto o usuário preenche os campos;
@@ -1251,11 +1272,13 @@ export async function invokeGeneratePdf(
       return { data: null, error: err };
     }
   } finally {
-    if (!isAction) {
-      generationInProgress = false;
-      setGenerationBusy(false);
+    if (ownedGeneration) {
+      ownedGeneration.finish();
+      if (activeGeneration === ownedGeneration) {
+        activeGeneration = null;
+        setGenerationBusy(false);
+      }
       flushPendingTemplateRevokes();
-      currentGenerationAbort = null;
     }
 
     if (!isPreview) endPdfLoading();
