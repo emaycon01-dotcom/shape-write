@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import FormDraftsPanel from "@/components/FormDraftsPanel";
 import { saveFormDraft } from "@/lib/form-drafts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDocuments } from "@/contexts/DocumentContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,13 +11,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import {
   University, GraduationCap, User, Loader2, FlaskConical, Trash2, Check, ChevronsUpDown,
-  BookOpen, Plus, X, RefreshCw, ClipboardList,
+  BookOpen, Plus, X, RefreshCw, ClipboardList, History, FileText,
+  Eye, CreditCard, ShieldCheck, ArrowLeft, Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
-import { storePreviewPayload } from "@/lib/preview-payload";
 import { pick, rnd } from "@/lib/random";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
+import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { creditRef } from "@/lib/credit-ref";
+import { describeError } from "@/lib/describe-error";
+import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
 import { MODALIDADES, type Modalidade, cursosPorModalidade, TOTAL_CURSOS } from "@/lib/diploma-cursos";
 import {
   gerarGrade, montarLinhas, cargaHorariaTotal, CURSOS_COM_GRADE_REAL,
