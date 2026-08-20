@@ -67,6 +67,8 @@ export default function PdfReadyDialog({
     link.href = url;
     link.download = fileName;
     link.rel = "noopener";
+    // target=_blank evita que o Safari navegue a aba atual e derrube esta tela.
+    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -74,13 +76,38 @@ export default function PdfReadyDialog({
   };
 
   const handleOpen = () => {
+    // A aba nova precisa ser aberta no mesmo gesto do toque (regra do Safari).
+    const tab = window.open("", "_blank");
     const url = objectUrl();
     if (!url) {
+      tab?.close();
       toast({ title: "Erro ao abrir PDF", variant: "destructive" });
       return;
     }
-    window.open(url, "_blank", "noopener,noreferrer");
+    if (!tab) {
+      // Pop-up bloqueado: cai para o comportamento antigo.
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    // Visualizador simples servido pela própria aba do painel (about:blank
+    // herda a origem), mantendo a aba original intacta.
+    tab.document.write(
+      `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">` +
+        `<meta name="viewport" content="width=device-width, initial-scale=1">` +
+        `<title>${fileName}</title>` +
+        `<style>html,body{margin:0;height:100%;background:#0b0b10;color:#fff;font-family:system-ui,sans-serif}` +
+        `iframe{border:0;width:100%;height:100%;display:block}` +
+        `.bar{display:flex;gap:8px;align-items:center;padding:10px 14px;background:#14141c}` +
+        `a{color:#fff;text-decoration:none;font-size:14px;font-weight:600;background:#4f46e5;padding:8px 14px;border-radius:10px}` +
+        `</style></head><body>` +
+        `<div class="bar"><span style="flex:1;font-size:13px;opacity:.8">${fileName}</span>` +
+        `<a href="${url}" download="${fileName}">Baixar</a></div>` +
+        `<iframe src="${url}" title="${fileName}"></iframe>` +
+        `</body></html>`,
+    );
+    tab.document.close();
   };
+
 
   const handleShare = async () => {
     try {
