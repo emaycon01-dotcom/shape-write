@@ -37,6 +37,7 @@ export default function PdfReadyDialog({
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const urlRef = useRef<string | null>(null);
+  const actionTabOpenRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
@@ -49,6 +50,18 @@ export default function PdfReadyDialog({
     };
   }, [open]);
 
+  useEffect(() => {
+    const restoreDialog = () => {
+      if (actionTabOpenRef.current) onOpenChange(true);
+    };
+    window.addEventListener("pageshow", restoreDialog);
+    document.addEventListener("visibilitychange", restoreDialog);
+    return () => {
+      window.removeEventListener("pageshow", restoreDialog);
+      document.removeEventListener("visibilitychange", restoreDialog);
+    };
+  }, [onOpenChange]);
+
   const objectUrl = () => {
     if (urlRef.current) return urlRef.current;
     const blob = pdfDataUrlToBlob(pdfDataUrl);
@@ -57,55 +70,53 @@ export default function PdfReadyDialog({
     return urlRef.current;
   };
 
-  const handleDownload = () => {
-    const url = objectUrl();
-    if (!url) {
-      toast({ title: "Erro ao baixar PDF", variant: "destructive" });
-      return;
-    }
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    link.rel = "noopener";
-    // target=_blank evita que o Safari navegue a aba atual e derrube esta tela.
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    toast({ title: "PDF baixado com sucesso!" });
-  };
+  const escapeHtml = (value: string) =>
+    value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-  const handleOpen = () => {
-    // A aba nova precisa ser aberta no mesmo gesto do toque (regra do Safari).
-    const tab = window.open("", "_blank");
+  const openViewerTab = (downloadImmediately: boolean) => {
+    // O Safari ignora target=_blank em links com download e pode substituir a
+    // aba atual. Criar a aba diretamente no gesto do toque evita esse desvio.
+    const tab = window.open("about:blank", "_blank");
     const url = objectUrl();
     if (!url) {
       tab?.close();
-      toast({ title: "Erro ao abrir PDF", variant: "destructive" });
-      return;
+      toast({ title: downloadImmediately ? "Erro ao baixar PDF" : "Erro ao abrir PDF", variant: "destructive" });
+      return false;
     }
     if (!tab) {
-      // Pop-up bloqueado: cai para o comportamento antigo.
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
+      toast({ title: "Permita a abertura de uma nova aba para continuar", variant: "destructive" });
+      return false;
     }
-    // Visualizador simples servido pela própria aba do painel (about:blank
-    // herda a origem), mantendo a aba original intacta.
+    actionTabOpenRef.current = true;
+    const safeName = escapeHtml(fileName);
     tab.document.write(
       `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">` +
         `<meta name="viewport" content="width=device-width, initial-scale=1">` +
-        `<title>${fileName}</title>` +
+        `<title>${safeName}</title>` +
         `<style>html,body{margin:0;height:100%;background:#0b0b10;color:#fff;font-family:system-ui,sans-serif}` +
         `iframe{border:0;width:100%;height:100%;display:block}` +
         `.bar{display:flex;gap:8px;align-items:center;padding:10px 14px;background:#14141c}` +
         `a{color:#fff;text-decoration:none;font-size:14px;font-weight:600;background:#4f46e5;padding:8px 14px;border-radius:10px}` +
         `</style></head><body>` +
-        `<div class="bar"><span style="flex:1;font-size:13px;opacity:.8">${fileName}</span>` +
-        `<a href="${url}" download="${fileName}">Baixar</a></div>` +
-        `<iframe src="${url}" title="${fileName}"></iframe>` +
+        `<div class="bar"><span style="flex:1;font-size:13px;opacity:.8">${safeName}</span>` +
+        `<a id="download" href="${url}" download="${safeName}">Baixar</a></div>` +
+        `<iframe src="${url}" title="${safeName}"></iframe>` +
+        (downloadImmediately
+          ? `<script>addEventListener('load',()=>setTimeout(()=>document.getElementById('download').click(),80))<\/script>`
+          : "") +
         `</body></html>`,
     );
     tab.document.close();
+    tab.focus();
+    return true;
+  };
+
+  const handleDownload = () => {
+    if (openViewerTab(true)) toast({ title: "Download aberto em uma nova aba" });
+  };
+
+  const handleOpen = () => {
+    openViewerTab(false);
   };
 
 
