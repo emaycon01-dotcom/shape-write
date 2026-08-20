@@ -90,6 +90,8 @@ export default function AtestadoFormPage() {
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [autoLive, setAutoLive] = useState(true);
   const previewSeq = useRef(0);
+  const generatedSignature = useRef<string | null>(null);
+
 
   /* ---------------- estado do documento final ---------------- */
   const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(ROUTE_KEY));
@@ -222,13 +224,17 @@ export default function AtestadoFormPage() {
     }
   }, [buildBody]);
 
-  /* Preview ao vivo com debounce — não navega, não gasta crédito. */
+  /* Preview ao vivo com debounce — não navega, não gasta crédito.
+     Após a geração final não roda de novo (evitava a tela de carregando
+     reaparecer por cima do diálogo de PDF pronto). */
   useEffect(() => {
-    if (!autoLive || !canPreview || generating) return;
+    if (!autoLive || !canPreview || generating || showReady) return;
+    if (generatedSignature.current === signature) return;
     const id = window.setTimeout(() => { void runPreview(); }, 900);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signature, autoLive, canPreview, generating]);
+  }, [signature, autoLive, canPreview, generating, showReady]);
+
 
   /* ---------------- documento final ---------------- */
   const handleGenerate = async () => {
@@ -302,7 +308,9 @@ export default function AtestadoFormPage() {
         pdfDataUrl: pdfFinal,
       });
 
+      generatedSignature.current = signature;
       setShowReady(true);
+
       toast({
         title: "Documento gerado com sucesso!",
         description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
