@@ -246,8 +246,12 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
     };
 
     const render = async () => {
-      setStatus("loading");
+      // Se já existe um documento pintado, mantemos ele na tela enquanto o novo
+      // é montado em segundo plano (troca atômica em presentStage). Sem isso a
+      // prévia "recarregava" a cada tecla digitada no formulário.
+      if (!stageRef.current) setStatus("loading");
       try {
+
         // Caminho rápido: as faixas já rasterizadas na geração são exibidas
         // direto, sem o PDF.js redesenhar o documento inteiro outra vez.
         if (await renderFromBands()) return;
