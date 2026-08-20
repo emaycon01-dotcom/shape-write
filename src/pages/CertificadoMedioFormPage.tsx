@@ -18,7 +18,7 @@ import PdfReadyDialog from "@/components/PdfReadyDialog";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { creditRef } from "@/lib/credit-ref";
 import { describeError } from "@/lib/describe-error";
-import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
+import { saveFinalPdf, readFinalPdf, clearFinalPdf } from "@/lib/preview-payload";
 import { ESTADO_NOMES, ESTADOS_UF, loadBrasaoDataUrl } from "@/lib/brasoes-estados";
 import { pick, rnd } from "@/lib/random";
 
@@ -349,6 +349,10 @@ export default function CertificadoMedioFormPage() {
       if (error) throw error;
       const result = data?.pdfBase64;
       if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      // Nova prévia = documento novo: descarta o PDF final anterior
+      // (senão o preview seguinte apareceria sem marca d'água).
+      setFinalPdf(null);
+      clearFinalPdf(ROUTE_KEY);
       setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
       // Pré-registra o HTML da versão final (sem marca d'água) em segundo
       // plano, para a geração definitiva já sair do cache ao clicar em Gerar.

@@ -13,7 +13,7 @@ import templateEquatorialP2Url from "@/assets/template-equatorial-p2-hq.webp";
 import { loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskDate, maskCPF, maskCEP } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
-import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
+import { saveFinalPdf, readFinalPdf, clearFinalPdf } from "@/lib/preview-payload";
 import { ESTADOS_UF } from "@/lib/brasoes-estados";
 import { AutoSection } from "@/components/AutoSection";
 import { autoEquatorial, baseDatas, fmtDate, refMesAbrev } from "@/lib/fatura-auto";
@@ -406,6 +406,10 @@ export default function EquatorialFormPage() {
       if (error) throw error;
       const result = data?.pdfBase64;
       if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      // Nova prévia = documento novo: descarta o PDF final anterior
+      // (senão o preview seguinte apareceria sem marca d'água).
+      setFinalPdf(null);
+      clearFinalPdf(ROUTE_KEY);
       setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
     } catch (e) {
       if (seq !== previewSeq.current) return;

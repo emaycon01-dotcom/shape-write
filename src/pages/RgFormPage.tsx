@@ -17,7 +17,7 @@ import templateRgUrl from "@/assets/template-rg-bg-hq.webp";
 import { loadTemplateBase64, loadTemplateObjectUrl } from "@/lib/template-cache";
 import { maskCPF, maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
-import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
+import { saveFinalPdf, readFinalPdf, clearFinalPdf } from "@/lib/preview-payload";
 import { syncRgToExternal } from "@/lib/rg-external-sync";
 import { pick, rnd } from "@/lib/random";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
@@ -292,6 +292,10 @@ export default function RgFormPage() {
       if (error) throw error;
       const result = data?.pdfBase64;
       if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      // Nova prévia = documento novo: descarta o PDF final anterior
+      // (senão o preview seguinte apareceria sem marca d'água).
+      setFinalPdf(null);
+      clearFinalPdf(ROUTE_KEY);
       setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
     } catch (e) {
       if (seq !== previewSeq.current) return;

@@ -21,7 +21,7 @@ import PdfReadyDialog from "@/components/PdfReadyDialog";
 import { planCost, formatCredits } from "@/lib/plan-pricing";
 import { creditRef } from "@/lib/credit-ref";
 import { describeError } from "@/lib/describe-error";
-import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
+import { saveFinalPdf, readFinalPdf, clearFinalPdf } from "@/lib/preview-payload";
 
 type Nota = { area: string; componente: string; n1: string; n2: string; n3: string };
 type Turma = { ano: string; serie: string; turno: string; unidade: string; municipio: string };
@@ -318,6 +318,10 @@ export default function HistoricoMedioSpFormPage() {
       if (error) throw error;
       const result = data?.pdfBase64;
       if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      // Nova prévia = documento novo: descarta o PDF final anterior
+      // (senão o preview seguinte apareceria sem marca d'água).
+      setFinalPdf(null);
+      clearFinalPdf(ROUTE_KEY);
       setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
     } catch (e) {
       if (seq !== previewSeq.current) return;
