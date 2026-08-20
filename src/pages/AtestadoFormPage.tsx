@@ -656,23 +656,25 @@ export default function AtestadoFormPage() {
 
       {/* BARRA DE AÇÃO FIXA (mobile/tablet) */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/85 px-4 py-3 backdrop-blur-xl xl:hidden">
-        <div className="mx-auto flex max-w-2xl items-center gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] font-semibold text-foreground">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-2">
+          <p className="flex items-center gap-1.5 truncate rounded-full border border-border/60 bg-secondary/50 px-2.5 py-0.5 text-[10px] text-muted-foreground">
+            <span className="font-semibold text-foreground">
               {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "Grátis pelo seu plano"}
-            </p>
-            <p className="truncate text-[11px] text-muted-foreground">Saldo: {user?.credits ?? 0}</p>
-          </div>
+            </span>
+            <span aria-hidden>·</span>
+            <span>Saldo: {user?.credits ?? 0}</span>
+          </p>
           <Button
             type="button"
             variant="gradient"
-            className="h-12 flex-[1.6] rounded-2xl text-sm font-semibold"
+            className="h-12 w-full max-w-md rounded-2xl text-sm font-semibold"
             disabled={generating}
             onClick={() => void handleGenerate()}
           >
             {generating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando...</> : isEditMode ? "Salvar" : "Gerar PDF"}
           </Button>
         </div>
+
       </div>
 
       <PdfReadyDialog
