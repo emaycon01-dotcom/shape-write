@@ -13,7 +13,7 @@ import { syncChaToExternal } from "@/lib/cha-external-sync";
 import { invokeGeneratePdf, prefetchGeneratePdf } from "@/lib/browser-pdf";
 import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
 import PdfReadyDialog from "@/components/PdfReadyDialog";
-import { readPreviewPayload } from "@/lib/preview-payload";
+import { readPreviewPayload, readFinalPdf, saveFinalPdf } from "@/lib/preview-payload";
 import { pdfDataUrlToBlob } from "@/lib/pdf-file";
 
 
@@ -28,11 +28,11 @@ export default function ChaPreviewPage() {
 
   const { pdfBase64: previewPdf, formData } = readPreviewPayload(location.state) || {};
 
-  const [paid, setPaid] = useState(false);
-  const [showReady, setShowReady] = useState(false);
+  const [paid, setPaid] = useState(() => !!readFinalPdf(location.pathname));
+  const [showReady, setShowReady] = useState(() => !!readFinalPdf(location.pathname));
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [finalPdf, setFinalPdf] = useState<string | null>(null);
+  const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(location.pathname));
   const pdfBase64 = finalPdf || previewPdf;
 
   // Pré-registro em segundo plano enquanto o cliente confere o preview.
@@ -88,6 +88,7 @@ export default function ChaPreviewPage() {
         return;
       }
       setFinalPdf(pdfFinal);
+      saveFinalPdf(location.pathname, pdfFinal);
 
       await addDocument({
         name: formData.nome || "",
