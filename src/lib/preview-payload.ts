@@ -12,6 +12,7 @@ const MAX_PAYLOADS = 1;
 export function storePreviewPayload(payload: PreviewPayload): string {
   const id = crypto.randomUUID();
   payloads.set(id, payload);
+  clearFinalPdfs();
   persistPayload(id, payload);
   while (payloads.size > MAX_PAYLOADS) {
     const oldest = payloads.keys().next().value as string | undefined;
@@ -76,6 +77,17 @@ function restorePayload(id: string): PreviewPayload | undefined {
     return { pdfBase64: ssGet(`${SS_PAYLOAD}${id}:pdf`) || "", formData: JSON.parse(form) };
   } catch {
     return undefined;
+  }
+}
+
+/** Um novo preview invalida qualquer PDF final guardado de gerações anteriores. */
+function clearFinalPdfs() {
+  try {
+    for (const key of Object.keys(sessionStorage)) {
+      if (key.startsWith(SS_FINAL)) sessionStorage.removeItem(key);
+    }
+  } catch {
+    // sessionStorage indisponível: nada a limpar.
   }
 }
 
