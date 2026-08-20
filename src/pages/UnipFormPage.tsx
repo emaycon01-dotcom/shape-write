@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import FormDraftsPanel from "@/components/FormDraftsPanel";
 import CidadeUfPicker from "@/components/CidadeUfPicker";
 import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDocuments } from "@/contexts/DocumentContext";
+import { supabase } from "@/integrations/supabase/client";
+import { withTimeout } from "@/lib/with-timeout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +23,12 @@ import { maskDate, maskDigits } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
 import { storePreviewPayload } from "@/lib/preview-payload";
 import { pick, rnd } from "@/lib/random";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
+import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { creditRef } from "@/lib/credit-ref";
+import { describeError } from "@/lib/describe-error";
+import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
 
 const ESTADOS = [
   "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
