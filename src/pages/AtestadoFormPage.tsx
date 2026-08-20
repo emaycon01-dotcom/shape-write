@@ -332,7 +332,7 @@ export default function AtestadoFormPage() {
   const SectionHeader = ({ icon: Icon, title, hint }: { icon: React.ElementType; title: string; hint?: string }) => (
     <div className="mb-4 flex items-center gap-3">
       <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/12 ring-1 ring-inset ring-primary/25">
-        <Icon className="h-4.5 w-4.5 text-primary" />
+        <Icon className="h-4 w-4 text-primary" />
       </span>
       <div className="min-w-0">
         <h2 className="text-sm font-bold uppercase tracking-wide text-foreground">{title}</h2>
@@ -452,7 +452,7 @@ export default function AtestadoFormPage() {
             </button>
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 ring-1 ring-inset ring-primary/30">
-                <Stethoscope className="h-5.5 w-5.5 text-primary" />
+                <Stethoscope className="h-5 w-5 text-primary" />
               </span>
               <div>
                 <h1 className="font-display text-2xl font-bold leading-tight text-foreground">Atestado UPA 24h</h1>
