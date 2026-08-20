@@ -407,7 +407,7 @@ export default function AtestadoFormPage() {
             )}
             {previewing && (
               <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 overflow-hidden">
-                <div className="h-full w-1/3 animate-[shimmer_1.1s_linear_infinite] bg-primary/70" />
+                <div className="h-full w-full animate-pulse bg-primary/70" />
               </div>
             )}
           </>
