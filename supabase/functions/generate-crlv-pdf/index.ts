@@ -231,6 +231,43 @@ function buildCrlvHtml(d: Record<string, string>, fieldPositions?: unknown, qrVa
     return `<div class="overlay sans" style="top:${pos.y}px;left:${pos.x}px;font-size:${pos.fontSize}px;${extra}">${escapeHtml(value)}</div>`;
   };
 
+  /** Campo monoespaçado com quebra de linha manual dentro da largura do quadro. */
+  const monoWrap = (id: string, value: string, extra = "") => {
+    const pos = p[id];
+    if (!pos) return "";
+    const maxWidth = pos.w ?? FIT_WIDTHS[id] ?? 480;
+    const size = pos.fontSize;
+    const perLine = Math.max(10, Math.floor(maxWidth / (0.6 * size)));
+    const words = (value || "").split(/\s+/).filter(Boolean);
+    const lines: string[] = [];
+    let current = "";
+    for (const word of words) {
+      if (!current) {
+        current = word;
+      } else if ((current + " " + word).length <= perLine) {
+        current += " " + word;
+      } else {
+        lines.push(current);
+        current = word;
+      }
+      while (current.length > perLine) {
+        lines.push(current.slice(0, perLine));
+        current = current.slice(perLine);
+      }
+    }
+    if (current) lines.push(current);
+    if (!lines.length) return "";
+    const html = lines
+      .map(
+        (ln, i) =>
+          `<div class="overlay mono" style="top:${pos.y + i * size * 1.45}px;left:${pos.x}px;font-size:${size}px;${extra}">${escapeHtml(ln)}</div>`,
+      )
+      .join("\n");
+    return html;
+  };
+
+
+
   const qrPos = p.qr;
   const uf = (d.uf || "").toUpperCase();
 
