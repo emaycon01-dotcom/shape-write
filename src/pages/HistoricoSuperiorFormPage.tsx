@@ -896,12 +896,52 @@ export default function HistoricoSuperiorFormPage() {
         </div>
 
 
-        <div className="flex justify-center pt-1">
-          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
-            {loading ? (<><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>) : "Gerar preview do histórico"}
+        <div className="hidden justify-center pt-1 xl:flex">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={generating}>
+            {generating ? (<><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>) : "Gerar PDF"}
           </Button>
         </div>
       </form>
+
+        {/* COLUNA — PRÉVIA STICKY (desktop) */}
+        <div className="hidden xl:block xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)]">
+          {previewPanel}
+        </div>
+      </div>
+
+      {/* PRÉVIA (mobile/tablet) */}
+      <div className="mt-6 xl:hidden">{previewPanel}</div>
+
+      {/* BARRA DE AÇÃO FIXA (mobile/tablet) */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/85 px-4 py-3 backdrop-blur-xl xl:hidden">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-2">
+          <p className="flex items-center gap-1.5 truncate rounded-full border border-border/60 bg-secondary/50 px-2.5 py-0.5 text-[10px] text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "Grátis pelo seu plano"}
+            </span>
+            <span aria-hidden>·</span>
+            <span>Saldo: {user?.credits ?? 0}</span>
+          </p>
+          <Button
+            type="button"
+            variant="gradient"
+            className="h-12 w-full max-w-md rounded-2xl text-sm font-semibold"
+            disabled={generating}
+            onClick={() => void handleGenerate()}
+          >
+            {generating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando...</> : "Gerar PDF"}
+          </Button>
+        </div>
+      </div>
+
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={finalPdf || ""}
+        fileName="historico-escolar-superior.pdf"
+        title="Historico Escolar Superior"
+        message={mensagem}
+      />
     </div>
   );
 }
