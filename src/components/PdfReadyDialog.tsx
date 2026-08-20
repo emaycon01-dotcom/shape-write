@@ -108,10 +108,15 @@ export default function PdfReadyDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) return; onOpenChange(next); }}>
       <DialogContent
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
         className="max-h-[90vh] max-w-lg overflow-y-auto gap-4 border-none bg-transparent p-0 shadow-none"
       >
+
         <div className="glass overflow-hidden rounded-2xl border border-border/60 bg-card">
           <div className="flex items-start gap-3 border-b border-border/60 p-5">
             <div className="min-w-0 flex-1">
