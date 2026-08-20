@@ -222,13 +222,17 @@ export default function AtestadoFormPage() {
     }
   }, [buildBody]);
 
-  /* Preview ao vivo com debounce — não navega, não gasta crédito. */
+  /* Preview ao vivo com debounce — não navega, não gasta crédito.
+     Após a geração final não roda de novo (evitava a tela de carregando
+     reaparecer por cima do diálogo de PDF pronto). */
   useEffect(() => {
-    if (!autoLive || !canPreview || generating) return;
+    if (!autoLive || !canPreview || generating || showReady) return;
+    if (generatedSignature.current === signature) return;
     const id = window.setTimeout(() => { void runPreview(); }, 900);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signature, autoLive, canPreview, generating]);
+  }, [signature, autoLive, canPreview, generating, showReady]);
+
 
   /* ---------------- documento final ---------------- */
   const handleGenerate = async () => {
