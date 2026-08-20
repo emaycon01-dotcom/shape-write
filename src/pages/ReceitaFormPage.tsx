@@ -240,13 +240,16 @@ export default function ReceitaFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Receita Médica</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">Receita Médica</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
         <FormDraftsPanel docType="receita" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* UNIDADE */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={MapPin} title="Unidade" />
 
           <div className="space-y-1.5">
@@ -267,7 +270,7 @@ export default function ReceitaFormPage() {
         </div>
 
         {/* PACIENTE */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do paciente" />
 
           <div className="space-y-1.5">
@@ -298,7 +301,7 @@ export default function ReceitaFormPage() {
         </div>
 
         {/* MEDICAMENTOS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Pill} title="Medicamentos" />
 
           <Button
@@ -383,7 +386,7 @@ export default function ReceitaFormPage() {
         </div>
 
         {/* MÉDICO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Stethoscope} title="Médico e clínica" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -408,15 +411,17 @@ export default function ReceitaFormPage() {
           </div>
         </div>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
-          ) : isEditMode ? (
-            <><FileText className="mr-2 h-5 w-5" /> Salvar alterações</>
-          ) : (
-            <><Pill className="mr-2 h-5 w-5" /> Gerar preview</>
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
+            ) : isEditMode ? (
+              <><FileText className="mr-2 h-5 w-5" /> Salvar alterações</>
+            ) : (
+              <><Pill className="mr-2 h-5 w-5" /> Gerar preview</>
+            )}
+          </Button>
+        </div>
       </form>
 
       <MedicamentoSearch

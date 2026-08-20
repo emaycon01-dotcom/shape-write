@@ -187,7 +187,7 @@ export default function RgPreviewPage() {
           : `Confira o preview abaixo. Para gerar o documento final, clique em Gerar (${cost > 0 ? `${formatCredits(cost)} crédito(s)` : "grátis"}).`}
       </p>
 
-      <div className="glass relative mb-6 overflow-hidden rounded-xl" style={{ height: "70vh" }}>
+      <div className="glass relative mb-6 overflow-hidden" style={{ height: "70vh" }}>
         <PdfCanvasPreview pdfDataUrl={pdfBase64} title="Preview do RG Digital" />
 
         {!paid && (
@@ -220,7 +220,7 @@ export default function RgPreviewPage() {
 
       {!paid ? (
         <div className="space-y-3">
-          <div className="glass flex items-center gap-3 rounded-xl p-4">
+          <div className="glass flex items-center gap-3 p-4">
             <CreditCard className="h-5 w-5 shrink-0 text-primary" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">
@@ -255,7 +255,7 @@ export default function RgPreviewPage() {
             </Button>
           </div>
 
-          <div className="glass space-y-3 rounded-xl p-5">
+          <div className="glass space-y-3 p-5">
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">Mensagem de entrega</p>
             <div className="whitespace-pre-line rounded-lg bg-secondary/50 p-4 text-sm leading-relaxed text-foreground">
               {mensagem}

@@ -340,13 +340,16 @@ export default function HistoricoMedioSpFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">HISTÓRICO ESCOLAR — ENSINO MÉDIO</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">HISTÓRICO ESCOLAR — ENSINO MÉDIO</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
         <FormDraftsPanel docType="historico-medio-sp" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Unidade de ensino" />
 
           <div className="space-y-1.5">
@@ -389,7 +392,7 @@ export default function HistoricoMedioSpFormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados do aluno" />
 
           <div className="space-y-1.5">
@@ -426,7 +429,7 @@ export default function HistoricoMedioSpFormPage() {
         </div>
 
         {/* NOTAS (OPCIONAL) */}
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <button
             type="button"
             onClick={() => setShowNotas((v) => !v)}
@@ -487,7 +490,7 @@ export default function HistoricoMedioSpFormPage() {
         </div>
 
         {/* TURMAS / TURNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={CalendarClock} title="Anos cursados e turno" />
 
           {turmas.map((turma, i) => (
@@ -520,7 +523,7 @@ export default function HistoricoMedioSpFormPage() {
         </div>
 
         {/* ASSINATURAS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={PenLine} title="Assinaturas do rodapé" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -558,15 +561,17 @@ export default function HistoricoMedioSpFormPage() {
           )}
         </div>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
-          ) : isEditMode ? (
-            <><FileText className="mr-2 h-5 w-5" /> Salvar alterações</>
-          ) : (
-            <><School className="mr-2 h-5 w-5" /> Gerar preview</>
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
+            ) : isEditMode ? (
+              <><FileText className="mr-2 h-5 w-5" /> Salvar alterações</>
+            ) : (
+              <><School className="mr-2 h-5 w-5" /> Gerar preview</>
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );

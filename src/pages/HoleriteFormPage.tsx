@@ -213,7 +213,10 @@ export default function HoleriteFormPage() {
 
   return (
     <div className="mx-auto max-w-3xl pb-10">
-      <h1 className="font-display mb-1 text-2xl font-bold text-foreground">HOLERITE — RECIBO DE PAGAMENTO DE SALÁRIO</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">HOLERITE — RECIBO DE PAGAMENTO DE SALÁRIO</h1>
+      </div>
       <p className="mb-6 text-sm text-muted-foreground">
         Duas vias na mesma página A4. Somente os campos removidos do documento são preenchidos — grades, rótulos,
         códigos/descrições fixos e as linhas de assinatura do original são preservados.
@@ -253,7 +256,7 @@ export default function HoleriteFormPage() {
           </div>
         </Section>
 
-        <div className="glass space-y-4 rounded-xl p-5">
+        <div className="glass space-y-4 p-5">
           <div className="flex items-center gap-2">
             <Wallet className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">Vencimentos e descontos</h2>
@@ -306,13 +309,15 @@ export default function HoleriteFormPage() {
           <Field label="Faixa IRRF" value={form.faixa_irrf} onChange={set("faixa_irrf")} placeholder="04" />
         </Section>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>
-          ) : (
-            isEditMode ? "Salvar alterações" : "Gerar preview"
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>
+            ) : (
+              isEditMode ? "Salvar alterações" : "Gerar preview"
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );

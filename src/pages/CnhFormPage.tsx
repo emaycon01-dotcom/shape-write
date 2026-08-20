@@ -430,7 +430,7 @@ export default function CnhFormPage() {
 
         <FormDraftsPanel docType="cnh" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* DADOS PESSOAIS */}
-        <div className="glass rounded-xl p-6 space-y-4">
+        <div className="glass p-6 space-y-4">
           <SectionHeader icon={User} title="Dados Pessoais" />
 
           <div className="space-y-1.5">
@@ -519,7 +519,7 @@ export default function CnhFormPage() {
         </div>
 
         {/* DADOS DO DOCUMENTO */}
-        <div className="glass rounded-xl p-6 space-y-4">
+        <div className="glass p-6 space-y-4">
           <SectionHeader icon={FileText} title="Dados do Documento" />
 
           <div className="space-y-1.5">
@@ -700,7 +700,7 @@ export default function CnhFormPage() {
         </div>
 
         {/* INFORMAÇÕES ADICIONAIS */}
-        <div className="glass rounded-xl p-6 space-y-4">
+        <div className="glass p-6 space-y-4">
           <SectionHeader icon={Info} title="Informações Adicionais" />
 
           <div className="space-y-1.5">
@@ -753,15 +753,17 @@ export default function CnhFormPage() {
           </div>
         </div>
 
-        <Button type="submit" variant="gradient" className="w-full h-14 text-base rounded-xl font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> {isEditMode ? "Atualizando..." : "Gerando PDF..."}</>
-          ) : isEditMode ? (
-            <><RefreshCw className="w-5 h-5 mr-2" /> Atualizar</>
-          ) : (
-            <><Eye className="w-5 h-5 mr-2" /> Gerar Preview</>
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> {isEditMode ? "Atualizando..." : "Gerando PDF..."}</>
+            ) : isEditMode ? (
+              <><RefreshCw className="w-5 h-5 mr-2" /> Atualizar</>
+            ) : (
+              <><Eye className="w-5 h-5 mr-2" /> Gerar Preview</>
+            )}
+          </Button>
+        </div>
       </form>
 
     </div>

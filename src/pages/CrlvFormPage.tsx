@@ -320,13 +320,16 @@ export default function CrlvFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">CRLV Digital</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">CRLV Digital</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
         <FormDraftsPanel docType="crlv" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* IDENTIFICAÇÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Car} title="Identificação do veículo" />
 
           <div className="grid grid-cols-3 gap-4">
@@ -422,7 +425,7 @@ export default function CrlvFormPage() {
         </div>
 
         {/* CARACTERÍSTICAS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Gauge} title="Características técnicas" />
 
           <div className="grid grid-cols-2 gap-4">
@@ -469,7 +472,7 @@ export default function CrlvFormPage() {
         </div>
 
         {/* PROPRIETÁRIO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Proprietário e emissão" />
 
           <div className="space-y-1.5">
@@ -494,7 +497,7 @@ export default function CrlvFormPage() {
         </div>
 
         {/* DPVAT (opcional) */}
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <button
             type="button"
             onClick={() => setDpvatOpen((v) => !v)}
@@ -520,13 +523,15 @@ export default function CrlvFormPage() {
           )}
         </div>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>
-          ) : (
-            isEditMode ? "Salvar alterações" : "Gerar Preview"
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>
+            ) : (
+              isEditMode ? "Salvar alterações" : "Gerar Preview"
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );

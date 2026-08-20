@@ -11,15 +11,18 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="glass space-y-4 rounded-xl p-5">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-primary" />
+    <div className="glass space-y-4 p-5">
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-inset ring-primary/30">
+          <Icon className="h-4 w-4 text-primary" />
+        </span>
         <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">{title}</h2>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">{children}</div>
     </div>
   );
 }
+
 
 /** Campo de texto rotulado, ocupando meia ou toda a largura da grade. */
 export function Field({
@@ -45,7 +48,7 @@ export function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={maxLength}
-        className="h-11 rounded-lg"
+        className="h-11 rounded-xl"
       />
     </div>
   );

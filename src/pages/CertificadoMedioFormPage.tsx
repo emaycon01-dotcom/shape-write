@@ -387,13 +387,16 @@ export default function CertificadoMedioFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">CERTIFICADO + HISTÓRICO — Ensino Médio</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">CERTIFICADO + HISTÓRICO — Ensino Médio</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
         <FormDraftsPanel docType="certificado-medio" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* ESCOLA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={School} title="Escola (cabeçalho)" />
 
           <div className="space-y-1.5">
@@ -442,7 +445,7 @@ export default function CertificadoMedioFormPage() {
         </div>
 
         {/* ALUNO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Aluno" />
 
           <div className="space-y-1.5">
@@ -544,7 +547,7 @@ export default function CertificadoMedioFormPage() {
         </div>
 
         {/* NOTAS (opcional) */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <button
             type="button"
             onClick={() => setNotasAbertas((v) => !v)}
@@ -567,7 +570,7 @@ export default function CertificadoMedioFormPage() {
 
 
         {/* ESTABELECIMENTOS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={ClipboardList} title="Estabelecimentos de ensino" />
           {estabs.map((e, i) => (
             <div key={e.serie} className="space-y-2 rounded-lg border border-border/60 bg-secondary/40 p-3">
@@ -610,13 +613,15 @@ export default function CertificadoMedioFormPage() {
           </div>
         </div>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
-          ) : (
-            isEditMode ? "Salvar alterações" : "Gerar preview"
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
+            ) : (
+              isEditMode ? "Salvar alterações" : "Gerar preview"
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );

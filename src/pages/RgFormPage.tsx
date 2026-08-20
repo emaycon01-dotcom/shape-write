@@ -372,13 +372,16 @@ export default function RgFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">RG Digital (CIN)</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">RG Digital (CIN)</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
         <FormDraftsPanel docType="rg" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* DADOS PESSOAIS */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Dados Pessoais" />
 
           <div className="space-y-1.5">
@@ -454,7 +457,7 @@ export default function RgFormPage() {
         </div>
 
         {/* EMISSÃO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={FileText} title="Emissão" />
 
           <div className="grid grid-cols-2 gap-4">
@@ -511,7 +514,7 @@ export default function RgFormPage() {
         </div>
 
         {/* OUTRAS INFORMAÇÕES (opcional) */}
-        <div className="glass rounded-xl p-6">
+        <div className="glass p-6">
           <button
             type="button"
             onClick={() => setOutrasOpen((v) => !v)}
@@ -621,13 +624,15 @@ export default function RgFormPage() {
           </div>
         </div>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
-          ) : (
-            <><IdCard className="mr-2 h-5 w-5" /> {isEditMode ? "Salvar alterações" : "Ver preview"}</>
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
+            ) : (
+              <><IdCard className="mr-2 h-5 w-5" /> {isEditMode ? "Salvar alterações" : "Ver preview"}</>
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );

@@ -17,7 +17,7 @@ export function AutoSection({
   children?: React.ReactNode;
 }) {
   return (
-    <details className="glass group rounded-xl p-5">
+    <details className="glass group p-5">
       <summary className="flex cursor-pointer list-none items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" />
         <h2 className="flex-1 text-sm font-semibold uppercase tracking-wider text-foreground">

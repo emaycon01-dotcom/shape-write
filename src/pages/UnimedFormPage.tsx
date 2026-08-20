@@ -384,13 +384,16 @@ export default function UnimedFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-4 text-2xl font-bold text-foreground">Atestado Médico Unimed</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">Atestado Médico Unimed</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
         <FormDraftsPanel docType="unimed" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* PACIENTE */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Paciente" />
 
           <div className="space-y-1.5">
@@ -465,7 +468,7 @@ export default function UnimedFormPage() {
         </div>
 
         {/* ATENDIMENTO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Stethoscope} title="Atendimento" />
 
           <div className="grid grid-cols-2 gap-4">
@@ -506,7 +509,7 @@ export default function UnimedFormPage() {
         </div>
 
         {/* UNIDADE */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Building2} title="Unidade" />
 
           <div className="space-y-1.5">
@@ -552,7 +555,7 @@ export default function UnimedFormPage() {
         </div>
 
         {/* PROFISSIONAL */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Stethoscope} title="Profissional" />
 
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-secondary/40 px-3 py-2">
@@ -646,7 +649,7 @@ export default function UnimedFormPage() {
 
 
         {/* HISTÓRICO */}
-        <div className="glass space-y-3 rounded-xl p-6">
+        <div className="glass space-y-3 p-6">
           <SectionHeader icon={History} title="Histórico de Previews" />
           {previewHistory.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum atestado Unimed gerado ainda.</p>
@@ -675,13 +678,15 @@ export default function UnimedFormPage() {
           )}
         </div>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>
-          ) : (
-            isEditMode ? "Salvar alterações" : "Gerar Preview"
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando preview...</>
+            ) : (
+              isEditMode ? "Salvar alterações" : "Gerar Preview"
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );

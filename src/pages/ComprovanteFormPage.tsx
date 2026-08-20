@@ -399,7 +399,10 @@ export default function ComprovanteFormPage() {
         </div>
       </div>
 
-      <h1 className="font-display mb-1 text-2xl font-bold text-foreground">Comprovante de Residência (Enel)</h1>
+      <div className="studio-hero relative mb-6 overflow-hidden rounded-3xl border border-border/60 p-6">
+        <span aria-hidden className="studio-hero-glow" />
+        <h1 className="font-display relative text-2xl font-bold leading-tight text-foreground">Comprovante de Residência (Enel)</h1>
+      </div>
       <p className="mb-4 text-sm text-muted-foreground">
         Informe apenas os dados do cliente e o total da fatura. Consumo, tarifas, ICMS, COSIP, leituras, chave da
         NF-e e a linha digitável são calculados automaticamente.
@@ -409,7 +412,7 @@ export default function ComprovanteFormPage() {
 
         <FormDraftsPanel docType="comprovante" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
         {/* TITULAR */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={User} title="Titular da conta" />
 
           <div className="space-y-1.5">
@@ -424,7 +427,7 @@ export default function ComprovanteFormPage() {
         </div>
 
         {/* ENDEREÇO */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Home} title="Endereço de fornecimento" />
 
           <div className="space-y-1.5">
@@ -464,7 +467,7 @@ export default function ComprovanteFormPage() {
         </div>
 
         {/* FATURA */}
-        <div className="glass space-y-4 rounded-xl p-6">
+        <div className="glass space-y-4 p-6">
           <SectionHeader icon={Receipt} title="Fatura" />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -595,13 +598,15 @@ export default function ComprovanteFormPage() {
           </div>
         </AutoSection>
 
-        <Button type="submit" variant="gradient" className="h-14 w-full rounded-xl text-base font-semibold" disabled={loading}>
-          {loading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
-          ) : (
-            isEditMode ? "Salvar alterações" : "Gerar Comprovante"
-          )}
-        </Button>
+        <div className="flex justify-center pt-1">
+          <Button type="submit" variant="gradient" className="h-14 w-full max-w-md rounded-2xl text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>
+            ) : (
+              isEditMode ? "Salvar alterações" : "Gerar Comprovante"
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );
