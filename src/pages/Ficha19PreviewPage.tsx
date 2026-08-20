@@ -147,6 +147,8 @@ export default function Ficha19PreviewPage() {
     }
   };
 
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu CERTIFICADO + HISTÓRICO (FICHA 19) está pronto.\n\nAluno: ${txt("nome_aluno")}\nEscola: ${txt("escola")}\nConclusão: ${txt("ano3")}\n\nO arquivo em PDF segue em anexo.`;
+
   return (
     <div className="mx-auto max-w-2xl">
       <button
