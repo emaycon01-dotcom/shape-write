@@ -1051,15 +1051,22 @@ export async function invokeGeneratePdf(
 
   const abortSignal = !isAction ? currentGenerationAbort?.signal : null;
 
-  beginPdfLoading(isPreview ? "Preparando a pré-visualização..." : "Gerando documento...");
+  // A tela cheia de carregamento pertence somente à geração FINAL. O Studio
+  // atualiza a prévia automaticamente enquanto o usuário preenche os campos;
+  // cobrir toda a página em cada atualização fazia parecer que ela recarregava.
+  // Durante previews, o documento anterior permanece visível e o novo é
+  // renderizado em segundo plano pelo PdfCanvasPreview.
+  if (!isPreview) beginPdfLoading("Gerando documento...");
   try {
     // Garante uma pintura real do overlay ANTES do trabalho pesado. Quando o
     // HTML já estava em cache, o motor começava na mesma tarefa e bloqueava o
     // timer/commit do React; o usuário via por segundos apenas o fundo escuro e
     // as marcas d'água. Isso também explica o sintoma no motor antigo.
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-    );
+    if (!isPreview) {
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+    }
 
     // O preview atualmente visível continua vivo durante a geração final.
     // Revogar seus blob: aqui fazia Safari/iOS apagar as imagens antes de o
@@ -1180,7 +1187,7 @@ export async function invokeGeneratePdf(
       // A rasterização terminou, mas o PDF.js ainda precisa pintar o resultado.
       // Mantemos o overlay até essa primeira pintura para nunca revelar canvas
       // vazio/preto entre a geração e o documento pronto.
-      awaitPdfPresentation();
+      if (!isPreview) awaitPdfPresentation();
 
       // Receita / Atestado Unimed: o portal de validação lê os dados no banco
       // secundário. Espelhamos o token/código e anexamos o arquivo em SEGUNDO
@@ -1251,7 +1258,7 @@ export async function invokeGeneratePdf(
       currentGenerationAbort = null;
     }
 
-    endPdfLoading();
+    if (!isPreview) endPdfLoading();
   }
 }
 
