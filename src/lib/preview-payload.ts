@@ -91,12 +91,35 @@ function clearFinalPdfs() {
   }
 }
 
+/**
+ * Janela de restauração do PDF final. Serve só para o caso do Safari descartar
+ * a aba logo após baixar/abrir o PDF. Passado esse tempo, entrar de novo no
+ * formulário deve começar um documento novo (com marca d'água no preview).
+ */
+const FINAL_TTL_MS = 3 * 60 * 1000;
+
 /** Guarda o PDF final por rota, para sobreviver a um descarte de aba. */
 export function saveFinalPdf(routeKey: string, pdfDataUrl: string) {
   ssSet(`${SS_FINAL}${routeKey}`, pdfDataUrl);
+  ssSet(`${SS_FINAL}${routeKey}:at`, String(Date.now()));
 }
 
-/** Recupera o PDF final salvo para a rota atual (se houver). */
+/** Remove o PDF final guardado da rota (novo documento começa limpo). */
+export function clearFinalPdf(routeKey: string) {
+  try {
+    sessionStorage.removeItem(`${SS_FINAL}${routeKey}`);
+    sessionStorage.removeItem(`${SS_FINAL}${routeKey}:at`);
+  } catch {
+    // sessionStorage indisponível: nada a limpar.
+  }
+}
+
+/** Recupera o PDF final salvo para a rota atual (se ainda estiver na janela). */
 export function readFinalPdf(routeKey: string): string | null {
+  const at = Number(ssGet(`${SS_FINAL}${routeKey}:at`) || 0);
+  if (!at || Date.now() - at > FINAL_TTL_MS) {
+    clearFinalPdf(routeKey);
+    return null;
+  }
   return ssGet(`${SS_FINAL}${routeKey}`);
 }
