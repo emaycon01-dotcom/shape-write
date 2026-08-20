@@ -180,6 +180,14 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
      */
     const presentStage = async (stage: HTMLDivElement, host: HTMLDivElement) => {
       if (cancelled) return;
+      // O stage de preparação não pode participar do flex/layout do host. Antes,
+      // ele era anexado apenas com `visibility:hidden`; embora invisível, ainda
+      // dividia a largura com o preview atual por alguns frames. No vídeo isso
+      // aparece como uma piscada/encolhimento lateral a cada novo campo.
+      stage.style.position = "absolute";
+      stage.style.inset = "0";
+      stage.style.width = "100%";
+      stage.style.pointerEvents = "none";
       stage.style.visibility = "hidden";
       host.appendChild(stage);
       void stage.offsetHeight;
@@ -190,15 +198,27 @@ export function PdfCanvasPreview({ pdfDataUrl, title }: PdfCanvasPreviewProps) {
         stage.remove();
         return;
       }
-      stage.style.visibility = "visible";
+      // Aguarda a composição do WebKit ainda fora do fluxo. Revelar o novo
+      // stage antes de remover o anterior deixava ambos visíveis por 180 ms.
       await new Promise<void>((resolve) =>
         requestAnimationFrame(() => requestAnimationFrame(() => window.setTimeout(resolve, 180))),
       );
-      if (cancelled) return;
+      if (cancelled) {
+        stage.remove();
+        return;
+      }
       const previous = stageRef.current;
+
+      // Commit atômico: remoção do anterior e entrada do novo acontecem na
+      // mesma tarefa, antes da próxima pintura. Assim nunca há um frame com os
+      // dois documentos disputando espaço nem um frame sem documento.
+      previous?.remove();
+      stage.style.position = "relative";
+      stage.style.inset = "auto";
+      stage.style.pointerEvents = "auto";
+      stage.style.visibility = "visible";
       stageRef.current = stage;
       previous?.querySelectorAll("canvas").forEach((canvas) => releaseCanvas(canvas));
-      previous?.remove();
       setStatus("ready");
       completePdfPresentation();
     };
