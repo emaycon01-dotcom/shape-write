@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import FormDraftsPanel from "@/components/FormDraftsPanel";
 import { saveFormDraft } from "@/lib/form-drafts";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,17 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   School, Loader2, FlaskConical, Trash2, User, BookOpen, ClipboardList, PenLine,
+  Eye, FileText, RefreshCw, CreditCard,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { maskDate } from "@/lib/masks";
 import { invokeGeneratePdf } from "@/lib/browser-pdf";
-import { storePreviewPayload } from "@/lib/preview-payload";
+import { saveFinalPdf, readFinalPdf } from "@/lib/preview-payload";
 import { ESTADO_NOMES, ESTADOS_UF, loadBrasaoDataUrl } from "@/lib/brasoes-estados";
 import { normalizeSignatureImage } from "@/lib/signature-image";
 import { loadTemplateBase64 } from "@/lib/template-cache";
 import assinaturaSecretarioAsset from "@/assets/ficha19-assinatura-secretario.png.asset.json";
 import assinaturaDiretorAsset from "@/assets/ficha19-assinatura-diretor.png.asset.json";
 import { pick, rnd } from "@/lib/random";
+import { PdfCanvasPreview } from "@/components/PdfCanvasPreview";
+import PdfReadyDialog from "@/components/PdfReadyDialog";
+import { planCost, formatCredits } from "@/lib/plan-pricing";
+import { creditRef } from "@/lib/credit-ref";
+import { describeError } from "@/lib/describe-error";
 
 type Modo = "auto" | "manual";
 
@@ -148,10 +153,12 @@ const initial: FormState = {
 const NOMES = ["WALDONMES DE QUEIROZ", "MATEUS LUCAS DA SILVA", "JOANA PEREIRA DOS SANTOS"];
 const MAES = ["VÂNIA MARIA DE QUEIROZ", "ROSINETE MAURICIO DA SILVA", "MARIA JOSE PEREIRA"];
 
+const ROUTE_KEY = "/dashboard/documents/ficha19/form";
+
 export default function Ficha19FormPage() {
   const location = useLocation();
   const navState = location.state as { editDocId?: string; modo?: Modo } | null;
-  const { getDocument, loadDocumentInfo, updateDocument } = useDocuments();
+  const { getDocument, loadDocumentInfo, updateDocument, addDocument } = useDocuments();
 
   const [modo, setModo] = useState<Modo>(navState?.modo === "manual" ? "manual" : "auto");
   const [form, setForm] = useState<FormState>(initial);
@@ -162,11 +169,23 @@ export default function Ficha19FormPage() {
   const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
-  const { user } = useAuth();
+  const { user, deductCredit } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const isEditMode = Boolean(navState?.editDocId);
+  const cost = planCost(1, user?.plano);
+
+  /* ---------------- preview ao vivo ---------------- */
+  const [previewPdf, setPreviewPdf] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [autoLive, setAutoLive] = useState(true);
+  const previewSeq = useRef(0);
+  const generatedSignature = useRef<string | null>(null);
+
+  const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(ROUTE_KEY));
+  const [showReady, setShowReady] = useState(false);
 
   useEffect(() => {
     if (hydrated || !navState?.editDocId) return;
@@ -299,8 +318,125 @@ export default function Ficha19FormPage() {
     toast({ title: "Formulário limpo!" });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  /* ---------------- montagem do payload ---------------- */
+  const buildBody = useCallback(async () => {
+    const brasaoBase64 = await loadBrasaoDataUrl(form.uf);
+
+    const [secAuto, dirAuto] = modo === "auto"
+      ? await Promise.all([
+          loadTemplateBase64(assinaturaSecretarioAsset.url),
+          loadTemplateBase64(assinaturaDiretorAsset.url),
+        ])
+      : ["", ""];
+
+    return {
+      modo,
+      uf: form.uf,
+      brasao_base64: brasaoBase64,
+      gov_estado: form.govEstado,
+      secretaria: form.secretaria,
+      escola: form.escola,
+      etapas: form.etapas,
+      endereco: form.endereco,
+      cidade: form.cidade,
+      ato_funcionamento: form.atoFuncionamento,
+      diario_oficial: form.diarioOficial,
+      cadastro_escolar: form.cadastroEscolar,
+
+      nome_aluno: form.nomeAluno,
+      mae: form.mae,
+      pai: form.pai,
+      sexo: form.sexo,
+      data_nasc: form.dataNasc,
+      municipio_nasc: form.municipioNasc,
+      uf_nasc: form.ufNasc,
+      nacionalidade: form.nacionalidade,
+      rg: form.rg,
+      orgao_expedidor: form.orgaoExpedidor,
+      serie_conclusao: form.serieConclusao,
+
+      alinea: form.alinea,
+      eja: form.eja,
+      progressao_parcial: form.progressaoParcial,
+      qtd_disciplinas: form.qtdDisciplinas,
+      dispensa_religioso: form.dispensaReligioso,
+      base_legal_religioso: form.baseLegalReligioso,
+      dispensa_ed_fisica: form.dispensaEdFisica,
+      base_legal_ed_fisica: form.baseLegalEdFisica,
+      observacoes: form.observacoes,
+
+      ano1: form.ano1,
+      ano2: form.ano2,
+      ano3: form.ano3,
+      estab1: form.estabelecimento,
+      estab2: form.estabelecimento,
+      estab3: form.estabelecimento,
+      cidade1: form.cidadeEstab,
+      cidade2: form.cidadeEstab,
+      cidade3: form.cidadeEstab,
+      uf1: form.ufEstab,
+      uf2: form.ufEstab,
+      uf3: form.ufEstab,
+      freq1: form.freq1,
+      freq2: form.freq2,
+      freq3: form.freq3,
+      resultado1: form.resultado1,
+      resultado2: form.resultado2,
+      resultado3: form.resultado3,
+      local_data: form.localData,
+
+      disciplinas: discs,
+      progressoes: [],
+
+      assinatura_secretario: modo === "auto" ? secAuto : assinaturaSecretario,
+      assinatura_diretor: modo === "auto" ? dirAuto : assinaturaDiretor,
+    } as Record<string, unknown>;
+  }, [form, discs, modo, assinaturaSecretario, assinaturaDiretor]);
+
+  const signature = useMemo(
+    () => JSON.stringify({ form, discs, modo, assinaturaSecretario, assinaturaDiretor }),
+    [form, discs, modo, assinaturaSecretario, assinaturaDiretor],
+  );
+
+  const canPreview =
+    form.nomeAluno.trim().length > 2 &&
+    form.mae.trim().length > 2 &&
+    form.rg.trim().length > 0 &&
+    form.ano1.trim().length === 4 &&
+    form.localData.trim().length > 0 &&
+    (modo === "auto" || (Boolean(assinaturaSecretario) && Boolean(assinaturaDiretor)));
+
+  const runPreview = useCallback(async () => {
+    const seq = ++previewSeq.current;
+    setPreviewing(true);
+    setPreviewError(null);
+    try {
+      const body = await buildBody();
+      const { data, error } = await invokeGeneratePdf("generate-ficha19-pdf", {
+        body: { ...body, preview: true },
+      });
+      if (seq !== previewSeq.current) return;
+      if (error) throw error;
+      const result = data?.pdfBase64;
+      if (!result) throw new Error(data?.error || "Nenhum PDF retornado");
+      setPreviewPdf(result.startsWith("data:") ? result : `data:application/pdf;base64,${result}`);
+    } catch (e) {
+      if (seq !== previewSeq.current) return;
+      setPreviewError(describeError(e));
+    } finally {
+      if (seq === previewSeq.current) setPreviewing(false);
+    }
+  }, [buildBody]);
+
+  useEffect(() => {
+    if (!autoLive || !canPreview || loading || showReady) return;
+    if (generatedSignature.current === signature) return;
+    const id = window.setTimeout(() => { void runPreview(); }, 900);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature, autoLive, canPreview, loading, showReady]);
+
+  const handleGenerate = async () => {
     if (!user) return;
 
     if (modo === "manual" && (!assinaturaSecretario || !assinaturaDiretor)) {
@@ -312,112 +448,86 @@ export default function Ficha19FormPage() {
       return;
     }
 
-    setLoading(true);
-
-    saveFormDraft("ficha19", form as unknown as Record<string, unknown>);
-    try {
-      const brasaoBase64 = await loadBrasaoDataUrl(form.uf);
-
-      const [secAuto, dirAuto] = modo === "auto"
-        ? await Promise.all([
-            loadTemplateBase64(assinaturaSecretarioAsset.url),
-            loadTemplateBase64(assinaturaDiretorAsset.url),
-          ])
-        : ["", ""];
-
-      const bodyData = {
-        modo,
-        uf: form.uf,
-        brasao_base64: brasaoBase64,
-        gov_estado: form.govEstado,
-        secretaria: form.secretaria,
-        escola: form.escola,
-        etapas: form.etapas,
-        endereco: form.endereco,
-        cidade: form.cidade,
-        ato_funcionamento: form.atoFuncionamento,
-        diario_oficial: form.diarioOficial,
-        cadastro_escolar: form.cadastroEscolar,
-
-        nome_aluno: form.nomeAluno,
-        mae: form.mae,
-        pai: form.pai,
-        sexo: form.sexo,
-        data_nasc: form.dataNasc,
-        municipio_nasc: form.municipioNasc,
-        uf_nasc: form.ufNasc,
-        nacionalidade: form.nacionalidade,
-        rg: form.rg,
-        orgao_expedidor: form.orgaoExpedidor,
-        serie_conclusao: form.serieConclusao,
-
-        alinea: form.alinea,
-        eja: form.eja,
-        progressao_parcial: form.progressaoParcial,
-        qtd_disciplinas: form.qtdDisciplinas,
-        dispensa_religioso: form.dispensaReligioso,
-        base_legal_religioso: form.baseLegalReligioso,
-        dispensa_ed_fisica: form.dispensaEdFisica,
-        base_legal_ed_fisica: form.baseLegalEdFisica,
-        observacoes: form.observacoes,
-
-        ano1: form.ano1,
-        ano2: form.ano2,
-        ano3: form.ano3,
-        estab1: form.estabelecimento,
-        estab2: form.estabelecimento,
-        estab3: form.estabelecimento,
-        cidade1: form.cidadeEstab,
-        cidade2: form.cidadeEstab,
-        cidade3: form.cidadeEstab,
-        uf1: form.ufEstab,
-        uf2: form.ufEstab,
-        uf3: form.ufEstab,
-        freq1: form.freq1,
-        freq2: form.freq2,
-        freq3: form.freq3,
-        resultado1: form.resultado1,
-        resultado2: form.resultado2,
-        resultado3: form.resultado3,
-        local_data: form.localData,
-
-        disciplinas: discs,
-        progressoes: [],
-
-        assinatura_secretario: modo === "auto" ? secAuto : assinaturaSecretario,
-        assinatura_diretor: modo === "auto" ? dirAuto : assinaturaDiretor,
-      };
-
-      const { data, error } = await invokeGeneratePdf("generate-ficha19-pdf", {
-        body: { ...bodyData, preview: !isEditMode },
-      });
-      if (error) throw error;
-
-      const pdfResult = data?.pdfBase64;
-      if (!pdfResult) throw new Error(data?.error || "Nenhum PDF retornado");
-
-      if (isEditMode && navState?.editDocId) {
+    if (isEditMode && navState?.editDocId) {
+      setLoading(true);
+      try {
+        const body = await buildBody();
+        const { data, error } = await invokeGeneratePdf("generate-ficha19-pdf", { body: { ...body, preview: false } });
+        if (error) throw error;
+        const generated = data?.pdfBase64;
+        if (!generated) throw new Error(data?.error || "Nenhum PDF retornado");
         await updateDocument(navState.editDocId, {
-          additionalInfo: JSON.stringify(bodyData),
-          pdfDataUrl: pdfResult.startsWith("data:") ? pdfResult : `data:application/pdf;base64,${pdfResult}`,
+          additionalInfo: JSON.stringify(body),
+          pdfDataUrl: generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`,
         });
         toast({ title: "Documento atualizado com sucesso!" });
         navigate("/dashboard/history");
-      } else {
-        const previewId = storePreviewPayload({ pdfBase64: pdfResult, formData: bodyData });
-        navigate("/dashboard/documents/ficha19/preview", { state: { previewId } });
+      } catch (err) {
+        console.error("Erro ao atualizar Ficha 19:", err);
+        toast({ title: "Erro ao atualizar documento", description: describeError(err), variant: "destructive" });
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Erro ao gerar Ficha 19:", err);
+      return;
+    }
+
+    if ((user.credits ?? 0) < cost) {
       toast({
-        title: isEditMode ? "Erro ao atualizar documento" : "Erro ao gerar PDF",
-        description: err instanceof Error ? err.message : "Tente novamente.",
+        title: "Créditos insuficientes",
+        description: `Você precisa de ${formatCredits(cost)} crédito(s) para gerar o documento.`,
         variant: "destructive",
       });
+      return;
+    }
+
+    setLoading(true);
+    saveFormDraft("ficha19", form as unknown as Record<string, unknown>);
+    try {
+      const body = await buildBody();
+
+      const { data, error } = await invokeGeneratePdf("generate-ficha19-pdf", {
+        body: { ...body, preview: false },
+      });
+      if (error) throw error;
+      const generated = data?.pdfBase64;
+      if (!generated) throw new Error(data?.error || "Nenhum PDF retornado");
+      const pdfFinal: string = generated.startsWith("data:") ? generated : `data:application/pdf;base64,${generated}`;
+
+      const deduction = await deductCredit(1, "geracao-ficha19", creditRef("geracao-ficha19", body));
+      if (!deduction.ok) {
+        toast({ title: "Não foi possível gerar", description: deduction.error, variant: "destructive" });
+        return;
+      }
+
+      setFinalPdf(pdfFinal);
+      saveFinalPdf(ROUTE_KEY, pdfFinal);
+
+      await addDocument({
+        name: (body.nome_aluno as string) || "",
+        identification: (body.rg as string) || "",
+        date: (body.ano3 as string) || "",
+        description: `CERTIFICADO + HISTÓRICO (FICHA 19) - ${(body.escola as string) || ""}`,
+        additionalInfo: JSON.stringify(body),
+        type: "ficha19",
+        userId: user.id,
+        pdfDataUrl: pdfFinal,
+      });
+
+      generatedSignature.current = signature;
+      setShowReady(true);
+      toast({
+        title: "Documento gerado com sucesso!",
+        description: cost > 0 ? `${formatCredits(cost)} crédito(s) descontado(s).` : "Gratuito pelo seu plano.",
+      });
+    } catch (err) {
+      console.error("Erro ao gerar Ficha 19:", err);
+      toast({ title: "Erro ao gerar documento", description: `Nenhum crédito foi descontado. ${describeError(err)}`, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
+
+  const mensagem = `Olá! 👋 Obrigado por comprar com ${user?.name || "nosso sistema"}. Seu CERTIFICADO + HISTÓRICO (FICHA 19) está pronto.\n\nAluno: ${form.nomeAluno}\nEscola: ${form.escola}\nConclusão: ${form.ano3}\n\nO arquivo em PDF segue em anexo.`;
 
   const inputCls = "bg-secondary border-border text-foreground placeholder:text-muted-foreground";
   const selectCls = `h-10 w-full rounded-md border px-3 text-sm ${inputCls}`;
@@ -443,8 +553,96 @@ export default function Ficha19FormPage() {
     </select>
   );
 
+  const previewPanel = (
+    <div className="glass flex h-full flex-col p-0">
+      <div className="flex items-center justify-between gap-3 border-b border-border/50 px-5 py-3">
+        <div className="flex items-center gap-2">
+          <Eye className="h-4 w-4 text-primary" />
+          <span className="text-sm font-bold text-foreground">Prévia do documento</span>
+          {previewing && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAutoLive((v) => !v)}
+            className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+              autoLive ? "border-primary/40 bg-primary/12 text-primary" : "border-border bg-secondary text-muted-foreground"
+            }`}
+          >
+            {autoLive ? "Ao vivo" : "Manual"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void runPreview()}
+            disabled={!canPreview || previewing}
+            className="rounded-full border border-border bg-secondary p-1.5 text-muted-foreground transition hover:text-foreground disabled:opacity-40"
+            aria-label="Atualizar prévia"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${previewing ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+      </div>
+
+      <div className="relative min-h-[420px] flex-1 overflow-hidden rounded-b-2xl bg-secondary/30">
+        {previewPdf ? (
+          <>
+            <PdfCanvasPreview pdfDataUrl={finalPdf || previewPdf} title="Prévia da Ficha 19" />
+            {!finalPdf && (
+              <div className="pointer-events-none absolute inset-0 select-none overflow-hidden">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(-45deg, transparent, transparent 80px, hsl(var(--destructive) / 0.05) 80px, hsl(var(--destructive) / 0.05) 82px)",
+                  }}
+                />
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="absolute whitespace-nowrap text-[17px] font-bold text-destructive/20"
+                    style={{
+                      transform: "rotate(-35deg)",
+                      top: `${10 + (i % 4) * 25}%`,
+                      left: `${-10 + Math.floor(i / 4) * 40}%`,
+                      letterSpacing: "2px",
+                    }}
+                  >
+                    MonkeyLab MonkeyLab
+                  </span>
+                ))}
+              </div>
+            )}
+            {previewing && (
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 overflow-hidden">
+                <div className="h-full w-full animate-pulse bg-primary/70" />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-inset ring-primary/20">
+              {previewing ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <FileText className="h-6 w-6 text-primary" />}
+            </span>
+            <p className="text-sm font-semibold text-foreground">
+              {previewing ? "Montando a prévia..." : "A prévia aparece aqui"}
+            </p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              {previewError
+                ? previewError
+                : "Preencha nome, mãe, RG, ano da 1ª série e local/data — a prévia atualiza sozinha enquanto você digita."}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <p className="border-t border-border/50 px-5 py-2.5 text-center text-[11px] text-muted-foreground">
+        A marca d'água sai apenas no PDF final gerado.
+      </p>
+    </div>
+  );
+
   return (
-    <div className="max-w-2xl">
+    <div className="mx-auto w-full max-w-[1500px] pb-28 xl:pb-10">
       <div className="mb-4 flex items-center justify-between">
         <button
           onClick={() => navigate("/dashboard/documents/ficha19")}
@@ -470,317 +668,363 @@ export default function Ficha19FormPage() {
         Assinatura {modo === "auto" ? "automática" : "manual"}
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] xl:items-start">
+        <form onSubmit={(e) => { e.preventDefault(); void handleGenerate(); }} className="space-y-6">
 
-        <FormDraftsPanel docType="ficha19" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
-        {/* ESCOLA */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={School} title="Escola (cabeçalho)" />
+          <FormDraftsPanel docType="ficha19" onRestore={(d) => setForm((p) => ({ ...p, ...(d as Partial<typeof p>) }))} />
+          {/* ESCOLA */}
+          <div className="glass space-y-4 p-6">
+            <SectionHeader icon={School} title="Escola (cabeçalho)" />
 
-          <div className="space-y-1.5">
-            <FieldLabel required>Estado (brasão do documento)</FieldLabel>
-            <select value={form.uf} onChange={(e) => setUf(e.target.value)} className={selectCls}>
-              {ESTADOS_UF.map((uf) => (
-                <option key={uf} value={uf}>{uf} — {ESTADO_NOMES[uf]}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel required>Governo do estado</FieldLabel>
-            <Input value={form.govEstado} onChange={set("govEstado")} className={inputCls} required />
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel required>Secretaria</FieldLabel>
-            <Input value={form.secretaria} onChange={set("secretaria")} className={inputCls} required />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <FieldLabel required>Nome da escola</FieldLabel>
-              <Input value={form.escola} onChange={set("escola")} className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Etapas de ensino</FieldLabel>
-              <Input value={form.etapas} onChange={set("etapas")} className={inputCls} />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Endereço</FieldLabel>
-            <Input value={form.endereco} onChange={set("endereco")} className={inputCls} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <FieldLabel>Cidade</FieldLabel>
-              <Input value={form.cidade} onChange={set("cidade")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Ato de funcionamento</FieldLabel>
-              <Input value={form.atoFuncionamento} onChange={set("atoFuncionamento")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Diário oficial de</FieldLabel>
-              <Input value={form.diarioOficial} onChange={set("diarioOficial")} className={inputCls} />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <FieldLabel>Cadastro escolar nº</FieldLabel>
-            <Input value={form.cadastroEscolar} onChange={set("cadastroEscolar")} className={inputCls} />
-          </div>
-        </div>
-
-        {/* ALUNO */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={User} title="Dados do aluno" />
-
-          <div className="space-y-1.5">
-            <FieldLabel required>Nome completo</FieldLabel>
-            <Input value={form.nomeAluno} onChange={set("nomeAluno")} className={inputCls} required />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <FieldLabel required>Nome da mãe</FieldLabel>
-              <Input value={form.mae} onChange={set("mae")} className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Nome do pai</FieldLabel>
-              <Input value={form.pai} onChange={set("pai")} placeholder="N/A" className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <FieldLabel>Sexo</FieldLabel>
-              <select
-                value={form.sexo}
-                onChange={(e) => setForm((p) => ({ ...p, sexo: e.target.value as "M" | "F" }))}
-                className={selectCls}
-              >
-                <option value="M">Masculino</option>
-                <option value="F">Feminino</option>
+              <FieldLabel required>Estado (brasão do documento)</FieldLabel>
+              <select value={form.uf} onChange={(e) => setUf(e.target.value)} className={selectCls}>
+                {ESTADOS_UF.map((uf) => (
+                  <option key={uf} value={uf}>{uf} — {ESTADO_NOMES[uf]}</option>
+                ))}
               </select>
             </div>
+
             <div className="space-y-1.5">
-              <FieldLabel required>Nascimento</FieldLabel>
-              <Input value={form.dataNasc} onChange={set("dataNasc")} placeholder="09 DE DEZEMBRO DE 2004" className={inputCls} required />
+              <FieldLabel required>Governo do estado</FieldLabel>
+              <Input value={form.govEstado} onChange={set("govEstado")} className={inputCls} required />
             </div>
+
             <div className="space-y-1.5">
-              <FieldLabel>Nacionalidade</FieldLabel>
-              <Input value={form.nacionalidade} onChange={set("nacionalidade")} className={inputCls} />
+              <FieldLabel required>Secretaria</FieldLabel>
+              <Input value={form.secretaria} onChange={set("secretaria")} className={inputCls} required />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <FieldLabel required>Nome da escola</FieldLabel>
+                <Input value={form.escola} onChange={set("escola")} className={inputCls} required />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Etapas de ensino</FieldLabel>
+                <Input value={form.etapas} onChange={set("etapas")} className={inputCls} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <FieldLabel>Endereço</FieldLabel>
+              <Input value={form.endereco} onChange={set("endereco")} className={inputCls} />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <FieldLabel>Cidade</FieldLabel>
+                <Input value={form.cidade} onChange={set("cidade")} className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Ato de funcionamento</FieldLabel>
+                <Input value={form.atoFuncionamento} onChange={set("atoFuncionamento")} className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Diário oficial de</FieldLabel>
+                <Input value={form.diarioOficial} onChange={set("diarioOficial")} className={inputCls} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <FieldLabel>Cadastro escolar nº</FieldLabel>
+              <Input value={form.cadastroEscolar} onChange={set("cadastroEscolar")} className={inputCls} />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div className="space-y-1.5 sm:col-span-2">
-              <FieldLabel>Cidade de nascimento</FieldLabel>
-              <Input value={form.municipioNasc} onChange={set("municipioNasc")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>UF</FieldLabel>
-              <select
-                value={form.ufNasc}
-                onChange={(e) => setForm((p) => ({ ...p, ufNasc: e.target.value }))}
-                className={selectCls}
-              >
-                {ESTADOS_UF.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Série concluída</FieldLabel>
-              <Input value={form.serieConclusao} onChange={set("serieConclusao")} className={inputCls} />
-            </div>
-          </div>
+          {/* ALUNO */}
+          <div className="glass space-y-4 p-6">
+            <SectionHeader icon={User} title="Dados do aluno" />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <FieldLabel required>RG</FieldLabel>
-              <Input value={form.rg} onChange={set("rg")} className={inputCls} required />
+              <FieldLabel required>Nome completo</FieldLabel>
+              <Input value={form.nomeAluno} onChange={set("nomeAluno")} className={inputCls} required />
             </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Órgão expedidor</FieldLabel>
-              <Input value={form.orgaoExpedidor} onChange={set("orgaoExpedidor")} className={inputCls} />
-            </div>
-          </div>
-        </div>
 
-        {/* INFORMAÇÕES COMPLEMENTARES */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={ClipboardList} title="Informações complementares" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <FieldLabel required>Nome da mãe</FieldLabel>
+                <Input value={form.mae} onChange={set("mae")} className={inputCls} required />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Nome do pai</FieldLabel>
+                <Input value={form.pai} onChange={set("pai")} placeholder="N/A" className={inputCls} />
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <FieldLabel>Alínea (classificação)</FieldLabel>
-              <Input value={form.alinea} onChange={set("alinea")} className={inputCls} />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <FieldLabel>Sexo</FieldLabel>
+                <select
+                  value={form.sexo}
+                  onChange={(e) => setForm((p) => ({ ...p, sexo: e.target.value as "M" | "F" }))}
+                  className={selectCls}
+                >
+                  <option value="M">Masculino</option>
+                  <option value="F">Feminino</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel required>Nascimento</FieldLabel>
+                <Input value={form.dataNasc} onChange={set("dataNasc")} placeholder="09 DE DEZEMBRO DE 2004" className={inputCls} required />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Nacionalidade</FieldLabel>
+                <Input value={form.nacionalidade} onChange={set("nacionalidade")} className={inputCls} />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <FieldLabel>EJA (Jovens e Adultos)</FieldLabel>
-              <SimNao value={form.eja} onChange={(v) => setForm((p) => ({ ...p, eja: v }))} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Progressão parcial</FieldLabel>
-              <SimNao value={form.progressaoParcial} onChange={(v) => setForm((p) => ({ ...p, progressaoParcial: v }))} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Nº de disciplinas</FieldLabel>
-              <Input value={form.qtdDisciplinas} onChange={set("qtdDisciplinas")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Dispensa de ensino religioso</FieldLabel>
-              <SimNao value={form.dispensaReligioso} onChange={(v) => setForm((p) => ({ ...p, dispensaReligioso: v }))} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Dispensa de educação física</FieldLabel>
-              <SimNao value={form.dispensaEdFisica} onChange={(v) => setForm((p) => ({ ...p, dispensaEdFisica: v }))} />
-            </div>
-          </div>
 
-          <div className="space-y-1.5">
-            <FieldLabel>Base legal (ensino religioso)</FieldLabel>
-            <Input value={form.baseLegalReligioso} onChange={set("baseLegalReligioso")} className={inputCls} />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel>Base legal (educação física)</FieldLabel>
-            <Input value={form.baseLegalEdFisica} onChange={set("baseLegalEdFisica")} className={inputCls} />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel>Observações</FieldLabel>
-            <Input value={form.observacoes} onChange={set("observacoes")} className={inputCls} />
-          </div>
-        </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+              <div className="space-y-1.5 sm:col-span-2">
+                <FieldLabel>Cidade de nascimento</FieldLabel>
+                <Input value={form.municipioNasc} onChange={set("municipioNasc")} className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>UF</FieldLabel>
+                <select
+                  value={form.ufNasc}
+                  onChange={(e) => setForm((p) => ({ ...p, ufNasc: e.target.value }))}
+                  className={selectCls}
+                >
+                  {ESTADOS_UF.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Série concluída</FieldLabel>
+                <Input value={form.serieConclusao} onChange={set("serieConclusao")} className={inputCls} />
+              </div>
+            </div>
 
-        {/* HISTÓRICO */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={BookOpen} title="Histórico escolar" />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5">
-              <FieldLabel required>Ano 1ª série</FieldLabel>
-              <Input value={form.ano1} onChange={setAno1} inputMode="numeric" placeholder="2022" className={inputCls} required />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Ano 2ª série</FieldLabel>
-              <Input value={form.ano2} onChange={set("ano2")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Ano 3ª série</FieldLabel>
-              <Input value={form.ano3} onChange={set("ano3")} className={inputCls} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="space-y-1.5 sm:col-span-2">
-              <FieldLabel>Estabelecimento (coluna lateral)</FieldLabel>
-              <Input value={form.estabelecimento} onChange={set("estabelecimento")} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <FieldLabel>Cidade / UF</FieldLabel>
-              <div className="flex gap-2">
-                <Input value={form.cidadeEstab} onChange={set("cidadeEstab")} className={inputCls} />
-                <Input value={form.ufEstab} onChange={set("ufEstab")} className={`w-16 ${inputCls}`} />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <FieldLabel required>RG</FieldLabel>
+                <Input value={form.rg} onChange={set("rg")} className={inputCls} required />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Órgão expedidor</FieldLabel>
+                <Input value={form.orgaoExpedidor} onChange={set("orgaoExpedidor")} className={inputCls} />
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <Input value={form.freq1} onChange={set("freq1")} placeholder="Freq. 1ª" className={cellCls} />
-            <Input value={form.freq2} onChange={set("freq2")} placeholder="Freq. 2ª" className={cellCls} />
-            <Input value={form.freq3} onChange={set("freq3")} placeholder="Freq. 3ª" className={cellCls} />
-            <Input value={form.resultado1} onChange={set("resultado1")} placeholder="Result. 1ª" className={cellCls} />
-            <Input value={form.resultado2} onChange={set("resultado2")} placeholder="Result. 2ª" className={cellCls} />
-            <Input value={form.resultado3} onChange={set("resultado3")} placeholder="Result. 3ª" className={cellCls} />
+          {/* INFORMAÇÕES COMPLEMENTARES */}
+          <div className="glass space-y-4 p-6">
+            <SectionHeader icon={ClipboardList} title="Informações complementares" />
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <FieldLabel>Alínea (classificação)</FieldLabel>
+                <Input value={form.alinea} onChange={set("alinea")} className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>EJA (Jovens e Adultos)</FieldLabel>
+                <SimNao value={form.eja} onChange={(v) => setForm((p) => ({ ...p, eja: v }))} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Progressão parcial</FieldLabel>
+                <SimNao value={form.progressaoParcial} onChange={(v) => setForm((p) => ({ ...p, progressaoParcial: v }))} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Nº de disciplinas</FieldLabel>
+                <Input value={form.qtdDisciplinas} onChange={set("qtdDisciplinas")} className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Dispensa de ensino religioso</FieldLabel>
+                <SimNao value={form.dispensaReligioso} onChange={(v) => setForm((p) => ({ ...p, dispensaReligioso: v }))} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Dispensa de educação física</FieldLabel>
+                <SimNao value={form.dispensaEdFisica} onChange={(v) => setForm((p) => ({ ...p, dispensaEdFisica: v }))} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <FieldLabel>Base legal (ensino religioso)</FieldLabel>
+              <Input value={form.baseLegalReligioso} onChange={set("baseLegalReligioso")} className={inputCls} />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel>Base legal (educação física)</FieldLabel>
+              <Input value={form.baseLegalEdFisica} onChange={set("baseLegalEdFisica")} className={inputCls} />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel>Observações</FieldLabel>
+              <Input value={form.observacoes} onChange={set("observacoes")} className={inputCls} />
+            </div>
           </div>
 
-          <div className="space-y-2">
+          {/* HISTÓRICO */}
+          <div className="glass space-y-4 p-6">
+            <SectionHeader icon={BookOpen} title="Histórico escolar" />
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <FieldLabel required>Ano 1ª série</FieldLabel>
+                <Input value={form.ano1} onChange={setAno1} inputMode="numeric" placeholder="2022" className={inputCls} required />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Ano 2ª série</FieldLabel>
+                <Input value={form.ano2} onChange={set("ano2")} className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Ano 3ª série</FieldLabel>
+                <Input value={form.ano3} onChange={set("ano3")} className={inputCls} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5 sm:col-span-2">
+                <FieldLabel>Estabelecimento (coluna lateral)</FieldLabel>
+                <Input value={form.estabelecimento} onChange={set("estabelecimento")} className={inputCls} />
+              </div>
+              <div className="space-y-1.5">
+                <FieldLabel>Cidade / UF</FieldLabel>
+                <div className="flex gap-2">
+                  <Input value={form.cidadeEstab} onChange={set("cidadeEstab")} className={inputCls} />
+                  <Input value={form.ufEstab} onChange={set("ufEstab")} className={`w-16 ${inputCls}`} />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <Input value={form.freq1} onChange={set("freq1")} placeholder="Freq. 1ª" className={cellCls} />
+              <Input value={form.freq2} onChange={set("freq2")} placeholder="Freq. 2ª" className={cellCls} />
+              <Input value={form.freq3} onChange={set("freq3")} placeholder="Freq. 3ª" className={cellCls} />
+              <Input value={form.resultado1} onChange={set("resultado1")} placeholder="Result. 1ª" className={cellCls} />
+              <Input value={form.resultado2} onChange={set("resultado2")} placeholder="Result. 2ª" className={cellCls} />
+              <Input value={form.resultado3} onChange={set("resultado3")} placeholder="Result. 3ª" className={cellCls} />
+            </div>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setNotasAbertas((v) => !v)}
+                className="flex w-full items-center justify-between rounded-lg border border-border/60 bg-secondary/40 px-3 py-2 text-left"
+              >
+                <span className="text-sm font-semibold text-primary">
+                  Notas e carga horária por série{" "}
+                  <span className="font-normal text-muted-foreground">(opcional)</span>
+                </span>
+                <span className="text-xs text-muted-foreground">{notasAbertas ? "Ocultar" : "Preencher"}</span>
+              </button>
+              {notasAbertas &&
+                discs.map((l, i) => (
+                  <div key={l.nome || i} className="rounded-lg border border-border/60 bg-secondary/40 p-2">
+                    <Input
+                      value={l.nome}
+                      onChange={(e) => editDisc(i, "nome", e.target.value)}
+                      className={`mb-1.5 h-8 text-xs font-bold ${inputCls}`}
+                    />
+                    <div className="grid grid-cols-6 gap-1.5">
+                      <Input value={l.n1} onChange={(e) => editDisc(i, "n1", e.target.value)} placeholder="Nota 1ª" className={cellCls} />
+                      <Input value={l.c1} onChange={(e) => editDisc(i, "c1", e.target.value)} placeholder="CH 1ª" className={cellCls} />
+                      <Input value={l.n2} onChange={(e) => editDisc(i, "n2", e.target.value)} placeholder="Nota 2ª" className={cellCls} />
+                      <Input value={l.c2} onChange={(e) => editDisc(i, "c2", e.target.value)} placeholder="CH 2ª" className={cellCls} />
+                      <Input value={l.n3} onChange={(e) => editDisc(i, "n3", e.target.value)} placeholder="Nota 3ª" className={cellCls} />
+                      <Input value={l.c3} onChange={(e) => editDisc(i, "c3", e.target.value)} placeholder="CH 3ª" className={cellCls} />
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+
+            <div className="space-y-1.5">
+              <FieldLabel required>Local e data</FieldLabel>
+              <Input value={form.localData} onChange={set("localData")} placeholder="Olinda, 12 de JANEIRO DE 2024" className={inputCls} required />
+            </div>
+          </div>
+
+          {/* ASSINATURAS */}
+          <div className="glass space-y-4 p-6">
+            <SectionHeader icon={PenLine} title="Assinaturas" />
+
+            {modo === "auto" ? (
+              <p className="text-xs text-muted-foreground">
+                Modo automático: as assinaturas oficiais do Secretário e do Diretor já vêm aplicadas no documento.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {([
+                  ["Assinatura do Secretário", assinaturaSecretario, uploadAssinatura("sec")],
+                  ["Assinatura do Diretor", assinaturaDiretor, uploadAssinatura("dir")],
+                ] as const).map(([label, valor, onChange]) => (
+                  <div key={label} className="space-y-1.5">
+                    <FieldLabel required>{label}</FieldLabel>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={onChange}
+                      className="block w-full text-xs text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
+                    />
+                    {valor && (
+                      <div className="rounded-md border border-border/60 bg-white p-2">
+                        <img src={valor} alt={label} className="mx-auto h-16 object-contain" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button
               type="button"
-              onClick={() => setNotasAbertas((v) => !v)}
-              className="flex w-full items-center justify-between rounded-lg border border-border/60 bg-secondary/40 px-3 py-2 text-left"
+              onClick={() => setModo((m) => (m === "auto" ? "manual" : "auto"))}
+              className="text-xs font-semibold text-primary hover:underline"
             >
-              <span className="text-sm font-semibold text-primary">
-                Notas e carga horária por série{" "}
-                <span className="font-normal text-muted-foreground">(opcional)</span>
-              </span>
-              <span className="text-xs text-muted-foreground">{notasAbertas ? "Ocultar" : "Preencher"}</span>
+              Trocar para assinatura {modo === "auto" ? "manual" : "automática"}
             </button>
-            {notasAbertas &&
-              discs.map((l, i) => (
-                <div key={l.nome || i} className="rounded-lg border border-border/60 bg-secondary/40 p-2">
-                  <Input
-                    value={l.nome}
-                    onChange={(e) => editDisc(i, "nome", e.target.value)}
-                    className={`mb-1.5 h-8 text-xs font-bold ${inputCls}`}
-                  />
-                  <div className="grid grid-cols-6 gap-1.5">
-                    <Input value={l.n1} onChange={(e) => editDisc(i, "n1", e.target.value)} placeholder="Nota 1ª" className={cellCls} />
-                    <Input value={l.c1} onChange={(e) => editDisc(i, "c1", e.target.value)} placeholder="CH 1ª" className={cellCls} />
-                    <Input value={l.n2} onChange={(e) => editDisc(i, "n2", e.target.value)} placeholder="Nota 2ª" className={cellCls} />
-                    <Input value={l.c2} onChange={(e) => editDisc(i, "c2", e.target.value)} placeholder="CH 2ª" className={cellCls} />
-                    <Input value={l.n3} onChange={(e) => editDisc(i, "n3", e.target.value)} placeholder="Nota 3ª" className={cellCls} />
-                    <Input value={l.c3} onChange={(e) => editDisc(i, "c3", e.target.value)} placeholder="CH 3ª" className={cellCls} />
-                  </div>
-                </div>
-              ))}
           </div>
 
+          {/* PRÉVIA — mobile/tablet */}
+          <div className="xl:hidden">{previewPanel}</div>
 
-          <div className="space-y-1.5">
-            <FieldLabel required>Local e data</FieldLabel>
-            <Input value={form.localData} onChange={set("localData")} placeholder="Olinda, 12 de JANEIRO DE 2024" className={inputCls} required />
+          <div className="hidden justify-center pt-1 xl:flex">
+            <Button type="submit" variant="gradient" disabled={loading} className="h-14 w-full max-w-md rounded-2xl text-base font-semibold">
+              {loading ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando documento...</>
+              ) : isEditMode ? (
+                "Salvar alterações"
+              ) : (
+                <><CreditCard className="mr-2 h-5 w-5" /> Gerar PDF ({cost > 0 ? `${formatCredits(cost)} crédito` : "grátis"})</>
+              )}
+            </Button>
           </div>
+        </form>
+
+        <div className="hidden xl:block xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)]">
+          {previewPanel}
         </div>
+      </div>
 
-        {/* ASSINATURAS */}
-        <div className="glass space-y-4 p-6">
-          <SectionHeader icon={PenLine} title="Assinaturas" />
-
-          {modo === "auto" ? (
-            <p className="text-xs text-muted-foreground">
-              Modo automático: as assinaturas oficiais do Secretário e do Diretor já vêm aplicadas no documento.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {([
-                ["Assinatura do Secretário", assinaturaSecretario, uploadAssinatura("sec")],
-                ["Assinatura do Diretor", assinaturaDiretor, uploadAssinatura("dir")],
-              ] as const).map(([label, valor, onChange]) => (
-                <div key={label} className="space-y-1.5">
-                  <FieldLabel required>{label}</FieldLabel>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={onChange}
-                    className="block w-full text-xs text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary"
-                  />
-                  {valor && (
-                    <div className="rounded-md border border-border/60 bg-white p-2">
-                      <img src={valor} alt={label} className="mx-auto h-16 object-contain" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          <button
+      {/* BARRA DE AÇÃO FIXA (mobile/tablet) */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/85 px-4 py-3 backdrop-blur-xl xl:hidden">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-2">
+          <p className="flex items-center gap-1.5 truncate rounded-full border border-border/60 bg-secondary/50 px-2.5 py-0.5 text-[10px] text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {cost > 0 ? `${formatCredits(cost)} crédito(s)` : "Grátis pelo seu plano"}
+            </span>
+            <span aria-hidden>·</span>
+            <span>Saldo: {user?.credits ?? 0}</span>
+          </p>
+          <Button
             type="button"
-            onClick={() => setModo((m) => (m === "auto" ? "manual" : "auto"))}
-            className="text-xs font-semibold text-primary hover:underline"
+            variant="gradient"
+            className="h-12 w-full max-w-md rounded-2xl text-sm font-semibold"
+            disabled={loading}
+            onClick={() => void handleGenerate()}
           >
-            Trocar para assinatura {modo === "auto" ? "manual" : "automática"}
-          </button>
-        </div>
-
-        <div className="flex justify-center pt-1">
-          <Button type="submit" variant="gradient" disabled={loading} className="h-12 w-full max-w-md rounded-2xl text-base font-semibold">
-            {loading ? (<><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando...</>) : "Gerar documento"}
+            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando...</> : isEditMode ? "Salvar" : "Gerar PDF"}
           </Button>
         </div>
-      </form>
+      </div>
+
+      <PdfReadyDialog
+        open={showReady}
+        onOpenChange={setShowReady}
+        pdfDataUrl={finalPdf || ""}
+        fileName="certificado-historico-ficha19.pdf"
+        title="Certificado + Histórico (Ficha 19)"
+        message={mensagem}
+      />
     </div>
   );
 }
