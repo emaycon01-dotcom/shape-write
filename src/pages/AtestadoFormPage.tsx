@@ -90,6 +90,8 @@ export default function AtestadoFormPage() {
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [autoLive, setAutoLive] = useState(true);
   const previewSeq = useRef(0);
+  const generatedSignature = useRef<string | null>(null);
+
 
   /* ---------------- estado do documento final ---------------- */
   const [finalPdf, setFinalPdf] = useState<string | null>(() => readFinalPdf(ROUTE_KEY));
