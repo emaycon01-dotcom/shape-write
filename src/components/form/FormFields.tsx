@@ -48,7 +48,7 @@ export function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={maxLength}
-        className="h-11 rounded-lg"
+        className="h-11 rounded-xl"
       />
     </div>
   );
