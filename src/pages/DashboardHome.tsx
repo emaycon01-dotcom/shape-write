@@ -339,6 +339,55 @@ export default function DashboardHome() {
         )}
       </section>
 
+      {/* Sites parceiros */}
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
+          <div>
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground">Sites parceiros</h2>
+            <p className="text-[11px] text-muted-foreground">Confira nossas plataformas aliadas</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <a
+            href="https://bellarussystems.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary/40"
+          >
+            <div className="absolute inset-0 gradient-primary opacity-[0.08]" />
+            <div className="relative flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-primary/40">
+                <Globe className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] font-semibold text-foreground">Bellarus Systems</p>
+                <p className="truncate text-[11px] text-muted-foreground">bellarussystems.online</p>
+              </div>
+              <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-primary" />
+            </div>
+          </a>
+
+          <a
+            href="https://atestalab.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-accent/40"
+          >
+            <div className="absolute inset-0 gradient-accent opacity-[0.08]" />
+            <div className="relative flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/80 ring-1 ring-border/60 transition-colors group-hover:ring-accent/40">
+                <Globe className="h-5 w-5 text-accent" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] font-semibold text-foreground">AtestaLab</p>
+                <p className="truncate text-[11px] text-muted-foreground">atestalab.online</p>
+              </div>
+              <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:text-accent" />
+            </div>
+          </a>
+        </div>
+      </section>
+
       {/* Rodapé */}
       <footer className="flex items-center justify-center pt-2 pb-4">
         <img src={logo} alt="MonkeyLab" className="h-8 w-auto object-contain opacity-70" />
