@@ -118,22 +118,20 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   .aluno .row { display: flex; justify-content: space-between; gap: 14px; }
   .corpo { display: flex; gap: 6px; margin-top: 10px; }
   .legal {
-    width: 26px; border: 1px solid #000; position: relative;
-    font-family: Arial, sans-serif; font-size: 8.5px; line-height: 1.35;
+    width: 46px; border: 1px solid #000;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Arial, sans-serif; font-size: 7.5px; line-height: 1.3;
+    padding: 2px;
   }
-  .legal span {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) rotate(180deg);
-    writing-mode: vertical-rl; white-space: nowrap;
-  }
+  .legal span { display: block; text-align: center; overflow-wrap: anywhere; }
   .grade-wrap { flex: 1; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .grade th, .grade td { border: 1px solid #000; padding: 1.5px 4px; font-size: 10.5px; }
   .grade .head { text-align: center; font-family: Arial, sans-serif; font-weight: normal; font-size: 10px; line-height: 1.2; }
-  .grade .area { width: 26px; position: relative; height: 1px; }
+  .grade .area { width: 46px; text-align: center; vertical-align: middle; padding: 2px; }
   .grade .area span {
-    display: block; writing-mode: vertical-rl; transform: rotate(180deg);
-    margin: 0 auto; font-family: Arial, sans-serif; font-size: 8.5px; line-height: 1.2; white-space: nowrap;
+    display: block; font-family: Arial, sans-serif; font-size: 7.5px;
+    line-height: 1.25; overflow-wrap: anywhere;
   }
   .grade .comp { font-size: 10.5px; }
   .grade .nota { text-align: center; font-size: 10.5px; }
@@ -181,7 +179,7 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
     <div class="legal"><span>${t(d.fundamento_legal)}</span></div>
     <div class="grade-wrap">
       <table class="grade">
-        <colgroup><col style="width:26px"><col><col style="width:52px"><col style="width:52px"><col style="width:52px"><col style="width:62px"></colgroup>
+        <colgroup><col style="width:46px"><col><col style="width:52px"><col style="width:52px"><col style="width:52px"><col style="width:62px"></colgroup>
         <tr>
           <th class="head" rowspan="2" colspan="2">COMPONENTES CURRICULARES</th>
           <th class="head" colspan="3">Período Letivo</th>
