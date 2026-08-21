@@ -9,7 +9,7 @@ import NovidadesDialog from "@/components/NovidadesDialog";
 import {
   Crown, ArrowUpRight, FileText, CreditCard, Gem, Star, Rocket,
   ShieldCheck, Zap, Clock, History, Headphones, Smartphone, RefreshCw,
-
+  Globe,
 } from "lucide-react";
 
 
