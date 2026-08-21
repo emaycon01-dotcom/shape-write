@@ -51,7 +51,6 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   const assinatura = d.assinatura_base64 || "";
   const notas = parseList<Nota>(d.notas_json);
   const estudos = parseList<Estudo>(d.estudos_json);
-  const grupos = agruparPorArea(notas);
   const t = (v: unknown) => escapeHtml(String(v ?? "").trim());
 
   const totalBase = d.ch_base || String(somarCargaHoraria(notas) || "");
@@ -61,20 +60,20 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
       (Number(totalBase) || 0) + (Number(String(d.ch_diversificada || "").replace(",", ".")) || 0),
     );
 
-  const linhasNotas = grupos
+  // Não usamos rowspan nem texto vertical: o renderizador Canvas de alguns
+  // navegadores móveis pode devolver coordenadas incorretas para essas células.
+  // A área fica numa linha própria e cada disciplina usa uma linha comum.
+  const linhasNotas = agruparPorArea(notas)
     .map((grupo) =>
+      `<tr class="area-row"><td colspan="5">${t(grupo.area)}</td></tr>` +
       grupo.itens
-        .map((item, index) => {
-          const areaCell =
-            index === 0
-              ? `<td class="area" rowspan="${grupo.itens.length}"><span>${t(grupo.area)}</span></td>`
-              : "";
-          return `<tr>${areaCell}<td class="comp">${t(item.componente)}</td>` +
-            `<td class="nota">${t(item.n1) || "–"}</td>` +
-            `<td class="nota">${t(item.n2) || "–"}</td>` +
-            `<td class="nota">${t(item.n3) || "–"}</td>` +
-            `<td class="nota">${t(item.ch) || "–"}</td></tr>`;
-        })
+        .map((item) =>
+          `<tr><td class="comp">${t(item.componente)}</td>` +
+          `<td class="nota">${t(item.n1) || "–"}</td>` +
+          `<td class="nota">${t(item.n2) || "–"}</td>` +
+          `<td class="nota">${t(item.n3) || "–"}</td>` +
+          `<td class="nota">${t(item.ch) || "–"}</td></tr>`,
+        )
         .join(""),
     )
     .join("");
@@ -116,23 +115,16 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   .subtitulo { text-align: center; font-family: Arial, sans-serif; font-weight: bold; font-size: 11px; }
   .aluno { margin-top: 10px; font-size: 11.5px; line-height: 1.7; }
   .aluno .row { display: flex; justify-content: space-between; gap: 14px; }
-  .corpo { display: flex; gap: 6px; margin-top: 10px; }
+  .corpo { margin-top: 10px; }
   .legal {
-    width: 46px; border: 1px solid #000;
-    display: flex; align-items: center; justify-content: center;
-    font-family: Arial, sans-serif; font-size: 7.5px; line-height: 1.3;
-    padding: 2px;
+    border: 1px solid #000; border-bottom: 0; padding: 3px 6px;
+    font-family: Arial, sans-serif; font-size: 7.5px; line-height: 1.25;
+    text-align: center;
   }
-  .legal span { display: block; text-align: center; overflow-wrap: anywhere; }
-  .grade-wrap { flex: 1; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .grade th, .grade td { border: 1px solid #000; padding: 1.5px 4px; font-size: 10.5px; }
   .grade .head { text-align: center; font-family: Arial, sans-serif; font-weight: normal; font-size: 10px; line-height: 1.2; }
-  .grade .area { width: 46px; text-align: center; vertical-align: middle; padding: 2px; }
-  .grade .area span {
-    display: block; font-family: Arial, sans-serif; font-size: 7.5px;
-    line-height: 1.25; overflow-wrap: anywhere;
-  }
+  .grade .area-row td { padding: 2px 4px; text-align: left; font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; background: #f2f2f2; }
   .grade .comp { font-size: 10.5px; }
   .grade .nota { text-align: center; font-size: 10.5px; }
   .grade .tot { font-family: Arial, sans-serif; font-size: 10px; font-weight: bold; }
@@ -176,12 +168,12 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   </div>
 
   <div class="corpo">
-    <div class="legal"><span>${t(d.fundamento_legal)}</span></div>
+    <div class="legal">${t(d.fundamento_legal)}</div>
     <div class="grade-wrap">
       <table class="grade">
-        <colgroup><col style="width:46px"><col><col style="width:52px"><col style="width:52px"><col style="width:52px"><col style="width:62px"></colgroup>
+        <colgroup><col><col style="width:52px"><col style="width:52px"><col style="width:52px"><col style="width:62px"></colgroup>
         <tr>
-          <th class="head" rowspan="2" colspan="2">COMPONENTES CURRICULARES</th>
+          <th class="head" rowspan="2">COMPONENTES CURRICULARES</th>
           <th class="head" colspan="3">Período Letivo</th>
           <th class="head" rowspan="2">Carga<br/>Horária</th>
         </tr>
@@ -191,10 +183,10 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
           <th class="head">3º Termo<br/>Ano</th>
         </tr>
         ${linhasNotas}
-        <tr><td class="tot" colspan="5">CARGA HORÁRIA – Base Nacional Comum</td><td class="nota">${t(totalBase) || "–"}</td></tr>
-        <tr><td class="divers" colspan="6">Disciplina de Apoio Curricular: ${t(d.apoio_curricular)}</td></tr>
-        <tr><td class="tot" colspan="5">CARGA HORÁRIA – Parte Diversificada</td><td class="nota">${t(d.ch_diversificada) || "–"}</td></tr>
-        <tr><td class="tot" colspan="5">TOTAL DE CARGA HORÁRIA – Base Nacional Comum e Parte Diversificada</td><td class="nota">${t(totalGeral) || "–"}</td></tr>
+        <tr><td class="tot" colspan="4">CARGA HORÁRIA – Base Nacional Comum</td><td class="nota">${t(totalBase) || "–"}</td></tr>
+        <tr><td class="divers" colspan="5">Disciplina de Apoio Curricular: ${t(d.apoio_curricular)}</td></tr>
+        <tr><td class="tot" colspan="4">CARGA HORÁRIA – Parte Diversificada</td><td class="nota">${t(d.ch_diversificada) || "–"}</td></tr>
+        <tr><td class="tot" colspan="4">TOTAL DE CARGA HORÁRIA – Base Nacional Comum e Parte Diversificada</td><td class="nota">${t(totalGeral) || "–"}</td></tr>
       </table>
     </div>
   </div>
