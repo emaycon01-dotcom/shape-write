@@ -297,10 +297,28 @@ export default function SupportWidget() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="p-3">
+              <div className="p-3 space-y-2">
                 <Button className="w-full" onClick={() => setCreating(true)}>
                   <Plus className="mr-1.5 h-4 w-4" /> Abrir novo chamado
                 </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href="https://wa.me/5581992120805"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#25D366]/15 px-2.5 py-2 text-[11px] font-semibold text-[#25D366] ring-1 ring-[#25D366]/30 transition-colors hover:bg-[#25D366]/25"
+                  >
+                    <Phone className="h-3.5 w-3.5" /> WhatsApp
+                  </a>
+                  <a
+                    href="https://chat.whatsapp.com/F8T3ASBFINeEFE2swOcUeQ?mode=gi_t"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary/15 px-2.5 py-2 text-[11px] font-semibold text-primary ring-1 ring-primary/30 transition-colors hover:bg-primary/25"
+                  >
+                    <Users className="h-3.5 w-3.5" /> Comunidade
+                  </a>
+                </div>
               </div>
               <p className="px-3 text-[10px] uppercase tracking-widest text-muted-foreground">Meus chamados</p>
               <div className="flex-1 space-y-2 overflow-auto p-3">
