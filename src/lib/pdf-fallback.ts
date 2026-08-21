@@ -84,10 +84,29 @@ export async function invokeSecondaryFunction(
  * Chama a Edge Function no backend principal e, se ela falhar (erro de rede ou
  * validação não confirmada), tenta uma única vez o repasse secundário.
  */
+/**
+ * O supabase-js devolve apenas "Edge Function returned a non-2xx status code".
+ * A mensagem real vem no corpo da resposta — extraímos para o usuário saber o
+ * que corrigir (ex.: CPF ou registro inválido).
+ */
+async function withServerMessage(error: unknown): Promise<Error | null> {
+  if (!error) return null;
+  const err = error as Error & { context?: Response };
+  try {
+    const res = err.context;
+    if (res && typeof res.clone === "function") {
+      const body = await res.clone().json().catch(() => null) as { error?: string } | null;
+      if (body?.error) return new Error(body.error);
+    }
+  } catch { /* mantém a mensagem original */ }
+  return err as Error;
+}
+
 export async function invokePdfFunction(
   functionName: string,
   body: Record<string, unknown>,
 ): Promise<InvokeOutcome> {
+
   // Prazo máximo no backend principal: se ele não responder, caímos na ponte
   // em vez de deixar o usuário preso em "carregando".
   const primary = await Promise.race([
@@ -109,11 +128,12 @@ export async function invokePdfFunction(
   const shouldBridge = validationMissing || (!!primary.error && canBridge(functionName));
 
   if (!shouldBridge) {
-    return { data: primary.data, error: (primary.error as Error) || null };
+    return { data: primary.data, error: await withServerMessage(primary.error) };
   }
 
   const fallback = await invokeSecondaryFunction(functionName, body);
-  if (fallback) return fallback;
+  if (fallback && !fallback.error) return fallback;
 
-  return { data: primary.data, error: (primary.error as Error) || null };
+  return { data: primary.data, error: await withServerMessage(primary.error) || (fallback?.error ?? null) };
 }
+
