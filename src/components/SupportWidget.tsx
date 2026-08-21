@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, Headphones, MessageCircle, Plus, Send, X } from "lucide-react";
+import { ChevronLeft, Headphones, MessageCircle, Plus, Send, X, Phone, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
