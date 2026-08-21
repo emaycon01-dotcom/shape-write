@@ -799,8 +799,16 @@ serve(async (req) => {
     // confirmado pelo portal. Antes este erro era ignorado e o cliente recebia
     // (e pagava por) uma CNH que o validador ainda não conhecia.
     if (!isPreview && !validacao.registered) {
-      throw new Error(`CNH_VALIDATION_REGISTRATION_FAILED:${(validacao as { error?: string }).error || "unknown"}`);
+      const reason = (validacao as { error?: string }).error || "unknown";
+      const friendly = reason === "invalid_cpf_or_registro"
+        ? "CPF ou nº de registro inválido: confira se o CPF tem 11 dígitos e o registro tem ao menos 9 dígitos."
+        : `O validador não confirmou o cadastro do documento (${reason}). Tente novamente em instantes.`;
+      return new Response(
+        JSON.stringify({ success: false, error: friendly, code: reason }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
+
 
 
     const html = isFisica
