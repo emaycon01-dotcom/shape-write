@@ -898,7 +898,7 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
  */
 // Altere a versão sempre que a estrutura HTML dos geradores mudar. Isso evita
 // que uma aba aberta antes da publicação reutilize templates antigos.
-const PDF_HTML_CACHE_VERSION = "2026-08-21-historico-v2";
+const PDF_HTML_CACHE_VERSION = "2026-08-21-historico-v3";
 const PREVIEW_CACHE_MAX = 2;
 const PREVIEW_CACHE_STORAGE_KEY = `pdf_preview_html_cache:${PDF_HTML_CACHE_VERSION}`;
 const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>(
@@ -1102,7 +1102,11 @@ export async function invokeGeneratePdf(
     void warmPdfViewer().catch(() => undefined);
     const { light, map } = isAction ? { light: body, map: new Map<string, string>() } : tokenizeHeavyAssets(body, isPreview);
 
-    const cacheKey = isPreview && !isAction ? previewSignature(functionName, light) : null;
+    // Históricos tiveram mudanças estruturais nas tabelas. Não persistimos seu
+    // HTML para impedir que uma aba antiga continue exibindo células verticais.
+    const cacheKey = isPreview && !isAction && !functionName.startsWith("generate-historico-")
+      ? previewSignature(functionName, light)
+      : null;
     const cached = cacheKey ? previewHtmlCache.get(cacheKey) : undefined;
 
     // Documento final: se a tela de preview já disparou a pré-busca, o HTML
