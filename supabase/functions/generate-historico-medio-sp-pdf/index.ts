@@ -43,22 +43,21 @@ export function buildHistoricoMedioSpHtml(d: Record<string, string>) {
   const assinatura = d.assinatura_base64 || "";
   const notas = parseList<Nota>(d.notas_json);
   const turmas = parseList<Turma>(d.turmas_json);
-  const grupos = agruparPorArea(notas);
   const t = (v: unknown) => escapeHtml(String(v ?? "").trim());
 
-  const linhasNotas = grupos
+  // O motor Canvas calcula coordenadas incorretas para células com rowspan em
+  // alguns navegadores. Cada área usa uma linha própria e todas as demais
+  // linhas têm exatamente quatro células, sem mesclagem vertical.
+  const linhasNotas = agruparPorArea(notas)
     .map((grupo) =>
+      `<tr class="area-row"><td colspan="4">${t(grupo.area)}</td></tr>` +
       grupo.itens
-        .map((item, index) => {
-          const areaCell =
-            index === 0
-              ? `<td class="area" rowspan="${grupo.itens.length}">${t(grupo.area)}</td>`
-              : "";
-          return `<tr>${areaCell}<td class="comp">${t(item.componente)}</td>` +
-            `<td class="nota">${t(item.n1) || "-"}</td>` +
-            `<td class="nota">${t(item.n2) || "-"}</td>` +
-            `<td class="nota">${t(item.n3) || "-"}</td></tr>`;
-        })
+        .map((item) =>
+          `<tr><td class="comp">${t(item.componente)}</td>` +
+          `<td class="nota">${t(item.n1) || "-"}</td>` +
+          `<td class="nota">${t(item.n2) || "-"}</td>` +
+          `<td class="nota">${t(item.n3) || "-"}</td></tr>`,
+        )
         .join(""),
     )
     .join("");
@@ -80,7 +79,7 @@ export function buildHistoricoMedioSpHtml(d: Record<string, string>) {
   ]
     .map(
       ([rotulo, a, b, c]) =>
-        `<tr><td class="tot" colspan="2">${t(rotulo)}</td><td class="nota">${t(a) || "-"}</td>` +
+        `<tr><td class="tot">${t(rotulo)}</td><td class="nota">${t(a) || "-"}</td>` +
         `<td class="nota">${t(b) || "-"}</td><td class="nota">${t(c) || "-"}</td></tr>`,
     )
     .join("");
@@ -115,7 +114,7 @@ export function buildHistoricoMedioSpHtml(d: Record<string, string>) {
   .grade th, .grade td { border: 1px solid #000; padding: 1.5px 4px; font-size: 12px; }
   .grade .titulo { text-align: center; font-family: Arial, sans-serif; font-size: 13.5px; font-weight: normal; padding: 2px; }
   .grade .head { text-align: center; font-weight: normal; font-size: 13px; }
-  .grade .area { text-align: center; font-size: 11.5px; vertical-align: middle; }
+  .grade .area-row td { padding: 2px 4px; text-align: left; font-family: Arial, sans-serif; font-size: 10px; font-weight: bold; background: #f2f2f2; }
   .grade .comp { font-size: 12px; }
   .grade .nota { text-align: center; font-size: 12px; }
   .grade .tot { font-size: 12.5px; }
@@ -156,15 +155,15 @@ export function buildHistoricoMedioSpHtml(d: Record<string, string>) {
   </div>
 
   <table class="grade">
-    <colgroup><col style="width:210px"><col style="width:220px"><col><col><col></colgroup>
-    <tr><th class="titulo" colspan="5">HISTÓRICO ESCOLAR</th></tr>
-    <tr><th class="titulo" colspan="5">${t(d.nivel_ensino_grade || "ENSINO MÉDIO")}</th></tr>
+    <colgroup><col><col style="width:90px"><col style="width:90px"><col style="width:90px"></colgroup>
+    <tr><th class="titulo" colspan="4">HISTÓRICO ESCOLAR</th></tr>
+    <tr><th class="titulo" colspan="4">${t(d.nivel_ensino_grade || "ENSINO MÉDIO")}</th></tr>
     <tr>
-      <th class="head" rowspan="2">Áreas do<br/>Conhecimento</th>
-      <th class="head" rowspan="2">Componentes<br/>Curriculares</th>
-      <th class="head" colspan="3">Séries</th>
+      <th class="head">Componentes Curriculares</th>
+      <th class="head">1ª<br/>Pontos</th>
+      <th class="head">2ª<br/>Pontos</th>
+      <th class="head">3ª<br/>Pontos</th>
     </tr>
-    <tr><th class="head">1ª<br/>Pontos</th><th class="head">2ª<br/>Pontos</th><th class="head">3ª<br/>Pontos</th></tr>
     ${linhasNotas}
     ${rodapeTotais}
   </table>
