@@ -896,11 +896,14 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
  * Nunca é usado no documento final: lá o QR precisa ser registrado de verdade
  * pela função, e o HTML é sempre diferente do preview.
  */
+// Altere a versão sempre que a estrutura HTML dos geradores mudar. Isso evita
+// que uma aba aberta antes da publicação reutilize templates antigos.
+const PDF_HTML_CACHE_VERSION = "2026-08-21-historico-v2";
+const PREVIEW_CACHE_MAX = 2;
+const PREVIEW_CACHE_STORAGE_KEY = `pdf_preview_html_cache:${PDF_HTML_CACHE_VERSION}`;
 const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>(
   readPersistentPreviewCache(),
 );
-const PREVIEW_CACHE_MAX = 2;
-const PREVIEW_CACHE_STORAGE_KEY = "pdf_preview_html_cache";
 
 function previewSignature(functionName: string, body: Record<string, unknown>): string {
   // Hash leve: strings pesadas entram como tamanho + amostra + 4 chars do fim.
@@ -934,7 +937,7 @@ function previewSignature(functionName: string, body: Record<string, unknown>): 
     hash = (hash << 5) - hash + full.charCodeAt(i);
     hash |= 0;
   }
-  return `${functionName}::${hash}:${full.length}`;
+  return `${PDF_HTML_CACHE_VERSION}:${functionName}::${hash}:${full.length}`;
 }
 
 function readPersistentPreviewCache(): [string, { html: string; payload: Record<string, unknown> }][] {

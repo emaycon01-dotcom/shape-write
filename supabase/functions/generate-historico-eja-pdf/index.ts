@@ -173,14 +173,11 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
       <table class="grade">
         <colgroup><col><col style="width:52px"><col style="width:52px"><col style="width:52px"><col style="width:62px"></colgroup>
         <tr>
-          <th class="head" rowspan="2">COMPONENTES CURRICULARES</th>
-          <th class="head" colspan="3">Período Letivo</th>
-          <th class="head" rowspan="2">Carga<br/>Horária</th>
-        </tr>
-        <tr>
+          <th class="head">COMPONENTES CURRICULARES</th>
           <th class="head">1º Termo<br/>Ano</th>
           <th class="head">2º Termo<br/>Ano</th>
           <th class="head">3º Termo<br/>Ano</th>
+          <th class="head">Carga<br/>Horária</th>
         </tr>
         ${linhasNotas}
         <tr><td class="tot" colspan="4">CARGA HORÁRIA – Base Nacional Comum</td><td class="nota">${t(totalBase) || "–"}</td></tr>
