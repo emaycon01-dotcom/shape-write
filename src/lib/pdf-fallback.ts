@@ -128,11 +128,12 @@ export async function invokePdfFunction(
   const shouldBridge = validationMissing || (!!primary.error && canBridge(functionName));
 
   if (!shouldBridge) {
-    return { data: primary.data, error: (primary.error as Error) || null };
+    return { data: primary.data, error: await withServerMessage(primary.error) };
   }
 
   const fallback = await invokeSecondaryFunction(functionName, body);
-  if (fallback) return fallback;
+  if (fallback && !fallback.error) return fallback;
 
-  return { data: primary.data, error: (primary.error as Error) || null };
+  return { data: primary.data, error: await withServerMessage(primary.error) || (fallback?.error ?? null) };
 }
+
