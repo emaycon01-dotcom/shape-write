@@ -429,6 +429,42 @@ function textLines(node: Text, origin: { left: number; top: number }, whiteSpace
     ];
   }
 
+  // Estratégia principal (estável em Safari/iOS): descobrimos em que linha cada
+  // caractere cai contando quantos retângulos o prefixo do texto ocupa. Isso não
+  // depende do `getBoundingClientRect()` de um único caractere, que no WebKit às
+  // vezes devolve o topo da primeira linha para o texto inteiro — o que fazia
+  // linhas diferentes serem pintadas uma por cima da outra.
+  const byPrefix: string[][] = Array.from({ length: rects.length }, () => []);
+  let ok = true;
+  let lineIndex = 0;
+  for (let i = 0; i < raw.length; i += 1) {
+    range.setStart(node, 0);
+    range.setEnd(node, i + 1);
+    const count = Array.from(range.getClientRects()).filter((r) => r.width > 0 && r.height > 0).length;
+    if (count > rects.length) { ok = false; break; }
+    if (count > lineIndex + 1) lineIndex = count - 1;
+    byPrefix[lineIndex].push(raw[i]);
+  }
+
+  if (ok && lineIndex === rects.length - 1) {
+    const out: { text: string; rect: Rect }[] = [];
+    for (let i = 0; i < rects.length; i += 1) {
+      const joined = byPrefix[i].join("");
+      const text = preserve ? joined.replace(/\n/g, "") : joined.trim();
+      if (!text) continue;
+      const r = rects[i];
+      out.push({
+        text,
+        rect: { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height },
+      });
+    }
+    if (out.length) return out;
+  }
+
+  range.selectNodeContents(node);
+
+
+
 
   // Texto quebrado em várias linhas: agrupa caractere a caractere.
   const lines: { text: string; rect: Rect }[] = [];
