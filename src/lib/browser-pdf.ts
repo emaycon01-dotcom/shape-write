@@ -979,6 +979,7 @@ function finalSignature(functionName: string, light: Record<string, unknown>): s
 export function prefetchGeneratePdf(functionName: string, body: Record<string, unknown>): void {
   try {
     if (!body || typeof body !== "object") return;
+    if (functionName.startsWith("generate-historico-")) return;
     const { light } = tokenizeHeavyAssets(body, false);
     const key = finalSignature(functionName, light);
     if (finalHtmlPrefetch.has(key)) return;
@@ -1112,7 +1113,7 @@ export async function invokeGeneratePdf(
     // Documento final: se a tela de preview já disparou a pré-busca, o HTML
     // (com o QR registrado) provavelmente está pronto — usamos direto.
     let prefetched: HtmlPayload | null = null;
-    if (!isPreview && !isAction) {
+    if (!isPreview && !isAction && !functionName.startsWith("generate-historico-")) {
       const finalKey = finalSignature(functionName, light);
       const pending = finalHtmlPrefetch.get(finalKey);
       if (pending) {
