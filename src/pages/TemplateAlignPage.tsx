@@ -53,7 +53,7 @@ import templateDeclaracaoBgUrl from "@/assets/template-declaracao-bg-hq.jpg";
 import templateDeclaracaoEteAsset from "@/assets/template-declaracao-ete-bg.jpg.asset.json";
 import templateDeclaracaoPeAsset from "@/assets/template-declaracao-pe-bg.jpg.asset.json";
 import templateReceitaBgUrl from "@/assets/template-receita-bg-hq.jpg";
-import templateReceitaAzulBgUrl from "@/assets/template-receita-azul-bg-hq.jpg";
+import templateReceitaAzulAsset from "@/assets/template-receita-azul-bg-hq.jpg.asset.json";
 import templateCrafBgUrl from "@/assets/template-craf-bg-hq.webp";
 import { PORTE_ALIGN_STORAGE_KEY, loadPorteFieldPositions } from "@/lib/porte-align";
 import templatePorteBgUrl from "@/assets/template-porte-bg-hq.webp";
@@ -1404,7 +1404,7 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     title: "Receita Azul (B1)",
     storageKey: RECEITA_AZUL_ALIGN_STORAGE_KEY,
     defaults: defaultReceitaAzulFields,
-    bg: templateReceitaAzulBgUrl,
+    bg: templateReceitaAzulAsset.url,
     font: RECEITA_AZUL_FONT,
     mrzFont: RECEITA_AZUL_FONT,
     mrzWidth: 400,
