@@ -386,7 +386,16 @@ const MODULOS: Categoria[] = [
         creditos: 1,
         qrcode: true,
       },
+      {
+        id: "receita-azul",
+        titulo: "RECEITA AZUL — NOTIFICAÇÃO B",
+        descricao: "Notificação de Receita B (talonário azul) com preenchimento manuscrito",
+        icon: Pill,
+        rota: "/dashboard/documents/receita-azul",
+        creditos: 1,
+      },
     ],
+
   },
 ];
 
