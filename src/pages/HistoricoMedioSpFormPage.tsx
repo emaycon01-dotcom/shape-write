@@ -23,7 +23,7 @@ import { creditRef } from "@/lib/credit-ref";
 import { describeError } from "@/lib/describe-error";
 import { saveFinalPdf, readFinalPdf, clearFinalPdf } from "@/lib/preview-payload";
 
-type Nota = { area: string; componente: string; n1: string; n2: string; n3: string };
+type Nota = { componente: string; n1: string; n2: string; n3: string };
 type Turma = { ano: string; serie: string; turno: string; unidade: string; municipio: string };
 
 export const TURNOS = [
@@ -35,26 +35,21 @@ export const TURNOS = [
   "EAD / Semipresencial",
 ];
 
-const AREA_LING = "Linguagens, Códigos e suas Tecnologias";
-const AREA_NAT = "Ciências da Natureza, Matemática e suas Tecnologias";
-const AREA_HUM = "Ciências Humanas e suas Tecnologias";
-const AREA_DIV = "Parte Diversificada";
-
 const NOTAS_PADRAO: Nota[] = [
-  { area: AREA_LING, componente: "Língua Portuguesa", n1: "", n2: "", n3: "" },
-  { area: AREA_LING, componente: "Educação Física", n1: "", n2: "", n3: "" },
-  { area: AREA_LING, componente: "Arte", n1: "", n2: "", n3: "" },
-  { area: AREA_NAT, componente: "Física", n1: "", n2: "", n3: "" },
-  { area: AREA_NAT, componente: "Química", n1: "", n2: "", n3: "" },
-  { area: AREA_NAT, componente: "Biologia", n1: "", n2: "", n3: "" },
-  { area: AREA_NAT, componente: "Matemática", n1: "", n2: "", n3: "" },
-  { area: AREA_HUM, componente: "História", n1: "", n2: "", n3: "" },
-  { area: AREA_HUM, componente: "Geografia", n1: "", n2: "", n3: "" },
-  { area: AREA_HUM, componente: "Sociologia", n1: "", n2: "", n3: "" },
-  { area: AREA_HUM, componente: "Filosofia", n1: "", n2: "", n3: "" },
-  { area: AREA_DIV, componente: "Inglês", n1: "", n2: "", n3: "" },
-  { area: AREA_DIV, componente: "Espanhol", n1: "", n2: "", n3: "" },
-  { area: AREA_DIV, componente: "Juventude, Educação e Trabalho", n1: "", n2: "", n3: "" },
+  { componente: "Língua Portuguesa", n1: "", n2: "", n3: "" },
+  { componente: "Educação Física", n1: "", n2: "", n3: "" },
+  { componente: "Arte", n1: "", n2: "", n3: "" },
+  { componente: "Física", n1: "", n2: "", n3: "" },
+  { componente: "Química", n1: "", n2: "", n3: "" },
+  { componente: "Biologia", n1: "", n2: "", n3: "" },
+  { componente: "Matemática", n1: "", n2: "", n3: "" },
+  { componente: "História", n1: "", n2: "", n3: "" },
+  { componente: "Geografia", n1: "", n2: "", n3: "" },
+  { componente: "Sociologia", n1: "", n2: "", n3: "" },
+  { componente: "Filosofia", n1: "", n2: "", n3: "" },
+  { componente: "Inglês", n1: "", n2: "", n3: "" },
+  { componente: "Espanhol", n1: "", n2: "", n3: "" },
+  { componente: "Juventude, Educação e Trabalho", n1: "", n2: "", n3: "" },
 ];
 
 const NOTAS_TESTE = ["8.0/8.0/10", "10/8.5/7.5", "10/10/8.0", "7.5/9.0/9.5", "6.5/10/8.5",
@@ -185,7 +180,10 @@ export default function HistoricoMedioSpFormPage() {
           diretorRg: b.diretor_rg || p.diretorRg,
           diretorCargo: b.diretor_cargo || p.diretorCargo,
         }));
-        try { const n = JSON.parse(b.notas_json || "[]"); if (Array.isArray(n) && n.length) setNotas(n); } catch { /* ignora */ }
+        try {
+          const n = JSON.parse(b.notas_json || "[]");
+          if (Array.isArray(n) && n.length) setNotas(n.map(({ componente, n1, n2, n3 }) => ({ componente, n1, n2, n3 })));
+        } catch { /* ignora */ }
         try { const t = JSON.parse(b.turmas_json || "[]"); if (Array.isArray(t) && t.length) setTurmas(t); } catch { /* ignora */ }
         setAssinatura(b.assinatura_base64 || "");
         setHydrated(true);

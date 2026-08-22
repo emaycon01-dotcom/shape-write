@@ -23,7 +23,7 @@ import { creditRef } from "@/lib/credit-ref";
 import { describeError } from "@/lib/describe-error";
 import { saveFinalPdf, readFinalPdf, clearFinalPdf } from "@/lib/preview-payload";
 
-type Nota = { area: string; componente: string; n1: string; n2: string; n3: string; ch: string };
+type Nota = { componente: string; n1: string; n2: string; n3: string; ch: string };
 type Estudo = { nivel: string; termo: string; ano: string; unidade: string; municipio: string; uf: string };
 
 const MODALIDADES = [
@@ -34,22 +34,18 @@ const MODALIDADES = [
   "EAD - EDUCAÇÃO A DISTÂNCIA",
 ];
 
-const AREA_LING = "Linguagens, Códigos e suas Tecnologias";
-const AREA_NAT = "Ciências da Natureza, Matemática e suas Tecnologias";
-const AREA_HUM = "Ciências Humanas e suas Tecnologias";
-
 const NOTAS_PADRAO: Nota[] = [
-  { area: AREA_LING, componente: "Língua Portuguesa e Literatura", n1: "", n2: "", n3: "", ch: "40" },
-  { area: AREA_LING, componente: "Arte", n1: "", n2: "", n3: "", ch: "40" },
-  { area: AREA_LING, componente: "Educação Física", n1: "", n2: "", n3: "", ch: "60" },
-  { area: AREA_NAT, componente: "Matemática", n1: "", n2: "", n3: "", ch: "60" },
-  { area: AREA_NAT, componente: "Física", n1: "", n2: "", n3: "", ch: "40" },
-  { area: AREA_NAT, componente: "Química", n1: "", n2: "", n3: "", ch: "40" },
-  { area: AREA_NAT, componente: "Biologia", n1: "", n2: "", n3: "", ch: "40" },
-  { area: AREA_HUM, componente: "História", n1: "", n2: "", n3: "", ch: "40" },
-  { area: AREA_HUM, componente: "Geografia", n1: "", n2: "", n3: "", ch: "40" },
-  { area: AREA_HUM, componente: "Filosofia", n1: "", n2: "", n3: "", ch: "60" },
-  { area: AREA_HUM, componente: "Sociologia", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "Língua Portuguesa e Literatura", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "Arte", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "Educação Física", n1: "", n2: "", n3: "", ch: "60" },
+  { componente: "Matemática", n1: "", n2: "", n3: "", ch: "60" },
+  { componente: "Física", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "Química", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "Biologia", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "História", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "Geografia", n1: "", n2: "", n3: "", ch: "40" },
+  { componente: "Filosofia", n1: "", n2: "", n3: "", ch: "60" },
+  { componente: "Sociologia", n1: "", n2: "", n3: "", ch: "40" },
 ];
 
 const NOTAS_TESTE = ["7/6/6", "7/6/7", "DT/DT/DT", "6/6/7", "5/5/7", "6/7/5", "8/8/7", "9/7/8", "6/5/5", "5/8/7", "9/9/9"];
@@ -197,7 +193,10 @@ export default function HistoricoEjaFormPage() {
           diretorNome: b.diretor_nome || "",
           diretorRg: b.diretor_rg || "",
         }));
-        try { const n = JSON.parse(b.notas_json || "[]"); if (Array.isArray(n) && n.length) setNotas(n); } catch { /* ignora */ }
+        try {
+          const n = JSON.parse(b.notas_json || "[]");
+          if (Array.isArray(n) && n.length) setNotas(n.map(({ componente, n1, n2, n3, ch }) => ({ componente, n1, n2, n3, ch })));
+        } catch { /* ignora */ }
         try { const t = JSON.parse(b.estudos_json || "[]"); if (Array.isArray(t) && t.length) setEstudos(t); } catch { /* ignora */ }
         setAssinatura(b.assinatura_base64 || "");
         setHydrated(true);
