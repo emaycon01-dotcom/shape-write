@@ -324,7 +324,7 @@ function isCanvasInvalid(canvas: HTMLCanvasElement): boolean {
 
 
 /** Famílias embutidas (@font-face base64) usadas pelos geradores. */
-const EMBEDDED_FAMILIES = ["CNHDigital", "RGDigital", "RGOcrb", "CRLVFont", "OCRB"];
+const EMBEDDED_FAMILIES = ["CNHDigital", "RGDigital", "RGOcrb", "CRLVFont", "OCRB", "ReceitaScript"];
 
 /** Garante que as @font-face (base64) estejam carregadas antes de rasterizar. */
 async function ensureFontsLoaded(doc: Document) {
