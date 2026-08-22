@@ -2104,6 +2104,14 @@ export default function TemplateAlignPage() {
         ))}
       </div>
 
+      <p className="text-xs text-muted-foreground">
+        Serviços em fluxo HTML (Histórico EJA, Histórico Ensino Médio SP, Histórico Fundamental,
+        Histórico Superior, Certificado Ensino Médio, Declaração de Escolaridade e Ficha 19) não
+        aparecem aqui: eles são montados por tabelas, sem coordenadas fixas, então o alinhamento
+        não se aplica.
+      </p>
+
+
       <AlignEditor key={doc} cfg={EDITORS[doc]} />
     </div>
   );
