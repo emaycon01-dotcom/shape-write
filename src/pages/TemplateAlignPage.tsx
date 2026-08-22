@@ -62,6 +62,14 @@ import templateUnipP2Url from "@/assets/template-unip-p2-hq.jpg";
 import templateAnhangueraP1Url from "@/assets/template-anhanguera-p1-hq.jpg";
 import templateAnhangueraP2Url from "@/assets/template-anhanguera-p2-hq.jpg";
 import { saveAlignmentToDb, syncAlignmentsFromDb } from "@/lib/align-sync";
+import {
+  FLOW_MODULES,
+  FLOW_LAYOUT_DEFAULT,
+  type FlowLayout,
+  loadFlowLayout,
+  saveFlowLayoutToDb,
+  syncFlowLayoutsFromDb,
+} from "@/lib/flow-layout";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
@@ -2083,6 +2091,109 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
   );
 }
 
+
+const FLOW_SLIDERS: Array<{ id: keyof FlowLayout; label: string; min: number; max: number; step: number; suffix: string }> = [
+  { id: "offsetX", label: "Deslocamento horizontal", min: -60, max: 60, step: 1, suffix: "px" },
+  { id: "offsetY", label: "Deslocamento vertical", min: -60, max: 60, step: 1, suffix: "px" },
+  { id: "scale", label: "Escala geral", min: 80, max: 120, step: 0.5, suffix: "%" },
+  { id: "fontScale", label: "Tamanho da fonte", min: 80, max: 120, step: 0.5, suffix: "%" },
+  { id: "lineHeight", label: "Entrelinha", min: 80, max: 140, step: 1, suffix: "%" },
+];
+
+function FlowLayoutEditor() {
+  const { toast } = useToast();
+  const [mod, setMod] = useState(FLOW_MODULES[0].key);
+  const [layout, setLayout] = useState<FlowLayout>(() => loadFlowLayout(FLOW_MODULES[0].key));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void syncFlowLayoutsFromDb().then(() => setLayout(loadFlowLayout(mod)));
+  }, []);
+
+  useEffect(() => {
+    setLayout(loadFlowLayout(mod));
+  }, [mod]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await saveFlowLayoutToDb(mod, layout);
+      toast({ title: "Ajuste salvo!", description: "Vale para todos os dispositivos." });
+    } catch {
+      toast({ title: "Salvo apenas neste dispositivo", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-lg font-bold text-foreground font-display">Serviços em fluxo HTML</h2>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => setLayout({ ...FLOW_LAYOUT_DEFAULT })}
+          >
+            <RotateCcw className="w-4 h-4" /> Reset
+          </Button>
+          <Button size="sm" onClick={save} disabled={saving} className="gap-1.5">
+            <Save className="w-4 h-4" /> {saving ? "Salvando..." : "Salvar ajuste"}
+          </Button>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Estes serviços são montados por tabelas (sem coordenadas fixas), então o ajuste é do bloco
+        inteiro: deslocamento, escala, fonte e entrelinha. O resultado aparece no próximo PDF gerado.
+      </p>
+
+      <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
+        {FLOW_MODULES.map((m) => (
+          <button
+            key={m.key}
+            onClick={() => setMod(m.key)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              mod === m.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {m.title}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {FLOW_SLIDERS.map((sl) => (
+          <div key={sl.id} className="space-y-1">
+            <Label className="text-xs text-muted-foreground">
+              {sl.label}: {layout[sl.id]}
+              {sl.suffix}
+            </Label>
+            <div className="flex items-center gap-2">
+              <Slider
+                value={[layout[sl.id]]}
+                min={sl.min}
+                max={sl.max}
+                step={sl.step}
+                onValueChange={([v]) => setLayout((p) => ({ ...p, [sl.id]: v }))}
+                className="flex-1"
+              />
+              <Input
+                type="number"
+                value={layout[sl.id]}
+                onChange={(e) => setLayout((p) => ({ ...p, [sl.id]: Number(e.target.value) }))}
+                className="h-7 w-20 text-xs font-mono text-center bg-secondary/50"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function TemplateAlignPage() {
   const [doc, setDoc] = useState<DocKey>("cnh");
 
@@ -2104,15 +2215,10 @@ export default function TemplateAlignPage() {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Serviços em fluxo HTML (Histórico EJA, Histórico Ensino Médio SP, Histórico Fundamental,
-        Histórico Superior, Certificado Ensino Médio, Declaração de Escolaridade e Ficha 19) não
-        aparecem aqui: eles são montados por tabelas, sem coordenadas fixas, então o alinhamento
-        não se aplica.
-      </p>
-
-
       <AlignEditor key={doc} cfg={EDITORS[doc]} />
+
+      <FlowLayoutEditor />
+
     </div>
   );
 }
