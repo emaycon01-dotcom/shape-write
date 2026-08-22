@@ -1411,7 +1411,10 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoBoxW: 240,
     estadoMaxChars: 40,
     mrzLineHeight: 1.22,
+    pageW: 692,
+    pageH: 340,
     copy: () => loadReceitaAzulFieldPositions() ?? {},
+
   },
   craf: {
     key: "craf",
