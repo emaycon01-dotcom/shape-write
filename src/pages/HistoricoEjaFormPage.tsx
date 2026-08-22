@@ -59,7 +59,6 @@ interface FormState {
   cep: string;
   telefone: string;
   modalidade: string;
-  fundamentoLegal: string;
   nomeAluno: string;
   rg: string;
   municipioNascimento: string;
@@ -89,8 +88,6 @@ const initial: FormState = {
   cep: "13232-524",
   telefone: "(11) 4039-3595",
   modalidade: MODALIDADES[0],
-  fundamentoLegal:
-    "Fundamento Legal: Lei Federal nº 9394/96, Artigo 37 e 38; Resoluções CNE/CEB nº 1/2000; Del. CEE/SP nº 9/2000 e Resolução SEE/SP nº 1/2001 e Resolução SEE nº 2/2006.",
   nomeAluno: "",
   rg: "",
   municipioNascimento: "",
@@ -173,7 +170,6 @@ export default function HistoricoEjaFormPage() {
           cep: b.cep || p.cep,
           telefone: b.telefone || p.telefone,
           modalidade: b.modalidade || p.modalidade,
-          fundamentoLegal: b.fundamento_legal || p.fundamentoLegal,
           nomeAluno: b.nome_aluno || "",
           rg: b.rg || "",
           municipioNascimento: b.municipio_nascimento || "",
@@ -287,7 +283,6 @@ export default function HistoricoEjaFormPage() {
       cep: form.cep,
       telefone: form.telefone,
       modalidade: form.modalidade,
-      fundamento_legal: form.fundamentoLegal,
       nome_aluno: form.nomeAluno,
       rg: form.rg,
       municipio_nascimento: form.municipioNascimento,

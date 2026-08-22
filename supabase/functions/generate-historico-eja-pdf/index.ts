@@ -98,11 +98,6 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   .aluno { margin-top: 10px; font-size: 11.5px; line-height: 1.7; }
   .aluno .row { display: flex; justify-content: space-between; gap: 14px; }
   .corpo { margin-top: 10px; }
-  .legal {
-    border: 1px solid #000; border-bottom: 0; padding: 3px 6px;
-    font-family: Arial, sans-serif; font-size: 7.5px; line-height: 1.25;
-    text-align: center;
-  }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .grade th, .grade td { border: 1px solid #000; padding: 1.5px 4px; font-size: 10.5px; }
   .grade .head { text-align: center; font-family: Arial, sans-serif; font-weight: normal; font-size: 10px; line-height: 1.2; }
@@ -149,7 +144,6 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   </div>
 
   <div class="corpo">
-    <div class="legal">${t(d.fundamento_legal)}</div>
     <div class="grade-wrap">
       <table class="grade">
         <colgroup><col><col style="width:52px"><col style="width:52px"><col style="width:52px"><col style="width:62px"></colgroup>
@@ -221,7 +215,7 @@ serve(async (req) => {
 
     const keys = [
       "estado", "estado_nome", "coordenadoria", "diretoria", "escola", "endereco", "cep", "telefone",
-      "modalidade", "fundamento_legal",
+      "modalidade",
       "nome_aluno", "rg", "municipio_nascimento", "uf_nascimento", "pais", "data_nascimento",
       "apoio_curricular", "ch_base", "ch_diversificada", "ch_total",
       "observacoes", "gdae", "ano_conclusao", "data_certificado",

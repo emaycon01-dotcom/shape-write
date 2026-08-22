@@ -899,7 +899,7 @@ function restoreHeavyAssets(html: string, map: Map<string, string>): string | nu
  */
 // Altere a versão sempre que a estrutura HTML dos geradores mudar. Isso evita
 // que uma aba aberta antes da publicação reutilize templates antigos.
-const PDF_HTML_CACHE_VERSION = "2026-08-22-historico-v4";
+const PDF_HTML_CACHE_VERSION = "2026-08-22-historico-v5";
 const PREVIEW_CACHE_MAX = 2;
 const PREVIEW_CACHE_STORAGE_KEY = `pdf_preview_html_cache:${PDF_HTML_CACHE_VERSION}`;
 const previewHtmlCache = new Map<string, { html: string; payload: Record<string, unknown> }>(
