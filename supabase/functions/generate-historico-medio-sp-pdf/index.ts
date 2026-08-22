@@ -45,20 +45,14 @@ export function buildHistoricoMedioSpHtml(d: Record<string, string>) {
   const turmas = parseList<Turma>(d.turmas_json);
   const t = (v: unknown) => escapeHtml(String(v ?? "").trim());
 
-  // O motor Canvas calcula coordenadas incorretas para células com rowspan em
-  // alguns navegadores. Cada área usa uma linha própria e todas as demais
-  // linhas têm exatamente quatro células, sem mesclagem vertical.
-  const linhasNotas = agruparPorArea(notas)
-    .map((grupo) =>
-      `<tr class="area-row"><td colspan="4">${t(grupo.area)}</td></tr>` +
-      grupo.itens
-        .map((item) =>
-          `<tr><td class="comp">${t(item.componente)}</td>` +
-          `<td class="nota">${t(item.n1) || "-"}</td>` +
-          `<td class="nota">${t(item.n2) || "-"}</td>` +
-          `<td class="nota">${t(item.n3) || "-"}</td></tr>`,
-        )
-        .join(""),
+  // Sem rowspan/colspan nem texto vertical: cada disciplina é uma linha simples
+  // de quatro células, evitando coordenadas erradas no motor Canvas.
+  const linhasNotas = notas
+    .map((item) =>
+      `<tr><td class="comp">${t(item.componente)}</td>` +
+      `<td class="nota">${t(item.n1) || "-"}</td>` +
+      `<td class="nota">${t(item.n2) || "-"}</td>` +
+      `<td class="nota">${t(item.n3) || "-"}</td></tr>`,
     )
     .join("");
 
@@ -114,7 +108,6 @@ export function buildHistoricoMedioSpHtml(d: Record<string, string>) {
   .grade th, .grade td { border: 1px solid #000; padding: 1.5px 4px; font-size: 12px; }
   .grade .titulo { text-align: center; font-family: Arial, sans-serif; font-size: 13.5px; font-weight: normal; padding: 2px; }
   .grade .head { text-align: center; font-weight: normal; font-size: 13px; }
-  .grade .area-row td { padding: 2px 4px; text-align: left; font-family: Arial, sans-serif; font-size: 10px; font-weight: bold; background: #f2f2f2; }
   .grade .comp { font-size: 12px; }
   .grade .nota { text-align: center; font-size: 12px; }
   .grade .tot { font-size: 12.5px; }

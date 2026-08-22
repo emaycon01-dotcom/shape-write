@@ -60,21 +60,15 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
       (Number(totalBase) || 0) + (Number(String(d.ch_diversificada || "").replace(",", ".")) || 0),
     );
 
-  // Não usamos rowspan nem texto vertical: o renderizador Canvas de alguns
-  // navegadores móveis pode devolver coordenadas incorretas para essas células.
-  // A área fica numa linha própria e cada disciplina usa uma linha comum.
-  const linhasNotas = agruparPorArea(notas)
-    .map((grupo) =>
-      `<tr class="area-row"><td colspan="5">${t(grupo.area)}</td></tr>` +
-      grupo.itens
-        .map((item) =>
-          `<tr><td class="comp">${t(item.componente)}</td>` +
-          `<td class="nota">${t(item.n1) || "–"}</td>` +
-          `<td class="nota">${t(item.n2) || "–"}</td>` +
-          `<td class="nota">${t(item.n3) || "–"}</td>` +
-          `<td class="nota">${t(item.ch) || "–"}</td></tr>`,
-        )
-        .join(""),
+  // Sem rowspan, colspan ou texto vertical: o motor Canvas devolve coordenadas
+  // incorretas nesses casos. Cada disciplina é uma linha simples de 5 células.
+  const linhasNotas = notas
+    .map((item) =>
+      `<tr><td class="comp">${t(item.componente)}</td>` +
+      `<td class="nota">${t(item.n1) || "–"}</td>` +
+      `<td class="nota">${t(item.n2) || "–"}</td>` +
+      `<td class="nota">${t(item.n3) || "–"}</td>` +
+      `<td class="nota">${t(item.ch) || "–"}</td></tr>`,
     )
     .join("");
 
@@ -124,7 +118,6 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .grade th, .grade td { border: 1px solid #000; padding: 1.5px 4px; font-size: 10.5px; }
   .grade .head { text-align: center; font-family: Arial, sans-serif; font-weight: normal; font-size: 10px; line-height: 1.2; }
-  .grade .area-row td { padding: 2px 4px; text-align: left; font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; background: #f2f2f2; }
   .grade .comp { font-size: 10.5px; }
   .grade .nota { text-align: center; font-size: 10.5px; }
   .grade .tot { font-family: Arial, sans-serif; font-size: 10px; font-weight: bold; }
