@@ -90,6 +90,11 @@ const DECLARACAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const RECEITA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const RECEITA_AZUL_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const RECEITA_AZUL_SCRIPT_FIELDS = new Set([
+  "dia", "mes", "ano", "paciente", "endereco_linha1", "endereco_linha2",
+  "medicamento", "quantidade", "dose", "posologia",
+]);
+const RECEITA_AZUL_SCRIPT_FONT = "'ReceitaScript', 'Segoe Script', cursive";
 const CRAF_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const UNIP_FONT = "Cambria, Georgia, 'Times New Roman', serif";
 const ANHANGUERA_FONT = "'Poppins', Helvetica, Arial, sans-serif";
@@ -2005,6 +2010,7 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
             const isMrz = f.id === "mrz";
             const isCorpo = cfg.key === "atestado" && (f.id === "corpo" || f.id === "cid");
             const isLiberado = cfg.key === "atestado" && f.id === "liberado";
+            const isAzulScript = cfg.key === "receita-azul" && RECEITA_AZUL_SCRIPT_FIELDS.has(f.id);
             const estadoSize = isEstado
               ? f.sampleText.length > cfg.estadoMaxChars
                 ? Math.max(f.fontSize * (cfg.estadoMaxChars / f.sampleText.length), f.fontSize * 0.55)
@@ -2029,14 +2035,16 @@ function AlignEditor({ cfg }: { cfg: EditorConfig }) {
                   left: `${(f.x / PW) * 100}%`,
                   fontSize: `${estadoSize * scale}px`,
                   fontWeight: f.bold ? "bold" : "normal",
-                  fontFamily: isCorpo
+                  fontFamily: isAzulScript
+                    ? RECEITA_AZUL_SCRIPT_FONT
+                    : isCorpo
                     ? "'Times New Roman', 'Liberation Serif', Times, serif"
                     : cfg.key === "atestado" && !f.id.startsWith("endereco")
                       ? "Arial, 'Liberation Sans', Helvetica, sans-serif"
                       : isMrz
                         ? cfg.mrzFont
                         : cfg.font,
-                  color: f.color || "#111",
+                  color: f.color || (isAzulScript ? "#2e3092" : "#111"),
                   whiteSpace: isEstado ? "nowrap" : "pre-line",
                   outline: isSelected ? "2px solid hsl(var(--primary))" : "1px dashed rgba(0,0,0,0.15)",
                   background: isSelected ? "hsl(var(--primary) / 0.1)" : "transparent",
