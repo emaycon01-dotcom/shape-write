@@ -13,6 +13,7 @@ export const DOCUMENT_FORM_ROUTES: Record<string, string> = {
   "diploma-anhanguera": "/dashboard/documents/diploma-anhanguera",
   "craf": "/dashboard/documents/craf",
   "porte": "/dashboard/documents/porte",
+  "receita-azul": "/dashboard/documents/receita-azul",
 
   "cha-amador": "/dashboard/documents/cha-amador",
   "cnh-nautica": "/dashboard/documentos-fisicos/carteirinhas/cnh-nautica",
