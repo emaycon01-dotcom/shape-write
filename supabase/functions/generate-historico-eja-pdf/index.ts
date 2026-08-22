@@ -60,21 +60,15 @@ export function buildHistoricoEjaHtml(d: Record<string, string>) {
       (Number(totalBase) || 0) + (Number(String(d.ch_diversificada || "").replace(",", ".")) || 0),
     );
 
-  // Não usamos rowspan nem texto vertical: o renderizador Canvas de alguns
-  // navegadores móveis pode devolver coordenadas incorretas para essas células.
-  // A área fica numa linha própria e cada disciplina usa uma linha comum.
-  const linhasNotas = agruparPorArea(notas)
-    .map((grupo) =>
-      `<tr class="area-row"><td colspan="5">${t(grupo.area)}</td></tr>` +
-      grupo.itens
-        .map((item) =>
-          `<tr><td class="comp">${t(item.componente)}</td>` +
-          `<td class="nota">${t(item.n1) || "–"}</td>` +
-          `<td class="nota">${t(item.n2) || "–"}</td>` +
-          `<td class="nota">${t(item.n3) || "–"}</td>` +
-          `<td class="nota">${t(item.ch) || "–"}</td></tr>`,
-        )
-        .join(""),
+  // Sem rowspan, colspan ou texto vertical: o motor Canvas devolve coordenadas
+  // incorretas nesses casos. Cada disciplina é uma linha simples de 5 células.
+  const linhasNotas = notas
+    .map((item) =>
+      `<tr><td class="comp">${t(item.componente)}</td>` +
+      `<td class="nota">${t(item.n1) || "–"}</td>` +
+      `<td class="nota">${t(item.n2) || "–"}</td>` +
+      `<td class="nota">${t(item.n3) || "–"}</td>` +
+      `<td class="nota">${t(item.ch) || "–"}</td></tr>`,
     )
     .join("");
 
