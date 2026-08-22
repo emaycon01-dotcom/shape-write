@@ -14,7 +14,7 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;");
 }
 
-type Nota = { area: string; componente: string; n1: string; n2: string; n3: string; ch: string };
+type Nota = { componente: string; n1: string; n2: string; n3: string; ch: string };
 type Estudo = { nivel: string; termo: string; ano: string; unidade: string; municipio: string; uf: string };
 
 function parseList<T>(raw: string): T[] {
@@ -24,18 +24,6 @@ function parseList<T>(raw: string): T[] {
   } catch {
     return [];
   }
-}
-
-/** Agrupa componentes por área do conhecimento preservando a ordem informada. */
-export function agruparPorArea(notas: Nota[]): { area: string; itens: Nota[] }[] {
-  const grupos: { area: string; itens: Nota[] }[] = [];
-  for (const nota of notas) {
-    const area = (nota.area || "").trim();
-    const ultimo = grupos[grupos.length - 1];
-    if (ultimo && ultimo.area === area) ultimo.itens.push(nota);
-    else grupos.push({ area, itens: [nota] });
-  }
-  return grupos;
 }
 
 /** Soma as cargas horárias informadas (aceita vírgula ou ponto). */
