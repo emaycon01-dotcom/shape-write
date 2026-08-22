@@ -12,6 +12,7 @@ import { warmPdfViewer } from "@/lib/pdfjs-loader";
 import { setGenerationBusy } from "@/lib/generation-busy";
 import { flushPendingTemplateRevokes } from "@/lib/template-cache";
 import { recordGeneration } from "@/lib/generation-telemetry";
+import { applyFlowLayout } from "@/lib/flow-layout";
 
 
 
@@ -1176,6 +1177,12 @@ export async function invokeGeneratePdf(
     // publicada da Edge Function.
     if (functionName === "generate-porte-pdf" && html) {
       html = applyPorteSignatureStyle(html, body);
+    }
+
+    // Serviços em fluxo HTML aceitam ajuste global de layout (deslocamento,
+    // escala, fonte e entrelinha) definido no Editor de Alinhamento.
+    if (html) {
+      html = applyFlowLayout(html, functionName);
     }
 
 
