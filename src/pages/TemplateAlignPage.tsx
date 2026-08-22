@@ -43,6 +43,7 @@ import { DECLARACAO_ALIGN_STORAGE_KEY, loadDeclaracaoFieldPositions } from "@/li
 import { DECLARACAO_ETE_ALIGN_STORAGE_KEY, loadDeclaracaoEteFieldPositions } from "@/lib/declaracao-ete-align";
 import { DECLARACAO_PE_ALIGN_STORAGE_KEY, loadDeclaracaoPeFieldPositions } from "@/lib/declaracao-pe-align";
 import { RECEITA_ALIGN_STORAGE_KEY, loadReceitaFieldPositions } from "@/lib/receita-align";
+import { RECEITA_AZUL_ALIGN_STORAGE_KEY, loadReceitaAzulFieldPositions } from "@/lib/receita-azul-align";
 import { CRAF_ALIGN_STORAGE_KEY, loadCrafFieldPositions } from "@/lib/craf-align";
 import templateHapvidaBgUrl from "@/assets/template-hapvida-bg-hq.jpg";
 import templateUnimedBgUrl from "@/assets/template-unimed-bg-hq.jpg";
@@ -52,6 +53,7 @@ import templateDeclaracaoBgUrl from "@/assets/template-declaracao-bg-hq.jpg";
 import templateDeclaracaoEteAsset from "@/assets/template-declaracao-ete-bg.jpg.asset.json";
 import templateDeclaracaoPeAsset from "@/assets/template-declaracao-pe-bg.jpg.asset.json";
 import templateReceitaBgUrl from "@/assets/template-receita-bg-hq.jpg";
+import templateReceitaAzulBgUrl from "@/assets/template-receita-azul-bg-hq.jpg";
 import templateCrafBgUrl from "@/assets/template-craf-bg-hq.webp";
 import { PORTE_ALIGN_STORAGE_KEY, loadPorteFieldPositions } from "@/lib/porte-align";
 import templatePorteBgUrl from "@/assets/template-porte-bg-hq.webp";
@@ -87,6 +89,7 @@ const CERTIDAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const DECLARACAO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const HISTORICO_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const RECEITA_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
+const RECEITA_AZUL_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const CRAF_FONT = "Arial, 'Liberation Sans', Helvetica, sans-serif";
 const UNIP_FONT = "Cambria, Georgia, 'Times New Roman', serif";
 const ANHANGUERA_FONT = "'Poppins', Helvetica, Arial, sans-serif";
@@ -576,6 +579,29 @@ export const defaultDeclaracaoEteFields: FieldDef[] = [
 export const defaultDeclaracaoPeFields: FieldDef[] = [
   { id: "corpo", label: "Corpo da declaração", sampleText: "Declaramos para os devidos fins que RAQUEL SOUZA BARROS DA SILVA, portador (a) da cédula de identidade nº 11.020.359 SDS/PE e C.P.F nº 718.608.124-06, filho (a) de MARCÍLIO BARROS DA SILVA e de CRISTIANE MARIA DE SOUZA SILVA, encontra-se regularmente matriculado (a) no 3º ano do ensino médio na ESCOLA TÉCNICA ESTADUAL JOSÉ ALENCAR GOMES DA SILVA, no turno da manhã, no ano letivo de 2022.", x: 86, y: 320, fontSize: 16, w: 630 },
   { id: "data_local", label: "Cidade e data", sampleText: "Paulista, 15 de agosto de 2022.", x: 386, y: 620, fontSize: 16, w: 330 },
+];
+
+// Defaults MUST match supabase/functions/generate-receita-azul-pdf/index.ts RECEITA_AZUL_DEFAULT_POSITIONS
+export const defaultReceitaAzulFields: FieldDef[] = [
+  { id: "uf", label: "UF", sampleText: "SP", x: 33, y: 57, fontSize: 15.2, w: 28 },
+  { id: "numero", label: "Número", sampleText: "02476237", x: 96, y: 56.5, fontSize: 18, w: 92 },
+  { id: "serie", label: "Série", sampleText: "K", x: 106, y: 74.2, fontSize: 6.7, w: 40 },
+  { id: "medico", label: "Médico(a)", sampleText: "Dra. Maria Cristina Cardeal Ramos", x: 226, y: 44.5, fontSize: 14.7, w: 267 },
+  { id: "crm", label: "CRM", sampleText: "CRM-SP 30076", x: 226, y: 61.8, fontSize: 11.7, w: 267 },
+  { id: "clinica_linha1", label: "Clínica linha 1", sampleText: "R. Conselheiro Saraiva, 306 - conj 162", x: 226, y: 93.8, fontSize: 10.4, w: 267 },
+  { id: "clinica_linha2", label: "Clínica linha 2", sampleText: "São Paulo - SP, 02037-020", x: 226, y: 105.8, fontSize: 10.4, w: 267 },
+  { id: "dia", label: "Dia", sampleText: "30", x: 38, y: 105.5, fontSize: 22, w: 42 },
+  { id: "mes", label: "Mês", sampleText: "Abril", x: 69, y: 106.5, fontSize: 21, w: 62 },
+  { id: "ano", label: "Ano", sampleText: "2025", x: 138, y: 105.5, fontSize: 22, w: 60 },
+  { id: "paciente", label: "Paciente", sampleText: "Pedro Henrique Ferreira Lima", x: 270, y: 123.5, fontSize: 20, w: 222 },
+  { id: "endereco_linha1", label: "Endereço linha 1", sampleText: "R. Henrique Gomes de Jesus, 280", x: 280, y: 162.5, fontSize: 14, w: 218 },
+  { id: "endereco_linha2", label: "Endereço linha 2", sampleText: "Parque Jandaia, Carapicuíba - SP", x: 225, y: 180, fontSize: 12.6, w: 272 },
+  { id: "medicamento", label: "Medicamento", sampleText: "Alprazolam", x: 494, y: 40, fontSize: 27, w: 174 },
+  { id: "quantidade", label: "Quantidade", sampleText: "2 caixas (30 comprimidos)", x: 492, y: 76.5, fontSize: 17, w: 178 },
+  { id: "dose", label: "Dose", sampleText: "01 mg", x: 494, y: 130, fontSize: 20, w: 174 },
+  { id: "posologia", label: "Posologia", sampleText: "Tomar 1 comprimido a noite", x: 496, y: 167.5, fontSize: 15, w: 172 },
+  { id: "numeracao", label: "Numeração (gráfica)", sampleText: "Numeração de 02.476.237 até 02.476.400", x: 541, y: 299.5, fontSize: 6.7, w: 132 },
+  { id: "autorizacao_data", label: "Data autorização", sampleText: "30/04/2025", x: 647, y: 307.5, fontSize: 5.2, w: 26 },
 ];
 
 // Defaults MUST match supabase/functions/generate-receita-pdf/index.ts RECEITA_DEFAULT_POSITIONS
@@ -1123,7 +1149,7 @@ function receiptStyle(key: DocKey, f: FieldDef, PW: number, scale: number): Reac
   };
 }
 
-type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "atpv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "declaracao-pe" | "receita" | "craf" | "porte" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
+type DocKey = "cnh" | "rg" | "atestado" | "hapvida" | "unimed" | "crlv" | "atpv" | "cha" | "diploma" | "historico" | "certidao" | "obito" | "declaracao" | "declaracao-ete" | "declaracao-pe" | "receita" | "receita-azul" | "craf" | "porte" | "unip" | "anhanguera" | "comprovante" | "coelba" | "equatorial" | "tim" | "holerite";
 
 
 interface EditorConfig {
@@ -1372,6 +1398,20 @@ const EDITORS: Record<DocKey, EditorConfig> = {
     estadoMaxChars: 40,
     mrzLineHeight: 1.22,
     copy: () => loadReceitaFieldPositions() ?? {},
+  },
+  "receita-azul": {
+    key: "receita-azul",
+    title: "Receita Azul (B1)",
+    storageKey: RECEITA_AZUL_ALIGN_STORAGE_KEY,
+    defaults: defaultReceitaAzulFields,
+    bg: templateReceitaAzulBgUrl,
+    font: RECEITA_AZUL_FONT,
+    mrzFont: RECEITA_AZUL_FONT,
+    mrzWidth: 400,
+    estadoBoxW: 240,
+    estadoMaxChars: 40,
+    mrzLineHeight: 1.22,
+    copy: () => loadReceitaAzulFieldPositions() ?? {},
   },
   craf: {
     key: "craf",
@@ -2202,7 +2242,7 @@ export default function TemplateAlignPage() {
       <h1 className="text-xl font-bold text-foreground font-display">Editor de Alinhamento</h1>
 
       <div className="inline-flex flex-wrap rounded-xl border border-border bg-secondary/40 p-1">
-        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "atpv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "declaracao-ete", "declaracao-pe", "receita", "craf", "porte", "comprovante", "coelba", "equatorial", "tim", "holerite"] as const).map((k) => (
+        {(["cnh", "rg", "atestado", "hapvida", "unimed", "crlv", "atpv", "cha", "diploma", "unip", "anhanguera", "historico", "certidao", "obito", "declaracao", "declaracao-ete", "declaracao-pe", "receita", "receita-azul", "craf", "porte", "comprovante", "coelba", "equatorial", "tim", "holerite"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setDoc(k)}
