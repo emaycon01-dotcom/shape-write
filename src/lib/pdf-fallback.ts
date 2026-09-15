@@ -15,9 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
  * A URL e a chave abaixo são públicas (chave anônima), como a do backend
  * principal — nenhum segredo é exposto.
  */
-const FALLBACK_URL = "https://doycwownddyxfqntifca.supabase.co";
-const FALLBACK_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRveWN3b3duZGR5eGZxbnRpZmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDYzMTYsImV4cCI6MjA4OTAyMjMxNn0.kpk695Xomza4QBmD8FtdkNSMmJS1bFQyc6YSuvxpEbI";
+const FALLBACK_URL = import.meta.env.VITE_SUPABASE_URL;
+const FALLBACK_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 /**
  * Funções que podem usar a ponte secundária: qualquer montador de documento

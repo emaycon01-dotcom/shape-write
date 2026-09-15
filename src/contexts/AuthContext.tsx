@@ -36,9 +36,8 @@ export const REJECTED_MSG = "Seu acesso foi recusado pela administração.";
  * (confirmação de e-mail ativa) e o RLS impede a inserção pelo cliente.
  */
 const PROFILE_BRIDGE_URL =
-  "https://doycwownddyxfqntifca.supabase.co/functions/v1/create-pending-profile";
-const PROFILE_BRIDGE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRveWN3b3duZGR5eGZxbnRpZmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDYzMTYsImV4cCI6MjA4OTAyMjMxNn0.kpk695Xomza4QBmD8FtdkNSMmJS1bFQyc6YSuvxpEbI";
+  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-pending-profile`;
+const PROFILE_BRIDGE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 async function ensurePendingProfile(userId: string, email: string, name: string) {
   try {

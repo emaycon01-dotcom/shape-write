@@ -872,7 +872,7 @@ BEGIN
   END IF;
 
   PERFORM net.http_post(
-    url := 'https://doycwownddyxfqntifca.supabase.co/functions/v1/process-email-queue',
+    url := 'https://tfelypvzmdokfcgupmls.supabase.co/functions/v1/process-email-queue',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'Lovable-Context', 'cron',
@@ -907,7 +907,7 @@ BEGIN
 
   BEGIN
     PERFORM net.http_post(
-      url := 'https://doycwownddyxfqntifca.supabase.co/functions/v1/process-email-queue',
+      url := 'https://tfelypvzmdokfcgupmls.supabase.co/functions/v1/process-email-queue',
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
         'Lovable-Context', 'cron',

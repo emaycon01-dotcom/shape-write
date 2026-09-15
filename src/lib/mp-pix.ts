@@ -38,10 +38,7 @@ export async function createMercadoPagoPix(payload: MpPixPayload): Promise<MpPix
     throw new Error("Sessão expirada. Entre novamente para gerar o PIX automático.");
   }
 
-  // A aplicação/autenticação está no backend de São Paulo, mas as funções
-  // gerenciadas são publicadas neste host estável. Não derive esta URL do
-  // cliente: isso fazia builds antigos chamarem um host sem a função (404).
-  const functionUrl = "https://doycwownddyxfqntifca.supabase.co/functions/v1/create-mercado-pago-pix";
+  const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-mercado-pago-pix`;
 
   const callGateway = (accessToken: string) => fetch(functionUrl, {
     method: "POST",
